@@ -1,0 +1,338 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model AdminUser {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model PortfolioSettings {
+  id              String   @id @default("singleton")
+  name            String
+  nameAr          String?
+  bio             String   @db.Text
+  bioAr           String?  @db.Text
+  heroText        String   @db.Text
+  heroTextAr      String?  @db.Text
+  ctaText         String
+  ctaTextAr       String?
+  location        String?
+  locationAr      String?
+  availability    String?
+  availabilityAr  String?
+  email           String?
+  profilePhoto    String?
+  typewriterWords String?  @db.Text
+  typewriterWordsAr String? @db.Text
+  footerText      String?  @db.Text
+  footerTextAr    String?  @db.Text
+  whatsappNumber  String?
+
+  // Hero Stats & Metrics
+  heroStats       String?  @db.Text
+  heroStatsAr     String?  @db.Text
+
+  // Theme & UI Customization
+  primaryThemeColor String? @default("emerald")
+  fontFamilyEn      String? @default("Geist")
+  fontFamilyAr      String? @default("Cairo")
+  cardStyle         String? @default("glassmorphic")
+  enableGlow        Boolean @default(true)
+  backgroundPattern String? @default("subtle-grid")
+
+  // Section Badges, Headings & Subtitles (EN & AR)
+  workflowBadge      String?  @default("Workflow & Methodology")
+  workflowBadgeAr    String?  @default("منهجية وسير العمل")
+  workflowTitle      String?  @default("How I Engineer Digital Products")
+  workflowTitleAr    String?  @default("كيف أطور وأبني الحلول الرقمية")
+  workflowSubtitle   String?  @db.Text
+  workflowSubtitleAr String?  @db.Text
+
+  projectsBadge      String?  @default("Featured Case Studies")
+  projectsBadgeAr    String?  @default("أعمال مختارة ودراسات حالة")
+  projectsTitle      String?  @default("Selected Work.")
+  projectsTitleAr    String?  @default("المشاريع المميزة.")
+  projectsSubtitle   String?  @db.Text
+  projectsSubtitleAr String?  @db.Text
+
+  skillsBadge        String?  @default("Skills & Expertise")
+  skillsBadgeAr      String?  @default("المهارات والقدرات التقنية")
+  skillsTitle        String?  @default("Engineered Core Capabilities")
+  skillsTitleAr      String?  @default("القدرات الهندسية الأساسية")
+  skillsDescription  String?  @db.Text
+  skillsDescriptionAr String? @db.Text
+  skillsParagraph1   String?  @db.Text
+  skillsParagraph1Ar String?  @db.Text
+  skillsParagraph2   String?  @db.Text
+  skillsParagraph2Ar String?  @db.Text
+  skillsPoint1Title  String?  @default("Architecture First")
+  skillsPoint1TitleAr String? @default("المعمارية أولاً")
+  skillsPoint1Text   String?  @default("Clean RESTful APIs & modular database design built to last.")
+  skillsPoint1TextAr String?  @default("واجهات برمجية RESTful نظيفة وتصميم قواعد بيانات متين صُمم ليدوم.")
+  skillsPoint2Title  String?  @default("Modern Stack")
+  skillsPoint2TitleAr String? @default("تقنيات حديثة")
+  skillsPoint2Text   String?  @default("High-performance React, Next.js, and Tailwind implementations.")
+  skillsPoint2TextAr String?  @default("تطبيقات عالية الأداء بالاعتماد على React و Next.js و Tailwind.")
+
+  experienceBadge    String?  @default("Career History & Academic Journey")
+  experienceBadgeAr  String?  @default("المسيرة المهنية والمحطات")
+  experienceTitle    String?  @default("Experience.")
+  experienceTitleAr  String?  @default("الخبرات والمؤهلات.")
+  experienceSubtitle String?  @db.Text
+  experienceSubtitleAr String? @db.Text
+
+  servicesBadge      String?  @default("Consulting & Offerings")
+  servicesBadgeAr    String?  @default("الخدمات والاستشارات")
+  servicesTitle      String?  @default("Services.")
+  servicesTitleAr    String?  @default("ما الذي أقدمه لك.")
+  servicesSubtitle   String?  @db.Text
+  servicesSubtitleAr String?  @db.Text
+
+  faqBadge           String?  @default("Got a question?")
+  faqBadgeAr         String?  @default("لديك سؤال؟")
+  faqTitle           String?  @default("Common Questions.")
+  faqTitleAr         String?  @default("الأسئلة الأكثر شيوعاً.")
+  faqSubtitle        String?  @db.Text
+  faqSubtitleAr      String?  @db.Text
+
+  contactBadge       String?  @default("Get In Touch")
+  contactBadgeAr     String?  @default("تواصل معي")
+  contactTitle       String?  @default("Have an idea? Let's talk.")
+  contactTitleAr     String?  @default("لديك فكرة أو مشروع؟ دعنا نتحدث.")
+  contactSubtitle    String?  @db.Text
+  contactSubtitleAr  String?  @db.Text
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model AboutSettings {
+  id              String   @id @default("singleton")
+  badge           String?  @default("About Me")
+  badgeAr         String?  @default("نبذة عني")
+  headline        String?  @db.Text
+  headlineAr      String?  @db.Text
+  bioParagraph1   String?  @db.Text
+  bioParagraph1Ar String?  @db.Text
+  bioParagraph2   String?  @db.Text
+  bioParagraph2Ar String?  @db.Text
+  coreStack       String?  @db.Text
+  coreStackAr     String?  @db.Text
+  bentoCards      String?  @db.Text
+  bentoCardsAr    String?  @db.Text
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model WorkflowStep {
+  id            String   @id @default(uuid())
+  num           String
+  title         String
+  titleAr       String?
+  description   String   @db.Text
+  descriptionAr String?  @db.Text
+  pinColor      String   @default("#E8732A")
+  order         Int      @default(0)
+  isEnabled     Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model FaqItem {
+  id          String   @id @default(uuid())
+  category    String
+  categoryAr  String?
+  question    String   @db.Text
+  questionAr  String?  @db.Text
+  answer      String   @db.Text
+  answerAr    String?  @db.Text
+  order       Int      @default(0)
+  isEnabled   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SeoSettings {
+  id              String   @id @default("singleton")
+  metaTitle       String   @default("Yusuf Ayoubi | Software Developer & Engineer")
+  metaDescription String   @db.Text
+  keywords        String?  @db.Text
+  author          String?  @default("Yusuf Ayoubi")
+  ogTitle         String?
+  ogDescription   String?  @db.Text
+  ogImage         String?
+  ogType          String?  @default("website")
+  twitterHandle   String?
+  twitterCardType String?  @default("summary_large_image")
+  canonicalUrl    String?
+  robots          String?  @default("index, follow")
+  structuredData  String?  @db.Text
+  pageOverrides   String?  @db.Text
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Translation {
+  id           String   @id @default(uuid())
+  languageCode String   @unique
+  languageName String
+  direction    String   @default("ltr")
+  isDefault    Boolean  @default(false)
+  isEnabled    Boolean  @default(true)
+  data         String   @db.LongText
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model SocialLink {
+  id        String   @id @default(uuid())
+  platform  String
+  url       String
+  icon      String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Project {
+  id           String         @id @default(uuid())
+  title        String
+  titleAr      String?
+  slug         String         @unique
+  description  String         @db.Text
+  descriptionAr String?       @db.Text
+  role         String?        @db.Text
+  roleAr       String?        @db.Text
+  challenge    String?        @db.Text
+  challengeAr  String?        @db.Text
+  solution     String?        @db.Text
+  solutionAr   String?        @db.Text
+  features     String?        @db.Text
+  featuresAr   String?        @db.Text
+  results      String?        @db.Text
+  resultsAr    String?        @db.Text
+  year         String?
+  category     String?
+  categoryAr   String?
+  liveDemo     String?
+  github       String?
+  isFeatured   Boolean        @default(false)
+  isPublished  Boolean        @default(false)
+  order        Int            @default(0)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  
+  images       ProjectImage[]
+  technologies Technology[]   @relation("ProjectTechnologies")
+}
+
+model ProjectImage {
+  id        String   @id @default(uuid())
+  url       String
+  isCover   Boolean  @default(false)
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Technology {
+  id         String       @id @default(uuid())
+  name       String
+  icon       String?
+  projects   Project[]    @relation("ProjectTechnologies")
+  experience Experience[] @relation("ExperienceTechnologies")
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+}
+
+model Skill {
+  id            String   @id @default(uuid())
+  name          String
+  nameAr        String?
+  category      String
+  categoryAr    String?
+  description   String?  @db.Text
+  descriptionAr String?  @db.Text
+  icon          String?
+  size          Int?     @default(20)
+  x             Float?
+  y             Float?
+  depth         Float?   @default(1.0)
+  order         Int      @default(0)
+  isEnabled     Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Experience {
+  id                 String       @id @default(uuid())
+  company            String
+  companyAr          String?
+  position           String
+  positionAr         String?
+  startDate          String
+  endDate            String?
+  location           String?
+  locationAr         String?
+  description        String?      @db.Text
+  descriptionAr      String?      @db.Text
+  responsibilities   String?      @db.Text
+  responsibilitiesAr String?      @db.Text
+  type               String       @default("work") // "education" | "work" | "milestone"
+  icon               String?      @default("briefcase")
+  color              String?      @default("blue")
+  order              Int          @default(0)
+  technologies       Technology[] @relation("ExperienceTechnologies")
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+}
+
+model Certificate {
+  id            String   @id @default(uuid())
+  title         String
+  titleAr       String?
+  issuer        String
+  issuerAr      String?
+  issueDate     String?
+  credentialUrl String?  @db.Text
+  credentialId  String?
+  icon          String?  @default("award")
+  skills        String?
+  skillsAr      String?
+  order         Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Service {
+  id            String   @id @default(uuid())
+  title         String
+  titleAr       String?
+  description   String   @db.Text
+  descriptionAr String?  @db.Text
+  order         Int      @default(0)
+  isEnabled     Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  subject   String
+  content   String   @db.Text
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
