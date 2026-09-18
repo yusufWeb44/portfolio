@@ -55,7 +55,7 @@ const themeAuraGradients: Record<string, { orb1: string; orb2: string; orb3: str
 };
 
 const PublicLayout = () => {
-  const { t, currentLang } = useLanguage();
+  const { t, currentLang, currentDirection } = useLanguage();
   const isAr = currentLang === 'ar';
   const [isDark, setIsDark] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -180,7 +180,7 @@ const PublicLayout = () => {
       fontFamilyAr: settings?.fontFamilyAr,
       fontUrlAr: settings?.fontUrlAr,
     });
-  }, [settings?.fontFamilyEn, settings?.fontUrlEn, settings?.fontFamilyAr, settings?.fontUrlAr]);
+  }, [settings?.fontFamilyEn, settings?.fontUrlEn, settings?.fontFamilyAr, settings?.fontUrlAr, currentLang, currentDirection]);
 
   const toggleTheme = () => setIsDark(!isDark);
 

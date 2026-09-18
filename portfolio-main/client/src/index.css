@@ -26,6 +26,12 @@
     --ring: 221 83% 53%;
     --radius: 0.5rem;
 
+    /* Dynamic Fonts */
+    --font-en: 'Geist', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-ar: 'Cairo', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-family: var(--font-ar);
+    --font-current: var(--font-ar);
+
     /* Light Mode Identity Palette: Royal Cobalt Blue (#2563EB) */
     --emerald-50: 214 100% 97%;   /* #eff6ff */
     --emerald-100: 214 95% 93%;   /* #dbeafe */
@@ -98,16 +104,25 @@
     @apply bg-foreground text-background;
   }
 
-  /* Arabic RTL Typography */
+  /* Typography & Dynamic Font Families */
   html[dir="rtl"],
   body[dir="rtl"],
   .rtl {
-    font-family: var(--font-ar, 'Cairo'), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-family: var(--font-ar, 'Cairo', system-ui, sans-serif);
+    --font-current: var(--font-ar, 'Cairo', system-ui, sans-serif);
+    font-family: var(--font-ar, 'Cairo'), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
   }
 
   html[dir="ltr"],
-  body[dir="ltr"] {
-    font-family: var(--font-en, 'Geist Sans'), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  body[dir="ltr"],
+  .ltr {
+    --font-family: var(--font-en, 'Geist Sans', system-ui, sans-serif);
+    --font-current: var(--font-en, 'Geist Sans', system-ui, sans-serif);
+    font-family: var(--font-en, 'Geist Sans'), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  }
+
+  body, button, input, select, textarea {
+    font-family: var(--font-family);
   }
 
   html[dir="rtl"] h1,

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import api from '../services/api';
+import { applyCustomFonts } from '../utils/fontLoader';
 
 export interface LanguageItem {
   id: string;
@@ -296,7 +297,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const activeLangObj = availableLanguages.find((l) => l.languageCode === currentLang);
   const currentDirection = activeLangObj?.direction || (currentLang === 'ar' ? 'rtl' : 'ltr');
 
-  // Update HTML document attributes when language changes
+  // Update HTML document attributes and active font family when language changes
   useEffect(() => {
     document.documentElement.lang = currentLang;
     document.documentElement.dir = currentDirection;
@@ -305,6 +306,13 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     } else {
       document.documentElement.classList.remove('rtl');
     }
+
+    try {
+      const cached = localStorage.getItem('portfolio_settings');
+      if (cached) {
+        applyCustomFonts(JSON.parse(cached));
+      }
+    } catch {}
   }, [currentLang, currentDirection]);
 
   const setLanguage = (langCode: string) => {

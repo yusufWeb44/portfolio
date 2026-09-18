@@ -901,27 +901,129 @@ const Settings = () => {
 
           {/* Typography / Manual Font Configuration */}
           <div className="p-6 bg-card rounded-xl border border-border space-y-6">
-            <div className="flex items-center justify-between flex-wrap gap-4">
-              <div className="flex items-center gap-2">
-                <Type className="text-emerald-500 w-5 h-5" />
-                <div>
-                  <h2 className="text-lg font-bold text-foreground">Custom Typography & Manual Fonts (إعداد الخطوط يدوياً)</h2>
-                  <p className="text-xs text-muted-foreground">
-                    أدخل أي اسم خط تريده للإنجليزية أو العربية يدوياً بدون أي قيود. يتم جلب خطوط Google Fonts تلقائياً، أو يمكنك إدراج رابط الخط الخارجي اختياري.
-                  </p>
-                </div>
+            <div className="flex items-center gap-2">
+              <Type className="text-emerald-500 w-5 h-5" />
+              <div>
+                <h2 className="text-lg font-bold text-foreground">Custom Typography & Fonts (تخصيص الخطوط)</h2>
+                <p className="text-xs text-muted-foreground">
+                  خصص الخطوط المستقلة لكل من واجهة الموقع العربية والإنجليزية. اختر من الخطوط الجاهزة بنقرة واحدة أو اكتب اسم أي خط من Google Fonts ليتم تطبيقه فوراً.
+                </p>
               </div>
             </div>
 
+            {/* Language Font Distinction Alert */}
+            <div className="p-4 rounded-xl border border-blue-500/20 bg-blue-500/5 text-xs text-muted-foreground flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+              <div className="flex items-center gap-2 text-foreground font-medium">
+                <Sparkles className="w-4 h-4 text-blue-500 shrink-0" />
+                <span>الموقع يمتلك خطين مستقلين: خط للواجهة العربية (RTL) وخط للواجهة الإنجليزية (LTR).</span>
+              </div>
+              <span className="text-[11px] bg-blue-500/10 text-blue-600 dark:text-blue-400 px-2.5 py-1 rounded-md font-semibold">
+                اللغة الافتراضية الحالية للموقع: العربية (Cairo)
+              </span>
+            </div>
+
             <div className="grid md:grid-cols-2 gap-6">
-              {/* English Font Configuration */}
+              {/* Arabic Font Configuration (Placed First for RTL priority) */}
               <div className="p-5 rounded-xl border border-border/80 bg-muted/20 space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-bold text-foreground flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    خط الواجهة العربية (Arabic Font)
+                  </span>
+                  <span className="text-[11px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono font-semibold">
+                    {settings.fontFamilyAr || 'Cairo'}
+                  </span>
+                </div>
+
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-xs font-semibold text-foreground/80 block mb-1.5">
+                      اختر خطاً سريعاً (Popular Arabic Fonts):
+                    </label>
+                    <div className="flex flex-wrap gap-1.5 mb-2.5">
+                      {[
+                        'Cairo', 'Tajawal', 'Alexandria', 'Almarai', 
+                        'Readex Pro', 'Amiri', 'IBM Plex Sans Arabic', 'Changa', 'Noto Sans Arabic'
+                      ].map((f) => (
+                        <button
+                          key={f}
+                          type="button"
+                          onClick={() => setSettings({ ...settings, fontFamilyAr: f })}
+                          className={`text-xs px-2.5 py-1 rounded-md border transition-all ${
+                            (settings.fontFamilyAr || 'Cairo') === f
+                              ? 'bg-emerald-500 text-white border-emerald-500 font-bold shadow-sm'
+                              : 'bg-background hover:bg-muted text-muted-foreground border-border'
+                          }`}
+                        >
+                          {f}
+                        </button>
+                      ))}
+                    </div>
+
+                    <label className="text-xs font-semibold text-foreground/80 block mb-1.5">
+                      اسم الخط العربي (أو اكتب أي خط يدوي)
+                    </label>
+                    <Input
+                      type="text"
+                      dir="rtl"
+                      placeholder="مثال: Cairo, Tajawal, Alexandria, Almarai..."
+                      value={settings.fontFamilyAr || ''}
+                      onChange={e => setSettings({ ...settings, fontFamilyAr: e.target.value })}
+                      className="bg-background text-sm text-right font-medium"
+                    />
+                    <p className="text-[11px] text-muted-foreground mt-1 text-right">
+                      هذا هو الخط الذي يظهر على الموقع بالكامل عند التصفح باللغة العربية.
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-foreground/80 block mb-1.5">
+                      رابط ملف الخط الخارجي (اختياري - Custom CDN / Webfont URL)
+                    </label>
+                    <Input
+                      type="url"
+                      placeholder="https://fonts.googleapis.com/... أو رابط CDN خارجي"
+                      value={settings.fontUrlAr || ''}
+                      onChange={e => setSettings({ ...settings, fontUrlAr: e.target.value })}
+                      className="bg-background text-sm font-mono text-xs"
+                    />
+                    <p className="text-[11px] text-muted-foreground mt-1 text-right">
+                      اتركه فارغاً لجلب الخط تلقائياً من Google Fonts فور كتابة اسمه.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Arabic Live Font Preview */}
+                <div className="pt-3 border-t border-border/60">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider text-right">
+                      معاينة حية للخط العربي (Live Preview)
+                    </span>
+                    <span className="text-[10px] text-emerald-500 font-medium">مباشر</span>
+                  </div>
+                  <div
+                    dir="rtl"
+                    className="p-4 rounded-lg bg-background border border-border space-y-2 text-right transition-all shadow-sm"
+                    style={{ fontFamily: settings.fontFamilyAr ? `'${settings.fontFamilyAr}', system-ui, sans-serif` : "'Cairo', system-ui, sans-serif" }}
+                  >
+                    <p className="text-lg font-bold text-foreground leading-tight">
+                      تصميم وتطوير تجارب رقمية وهندسية متكاملة
+                    </p>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      أبجد هوز حطي كلمن صعفض قرشت ثخذ ضظغ — ٠١٢٣٤٥٦٧٨٩ — المظهر الحالي لخط الموقع بالعربية.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* English Font Configuration */}
+              <div className="p-5 rounded-xl border border-border/80 bg-muted/20 space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-bold text-foreground flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-blue-500"></span>
                     English Font (الخط الإنجليزي)
                   </span>
-                  <span className="text-[11px] px-2 py-0.5 rounded bg-muted text-muted-foreground font-mono">
+                  <span className="text-[11px] px-2 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 font-mono font-semibold">
                     {settings.fontFamilyEn || 'Geist'}
                   </span>
                 </div>
@@ -929,17 +1031,40 @@ const Settings = () => {
                 <div className="space-y-3">
                   <div>
                     <label className="text-xs font-semibold text-foreground/80 block mb-1.5">
+                      Quick Pick (Popular Latin Fonts):
+                    </label>
+                    <div className="flex flex-wrap gap-1.5 mb-2.5">
+                      {[
+                        'Geist', 'Plus Jakarta Sans', 'Inter', 'Outfit', 
+                        'Vollkorn', 'Poppins', 'Montserrat', 'Playfair Display', 'Lora', 'Roboto'
+                      ].map((f) => (
+                        <button
+                          key={f}
+                          type="button"
+                          onClick={() => setSettings({ ...settings, fontFamilyEn: f })}
+                          className={`text-xs px-2.5 py-1 rounded-md border transition-all ${
+                            (settings.fontFamilyEn || 'Geist') === f
+                              ? 'bg-blue-600 text-white border-blue-600 font-bold shadow-sm'
+                              : 'bg-background hover:bg-muted text-muted-foreground border-border'
+                          }`}
+                        >
+                          {f}
+                        </button>
+                      ))}
+                    </div>
+
+                    <label className="text-xs font-semibold text-foreground/80 block mb-1.5">
                       Font Family Name (اسم الخط)
                     </label>
                     <Input
                       type="text"
-                      placeholder="e.g. Plus Jakarta Sans, Outfit, Inter, Montserrat..."
+                      placeholder="e.g. Plus Jakarta Sans, Vollkorn, Inter, Outfit..."
                       value={settings.fontFamilyEn || ''}
                       onChange={e => setSettings({ ...settings, fontFamilyEn: e.target.value })}
-                      className="bg-background text-sm"
+                      className="bg-background text-sm font-medium"
                     />
                     <p className="text-[11px] text-muted-foreground mt-1">
-                      اكتب اسم الخط كما هو في Google Fonts أو النظام (سيتم جلبه وتطبيقه تلقائياً).
+                      يُطبق عند تصفح الموقع باللغة الإنجليزية (LTR).
                     </p>
                   </div>
 
@@ -962,85 +1087,21 @@ const Settings = () => {
 
                 {/* English Live Font Preview */}
                 <div className="pt-3 border-t border-border/60">
-                  <span className="text-[11px] font-semibold text-muted-foreground block mb-2 uppercase tracking-wider">
-                    Live Preview (معاينة حية)
-                  </span>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                      Live Preview (معاينة حية)
+                    </span>
+                    <span className="text-[10px] text-blue-500 font-medium">Live</span>
+                  </div>
                   <div
-                    className="p-4 rounded-lg bg-background/80 border border-border space-y-2 transition-all"
-                    style={{ fontFamily: settings.fontFamilyEn ? `'${settings.fontFamilyEn}', sans-serif` : 'sans-serif' }}
+                    className="p-4 rounded-lg bg-background border border-border space-y-2 transition-all shadow-sm"
+                    style={{ fontFamily: settings.fontFamilyEn ? `'${settings.fontFamilyEn}', system-ui, sans-serif` : "'Geist', system-ui, sans-serif" }}
                   >
                     <p className="text-lg font-bold text-foreground leading-tight">
                       Crafting Exceptional Digital Solutions
                     </p>
                     <p className="text-xs text-muted-foreground leading-relaxed">
                       The quick brown fox jumps over the lazy dog. 0123456789 — Aa Bb Cc Dd Ee Ff Gg
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Arabic Font Configuration */}
-              <div className="p-5 rounded-xl border border-border/80 bg-muted/20 space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-bold text-foreground flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                    خط اللغة العربية (Arabic Font)
-                  </span>
-                  <span className="text-[11px] px-2 py-0.5 rounded bg-muted text-muted-foreground font-mono">
-                    {settings.fontFamilyAr || 'Cairo'}
-                  </span>
-                </div>
-
-                <div className="space-y-3">
-                  <div>
-                    <label className="text-xs font-semibold text-foreground/80 block mb-1.5">
-                      اسم الخط العربي (Font Family Name)
-                    </label>
-                    <Input
-                      type="text"
-                      dir="rtl"
-                      placeholder="مثال: Cairo, Tajawal, Alexandria, Almarai, Readex Pro, Amiri..."
-                      value={settings.fontFamilyAr || ''}
-                      onChange={e => setSettings({ ...settings, fontFamilyAr: e.target.value })}
-                      className="bg-background text-sm text-right"
-                    />
-                    <p className="text-[11px] text-muted-foreground mt-1 text-right">
-                      اكتب اسم أي خط تريده وسيتم تطبيقه على الواجهة العربية فوراً.
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-semibold text-foreground/80 block mb-1.5">
-                      رابط ملف الخط الخارجي (اختياري - Custom Font URL)
-                    </label>
-                    <Input
-                      type="url"
-                      placeholder="https://fonts.googleapis.com/... أو رابط CDN"
-                      value={settings.fontUrlAr || ''}
-                      onChange={e => setSettings({ ...settings, fontUrlAr: e.target.value })}
-                      className="bg-background text-sm font-mono text-xs"
-                    />
-                    <p className="text-[11px] text-muted-foreground mt-1 text-right">
-                      اتركه فارغاً لجلب الخط تلقائياً من Google Fonts بمجرد كتابة اسمه.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Arabic Live Font Preview */}
-                <div className="pt-3 border-t border-border/60">
-                  <span className="text-[11px] font-semibold text-muted-foreground block mb-2 uppercase tracking-wider text-right">
-                    معاينة حية للنص العربي (Live Preview)
-                  </span>
-                  <div
-                    dir="rtl"
-                    className="p-4 rounded-lg bg-background/80 border border-border space-y-2 text-right transition-all"
-                    style={{ fontFamily: settings.fontFamilyAr ? `'${settings.fontFamilyAr}', sans-serif` : 'sans-serif' }}
-                  >
-                    <p className="text-lg font-bold text-foreground leading-tight">
-                      تصميم وتطوير تجارب رقمية وهندسية متكاملة
-                    </p>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      أبجد هوز حطي كلمن صعفض قرشت ثخذ ضظغ — ٠١٢٣٤٥٦٧٨٩
                     </p>
                   </div>
                 </div>

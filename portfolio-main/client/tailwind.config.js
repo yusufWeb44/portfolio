@@ -8,7 +8,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Geist', 'sans-serif'],
+        sans: ['var(--font-family)', 'var(--font-current)', 'var(--font-en)', 'var(--font-ar)', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
         mono: ['Geist Mono', 'monospace'],
       },
       colors: {
