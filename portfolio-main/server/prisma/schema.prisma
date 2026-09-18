@@ -44,7 +44,9 @@ model PortfolioSettings {
   // Theme & UI Customization
   primaryThemeColor String? @default("emerald")
   fontFamilyEn      String? @default("Geist")
+  fontUrlEn         String? @db.Text
   fontFamilyAr      String? @default("Cairo")
+  fontUrlAr         String? @db.Text
   cardStyle         String? @default("glassmorphic")
   enableGlow        Boolean @default(true)
   backgroundPattern String? @default("subtle-grid")
