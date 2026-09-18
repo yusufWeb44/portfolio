@@ -319,12 +319,12 @@ export const ServiceCard = ({
     ? `${whatsappBaseUrl}${whatsappBaseUrl.includes('?') ? '&' : '?'}text=${inquiryMsg}`
     : `https://wa.me/?text=${inquiryMsg}`;
 
-  // Tailored gradient for cards fitting the emerald & obsidian identity
+  // Tailored gradient for cards fitting the light mode blue and dark mode emerald identity
   const cardGradients = [
-    "from-emerald-500/15 via-emerald-950/20 to-card dark:from-emerald-500/10 dark:via-white/[0.03] dark:to-white/[0.01]",
-    "from-teal-500/15 via-teal-950/20 to-card dark:from-teal-500/10 dark:via-white/[0.03] dark:to-white/[0.01]",
-    "from-cyan-500/15 via-cyan-950/20 to-card dark:from-cyan-500/10 dark:via-white/[0.03] dark:to-white/[0.01]",
-    "from-indigo-500/15 via-indigo-950/20 to-card dark:from-indigo-500/10 dark:via-white/[0.03] dark:to-white/[0.01]",
+    "from-blue-500/10 via-blue-500/[0.03] to-card dark:from-emerald-500/10 dark:via-white/[0.03] dark:to-white/[0.01]",
+    "from-indigo-500/10 via-indigo-500/[0.03] to-card dark:from-teal-500/10 dark:via-white/[0.03] dark:to-white/[0.01]",
+    "from-sky-500/10 via-sky-500/[0.03] to-card dark:from-cyan-500/10 dark:via-white/[0.03] dark:to-white/[0.01]",
+    "from-blue-600/10 via-blue-600/[0.03] to-card dark:from-indigo-500/10 dark:via-white/[0.03] dark:to-white/[0.01]",
   ];
 
   const activeGradient = service.gradient || cardGradients[index % cardGradients.length];

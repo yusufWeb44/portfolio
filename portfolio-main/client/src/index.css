@@ -4,48 +4,76 @@
 
 @layer base {
   :root {
-    --background: 0 0% 98%;
-    --foreground: 0 0% 7%;
+    /* Base Canvas in Light Mode: Crisp Modern Slate Surface */
+    --background: 210 25% 98%;
+    --foreground: 222 47% 11%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 7%;
+    --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 7%;
-    --primary: 0 0% 7%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 5% 96%;
-    --secondary-foreground: 0 0% 7%;
-    --muted: 240 5% 96%;
-    --muted-foreground: 240 4% 46%;
-    --accent: 0 0% 7%;
-    --accent-foreground: 0 0% 98%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 221 83% 53%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 214 32% 94%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 214 32% 94%;
+    --muted-foreground: 215 25% 36%;
+    --accent: 221 83% 53%;
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 6% 90%;
-    --input: 240 6% 90%;
-    --ring: 0 0% 7%;
+    --border: 214 32% 86%;
+    --input: 214 32% 86%;
+    --ring: 221 83% 53%;
     --radius: 0.5rem;
+
+    /* Light Mode Identity Palette: Royal Cobalt Blue (#2563EB) */
+    --emerald-50: 214 100% 97%;   /* #eff6ff */
+    --emerald-100: 214 95% 93%;   /* #dbeafe */
+    --emerald-200: 213 97% 87%;   /* #bfdbfe */
+    --emerald-300: 212 96% 78%;   /* #93c5fd */
+    --emerald-400: 221 83% 45%;   /* #1d4ed8 - High-contrast readable royal blue for text */
+    --emerald-500: 221 83% 53%;   /* #2563eb - Primary vibrant royal cobalt blue */
+    --emerald-600: 224 76% 45%;   /* #1d4ed8 - Deep rich blue for buttons */
+    --emerald-700: 226 71% 38%;   /* #1e40af */
+    --emerald-800: 224 64% 30%;   /* #1e3a8a */
+    --emerald-900: 226 55% 22%;   /* #172554 */
+    --emerald-950: 224 71% 12%;   /* #0f172a */
   }
 
   .dark {
+    /* Dark Mode Canvas: Obsidian Matrix */
     --background: 0 0% 4%;
     --foreground: 0 0% 93%;
     --card: 0 0% 8%;
     --card-foreground: 0 0% 93%;
     --popover: 0 0% 8%;
     --popover-foreground: 0 0% 93%;
-    --primary: 0 0% 93%;
+    --primary: 160 84% 39%;
     --primary-foreground: 0 0% 4%;
     --secondary: 240 4% 16%;
     --secondary-foreground: 0 0% 93%;
     --muted: 240 4% 16%;
     --muted-foreground: 240 5% 65%;
-    --accent: 0 0% 93%;
+    --accent: 160 84% 39%;
     --accent-foreground: 0 0% 4%;
     --destructive: 0 63% 31%;
     --destructive-foreground: 0 0% 93%;
     --border: 240 4% 16%;
     --input: 240 4% 16%;
-    --ring: 240 5% 84%;
+    --ring: 160 84% 39%;
+
+    /* Dark Mode Identity Palette: Vibrant Terminal Emerald (#10B981) */
+    --emerald-50: 152 76% 96%;
+    --emerald-100: 149 80% 90%;
+    --emerald-200: 152 76% 80%;
+    --emerald-300: 156 72% 67%;
+    --emerald-400: 158 64% 52%;  /* #34d399 */
+    --emerald-500: 160 84% 39%;  /* #10b981 */
+    --emerald-600: 161 94% 30%;  /* #059669 */
+    --emerald-700: 163 88% 23%;  /* #047857 */
+    --emerald-800: 163 79% 19%;  /* #065f46 */
+    --emerald-900: 164 74% 16%;  /* #064e3b */
+    --emerald-950: 166 87% 8%;   /* #022c22 */
   }
 }
 
@@ -102,8 +130,8 @@
   /* Dynamic Background Patterns */
   .bg-grid-pattern {
     background-size: 40px 40px;
-    background-image: linear-gradient(to right, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
-                      linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+    background-image: linear-gradient(to right, rgba(15, 23, 42, 0.05) 1px, transparent 1px),
+                      linear-gradient(to bottom, rgba(15, 23, 42, 0.05) 1px, transparent 1px);
   }
   .dark .bg-grid-pattern {
     background-image: linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
@@ -111,7 +139,7 @@
   }
   .bg-dots-pattern {
     background-size: 28px 28px;
-    background-image: radial-gradient(rgba(0, 0, 0, 0.08) 1px, transparent 1px);
+    background-image: radial-gradient(rgba(15, 23, 42, 0.08) 1px, transparent 1px);
   }
   .dark .bg-dots-pattern {
     background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
@@ -119,10 +147,10 @@
 
   /* Dynamic Card Styles */
   .glass {
-    @apply bg-background/70 backdrop-blur-xl border-b border-border/50;
+    @apply bg-background/80 backdrop-blur-xl border-b border-border;
   }
   .glass-card {
-    @apply bg-card/40 backdrop-blur-xl border border-border/50 hover:border-emerald-500/40 transition-all duration-300;
+    @apply bg-card/90 backdrop-blur-xl border border-border transition-all duration-300;
   }
   .dark .glass-card {
     background-color: rgba(255, 255, 255, 0.025);
@@ -131,6 +159,61 @@
   .dark .glass-card:hover {
     border-color: rgba(16, 185, 129, 0.4);
     box-shadow: 0 0 25px rgba(16, 185, 129, 0.08);
+  }
+
+  /* ─── Light Mode Container & Card Definition ─── */
+  :root:not(.dark) .bg-card\/30,
+  :root:not(.dark) .bg-card\/40,
+  :root:not(.dark) .bg-card\/60,
+  :root:not(.dark) .bg-card\/70,
+  :root:not(.dark) .bg-card\/80,
+  :root:not(.dark) .glass-card {
+    background-color: rgba(255, 255, 255, 0.94) !important;
+    border-color: rgba(203, 213, 225, 0.85) !important;
+    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03) !important;
+  }
+
+  /* ─── Light Mode Hover Glow: Royal Cobalt Accent ─── */
+  :root:not(.dark) .hover\:border-emerald-500\/40:hover,
+  :root:not(.dark) .hover\:border-emerald-500\/50:hover,
+  :root:not(.dark) .hover\:border-emerald-500\/70:hover,
+  :root:not(.dark) .glass-card:hover,
+  :root:not(.dark) .group:hover .group-hover\:border-emerald-500\/40,
+  :root:not(.dark) .group:hover .group-hover\:border-emerald-500\/50 {
+    border-color: rgba(37, 99, 235, 0.5) !important;
+    box-shadow: 0 12px 28px -6px rgba(37, 99, 235, 0.14), 0 6px 12px -3px rgba(37, 99, 235, 0.06) !important;
+  }
+
+  /* ─── Light Mode CTA Buttons & Badges High-Contrast ─── */
+  :root:not(.dark) .bg-emerald-500 {
+    background-color: #2563eb !important;
+    color: #ffffff !important;
+  }
+  :root:not(.dark) .bg-emerald-500:hover,
+  :root:not(.dark) .hover\:bg-emerald-400:hover {
+    background-color: #1d4ed8 !important;
+    color: #ffffff !important;
+  }
+  :root:not(.dark) .bg-emerald-500 *,
+  :root:not(.dark) .bg-emerald-500 svg {
+    color: #ffffff !important;
+  }
+
+  /* Light Mode Status Badges */
+  :root:not(.dark) .bg-emerald-500\/10 {
+    background-color: rgba(37, 99, 235, 0.08) !important;
+  }
+  :root:not(.dark) .border-emerald-500\/25,
+  :root:not(.dark) .border-emerald-500\/20 {
+    border-color: rgba(37, 99, 235, 0.28) !important;
+  }
+  :root:not(.dark) .text-emerald-400,
+  :root:not(.dark) .text-emerald-500 {
+    color: #1d4ed8 !important;
+  }
+  :root:not(.dark) .hover\:text-emerald-400:hover,
+  :root:not(.dark) .group:hover .group-hover\:text-emerald-400 {
+    color: #1d4ed8 !important;
   }
 
   /* Card Style: Deep Obsidian */

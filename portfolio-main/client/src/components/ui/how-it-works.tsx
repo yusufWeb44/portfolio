@@ -1,5 +1,5 @@
-import { useRef, useEffect, useState } from 'react';
-import { motion, useScroll, useInView, useSpring } from 'framer-motion';
+import { useRef, useEffect, useState, useCallback } from 'react';
+import { motion, useScroll, useInView, useSpring, useTransform, useMotionValueEvent } from 'framer-motion';
 import api from '../../services/api';
 import { useLanguage } from '../../contexts/LanguageContext';
 
@@ -133,12 +133,50 @@ interface Step {
 /* ═══════════════════════════════════════════════════════════════════
    Sticky Note Card
    ═══════════════════════════════════════════════════════════════════ */
-const StickyNoteCard = ({ step, isMobile, isRtl }: { step: Step; isMobile?: boolean; isRtl?: boolean }) => {
+const StickyNoteCard = ({
+  step,
+  isMobile,
+  isRtl,
+  isRevealed,
+  isFirst,
+  onReveal,
+}: {
+  step: Step;
+  isMobile?: boolean;
+  isRtl?: boolean;
+  isRevealed: boolean;
+  isFirst?: boolean;
+  onReveal?: () => void;
+}) => {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: '-10% 0px -5% 0px' });
+  const isInView = useInView(ref, { once: true, margin: '-5% 0px -5% 0px' });
   const baseTilt = isRtl ? -step.tilt : step.tilt;
   const tilt = isMobile ? baseTilt * 0.55 : baseTilt;
   const isVisualLeft = isRtl ? (step.side === 'right') : (step.side === 'left');
+
+  useEffect(() => {
+    if (isFirst && isInView) {
+      onReveal?.();
+    }
+  }, [isFirst, isInView, onReveal]);
+
+  // Safety fallback: if user reloaded or jumped down past this card
+  useEffect(() => {
+    if (!isRevealed && !isFirst && ref.current) {
+      const checkPosition = () => {
+        if (!ref.current) return;
+        const rect = ref.current.getBoundingClientRect();
+        if (rect.top > 0 && rect.top < window.innerHeight * 0.45) {
+          onReveal?.();
+        }
+      };
+      checkPosition();
+      window.addEventListener('scroll', checkPosition, { passive: true });
+      return () => window.removeEventListener('scroll', checkPosition);
+    }
+  }, [isRevealed, isFirst, onReveal]);
+
+  const shouldShow = isFirst ? (isInView || isRevealed) : isRevealed;
 
   return (
     <motion.div
@@ -146,9 +184,9 @@ const StickyNoteCard = ({ step, isMobile, isRtl }: { step: Step; isMobile?: bool
       className="relative"
       initial={{ opacity: 0, y: 35, scale: 0.95, rotate: tilt * 1.3 }}
       animate={
-        isInView
+        shouldShow
           ? { opacity: 1, y: 0, scale: 1, rotate: tilt }
-          : {}
+          : { opacity: 0, y: 35, scale: 0.95, rotate: tilt * 1.3 }
       }
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
       style={{ transformOrigin: isVisualLeft ? '65% 25%' : '35% 25%' }}
@@ -263,28 +301,32 @@ const StickyNoteCard = ({ step, isMobile, isRtl }: { step: Step; isMobile?: bool
 const ConnectorSegment = ({
   fromSide,
   toSide,
-  index,
+  index: _index,
   isMobile,
   isRtl,
+  isActive,
+  onReach,
 }: {
   fromSide: 'left' | 'right';
   toSide: 'left' | 'right';
   fromColor?: string;
   toColor?: string;
-  index: number;
+  index?: number;
   isMobile?: boolean;
   isRtl?: boolean;
+  isActive: boolean;
+  onReach?: () => void;
 }) => {
   const ref = useRef<HTMLDivElement>(null);
 
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ['start 85%', 'end 35%'],
+    offset: ['start 82%', 'end 52%'],
   });
 
   const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 80,
-    damping: 25,
+    stiffness: 100,
+    damping: 28,
     restDelta: 0.001,
   });
 
@@ -310,61 +352,56 @@ const ConnectorSegment = ({
 
   const d = `M ${fromXNum} ${startY} C ${fromXNum} ${cp1Y}, ${toXNum} ${cp2Y}, ${toXNum} ${endY}`;
 
-  const maskId = `connector_mask_${index}`;
+  const hasReachedRef = useRef(false);
+
+  // Notify parent when line reaches the end (touches the card)
+  useMotionValueEvent(smoothProgress, 'change', (latest) => {
+    if (isActive && latest >= 0.95 && !hasReachedRef.current) {
+      hasReachedRef.current = true;
+      onReach?.();
+    }
+  });
+
+  useEffect(() => {
+    if (isActive && smoothProgress.get() >= 0.95 && !hasReachedRef.current) {
+      hasReachedRef.current = true;
+      onReach?.();
+    }
+  }, [isActive, smoothProgress, onReach]);
+
+  // Transform scroll progress to pixel height for drawing the line
+  // If not active yet, height stays at 0
+  const progress = useTransform(smoothProgress, (val) => (isActive ? val : 0));
+  const revealHeight = useTransform(progress, [0, 1], [0, svgHeight], { clamp: true });
 
   return (
     <div ref={ref} className="w-full relative" style={{ height: svgHeight }}>
-      <svg
-        className="absolute inset-0 w-full h-full pointer-events-none"
-        viewBox={`0 0 100 ${svgHeight}`}
-        preserveAspectRatio="none"
-        fill="none"
+      {/* Dashed line entirely drawn on scroll — no background track */}
+      <motion.div
+        className="absolute top-0 left-0 right-0 overflow-hidden pointer-events-none"
+        style={{ height: revealHeight }}
       >
-        <defs>
-          <mask id={maskId} maskUnits="userSpaceOnUse" x="-10" y="-10" width="120" height={svgHeight + 20}>
-            <rect x="-10" y="-10" width="120" height={svgHeight + 20} fill="black" />
-            <motion.path
-              d={d}
-              stroke="white"
-              strokeWidth="16"
-              strokeLinecap="butt"
-              fill="none"
-              vectorEffect="non-scaling-stroke"
-              pathLength={1}
-              style={{
-                pathLength: smoothProgress,
-              }}
-            />
-          </mask>
-        </defs>
-
-        {/* Faint white dashed track underneath (guide road) */}
-        <path
-          d={d}
-          stroke="rgba(255, 255, 255, 0.12)"
-          strokeWidth="1.6"
-          strokeDasharray="7 7"
-          strokeLinecap="round"
+        <svg
+          className="w-full pointer-events-none"
+          style={{ height: svgHeight, minHeight: svgHeight }}
+          viewBox={`0 0 100 ${svgHeight}`}
+          preserveAspectRatio="none"
           fill="none"
-          vectorEffect="non-scaling-stroke"
-        />
-
-        {/* Active clear white dashed line smoothly revealed on scroll */}
-        <g mask={`url(#${maskId})`}>
+        >
           <path
             d={d}
-            stroke="#ffffff"
+            className="stroke-zinc-800 dark:stroke-white"
             strokeWidth="2.4"
             strokeDasharray="7 7"
             strokeLinecap="round"
             fill="none"
             vectorEffect="non-scaling-stroke"
             style={{
-              filter: 'drop-shadow(0 0 4px rgba(255, 255, 255, 0.7)) drop-shadow(0 0 10px rgba(255, 255, 255, 0.25))',
+              filter: 'drop-shadow(0 0 4px rgba(255, 255, 255, 0.6)) drop-shadow(0 0 8px rgba(255, 255, 255, 0.2))',
             }}
           />
-        </g>
-      </svg>
+        </svg>
+      </motion.div>
     </div>
   );
 };
@@ -381,6 +418,11 @@ const HowItWorks = () => {
   const [isMobile, setIsMobile] = useState(() =>
     typeof window !== 'undefined' ? window.innerWidth < 640 : false
   );
+  const [revealedIndices, setRevealedIndices] = useState<number[]>([]);
+
+  const handleReveal = useCallback((idx: number) => {
+    setRevealedIndices((prev) => (prev.includes(idx) ? prev : [...prev, idx]));
+  }, []);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 640);
@@ -483,20 +525,29 @@ const HowItWorks = () => {
               {/* Card row */}
               <div className={`flex ${step.side === 'right' ? 'justify-end' : 'justify-start'}`}>
                 <div className="w-[88%] sm:w-[82%] md:w-full md:max-w-[420px]">
-                  <StickyNoteCard step={step} isMobile={isMobile} isRtl={isRtl} />
+                  <StickyNoteCard
+                    step={step}
+                    isMobile={isMobile}
+                    isRtl={isRtl}
+                    isFirst={i === 0}
+                    isRevealed={revealedIndices.includes(i)}
+                    onReveal={() => handleReveal(i)}
+                  />
                 </div>
               </div>
 
               {/* Connector between this card and the next */}
-              {i < stepsData.length - 1 && (
+              {i < displaySteps.length - 1 && (
                 <ConnectorSegment
                   fromSide={step.side}
-                  toSide={stepsData[i + 1].side}
+                  toSide={displaySteps[i + 1].side}
                   fromColor={step.pinColor}
-                  toColor={stepsData[i + 1].pinColor}
+                  toColor={displaySteps[i + 1].pinColor}
                   index={i}
                   isMobile={isMobile}
                   isRtl={isRtl}
+                  isActive={revealedIndices.includes(i)}
+                  onReach={() => handleReveal(i + 1)}
                 />
               )}
             </div>
@@ -508,3 +559,4 @@ const HowItWorks = () => {
 };
 
 export default HowItWorks;
+

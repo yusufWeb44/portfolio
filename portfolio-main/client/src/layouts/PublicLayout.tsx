@@ -1,19 +1,20 @@
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { Moon, Sun, Menu, X, ArrowRight, ArrowUpRight } from 'lucide-react';
+import { Moon, Sun, Menu, X, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
 import { cn } from '../components/ui/Button';
 import api from '../services/api';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { useLanguage } from '../contexts/LanguageContext';
 import { applyCustomFonts } from '../utils/fontLoader';
+import Footer from '../components/Footer';
 
 const themeAuraGradients: Record<string, { orb1: string; orb2: string; orb3: string; orb4: string }> = {
   emerald: {
-    orb1: 'from-emerald-500/15 via-emerald-500/5 to-transparent dark:from-emerald-500/10 dark:via-emerald-500/[0.03]',
-    orb2: 'from-teal-500/12 via-cyan-500/5 to-transparent dark:from-teal-500/8 dark:via-cyan-500/[0.02]',
-    orb3: 'from-emerald-600/15 via-emerald-500/5 to-transparent dark:from-emerald-600/10 dark:via-emerald-500/[0.03]',
-    orb4: 'bg-emerald-500/10 dark:bg-emerald-500/[0.05]',
+    orb1: 'from-blue-500/12 via-indigo-500/5 to-transparent dark:from-emerald-500/10 dark:via-emerald-500/[0.03]',
+    orb2: 'from-sky-500/10 via-blue-500/5 to-transparent dark:from-teal-500/8 dark:via-cyan-500/[0.02]',
+    orb3: 'from-indigo-600/10 via-blue-500/5 to-transparent dark:from-emerald-600/10 dark:via-emerald-500/[0.03]',
+    orb4: 'bg-blue-500/8 dark:bg-emerald-500/[0.05]',
   },
   cyan: {
     orb1: 'from-cyan-500/15 via-cyan-500/5 to-transparent dark:from-cyan-500/10 dark:via-cyan-500/[0.03]',
@@ -361,66 +362,11 @@ const PublicLayout = () => {
         </AnimatePresence>
       </main>
       
-      <footer className="relative bg-transparent mt-12">
-        <div className="w-full max-w-7xl mx-auto px-6 md:px-8 mb-4">
-          <div className="h-px bg-gradient-to-r from-transparent via-border/50 to-transparent" />
-        </div>
-        <div className="max-w-7xl mx-auto px-6 md:px-8">
-          {/* Top row */}
-          <div className="py-14 grid md:grid-cols-3 gap-10">
-            <div>
-              <h3 className="font-bold tracking-tighter text-2xl mb-2">
-                {brandName}.
-              </h3>
-              <p className="text-muted-foreground text-sm leading-relaxed max-w-xs">
-                {isAr
-                  ? (settings?.bioAr || settings?.footerTextAr || 'مهندس برمجيات متكامل يطور حلولاً رقمية وتطبيقات ويب سريعة وموثوقة.')
-                  : (settings?.footerText || settings?.bio || 'Full-Stack Engineer crafting performant digital products and experiences.')}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">{t('footer.navigation', 'Navigation')}</p>
-              <div className="grid grid-cols-2 gap-2">
-                {navLinks.map(l => (
-                  <button
-                    key={l.name}
-                    onClick={() => scrollToSection(l.id)}
-                    className="text-sm text-start text-muted-foreground hover:text-foreground transition-colors py-1 cursor-pointer bg-transparent border-none p-0"
-                  >
-                    {l.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">{t('footer.connect', 'Connect')}</p>
-              <div className="flex flex-col gap-2">
-                {socialLinks.length > 0 ? socialLinks.map(sl => (
-                  <a key={sl.platform} href={sl.url} target="_blank" rel="noreferrer" className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 group">
-                    {sl.platform} <ArrowUpRight size={12} className="opacity-0 group-hover:opacity-100 rtl:rotate-[-90deg] transition-opacity" />
-                  </a>
-                )) : [
-                  { n: 'GitHub', h: 'https://github.com' },
-                  { n: 'LinkedIn', h: 'https://linkedin.com' },
-                ].map(s => (
-                  <a key={s.n} href={s.h} target="_blank" rel="noreferrer" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{s.n}</a>
-                ))}
-              </div>
-            </div>
-          </div>
-          {/* Bottom row */}
-          <div className="py-6 border-t border-border flex flex-col sm:flex-row justify-between items-center gap-3">
-            <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} {isAr ? (settings?.nameAr || 'يوسف الأيوبي') : (settings?.name || 'Yusuf Ayoubi')}. {t('footer.rights', 'All rights reserved.')}</p>
-            <button
-              onClick={() => scrollToSection('contact')}
-              className="text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 cursor-pointer bg-transparent border-none p-0"
-            >
-              <span>{t('footer.startProject', 'Start a project')}</span>
-              <ArrowRight size={12} className="rtl:rotate-180" />
-            </button>
-          </div>
-        </div>
-      </footer>
+      <Footer
+        settings={settings}
+        socialLinks={socialLinks}
+        scrollToSection={scrollToSection}
+      />
     </div>
   );
 };

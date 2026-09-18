@@ -90,7 +90,7 @@ const defaultStats: StatItem[] = [
 
 /* ─── Availability Badge (shared between mobile & desktop) ─────── */
 const AvailabilityBadge = ({ text }: { text: string }) => (
-  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-xs font-mono font-semibold uppercase tracking-wider shadow-sm backdrop-blur-sm">
+  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-600 dark:text-emerald-400 text-xs font-semibold tracking-normal shadow-sm backdrop-blur-sm">
     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
     <span className="truncate">{text}</span>
   </div>
@@ -285,22 +285,33 @@ const MinimalistHero: React.FC<MinimalistHeroProps> = ({
                 className="absolute w-[280px] h-[280px] sm:w-[360px] sm:h-[360px] lg:w-[480px] lg:h-[480px] z-0 pointer-events-none"
               >
                 {/* Ambient glow behind blob without expensive filter */}
-                <div className="absolute inset-6 rounded-full bg-emerald-500/25 blur-3xl -z-10" />
+                <div className="absolute inset-6 rounded-full bg-blue-500/20 dark:bg-emerald-500/25 blur-3xl -z-10" />
                 <svg viewBox="0 0 500 500" className="w-full h-full">
                   <defs>
-                    <linearGradient id="fluid-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    {/* Dark Mode Gradient: Cyan into Emerald */}
+                    <linearGradient id="fluid-gradient-dark" x1="0%" y1="0%" x2="100%" y2="100%">
                       <stop offset="0%" stopColor="#0EA5E9" />
                       <stop offset="50%" stopColor="#10B981" />
                       <stop offset="100%" stopColor="#064E3B" />
                     </linearGradient>
-                    <radialGradient id="glow-gradient" cx="50%" cy="50%" r="50%">
+                    {/* Light Mode Gradient: Electric Sky into Royal Cobalt into Deep Blue */}
+                    <linearGradient id="fluid-gradient-light" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#38BDF8" />
+                      <stop offset="50%" stopColor="#2563EB" />
+                      <stop offset="100%" stopColor="#1D4ED8" />
+                    </linearGradient>
+                    <radialGradient id="glow-gradient-dark" cx="50%" cy="50%" r="50%">
                       <stop offset="0%" stopColor="#10B981" stopOpacity="0.45" />
                       <stop offset="100%" stopColor="#0EA5E9" stopOpacity="0" />
                     </radialGradient>
+                    <radialGradient id="glow-gradient-light" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" stopColor="#2563EB" stopOpacity="0.3" />
+                      <stop offset="100%" stopColor="#38BDF8" stopOpacity="0" />
+                    </radialGradient>
                   </defs>
-                  <circle cx="250" cy="250" r="230" fill="url(#glow-gradient)" />
+                  <circle cx="250" cy="250" r="230" className="dark:fill-[url(#glow-gradient-dark)] fill-[url(#glow-gradient-light)]" />
                   <motion.path
-                    fill="url(#fluid-gradient)"
+                    className="dark:fill-[url(#fluid-gradient-dark)] fill-[url(#fluid-gradient-light)]"
                     d={blobPath1}
                     animate={{ d: [blobPath1, blobPath2, blobPath3, blobPath1] }}
                     transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}

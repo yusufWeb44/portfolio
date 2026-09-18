@@ -85,9 +85,11 @@ const ScatterCloud = ({ items }: { items: TechItem[] }) => {
               style={{
                 fontSize: `${tech.size}px`,
                 lineHeight: 1.2,
-                color: isActive ? '#10B981' : `rgba(16, 185, 129, ${tech.depth})`,
+                color: isActive 
+                  ? 'hsl(var(--emerald-500))' 
+                  : `hsl(var(--emerald-500) / ${Math.max(0.45, tech.depth)})`,
                 textShadow: isActive
-                  ? '0 0 14px rgba(16,185,129,0.3)'
+                  ? '0 0 16px hsl(var(--emerald-500) / 0.35)'
                   : 'none',
               }}
               initial={{
