@@ -326,7 +326,7 @@ const Home = () => {
   })();
 
   return (
-    <div className="w-full bg-transparent overflow-x-hidden">
+    <div className="w-full bg-transparent overflow-x-clip">
       <SEO
         pageKey="home"
         title={`${name} | Software Developer & Engineer`}

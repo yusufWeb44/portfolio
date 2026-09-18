@@ -198,7 +198,7 @@ const PublicLayout = () => {
     : (settings?.name ? settings.name.split(' ')[0] : 'Yusuf');
 
   return (
-    <div className="min-h-screen flex flex-col relative bg-background text-foreground transition-colors duration-500 font-sans selection:bg-foreground selection:text-background overflow-x-hidden">
+    <div className="min-h-screen flex flex-col relative bg-background text-foreground transition-colors duration-500 font-sans selection:bg-foreground selection:text-background overflow-x-clip">
       
       {/* ── Continuous Ambient Glassmorphic Background System (GPU Composited Layer) ── */}
       <div 

@@ -1,19 +1,20 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowUpRight, ArrowRight, ExternalLink, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { motion, useScroll } from 'framer-motion';
+import { ArrowRight, ArrowUpRight, ChevronDown, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { getMediaUrl } from '../../utils/mediaUrl';
 
-/* ─── Types ──────────────────────────────────────────────────────── */
+/* ─── Data Interfaces ─────────────────────────────────────────────── */
 interface ProjectImage {
   id?: string;
   url: string;
-  isCover: boolean;
+  isCover?: boolean;
 }
 
 interface Technology {
-  id: string;
+  id?: string;
   name: string;
 }
 
@@ -26,263 +27,324 @@ interface Project {
   descriptionAr?: string | null;
   role?: string | null;
   roleAr?: string | null;
-  challenge?: string | null;
-  challengeAr?: string | null;
-  solution?: string | null;
-  solutionAr?: string | null;
-  features?: string | null;
-  featuresAr?: string | null;
-  results?: string | null;
-  resultsAr?: string | null;
-  year?: string | null;
   category?: string | null;
   categoryAr?: string | null;
+  year?: string | null;
   liveDemo?: string | null;
   github?: string | null;
+  isFeatured?: boolean;
+  order?: number;
   images: ProjectImage[];
   technologies: Technology[];
 }
 
-/* ─── Premium Featured Project Card ───────────────────────────────── */
-const FeaturedProjectCard = ({
+/* ─── Fallback Projects (Guarantees complete 3-card deck matching reference) ─── */
+const FALLBACK_PROJECTS: Project[] = [
+  {
+    id: 'healio-medical-app',
+    title: 'Healio',
+    titleAr: 'هيليو',
+    slug: 'healio-medical-app',
+    year: '2025',
+    category: 'Medical • Mobile App',
+    categoryAr: 'رعاية صحية • تطبيق هاتف',
+    description:
+      'A patient-centered platform with intuitive navigation and calming visual architecture focused on healthcare accessibility and real-time consultations.',
+    descriptionAr:
+      'منصة طبية متكاملة تركز على تجربة المريض مع تصميم هادئ وواجهات سلسة تهدف لتسهيل الوصول للرعاية الصحية والاستشارات الفورية.',
+    technologies: [
+      { name: 'React Native' },
+      { name: 'Node.js' },
+      { name: 'TypeScript' },
+      { name: 'Tailwind CSS' },
+      { name: 'PostgreSQL' },
+    ],
+    images: [],
+  },
+  {
+    id: 'finflow-banking-system',
+    title: 'FinFlow',
+    titleAr: 'فين فلو',
+    slug: 'finflow-banking-system',
+    year: '2024',
+    category: 'Fintech • Enterprise Core',
+    categoryAr: 'تقنية مالية • أنظمة مصرفية',
+    description:
+      'Next-generation treasury management and automated financial ledger system engineered for high-throughput transactional velocity and audit-grade safety.',
+    descriptionAr:
+      'منصة مالية ومصرفية متقدمة لإدارة السيولة والتحويلات المالية الفورية بنظام قيود مشفر يلبي أعلى معايير الأمان المالي.',
+    technologies: [
+      { name: 'Next.js' },
+      { name: 'TypeScript' },
+      { name: 'Go' },
+      { name: 'Prisma' },
+      { name: 'Redis' },
+    ],
+    images: [],
+  },
+  {
+    id: 'aether-crm-enterprise',
+    title: 'Aether CRM',
+    titleAr: 'إيثر سي آر إم',
+    slug: 'aether-crm-enterprise',
+    year: '2024',
+    category: 'Enterprise • SaaS Platform',
+    categoryAr: 'أنظمة سحابية • إدارة أعمال',
+    description:
+      'Scalable multi-tenant enterprise orchestration suite providing deep revenue analytics, automated pipeline workflows, and unified team collaboration.',
+    descriptionAr:
+      'نظام إدارة علاقات عملاء مؤسسي متعدد المستأجرين مع تحليلات إيرادات مدعومة بالأتمتة وخطط سير عمل مخصصة لفرق المبيعات.',
+    technologies: [
+      { name: 'React' },
+      { name: 'Node.js' },
+      { name: 'Docker' },
+      { name: 'GraphQL' },
+      { name: 'PostgreSQL' },
+    ],
+    images: [],
+  },
+];
+
+/* ─── Project Media Visual (Matches Healio reference: Square • Circle • Circle) ─── */
+const ProjectMediaVisual = ({
   project,
-  index,
+  cardIndex,
 }: {
   project: Project;
-  index: number;
+  cardIndex: number;
 }) => {
-  const { t, currentLang } = useLanguage();
-  const isAr = currentLang === 'ar';
-  const [activeImgIdx, setActiveImgIdx] = useState(0);
-  const [isHovered, setIsHovered] = useState(false);
-  const isEven = index % 2 === 0;
+  const coverImage =
+    project.images?.find((img) => img.isCover)?.url ||
+    project.images?.[0]?.url;
 
-  // Prepare images (ensure at least 2-3 previews if images exist)
-  const rawImages = project.images?.map((img) => img.url) || [];
-  let displayImages = rawImages.length > 0 ? rawImages : [];
-  if (displayImages.length === 1) {
-    displayImages = [
-      displayImages[0],
-      displayImages[0],
-    ];
+  if (coverImage) {
+    return (
+      <div className="w-full h-full relative overflow-hidden group">
+        <img
+          src={getMediaUrl(coverImage)}
+          alt={project.title}
+          className="w-full h-full object-cover select-none transition-transform duration-700 group-hover:scale-105"
+          loading="lazy"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60" />
+      </div>
+    );
   }
 
-  const currentImage = displayImages[activeImgIdx] || null;
+  // Atmospheric gradients matching the Healio reference aesthetic
+  const ambientGradients = [
+    'from-[#0b1424] via-[#10203a] to-[#070c16]',
+    'from-[#0d1627] via-[#131f38] to-[#080d18]',
+    'from-[#091120] via-[#0f1b32] to-[#060a14]',
+  ];
+  const gradient = ambientGradients[cardIndex % ambientGradients.length];
 
-  const prevImage = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (displayImages.length <= 1) return;
-    setActiveImgIdx((prev) => (prev === 0 ? displayImages.length - 1 : prev - 1));
+  return (
+    <div
+      className={`w-full h-full relative overflow-hidden bg-gradient-to-br ${gradient} flex items-center justify-center select-none p-6`}
+    >
+      {/* Subtle colorful ambient light reflections from the mockup */}
+      <div className="absolute -top-12 -left-12 w-52 h-52 bg-blue-500/25 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-12 -right-12 w-56 h-56 bg-amber-500/20 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute inset-0 bg-radial from-transparent to-black/40 pointer-events-none" />
+
+      {/* Iconic Geometric Shapes Logo: [ Square • Circle • Circle ] from reference mockup */}
+      <div className="relative z-10 flex items-center gap-3.5 sm:gap-4 drop-shadow-[0_6px_20px_rgba(0,0,0,0.6)]">
+        <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-[8px] bg-white shadow-md" />
+        <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-white shadow-md" />
+        <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-white shadow-md" />
+      </div>
+
+      {/* Minimalistic corner branding tag */}
+      <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 text-[10px] font-mono tracking-widest uppercase text-white/30 font-medium">
+        {project.slug.split('-')[0].toUpperCase()}
+      </div>
+    </div>
+  );
+};
+
+/* ─── Stacked Card Item Component ────────────────────────────────── */
+interface StackedCardProps {
+  project: Project;
+  index: number;
+  activeCard: number;
+  isAr: boolean;
+  onSelect: () => void;
+}
+
+const StackedCard = ({
+  project,
+  index,
+  activeCard,
+  isAr,
+  onSelect,
+}: StackedCardProps) => {
+  // Relative position in the 3-card rotating deck: 0 = Front, 1 = Middle, 2 = Back
+  const pos = (index - activeCard + 3) % 3;
+  const isFront = pos === 0;
+
+  // Exact Portfolio Identity Color Tokens:
+  // Dark: Deep Obsidian Matrix with crisp emerald borders and atmospheric glow
+  // Light: Clean Crisp White with subtle slate borders
+  const cardLayerStyles = [
+    // Position 0 (Front)
+    'bg-white dark:bg-[#0c1017] border-slate-300/80 dark:border-emerald-500/30 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.1),0_0_30px_-10px_rgba(16,185,129,0.12)] dark:shadow-[0_30px_80px_-20px_rgba(0,0,0,0.95),0_0_40px_-15px_rgba(16,185,129,0.18)]',
+    // Position 1 (Middle)
+    'bg-slate-50 dark:bg-[#090d14] border-slate-300/70 dark:border-emerald-500/20 shadow-[0_15px_35px_-10px_rgba(0,0,0,0.06)] dark:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.85)]',
+    // Position 2 (Back)
+    'bg-slate-100 dark:bg-[#070a0f] border-slate-300/60 dark:border-emerald-500/12 shadow-[0_10px_25px_-10px_rgba(0,0,0,0.04)] dark:shadow-[0_15px_40px_-15px_rgba(0,0,0,0.75)]',
+  ];
+
+  const currentBgStyle = cardLayerStyles[pos];
+
+  // Dynamic Content Overrides
+  const displayTitle = isAr ? project.titleAr || project.title : project.title;
+  const displayCategory = isAr ? project.categoryAr || project.category : project.category;
+  const displayDescription = isAr ? project.descriptionAr || project.description : project.description;
+  const formattedNumber = String(index + 1).padStart(2, '0');
+
+  // Exact Stacking Geometry matching Healio reference:
+  // - Vertical stacking step: exactly 34px per layer (y: 0 -> y: -34 -> y: -68)
+  // - Top-center transform origin with scale 0.91 and 0.83 creates identical ~38px symmetrical horizontal indents
+  const cardVariants: any = {
+    front: {
+      y: 0,
+      scale: 1,
+      zIndex: 30,
+      opacity: 1,
+      transition: {
+        y: { type: 'spring', stiffness: 220, damping: 24, mass: 0.5 },
+        scale: { type: 'spring', stiffness: 220, damping: 24, mass: 0.5 },
+        opacity: { duration: 0.2 },
+        zIndex: { delay: 0 },
+      },
+    },
+    middle: {
+      y: -34,
+      scale: 0.91,
+      zIndex: 20,
+      opacity: 1,
+      transition: {
+        y: { type: 'spring', stiffness: 220, damping: 24, mass: 0.5 },
+        scale: { type: 'spring', stiffness: 220, damping: 24, mass: 0.5 },
+        opacity: { duration: 0.2 },
+        zIndex: { delay: 0 },
+      },
+    },
+    back: {
+      y: -68,
+      scale: 0.83,
+      zIndex: 10,
+      opacity: 1,
+      transition: {
+        y: { type: 'spring', stiffness: 220, damping: 24, mass: 0.5 },
+        scale: { type: 'spring', stiffness: 220, damping: 24, mass: 0.5 },
+        opacity: { duration: 0.2 },
+        zIndex: { delay: 0.15 },
+      },
+    },
   };
 
-  const nextImage = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (displayImages.length <= 1) return;
-    setActiveImgIdx((prev) => (prev === displayImages.length - 1 ? 0 : prev + 1));
-  };
+  const currentVariant = pos === 0 ? 'front' : pos === 1 ? 'middle' : 'back';
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 35 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-60px' }}
-      transition={{ duration: 0.7, delay: index * 0.12, ease: [0.16, 1, 0.3, 1] }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className="group relative rounded-3xl border border-border/60 bg-card/40 dark:bg-white/[0.025] backdrop-blur-xl hover:border-emerald-500/40 shadow-xl transition-all duration-500 overflow-hidden"
+      variants={cardVariants}
+      animate={currentVariant}
+      initial={false}
+      style={{ transformOrigin: 'top center' }}
+      onClick={!isFront ? onSelect : undefined}
+      className={`absolute top-0 left-0 right-0 w-full rounded-[28px] sm:rounded-[34px] border overflow-hidden ${currentBgStyle} ${
+        !isFront ? 'cursor-pointer hover:border-foreground/30 dark:hover:border-emerald-500/40 transition-colors' : ''
+      }`}
     >
-      {/* Top Window / Header Bar */}
-      <div className="px-6 py-3.5 border-b border-border/50 bg-card/30 dark:bg-black/20 backdrop-blur-md flex items-center justify-between">
-        {/* macOS Window Controls */}
-        <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
-          <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/60" />
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/60" />
-          <span className="text-[11px] font-mono text-muted-foreground/70 ml-2 hidden sm:inline">
-            project-{String(index + 1).padStart(2, '0')}.app
-          </span>
-        </div>
+      {/* Subtle atmospheric brand emerald sheen in corner */}
+      {isFront && (
+        <div className="absolute -top-20 -left-20 w-56 h-56 bg-emerald-500/10 dark:bg-emerald-500/12 rounded-full blur-3xl pointer-events-none" />
+      )}
 
-        {/* Live Status & Category Pill */}
-        <div className="flex items-center gap-3">
-          {project.liveDemo && (
-            <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-mono font-semibold uppercase tracking-wider">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Live</span>
-            </div>
-          )}
-          {project.category && (
-            <span className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground font-semibold">
-              {isAr ? (project.categoryAr || project.category) : project.category}
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Main Card Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 p-6 md:p-10 items-center">
+      {/* ── Main Card Body Grid: Taller & more spacious layout (7:5 ratio) ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 p-6 sm:p-7 lg:p-8 items-stretch min-h-[410px] sm:min-h-[435px] lg:min-h-[460px]">
         
-        {/* ── IMAGE SHOWCASE SIDE ── */}
+        {/* Left Column: Project Details (Fades out when not front so background card is clean) */}
         <div
-          className={`lg:col-span-7 relative ${
-            isEven ? 'lg:order-1' : 'lg:order-2'
-          }`}
-        >
-          <div className="relative aspect-[16/10] sm:aspect-[16/10] rounded-2xl overflow-hidden border border-border/60 bg-muted/40 shadow-inner group/img">
-            {currentImage ? (
-              <AnimatePresence mode="wait">
-                <motion.img
-                  key={currentImage + activeImgIdx}
-                  src={currentImage}
-                  alt={isAr ? (project.titleAr || project.title) : project.title}
-                  initial={{ opacity: 0, scale: 1.02 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.98 }}
-                  transition={{ duration: 0.35, ease: 'easeOut' }}
-                  className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover/img:scale-[1.03]"
-                  loading="lazy"
-                />
-              </AnimatePresence>
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-card/60">
-                <span className="text-7xl font-bold text-muted-foreground/20 font-mono">
-                  {(isAr ? (project.titleAr || project.title) : project.title)[0]}
-                </span>
-              </div>
-            )}
-
-            {/* Subtle Gradient Overlays */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
-
-            {/* Interactive Image Arrows (if multiple images available) */}
-            {displayImages.length > 1 && (
-              <>
-                <button
-                  onClick={prevImage}
-                  aria-label="Previous screenshot"
-                  className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/60 hover:bg-black/90 text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition-all opacity-80 hover:opacity-100 hover:scale-105 active:scale-95 cursor-pointer shadow-md"
-                >
-                  <ChevronLeft size={16} className="rtl:rotate-180" />
-                </button>
-                <button
-                  onClick={nextImage}
-                  aria-label="Next screenshot"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/60 hover:bg-black/90 text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition-all opacity-80 hover:opacity-100 hover:scale-105 active:scale-95 cursor-pointer shadow-md"
-                >
-                  <ChevronRight size={16} className="rtl:rotate-180" />
-                </button>
-                {displayImages.map((_, i) => (
-                  <span
-                    key={i}
-                    className={`h-1.5 rounded-full transition-all duration-300 ${
-                      activeImgIdx === i
-                        ? 'w-6 bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]'
-                        : 'w-1.5 bg-white/40'
-                    }`}
-                  />
-                ))}
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* ── PROJECT DETAILS SIDE ── */}
-        <div
-          className={`lg:col-span-5 flex flex-col justify-between h-full ${
-            isEven ? 'lg:order-2' : 'lg:order-1'
+          className={`lg:col-span-7 flex flex-col justify-between ${
+            isAr ? 'text-right' : 'text-left'
+          } transition-opacity duration-300 ${
+            isFront ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none select-none'
           }`}
         >
           <div>
-            {/* Year & Index Header */}
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-xs font-mono text-emerald-500 font-semibold tracking-wider">
-                {project.year || '2025'} — {isAr ? t('projects.production', 'إنتاج حقيقي') : 'PRODUCTION'}
-              </span>
-              <span className="text-4xl font-extrabold text-foreground/10 font-mono select-none">
-                0{index + 1}
-              </span>
+            {/* 1. Pill Number Badge (Standalone oval pill matching Healio reference) */}
+            <div className={`flex items-center mb-4 sm:mb-5 ${isAr ? 'justify-end' : 'justify-start'}`}>
+              <div className="w-12 h-7 sm:w-13 sm:h-7.5 rounded-full border border-emerald-500/30 dark:border-emerald-500/25 bg-emerald-500/5 dark:bg-emerald-500/10 flex items-center justify-center font-mono text-xs font-semibold text-foreground dark:text-emerald-400">
+                {formattedNumber}
+              </div>
             </div>
 
-            {/* Title */}
-            <Link to={`/projects#${project.slug}`}>
-              <h3 className="text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tight text-foreground hover:text-emerald-400 transition-colors duration-200 leading-[1.15] mb-4">
-                {isAr ? (project.titleAr || project.title) : project.title}
-              </h3>
-            </Link>
+            {/* 2. Metadata Line: Year • Category */}
+            <div className="text-[11px] sm:text-xs font-mono font-medium uppercase tracking-wider text-muted-foreground dark:text-zinc-400 mb-2">
+              {project.year || '2025'}{displayCategory ? ` • ${displayCategory}` : ''}
+            </div>
 
-            {/* Description */}
-            <p className="text-muted-foreground text-sm sm:text-base leading-relaxed mb-6 line-clamp-3">
-              {isAr ? (project.descriptionAr || project.description) : project.description}
+            {/* 3. Project Title — Harmonized with portfolio typography */}
+            <h3 className="text-2xl sm:text-3xl lg:text-[2.2rem] font-bold tracking-tight text-foreground dark:text-white mb-2.5 leading-snug">
+              {displayTitle}
+            </h3>
+
+            {/* 4. Project Description */}
+            <p className="text-xs sm:text-sm text-muted-foreground dark:text-zinc-300 leading-relaxed line-clamp-3 mb-4 max-w-md">
+              {displayDescription}
             </p>
 
-            {/* Technologies Chips */}
+            {/* 5. Technologies Badges */}
             {project.technologies && project.technologies.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-8">
-                {project.technologies.slice(0, 5).map((tech) => (
+              <div
+                className={`flex flex-wrap items-center gap-1.5 sm:gap-2 mb-5 ${
+                  isAr ? 'justify-end' : 'justify-start'
+                }`}
+              >
+                {project.technologies.map((tech, tIdx) => (
                   <span
-                    key={tech.id || tech.name}
-                    className="px-3 py-1 rounded-full text-xs font-mono font-medium border border-border/70 bg-card/60 dark:bg-white/[0.04] backdrop-blur-md text-foreground/80 hover:border-emerald-500/40 hover:text-emerald-400 transition-colors"
+                    key={tech.id || tech.name || tIdx}
+                    className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-mono font-medium border border-border/70 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-foreground dark:text-zinc-300"
                   >
                     {tech.name}
                   </span>
                 ))}
-                {project.technologies.length > 5 && (
-                  <span className="px-2.5 py-1 rounded-full text-xs font-mono text-muted-foreground">
-                    +{project.technologies.length - 5}
-                  </span>
-                )}
               </div>
             )}
           </div>
 
-          {/* Action CTAs */}
-          <div className="flex flex-wrap items-center gap-3 pt-2">
+          {/* 6. Action Button: Substantial, ergonomic pill with signature emerald hover glow */}
+          <div className={`pt-2 flex items-center ${isAr ? 'justify-end' : 'justify-start'}`}>
             <Link
               to={`/projects#${project.slug}`}
-              className="h-10 px-5 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs uppercase tracking-wider inline-flex items-center gap-2 transition-colors duration-200 shadow-sm hover:shadow-md hover:shadow-emerald-500/15 cursor-pointer"
+              className="group inline-flex items-center gap-3 h-11 px-7 rounded-full bg-emerald-500/10 hover:bg-emerald-500 text-emerald-500 dark:text-emerald-400 hover:text-slate-950 dark:hover:text-slate-950 border border-emerald-500/35 hover:border-emerald-500 font-mono font-bold text-xs uppercase tracking-wider transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-sm hover:shadow-lg hover:shadow-emerald-500/25 cursor-pointer"
             >
-              <span>{isAr ? t('projects.viewCaseStudy', 'عرض دراسة الحالة') : 'View Case Study'}</span>
-              <ArrowRight size={14} className="rtl:rotate-180" />
+              <span>{isAr ? 'عرض دراسة الحالة' : 'VIEW CASE STUDY'}</span>
+              <ArrowRight
+                size={15}
+                className="transition-transform duration-300 group-hover:translate-x-1.5 rtl:group-hover:-translate-x-1.5 rtl:rotate-180 text-emerald-500 dark:text-emerald-400 group-hover:text-slate-950 dark:group-hover:text-slate-950"
+              />
             </Link>
+          </div>
+        </div>
 
-            {project.liveDemo && (
-              <a
-                href={project.liveDemo}
-                target="_blank"
-                rel="noreferrer"
-                className="h-10 px-5 rounded-full border border-border/70 bg-card/60 hover:bg-card/90 hover:border-emerald-500/50 hover:text-emerald-400 dark:bg-white/[0.04] backdrop-blur-md text-foreground text-xs uppercase tracking-wider font-bold inline-flex items-center gap-2 transition-colors duration-200 cursor-pointer"
-              >
-                <span>{isAr ? t('projects.liveDemo', 'معاينة حية') : 'Live Demo'}</span>
-                <ExternalLink size={13} />
-              </a>
-            )}
+        {/* Right Column: Prominent Rounded Media Preview (5 cols of 12) */}
+        <div className="lg:col-span-5 flex items-stretch">
+          <div className="w-full h-full min-h-[260px] sm:min-h-[290px] md:min-h-[330px] lg:min-h-[370px] rounded-[22px] sm:rounded-[26px] overflow-hidden border border-foreground/15 dark:border-white/10 bg-muted/20 shadow-inner group">
+            <ProjectMediaVisual project={project} cardIndex={index} />
           </div>
         </div>
 
       </div>
-
-      {/* Subtle bottom accent line on hover */}
-      <div className={`h-[2px] bg-gradient-to-r from-transparent via-emerald-500/0 to-transparent transition-all duration-500 ${isHovered ? 'via-emerald-500/60' : ''}`} />
     </motion.div>
   );
 };
 
-/* ─── Skeleton Loader ────────────────────────────────────────────── */
-const Skeleton = () => (
-  <div className="space-y-8">
-    {[1, 2].map((i) => (
-      <div
-        key={i}
-        className="h-[420px] rounded-3xl bg-card/40 dark:bg-white/[0.02] border border-border/50 animate-pulse"
-      />
-    ))}
-  </div>
-);
-
 /* ═══════════════════════════════════════════════════════════════════
-   MAIN PROJECTS SECTION
+   MAIN PROJECTS SECTION COMPONENT
    ═══════════════════════════════════════════════════════════════════ */
 const ProjectsSection = () => {
   const { t, currentLang } = useLanguage();
@@ -291,8 +353,57 @@ const ProjectsSection = () => {
   const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
+  // Scroll Track: 250vh provides generous scroll room with dedicated lead-in zone
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isProgrammaticScrollRef = useRef(false);
+  const scrollTimeoutRef = useRef<any>(null);
+
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ['start start', 'end end'],
+  });
+
+  const [activeCard, setActiveCard] = useState(0);
+
+  // Scroll progress listener:
+  // Flipping starts only when cards are centered in viewport!
+  // Card 0 remains stationary & centered for initial scroll lead-in (< 0.28).
   useEffect(() => {
-    api.get('/settings').then(res => setSettings(res.data?.data)).catch(() => {});
+    return scrollYProgress.on('change', (latest) => {
+      // Ignore intermediate scroll progress during programmatic click-navigation
+      if (isProgrammaticScrollRef.current) return;
+
+      let targetCard = 0;
+      if (latest < 0.28) {
+        targetCard = 0;
+      } else if (latest < 0.65) {
+        targetCard = 1;
+      } else {
+        targetCard = 2;
+      }
+
+      setActiveCard((current) => (current !== targetCard ? targetCard : current));
+    });
+  }, [scrollYProgress]);
+
+  // Cancel programmatic scroll lock if user manually touches or scrolls wheel
+  useEffect(() => {
+    const handleUserInterrupt = () => {
+      isProgrammaticScrollRef.current = false;
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    };
+    window.addEventListener('wheel', handleUserInterrupt, { passive: true });
+    window.addEventListener('touchmove', handleUserInterrupt, { passive: true });
+    return () => {
+      window.removeEventListener('wheel', handleUserInterrupt);
+      window.removeEventListener('touchmove', handleUserInterrupt);
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    };
+  }, []);
+
+  // Load Settings & Projects directly from Backend API (Dashboard Driven)
+  useEffect(() => {
+    api.get('/settings').then((res) => setSettings(res.data?.data)).catch(() => {});
     api
       .get('/projects?public=true')
       .then((res) => setProjects(res.data.data || []))
@@ -300,100 +411,152 @@ const ProjectsSection = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  // Prioritize featured projects first
-  const featured = (() => {
-    const isFeaturedList = projects.filter((p: any) => p.isFeatured);
+  // Assemble exactly 3 projects for the stacked deck:
+  const deckProjects: Project[] = (() => {
+    const featuredList = projects.filter((p: any) => p.isFeatured);
     const nonFeaturedList = projects.filter((p: any) => !p.isFeatured);
-    return [...isFeaturedList, ...nonFeaturedList].slice(0, 2);
+    const combined = [...featuredList, ...nonFeaturedList];
+
+    if (combined.length >= 3) {
+      return combined.slice(0, 3);
+    }
+    const needed = 3 - combined.length;
+    const fillers = FALLBACK_PROJECTS.slice(0, needed);
+    return [...combined, ...fillers];
   })();
 
-  const displayBadge = isAr 
-    ? (settings?.projectsBadgeAr || t('projects.badge', 'أعمال مختارة ودراسات حالة')) 
-    : (settings?.projectsBadge || 'Featured Case Studies');
-  const displayTitle = isAr 
-    ? (settings?.projectsTitleAr || t('projects.title', 'المشاريع المميزة.')) 
-    : (settings?.projectsTitle || 'Selected Work.');
-  const displaySubtitle = isAr 
-    ? (settings?.projectsSubtitleAr || t('projects.subtitle', 'مجموعة مختارة من حلول الويب، ومنصات الـ SaaS، والأنظمة المؤسسية المصممة بعناية.')) 
-    : (settings?.projectsSubtitle || 'A curated selection of production web applications, custom CRM platforms, and full-stack software architectures built for performance and measurable business impact.');
+  // Card selector with glitch-free smooth scrolling lock
+  const handleSelectCard = (index: number) => {
+    if (index === activeCard) return;
+
+    // Immediately trigger framer-motion spring to selected card
+    setActiveCard(index);
+
+    // Lock scroll listener updates during the smooth scroll animation
+    isProgrammaticScrollRef.current = true;
+    if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const scrollTop = window.scrollY + rect.top;
+      const targetRatio = index === 0 ? 0.10 : index === 1 ? 0.46 : 0.82;
+      const totalScrollable = containerRef.current.offsetHeight - window.innerHeight;
+      const targetScroll = scrollTop + targetRatio * totalScrollable;
+      window.scrollTo({ top: targetScroll, behavior: 'smooth' });
+    }
+
+    // Release lock once programmatic smooth scroll is complete
+    scrollTimeoutRef.current = setTimeout(() => {
+      isProgrammaticScrollRef.current = false;
+    }, 850);
+  };
+
+  // Section Heading & Subtitle Overrides from Dashboard
+  const displayBadge = isAr
+    ? settings?.projectsBadgeAr || t('projects.badge', 'نماذج أعمال مختارة')
+    : settings?.projectsBadge || 'Featured Case Studies';
+  const displayTitle = isAr
+    ? settings?.projectsTitleAr || t('projects.title', 'أبرز المشاريع والتطبيقات.')
+    : settings?.projectsTitle || 'Selected Work.';
+  const displaySubtitle = isAr
+    ? settings?.projectsSubtitleAr ||
+      t('projects.subtitle', 'مجموعة مختارة من التطبيقات البرمجية والأنظمة السحابية المتقدمة المصممة لتحقيق أعلى معايير الأداء والنمو التجاري.')
+    : settings?.projectsSubtitle ||
+      'A curated selection of production web applications, custom CRM platforms, and full-stack software architectures built for performance and measurable business impact.';
+
+  const totalCount = Math.max(projects.length, 3);
 
   return (
-    <section id="projects" className="scroll-mt-24 py-28 px-6 bg-transparent">
-      <div className="max-w-7xl mx-auto space-y-16">
-        
-        {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-80px' }}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          className="flex flex-col md:flex-row md:items-end justify-between gap-6"
-        >
-          <div>
-            <div className="flex items-center gap-3 mb-4">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-xs font-bold tracking-widest uppercase text-muted-foreground font-mono">
-                {displayBadge}
-              </span>
-            </div>
-            <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter leading-[1.05]">
-              {displayTitle}
-            </h2>
-            {displaySubtitle && (
-              <p className="text-muted-foreground text-sm sm:text-base mt-3 max-w-xl">
-                {displaySubtitle}
-              </p>
-            )}
-          </div>
+    <section id="projects" className="scroll-mt-20 relative bg-transparent">
+      {/* ── 1. Section Header: Slim, Elegant & Compact ── */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 pt-8 sm:pt-12 pb-3 sm:pb-4">
+        <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full border border-border/60 bg-card/40 dark:bg-white/[0.04] backdrop-blur-md mb-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+          <span className="text-[10px] sm:text-[11px] font-mono font-semibold uppercase tracking-widest text-muted-foreground">
+            {displayBadge}
+          </span>
+        </div>
 
-          <Link
-            to="/projects"
-            className="shrink-0 inline-flex items-center gap-2 text-xs md:text-sm font-mono font-semibold uppercase tracking-wider text-muted-foreground hover:text-emerald-400 transition-colors group cursor-pointer"
-          >
-            <span>{t('projects.viewAll', 'View all projects')} ({projects.length})</span>
-            <ArrowRight size={14} className="rtl:rotate-180" />
-          </Link>
-        </motion.div>
+        <div className="max-w-2xl">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight leading-tight text-foreground mb-1.5">
+            {displayTitle}
+          </h2>
+          {displaySubtitle && (
+            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed line-clamp-2">
+              {displaySubtitle}
+            </p>
+          )}
+        </div>
+      </div>
 
-        {/* Projects Cards Showcase */}
-        {loading ? (
-          <Skeleton />
-        ) : featured.length === 0 ? (
-          <div className="py-20 text-center border border-dashed border-border/60 rounded-3xl bg-card/30 backdrop-blur-md">
-            <Sparkles className="w-8 h-8 text-emerald-500 mx-auto mb-3" />
-            <p className="text-xl font-bold tracking-tight mb-2">{isAr ? 'قريباً: مشاريع وأعمال جديدة.' : 'Projects coming soon.'}</p>
-            <p className="text-sm text-muted-foreground">{isAr ? 'يرجى العودة لاحقاً للاطلاع على أحدث دراسات الحالة.' : 'Check back later for new case studies.'}</p>
-          </div>
-        ) : (
-          <div className="space-y-10">
-            {featured.map((project, i) => (
-              <FeaturedProjectCard key={project.id} project={project} index={i} />
-            ))}
-          </div>
-        )}
-
-        {/* Bottom CTA to View All */}
-        {!loading && projects.length > 2 && (
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="flex justify-center pt-6"
-          >
-            <Link
-              to="/projects"
-              className="group h-11 px-7 rounded-full border border-border/80 hover:border-emerald-500/50 bg-card/50 hover:bg-card/80 dark:bg-white/[0.04] backdrop-blur-md text-foreground font-semibold text-xs md:text-sm uppercase tracking-wider inline-flex items-center gap-2.5 transition-colors duration-200 hover:shadow-md hover:shadow-emerald-500/10 cursor-pointer"
+      {/* ── 2. Sticky Scroll Track: Taller cards centered vertically in viewport ── */}
+      <div ref={containerRef} className="relative h-[250vh]">
+        <div className="sticky top-0 h-screen w-full flex flex-col justify-center items-center px-4 sm:px-6 md:px-8 max-w-7xl mx-auto overflow-visible">
+          
+          <div className="relative w-full max-w-[900px] lg:max-w-[940px] mx-auto flex flex-col items-center">
+            
+            {/* Vertical Scroll Indicator floating on the side */}
+            <div
+              className={`hidden md:flex flex-col items-center gap-2.5 absolute ${
+                isAr ? '-left-12 lg:-left-16' : '-right-12 lg:-right-16'
+              } top-1/2 -translate-y-1/2 select-none pointer-events-none z-40`}
             >
-              <span>{isAr ? `استكشف جميع المشاريع (${projects.length})` : `Explore all ${projects.length} case studies`}</span>
-              <ArrowUpRight size={14} className="rtl:rotate-[-90deg] text-emerald-500" />
-            </Link>
-          </motion.div>
-        )}
+              <div className="w-5 h-9 rounded-full border border-emerald-500/40 dark:border-emerald-400/30 flex justify-center pt-1.5 bg-card/40 dark:bg-black/40 backdrop-blur-xs shadow-xs">
+                <motion.div
+                  animate={{ y: [0, 10, 0], opacity: [0.3, 1, 0.3] }}
+                  transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+                  className="w-1.5 h-1.5 rounded-full bg-emerald-500"
+                />
+              </div>
+              <span className="text-[9px] font-mono font-semibold tracking-[0.25em] uppercase text-muted-foreground/60 [writing-mode:vertical-lr] rotate-180">
+                {isAr ? 'تمرير' : 'SCROLL'}
+              </span>
+              <ChevronDown size={14} className="text-emerald-500/70 animate-bounce -mt-1" />
+            </div>
 
+            {/* 3D Stack of Cards: Taller & more spacious layout */}
+            <div className="relative w-full pt-20 pb-2">
+              <div className="relative w-full min-h-[410px] sm:min-h-[435px] lg:min-h-[460px]">
+                {loading ? (
+                  <div className="w-full h-[450px] rounded-[32px] bg-card/40 dark:bg-white/[0.02] border border-border/50 animate-pulse flex items-center justify-center">
+                    <Sparkles className="w-8 h-8 text-emerald-500 animate-spin" />
+                  </div>
+                ) : (
+                  deckProjects.map((project, i) => (
+                    <StackedCard
+                      key={project.id}
+                      project={project}
+                      index={i}
+                      activeCard={activeCard}
+                      isAr={isAr}
+                      onSelect={() => handleSelectCard(i)}
+                    />
+                  ))
+                )}
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      {/* ── 3. Bottom Section: ONLY the Explore All Projects Button (Brought closer) ── */}
+      <div className="pt-4 sm:pt-6 pb-12 sm:pb-16 flex justify-center px-4">
+        <Link
+          to="/projects"
+          className="group relative inline-flex items-center gap-3 h-12 px-8 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-mono font-bold text-xs sm:text-sm uppercase tracking-wider transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] shadow-md hover:shadow-xl hover:shadow-emerald-500/30 cursor-pointer overflow-hidden"
+        >
+          <span className="relative z-10">{isAr ? `استكشاف جميع المشاريع (${totalCount})` : `EXPLORE ALL PROJECTS (${totalCount})`}</span>
+          <ArrowUpRight
+            size={16}
+            className="relative z-10 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 rtl:rotate-[-90deg] text-slate-950"
+          />
+        </Link>
       </div>
     </section>
   );
 };
 
 export default ProjectsSection;
+
