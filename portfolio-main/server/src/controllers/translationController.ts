@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import prisma from '../utils/prisma';
+import { syncTranslationToSettings } from '../utils/translationSync';
 
 export const getTranslations = async (req: Request, res: Response) => {
   try {
@@ -72,6 +73,9 @@ export const createOrUpdateTranslation = async (req: Request, res: Response) => 
         data: dataString
       }
     });
+
+    // Synchronize matching fields to PortfolioSettings & AboutSettings
+    await syncTranslationToSettings(languageCode, data);
 
     res.json({ success: true, data: translation });
   } catch (error) {

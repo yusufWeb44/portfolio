@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import prisma from '../utils/prisma';
+import { syncAboutToTranslation } from '../utils/translationSync';
 
 export const getAbout = async (req: Request, res: Response) => {
   try {
@@ -33,6 +34,14 @@ export const updateAbout = async (req: Request, res: Response) => {
     // If arrays are passed, stringify them for storage
     if (typeof data.coreStack === 'object') data.coreStack = JSON.stringify(data.coreStack);
     if (typeof data.coreStackAr === 'object') data.coreStackAr = JSON.stringify(data.coreStackAr);
+
+    // Ensure coreStack and coreStackAr are always kept in sync
+    if (data.coreStack && (!data.coreStackAr || data.coreStackAr === 'null')) {
+      data.coreStackAr = data.coreStack;
+    } else if (data.coreStackAr && (!data.coreStack || data.coreStack === 'null')) {
+      data.coreStack = data.coreStackAr;
+    }
+
     if (typeof data.bentoCards === 'object') data.bentoCards = JSON.stringify(data.bentoCards);
     if (typeof data.bentoCardsAr === 'object') data.bentoCardsAr = JSON.stringify(data.bentoCardsAr);
 
@@ -41,6 +50,9 @@ export const updateAbout = async (req: Request, res: Response) => {
       update: data,
       create: { id: 'singleton', ...data }
     });
+    // Synchronize matching fields to Translation table
+    await syncAboutToTranslation(data);
+
     res.json({ success: true, data: about });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to update about settings', error });

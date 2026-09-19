@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import prisma from '../utils/prisma';
+import { syncSettingsToTranslation } from '../utils/translationSync';
 
 // --- Settings ---
 export const getSettings = async (req: Request, res: Response) => {
@@ -40,8 +41,11 @@ export const updateSettings = async (req: Request, res: Response) => {
     const settings = await prisma.portfolioSettings.upsert({
       where: { id: 'singleton' },
       update: updateData,
-      create: { id: 'singleton', ...updateData }
+      create: { id: 'singleton', name: 'Yusuf', bio: '', heroText: '', ctaText: '', ...updateData }
     });
+    // Synchronize matching fields to Translation table
+    await syncSettingsToTranslation(updateData);
+
     res.json({ success: true, data: settings });
   } catch (error: any) {
     console.error('Update settings error:', error);
