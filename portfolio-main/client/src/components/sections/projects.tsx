@@ -263,12 +263,12 @@ const StackedCard = ({
         <div className="absolute -top-20 -left-20 w-56 h-56 bg-emerald-500/10 dark:bg-emerald-500/12 rounded-full blur-3xl pointer-events-none" />
       )}
 
-      {/* ── Main Card Body Grid: Taller & more spacious layout (7:5 ratio) ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 p-6 sm:p-7 lg:p-8 items-stretch min-h-[410px] sm:min-h-[435px] lg:min-h-[460px]">
+      {/* ── Main Card Body Grid: Balanced layout with wider media preview (5:7 ratio) ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-7 p-6 sm:p-7 lg:p-8 items-stretch min-h-[410px] sm:min-h-[435px] lg:min-h-[460px]">
         
-        {/* Left Column: Project Details (Fades out when not front so background card is clean) */}
+        {/* Left Column: Project Details (5 cols of 12) */}
         <div
-          className={`lg:col-span-7 flex flex-col justify-between ${
+          className={`lg:col-span-5 flex flex-col justify-between ${
             isAr ? 'text-right' : 'text-left'
           } transition-opacity duration-300 ${
             isFront ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none select-none'
@@ -288,12 +288,12 @@ const StackedCard = ({
             </div>
 
             {/* 3. Project Title — Harmonized with portfolio typography */}
-            <h3 className="text-2xl sm:text-3xl lg:text-[2.2rem] font-bold tracking-tight text-foreground dark:text-white mb-2.5 leading-snug">
+            <h3 className="text-2xl sm:text-3xl lg:text-[2.1rem] font-bold tracking-tight text-foreground dark:text-white mb-2.5 leading-snug">
               {displayTitle}
             </h3>
 
-            {/* 4. Project Description */}
-            <p className="text-xs sm:text-sm text-muted-foreground dark:text-zinc-300 leading-relaxed line-clamp-3 mb-4 max-w-md">
+            {/* 4. Project Description: Expanded to show full content and fill vertical space */}
+            <p className="text-xs sm:text-[13.5px] lg:text-sm text-muted-foreground dark:text-zinc-300 leading-relaxed sm:leading-[1.65] line-clamp-5 sm:line-clamp-6 mb-4 sm:mb-5 w-full">
               {displayDescription}
             </p>
 
@@ -307,7 +307,7 @@ const StackedCard = ({
                 {project.technologies.map((tech, tIdx) => (
                   <span
                     key={tech.id || tech.name || tIdx}
-                    className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-mono font-medium border border-border/70 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-foreground dark:text-zinc-300"
+                    className="inline-flex items-center px-2.5 sm:px-3 py-1 rounded-full text-[11px] font-mono font-medium border border-border/70 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-foreground dark:text-zinc-300"
                   >
                     {tech.name}
                   </span>
@@ -331,9 +331,9 @@ const StackedCard = ({
           </div>
         </div>
 
-        {/* Right Column: Prominent Rounded Media Preview (5 cols of 12) */}
-        <div className="lg:col-span-5 flex items-stretch">
-          <div className="w-full h-full min-h-[260px] sm:min-h-[290px] md:min-h-[330px] lg:min-h-[370px] rounded-[22px] sm:rounded-[26px] overflow-hidden border border-foreground/15 dark:border-white/10 bg-muted/20 shadow-inner group">
+        {/* Right Column: Prominent Rounded Media Preview (7 cols of 12, takes more space to the left) */}
+        <div className="lg:col-span-7 flex items-stretch">
+          <div className="w-full h-full min-h-[260px] sm:min-h-[300px] md:min-h-[340px] lg:min-h-[380px] rounded-[22px] sm:rounded-[26px] overflow-hidden border border-foreground/15 dark:border-white/10 bg-muted/20 shadow-inner group">
             <ProjectMediaVisual project={project} cardIndex={index} />
           </div>
         </div>
@@ -505,7 +505,7 @@ const ProjectsSection = () => {
       <div ref={containerRef} className="relative h-[250vh]">
         <div className="sticky top-0 h-screen w-full flex flex-col justify-center items-center px-4 sm:px-6 md:px-8 max-w-7xl mx-auto overflow-visible">
           
-          <div className="relative w-full max-w-[900px] lg:max-w-[940px] mx-auto flex flex-col items-center">
+          <div className="relative w-full max-w-[900px] lg:max-w-[980px] xl:max-w-[1020px] mx-auto flex flex-col items-center">
             
             {/* Vertical Scroll Indicator floating on the side */}
             <div
