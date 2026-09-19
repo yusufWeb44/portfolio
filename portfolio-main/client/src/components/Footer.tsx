@@ -30,8 +30,8 @@ export const Footer: React.FC<FooterProps> = ({ settings, socialLinks = [], scro
     : (settings?.location || 'Istanbul, Turkey');
 
   const footerText = isAr
-    ? (settings?.footerTextAr || settings?.bioAr || 'بناء وتصميم منتجات رقمية وأنظمة برمجية متكاملة وقابلة للتوسع.')
-    : (settings?.footerText || settings?.bio || 'Architecting scalable digital products & high-performance software systems.');
+    ? t('footer.tagline', settings?.footerTextAr || settings?.bioAr || 'بناء وتصميم منتجات رقمية وأنظمة برمجية متكاملة وقابلة للتوسع.')
+    : t('footer.tagline', settings?.footerText || settings?.bio || 'Architecting scalable digital products & high-performance software systems.');
 
   const availabilityText = isAr
     ? (settings?.availabilityAr || 'متاح للفرص والمشاريع الجديدة')

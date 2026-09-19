@@ -403,12 +403,20 @@ const ProjectsSection = () => {
 
   // Load Settings & Projects directly from Backend API (Dashboard Driven)
   useEffect(() => {
-    api.get('/settings').then((res) => setSettings(res.data?.data)).catch(() => {});
-    api
-      .get('/projects?public=true')
-      .then((res) => setProjects(res.data.data || []))
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    const fetchSettingsAndProjects = () => {
+      api.get('/settings').then((res) => setSettings(res.data?.data)).catch(() => {});
+      api
+        .get('/projects?public=true')
+        .then((res) => setProjects(res.data.data || []))
+        .catch(() => {})
+        .finally(() => setLoading(false));
+    };
+
+    fetchSettingsAndProjects();
+
+    const handleUpdate = () => fetchSettingsAndProjects();
+    window.addEventListener('portfolio_settings_updated', handleUpdate);
+    return () => window.removeEventListener('portfolio_settings_updated', handleUpdate);
   }, []);
 
   // Assemble exactly 3 projects for the stacked deck:
@@ -451,18 +459,22 @@ const ProjectsSection = () => {
     }, 850);
   };
 
+  const resolveField = (key: string, arVal?: string, enVal?: string, fallback?: string) => {
+    if (isAr) {
+      return t(key, arVal || fallback);
+    }
+    return t(key, enVal || fallback);
+  };
+
   // Section Heading & Subtitle Overrides from Dashboard
-  const displayBadge = isAr
-    ? settings?.projectsBadgeAr || t('projects.badge', 'نماذج أعمال مختارة')
-    : settings?.projectsBadge || 'Featured Case Studies';
-  const displayTitle = isAr
-    ? settings?.projectsTitleAr || t('projects.title', 'أبرز المشاريع والتطبيقات.')
-    : settings?.projectsTitle || 'Selected Work.';
-  const displaySubtitle = isAr
-    ? settings?.projectsSubtitleAr ||
-      t('projects.subtitle', 'مجموعة مختارة من التطبيقات البرمجية والأنظمة السحابية المتقدمة المصممة لتحقيق أعلى معايير الأداء والنمو التجاري.')
-    : settings?.projectsSubtitle ||
-      'A curated selection of production web applications, custom CRM platforms, and full-stack software architectures built for performance and measurable business impact.';
+  const displayBadge = resolveField('projects.badge', settings?.projectsBadgeAr, settings?.projectsBadge, 'Featured Case Studies');
+  const displayTitle = resolveField('projects.title', settings?.projectsTitleAr, settings?.projectsTitle, 'Selected Work.');
+  const displaySubtitle = resolveField(
+    'projects.subtitle',
+    settings?.projectsSubtitleAr,
+    settings?.projectsSubtitle,
+    'A curated selection of production web applications, custom CRM platforms, and full-stack software architectures built for performance and measurable business impact.'
+  );
 
   const totalCount = Math.max(projects.length, 3);
 

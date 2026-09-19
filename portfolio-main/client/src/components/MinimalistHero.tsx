@@ -235,40 +235,38 @@ const MinimalistHero: React.FC<MinimalistHeroProps> = ({
           <div className="order-1 lg:order-2 lg:col-span-4 relative flex flex-col justify-center items-center min-w-0">
 
             {/* ── Mobile-only: badge then typewriter stacked above image ── */}
-            <div className="lg:hidden w-full flex flex-col gap-2.5 mb-4 px-1 ">
-              {/* Availability Badge — left aligned */}
+            <div className="lg:hidden w-full flex flex-col gap-3.5 mb-4 px-1">
+              {/* Availability Badge */}
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.5 }}
-                className="flex justify-start"
+                className="flex justify-center sm:justify-start rtl:sm:justify-start"
               >
                 <AvailabilityBadge text={availabilityStatus} />
               </motion.div>
 
-              {/* Typewriter — centered below badge, min-h prevents layout shift */}
+              {/* Typewriter — centered below badge with stable height to prevent layout shift */}
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.6 }}
-                className="flex justify-center pt-6 sm:pt-8"
+                className="flex justify-center items-start min-h-[3.6rem] sm:min-h-[4.2rem] pt-1"
               >
                 <h2
-                  className="min-h-[2.2rem] text-xl sm:text-2xl font-extrabold tracking-tight uppercase text-foreground text-center"
+                  className="text-xl sm:text-2xl font-extrabold tracking-tight rtl:tracking-normal uppercase rtl:normal-case text-foreground text-center leading-[1.45] rtl:leading-[1.55]"
+                  dir="auto"
                   style={{
-                    lineHeight: '1.35',
-                    overflowWrap: 'normal',
+                    overflowWrap: 'break-word',
                     wordBreak: 'normal',
-                    whiteSpace: 'normal',
                   }}
                 >
                   <Typewriter
                     words={words}
-                    speed={70}
+                    speed={65}
                     delayBetweenWords={2200}
                     cursor={true}
-                    cursorChar="_"
-                    className="text-foreground"
+                    className="text-foreground inline-block"
                   />
                 </h2>
               </motion.div>
@@ -345,37 +343,34 @@ const MinimalistHero: React.FC<MinimalistHeroProps> = ({
           </div>
 
           {/* ── Right Column (desktop only): Availability Badge + Typewriter ── */}
-          <div className="hidden lg:flex order-3 lg:col-span-3 lg:justify-end rtl:lg:justify-start lg:items-start z-10 min-w-0 w-full lg:-mt-8">
+          <div className="hidden lg:flex order-3 lg:col-span-3 lg:justify-end rtl:lg:justify-start lg:items-start z-10 min-w-0 w-full pt-1">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 1.2 }}
-              className="w-full lg:max-w-[340px] xl:max-w-[380px] text-left lg:text-right rtl:lg:text-left"
+              className="w-full lg:max-w-[380px] xl:max-w-[440px] flex flex-col items-end rtl:items-start text-right rtl:text-right"
             >
-              {/* Dynamic Availability Badge */}
-              <div className="flex items-center justify-end rtl:justify-start mb-3">
+              {/* Dynamic Availability Badge — Increased separation */}
+              <div className="flex items-center justify-end rtl:justify-start mb-5 sm:mb-6 w-full">
                 <AvailabilityBadge text={availabilityStatus} />
               </div>
 
-              {/* Typewriter */}
-              <div className="min-h-[120px] lg:min-h-[155px] flex items-center justify-end rtl:justify-start">
+              {/* Typewriter — Top-aligned with spacious multi-line leading */}
+              <div className="min-h-[95px] lg:min-h-[125px] w-full flex flex-col justify-start items-end rtl:items-start">
                 <h2
-                  className="text-2xl sm:text-3xl lg:text-[2.2rem] xl:text-[2.6rem] font-extrabold tracking-tight uppercase text-foreground"
+                  className="text-xl sm:text-2xl lg:text-[1.85rem] xl:text-[2.2rem] font-extrabold tracking-tight rtl:tracking-normal uppercase rtl:normal-case text-foreground text-right rtl:text-right leading-[1.45] sm:leading-[1.5] lg:leading-[1.48] xl:leading-[1.5] rtl:leading-[1.6] w-full"
+                  dir="auto"
                   style={{
-                    lineHeight: '1.35',
-                    overflowWrap: 'normal',
+                    overflowWrap: 'break-word',
                     wordBreak: 'normal',
-                    whiteSpace: 'normal',
-                    maxWidth: '100%',
                   }}
                 >
                   <Typewriter
                     words={words}
-                    speed={70}
+                    speed={65}
                     delayBetweenWords={2200}
                     cursor={true}
-                    cursorChar="_"
-                    className="text-foreground"
+                    className="text-foreground inline-block"
                   />
                 </h2>
               </div>

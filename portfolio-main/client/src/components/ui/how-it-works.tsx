@@ -432,51 +432,58 @@ const HowItWorks = () => {
   }, []);
 
   useEffect(() => {
-    Promise.allSettled([
-      api.get('/workflow'),
-      api.get('/settings')
-    ]).then(([wfRes, settRes]) => {
-      if (settRes.status === 'fulfilled' && settRes.value.data?.data) {
-        setSettings(settRes.value.data.data);
-      }
-      if (wfRes.status === 'fulfilled') {
-        const data = wfRes.value.data?.data;
-        if (Array.isArray(data) && data.length > 0) {
-          const enabledSteps = data.filter((s: any) => s.isEnabled !== false);
-          if (enabledSteps.length > 0) {
-            const mapped: Step[] = enabledSteps.map((s: any, idx: number) => {
-              const fallbackSide: 'left' | 'right' = idx % 2 === 0 ? 'left' : 'right';
-              return {
-                num: s.num || String(idx + 1).padStart(2, '0'),
-                title: s.title,
-                titleAr: s.titleAr,
-                description: s.description,
-                descriptionAr: s.descriptionAr,
-                pinColor: s.pinColor || (idx % 2 === 0 ? '#E8732A' : '#3B7DD8'),
-                tilt: typeof s.tilt === 'number' ? s.tilt : (idx % 2 === 0 ? -2.5 : 2.5),
-                side: (s.side === 'left' || s.side === 'right') ? s.side : fallbackSide,
-                paperBg: s.paperBg || '#FFF8DC',
-                paperEdge: s.paperEdge || '#F5E6B8',
-              };
-            });
-            setStepsData(mapped);
+    const fetchWorkflowAndSettings = () => {
+      Promise.allSettled([
+        api.get('/workflow'),
+        api.get('/settings')
+      ]).then(([wfRes, settRes]) => {
+        if (settRes.status === 'fulfilled' && settRes.value.data?.data) {
+          setSettings(settRes.value.data.data);
+        }
+        if (wfRes.status === 'fulfilled') {
+          const data = wfRes.value.data?.data;
+          if (Array.isArray(data) && data.length > 0) {
+            const enabledSteps = data.filter((s: any) => s.isEnabled !== false);
+            if (enabledSteps.length > 0) {
+              const mapped: Step[] = enabledSteps.map((s: any, idx: number) => {
+                const fallbackSide: 'left' | 'right' = idx % 2 === 0 ? 'left' : 'right';
+                return {
+                  num: s.num || String(idx + 1).padStart(2, '0'),
+                  title: s.title,
+                  titleAr: s.titleAr,
+                  description: s.description,
+                  descriptionAr: s.descriptionAr,
+                  pinColor: s.pinColor || (idx % 2 === 0 ? '#E8732A' : '#3B7DD8'),
+                  tilt: typeof s.tilt === 'number' ? s.tilt : (idx % 2 === 0 ? -2.5 : 2.5),
+                  side: (s.side === 'left' || s.side === 'right') ? s.side : fallbackSide,
+                  paperBg: s.paperBg || '#FFF8DC',
+                  paperEdge: s.paperEdge || '#F5E6B8',
+                };
+              });
+              setStepsData(mapped);
+            }
           }
         }
-      }
-    });
+      });
+    };
+
+    fetchWorkflowAndSettings();
+
+    const handleUpdate = () => fetchWorkflowAndSettings();
+    window.addEventListener('portfolio_settings_updated', handleUpdate);
+    return () => window.removeEventListener('portfolio_settings_updated', handleUpdate);
   }, []);
 
-  const displayBadge = isAr 
-    ? (settings?.workflowBadgeAr || t('workflow.badge', 'منهجية وسير العمل')) 
-    : (settings?.workflowBadge || 'Workflow & Methodology');
+  const resolveField = (key: string, arVal?: string, enVal?: string, fallback?: string) => {
+    if (isAr) {
+      return t(key, arVal || fallback);
+    }
+    return t(key, enVal || fallback);
+  };
 
-  const displayTitle = isAr 
-    ? (settings?.workflowTitleAr || t('workflow.title', 'كيف أطور وأبني الحلول الرقمية')) 
-    : (settings?.workflowTitle || 'How I Engineer Digital Products');
-
-  const displaySubtitle = isAr 
-    ? (settings?.workflowSubtitleAr || t('workflow.subtitle', 'عملية تطوير منظمة وشاملة تضمن أعلى درجات الموثوقية وتوافق الأعمال.')) 
-    : (settings?.workflowSubtitle || 'A structured, end-to-end development process ensuring total reliability and business alignment.');
+  const displayBadge = resolveField('workflow.badge', settings?.workflowBadgeAr, settings?.workflowBadge, 'Workflow & Methodology');
+  const displayTitle = resolveField('workflow.title', settings?.workflowTitleAr, settings?.workflowTitle, 'How I Engineer Digital Products');
+  const displaySubtitle = resolveField('workflow.subtitle', settings?.workflowSubtitleAr, settings?.workflowSubtitle, 'A structured, end-to-end development process ensuring total reliability and business alignment.');
 
   const displaySteps = stepsData.map((step) => {
     if (isAr) {

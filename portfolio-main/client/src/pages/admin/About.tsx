@@ -145,6 +145,7 @@ const AdminAbout = () => {
         bioParagraph2: data.bioParagraph2,
         bioParagraph2Ar: data.bioParagraph2Ar,
         coreStack: data.coreStack,
+        coreStackAr: data.coreStack,
         bentoCards: data.bentoCards,
         // Also stringified for backwards-compat if needed
         bentoCardsAr: data.bentoCards.map(c => ({
@@ -156,6 +157,10 @@ const AdminAbout = () => {
         }))
       };
       await api.put('/about', payload);
+      try {
+        localStorage.removeItem('portfolio_settings');
+        window.dispatchEvent(new CustomEvent('portfolio_settings_updated'));
+      } catch {}
       showToast('About section saved successfully!');
     } catch {
       showToast('Failed to save settings', 'error');

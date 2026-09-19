@@ -10,7 +10,7 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Textarea } from '../../components/ui/Textarea';
 
-import { defaultEnTranslations, flattenTranslations } from '../../contexts/LanguageContext';
+import { useLanguage, defaultEnTranslations, flattenTranslations } from '../../contexts/LanguageContext';
 
 interface TranslationItem {
   id: string;
@@ -27,6 +27,7 @@ const TEMPLATE_KEYS = defaultEnTranslations;
 
 
 const AdminTranslations = () => {
+  const { refreshLanguages } = useLanguage();
   const [languages, setLanguages] = useState<TranslationItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeLang, setActiveLang] = useState<TranslationItem | null>(null);
@@ -153,6 +154,7 @@ const AdminTranslations = () => {
       setIsAddModalOpen(false);
       showToast(`Language ${name} added!`);
       await fetchLanguages();
+      await refreshLanguages();
       if (res.data?.data) {
         selectLanguage(mapToTranslationItem(res.data.data));
       }
@@ -169,6 +171,7 @@ const AdminTranslations = () => {
     try {
       await api.put(`/translations/${lang.id}/default`);
       await fetchLanguages();
+      await refreshLanguages();
       showToast(`${lang.name} set as default language`);
     } catch {
       showToast('Failed to set default language', 'error');
@@ -190,6 +193,7 @@ const AdminTranslations = () => {
       if (activeLang?.id === lang.id) {
         selectLanguage(remaining[0]);
       }
+      await refreshLanguages();
       showToast('Language deleted');
     } catch {
       showToast('Failed to delete language', 'error');
@@ -225,6 +229,11 @@ const AdminTranslations = () => {
       });
       showToast(`Translations for ${activeLang.name} saved successfully!`);
       await fetchLanguages();
+      await refreshLanguages();
+      try {
+        localStorage.removeItem('portfolio_settings');
+        window.dispatchEvent(new CustomEvent('portfolio_settings_updated'));
+      } catch {}
     } catch (err: any) {
       const msg = err.response?.data?.message || 'Failed to save translations';
       showToast(msg, 'error');

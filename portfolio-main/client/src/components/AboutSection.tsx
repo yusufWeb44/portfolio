@@ -74,28 +74,28 @@ const AboutSection = () => {
       }
     };
     fetchAbout();
+
+    const handleUpdate = () => fetchAbout();
+    window.addEventListener('portfolio_settings_updated', handleUpdate);
+    return () => window.removeEventListener('portfolio_settings_updated', handleUpdate);
   }, []);
 
-  const displayBadge = isAr 
-    ? (aboutData?.badgeAr || t('about.badge', 'نبذة عني')) 
-    : (aboutData?.badge || 'About Me');
+  const resolveAboutField = (key: string, arVal?: string, enVal?: string, fallback?: string) => {
+    if (isAr) {
+      return t(key, arVal || fallback);
+    }
+    return t(key, enVal || fallback);
+  };
 
-  const displayHeadline = isAr 
-    ? (aboutData?.headlineAr || t('about.headline', 'بناء برمجيات قابلة للتوسع بدقة واحترافية.')) 
-    : (aboutData?.headline || 'Crafting Scalable Software with Purpose & Precision.');
-
-  const displayBio1 = isAr 
-    ? (aboutData?.bioParagraph1Ar || aboutData?.bioParagraph1 || '') 
-    : (aboutData?.bioParagraph1 || '');
-
-  const displayBio2 = isAr 
-    ? (aboutData?.bioParagraph2Ar || aboutData?.bioParagraph2 || '') 
-    : (aboutData?.bioParagraph2 || '');
+  const displayBadge = resolveAboutField('about.badge', aboutData?.badgeAr, aboutData?.badge, 'About Me');
+  const displayHeadline = resolveAboutField('about.headline', aboutData?.headlineAr, aboutData?.headline, 'Crafting Scalable Software with Purpose & Precision.');
+  const displayBio1 = resolveAboutField('about.bio1', aboutData?.bioParagraph1Ar, aboutData?.bioParagraph1, '');
+  const displayBio2 = resolveAboutField('about.bio2', aboutData?.bioParagraph2Ar, aboutData?.bioParagraph2, '');
 
   const displayCoreStackTitle = isAr ? t('about.coreStack', 'التقنيات الأساسية') : 'Core Stack';
 
   const coreStack: string[] = (() => {
-    const raw = isAr && aboutData?.coreStackAr ? aboutData.coreStackAr : aboutData?.coreStack;
+    const raw = aboutData?.coreStack || aboutData?.coreStackAr;
     if (!raw) return [];
     if (Array.isArray(raw)) return raw;
     try {

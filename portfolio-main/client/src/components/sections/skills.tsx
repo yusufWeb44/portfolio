@@ -154,25 +154,33 @@ const SkillsSection = () => {
   const [selectedMobile, setSelectedMobile] = useState<number | null>(null);
 
   useEffect(() => {
-    Promise.all([
-      api.get('/skills'),
-      api.get('/settings')
-    ])
-      .then(([skillsRes, settingsRes]) => {
-        if (settingsRes.data?.data) {
-          setSettings(settingsRes.data.data);
-        }
+    const fetchSkillsAndSettings = () => {
+      Promise.all([
+        api.get('/skills'),
+        api.get('/settings')
+      ])
+        .then(([skillsRes, settingsRes]) => {
+          if (settingsRes.data?.data) {
+            setSettings(settingsRes.data.data);
+          }
 
-        const rawSkills = skillsRes.data?.data;
-        if (Array.isArray(rawSkills) && rawSkills.length > 0) {
-          const activeSkills = rawSkills.filter((s: any) => s.isEnabled !== false);
-          activeSkills.sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
-          setRawSkillsData(activeSkills);
-        }
-      })
-      .catch((err) => {
-        console.error('Failed to load skills from database', err);
-      });
+          const rawSkills = skillsRes.data?.data;
+          if (Array.isArray(rawSkills) && rawSkills.length > 0) {
+            const activeSkills = rawSkills.filter((s: any) => s.isEnabled !== false);
+            activeSkills.sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
+            setRawSkillsData(activeSkills);
+          }
+        })
+        .catch((err) => {
+          console.error('Failed to load skills from database', err);
+        });
+    };
+
+    fetchSkillsAndSettings();
+
+    const handleUpdate = () => fetchSkillsAndSettings();
+    window.addEventListener('portfolio_settings_updated', handleUpdate);
+    return () => window.removeEventListener('portfolio_settings_updated', handleUpdate);
   }, []);
 
   const skillsItems: TechItem[] = rawSkillsData.map((s: any, idx: number) => {
@@ -192,26 +200,24 @@ const SkillsSection = () => {
     };
   });
 
-  const badgeText = isAr 
-    ? (settings?.skillsBadgeAr || t('skills.badge', 'المهارات والقدرات التقنية')) 
-    : (settings?.skillsBadge || 'Skills & Expertise');
+  const resolveField = (key: string, arVal?: string, enVal?: string, fallback?: string) => {
+    if (isAr) {
+      return t(key, arVal || fallback);
+    }
+    return t(key, enVal || fallback);
+  };
 
-  const mainTitle = isAr 
-    ? (settings?.skillsTitleAr || t('skills.title', 'القدرات الهندسية الأساسية')) 
-    : (settings?.skillsTitle || 'Engineered Core Capabilities');
-
-  const p1 = isAr 
-    ? (settings?.skillsParagraph1Ar || settings?.skillsDescriptionAr || t('skills.description', 'أبني أنظمة متكاملة ومترابطة من البداية إلى النهاية — من طبقات خدمة Node.js النظيفة بقواعد بيانات معيارية، إلى واجهات React و Next.js المتطورة المصممة للأداء العالي وسهولة الصيانة.'))
-    : (settings?.skillsParagraph1 || settings?.skillsDescription || 'I architect full-stack systems end-to-end — from clean Node.js service layers with normalized relational schemas, to reactive React and Next.js frontends built for performance, accessibility, and long-term maintainability.');
-
+  const badgeText = resolveField('skills.badge', settings?.skillsBadgeAr, settings?.skillsBadge, 'Skills & Expertise');
+  const mainTitle = resolveField('skills.title', settings?.skillsTitleAr, settings?.skillsTitle, 'Engineered Core Capabilities');
+  const p1 = resolveField('skills.subtitle', settings?.skillsParagraph1Ar || settings?.skillsDescriptionAr, settings?.skillsParagraph1 || settings?.skillsDescription, 'I architect full-stack systems end-to-end — from clean Node.js service layers with normalized relational schemas, to reactive React and Next.js frontends built for performance, accessibility, and long-term maintainability.');
   const p2 = isAr
     ? (settings?.skillsParagraph2Ar || t('skills.paragraph2', 'كل قرار هندسي يرتكز على قابلية التوسع: تصميم واجهات برمجية API معيارية، وفهرسة دقيقة لقواعد البيانات، وخطوط نشر مجربة تضمن استقرار النظام تحت الضغط العالي.'))
     : (settings?.skillsParagraph2 || 'Every engineering decision is grounded in scalability: modular API design, precise database indexing, and production-tested deployment workflows that keep systems reliable under real-world load and rapid iteration.');
 
-  const point1Title = isAr ? (settings?.skillsPoint1TitleAr || 'المعمارية أولاً') : (settings?.skillsPoint1Title || 'Architecture First');
-  const point1Text = isAr ? (settings?.skillsPoint1TextAr || 'واجهات برمجية RESTful نظيفة وتصميم قواعد بيانات متين صُمم ليدوم.') : (settings?.skillsPoint1Text || 'Clean RESTful APIs & modular database design built to last.');
-  const point2Title = isAr ? (settings?.skillsPoint2TitleAr || 'تقنيات حديثة') : (settings?.skillsPoint2Title || 'Modern Stack');
-  const point2Text = isAr ? (settings?.skillsPoint2TextAr || 'تطبيقات عالية الأداء بالاعتماد على React و Next.js و Tailwind.') : (settings?.skillsPoint2Text || 'High-performance React, Next.js, and Tailwind implementations.');
+  const point1Title = resolveField('skills.point1.title', settings?.skillsPoint1TitleAr, settings?.skillsPoint1Title, 'Architecture First');
+  const point1Text = resolveField('skills.point1.desc', settings?.skillsPoint1TextAr, settings?.skillsPoint1Text, 'Clean RESTful APIs & modular database design built to last.');
+  const point2Title = resolveField('skills.point2.title', settings?.skillsPoint2TitleAr, settings?.skillsPoint2Title, 'Modern Stack');
+  const point2Text = resolveField('skills.point2.desc', settings?.skillsPoint2TextAr, settings?.skillsPoint2Text, 'High-performance React, Next.js, and Tailwind implementations.');
 
   return (
     <section

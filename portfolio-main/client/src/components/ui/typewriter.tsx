@@ -13,10 +13,10 @@ export interface TypewriterProps {
 
 export function Typewriter({
   words,
-  speed = 90,
-  delayBetweenWords = 2000,
+  speed = 80,
+  delayBetweenWords = 2200,
   cursor = true,
-  cursorChar = "|",
+  cursorChar,
   className = "",
 }: TypewriterProps) {
   const [displayText, setDisplayText] = useState("")
@@ -64,22 +64,45 @@ export function Typewriter({
 
     const cursorInterval = setInterval(() => {
       setShowCursor((prev) => !prev)
-    }, 450)
+    }, 500)
 
     return () => clearTimeout(cursorInterval)
   }, [cursor])
 
+  const useCustomChar = cursorChar && cursorChar !== "_" && cursorChar !== "|"
+
+  // Bind the last word and the cursor together in whitespace-nowrap so cursor never drops to a new line
+  const lastSpaceIndex = displayText.lastIndexOf(" ")
+  const hasSpace = lastSpaceIndex !== -1
+  const leadingText = hasSpace ? displayText.substring(0, lastSpaceIndex + 1) : ""
+  const lastWord = hasSpace ? displayText.substring(lastSpaceIndex + 1) : displayText
+
   return (
-    <span className={`inline-block ${className}`}>
-      <span>{displayText}</span>
-      {cursor && (
-        <span
-          className="ml-1 text-emerald-500 font-normal transition-opacity duration-75 select-none"
-          style={{ opacity: showCursor ? 1 : 0 }}
-        >
-          {cursorChar}
-        </span>
-      )}
+    <span className={`inline-block ${className}`} dir="auto">
+      {leadingText && <span>{leadingText}</span>}
+      <span className="inline whitespace-nowrap">
+        <span>{lastWord || (!leadingText ? '\u200B' : '')}</span>
+        {cursor && (
+          useCustomChar ? (
+            <span
+              aria-hidden="true"
+              className="ms-1 text-emerald-500 font-normal transition-opacity duration-100 select-none inline-block align-baseline"
+              style={{ opacity: showCursor ? 1 : 0 }}
+            >
+              {cursorChar}
+            </span>
+          ) : (
+            <span
+              aria-hidden="true"
+              className="inline-block w-[3.5px] h-[0.85em] bg-emerald-500 rounded-full mx-1.5 align-baseline transition-opacity duration-100 select-none shrink-0"
+              style={{
+                opacity: showCursor ? 1 : 0,
+                transform: 'translateY(1px)',
+              }}
+            />
+          )
+        )}
+      </span>
     </span>
   )
 }

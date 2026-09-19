@@ -198,6 +198,20 @@ const Home = () => {
     };
 
     fetchAll();
+
+    const handleSettingsUpdated = () => {
+      api.get('/settings').then(res => {
+        if (res.data?.data) {
+          setSettings(res.data.data);
+          try {
+            localStorage.setItem('portfolio_settings', JSON.stringify(res.data.data));
+          } catch {}
+        }
+      }).catch(() => {});
+    };
+
+    window.addEventListener('portfolio_settings_updated', handleSettingsUpdated);
+    return () => window.removeEventListener('portfolio_settings_updated', handleSettingsUpdated);
   }, []);
 
   const isAr = currentLang === 'ar';
@@ -251,26 +265,45 @@ const Home = () => {
     return <Globe size={16} />;
   };
 
+  const resolveField = (key: string, arSetting?: string, enSetting?: string, fallback?: string) => {
+    if (isAr) {
+      return t(key, arSetting || fallback);
+    }
+    return t(key, enSetting || fallback);
+  };
+
   const name = isAr ? (settings?.nameAr || 'يوسف الأيوبي') : (settings?.name || 'Yusuf Ayoubi');
 
-  const bio = isAr
-    ? (settings?.bioAr || t('hero.bio', 'تطوير تطبيقات ويب قابلة للتوسع، وأنظمة CRM مخصصة، وواجهات برمجة تطبيقات عالية الأداء للشركات الناشئة والمؤسسات، بكود نظيف وموثوق يضمن النمو المستمر.'))
-    : (settings?.bio || t('hero.bio', "Building scalable web applications, custom CRM systems, and high-performance APIs for startups and businesses. Delivering clean, maintainable code engineered for reliability and seamless growth."));
+  const bio = resolveField(
+    'hero.bio',
+    settings?.bioAr,
+    settings?.bio,
+    "Building scalable web applications, custom CRM systems, and high-performance APIs for startups and businesses. Delivering clean, maintainable code engineered for reliability and seamless growth."
+  );
 
-  const heroText = isAr
-    ? (settings?.heroTextAr || t('hero.headline', 'تطوير برمجيات متكاملة وهندسة حلول الويب'))
-    : (settings?.heroText || t('hero.headline', 'End-to-End Web Development & Software Engineering'));
+  const heroText = resolveField(
+    'hero.headline',
+    settings?.heroTextAr,
+    settings?.heroText,
+    'End-to-End Web Development & Software Engineering'
+  );
 
   const email = settings?.email || 'hello@example.com';
   const location = settings?.location || 'Istanbul, Turkey';
 
-  const availability = isAr
-    ? (settings?.availabilityAr || t('hero.availability', 'متاح للمشاريع الحرة والاستشارات'))
-    : (settings?.availability || t('hero.availability', 'Available for Freelance & Consulting'));
+  const availability = resolveField(
+    'hero.availability',
+    settings?.availabilityAr,
+    settings?.availability,
+    'Available for Freelance & Consulting'
+  );
 
-  const ctaText = isAr
-    ? (settings?.ctaTextAr || t('hero.cta', 'شاهد أعمالي'))
-    : (settings?.ctaText || t('hero.cta', 'See My Work'));
+  const ctaText = resolveField(
+    'hero.cta',
+    settings?.ctaTextAr,
+    settings?.ctaText,
+    'See My Work'
+  );
 
   const githubUrl = socialLinks.find(s => s.platform.toLowerCase() === 'github')?.url;
   const linkedinUrl = socialLinks.find(s => s.platform.toLowerCase() === 'linkedin')?.url;
@@ -382,14 +415,14 @@ const Home = () => {
             <div className="flex items-center gap-3 mb-4">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-xs font-bold tracking-widest uppercase text-muted-foreground font-mono">
-                {isAr ? (settings?.experienceBadgeAr || t('experience.badge', 'الخبرات والمسيرة المهنية')) : (settings?.experienceBadge || t('experience.badge', 'Career History & Academic Journey'))}
+                {resolveField('experience.badge', settings?.experienceBadgeAr, settings?.experienceBadge, 'Career History & Academic Journey')}
               </span>
             </div>
             <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter leading-[1.05]">
-              {isAr ? (settings?.experienceTitleAr || t('experience.title', 'الخبرات.')) : (settings?.experienceTitle || t('experience.title', 'Experience.'))}
+              {resolveField('experience.title', settings?.experienceTitleAr, settings?.experienceTitle, 'Experience.')}
             </h2>
             <p className="text-base md:text-lg text-muted-foreground mt-4 max-w-2xl">
-              {isAr ? (settings?.experienceSubtitleAr || t('experience.subtitle', 'مسار زمني تفاعلي للأسس الأكاديمية والأدوار المهنية.')) : (settings?.experienceSubtitle || t('experience.subtitle', 'An interactive roadmap of academic foundations, professional roles, and specialized technical credentials.'))}
+              {resolveField('experience.subtitle', settings?.experienceSubtitleAr, settings?.experienceSubtitle, 'An interactive roadmap of academic foundations, professional roles, and specialized technical credentials.')}
             </p>
           </FadeIn>
 
@@ -410,15 +443,15 @@ const Home = () => {
             <div className="flex items-center gap-3 mb-4">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-xs font-bold tracking-widest uppercase text-muted-foreground font-mono">
-                {isAr ? (settings?.servicesBadgeAr || t('services.badge', 'الخدمات والحلول')) : (settings?.servicesBadge || t('services.badge', 'Consulting & Offerings'))}
+                {resolveField('services.badge', settings?.servicesBadgeAr, settings?.servicesBadge, 'Consulting & Offerings')}
               </span>
             </div>
             <div className="grid md:grid-cols-2 gap-8 items-end justify-between">
               <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter leading-[1.05]">
-                {isAr ? (settings?.servicesTitleAr || t('services.title', 'الخدمات.')) : (settings?.servicesTitle || t('services.title', 'Services.'))}
+                {resolveField('services.title', settings?.servicesTitleAr, settings?.servicesTitle, 'Services.')}
               </h2>
               <p className="text-muted-foreground text-base max-w-md">
-                {isAr ? (settings?.servicesSubtitleAr || t('services.subtitle', 'خدمات تطوير برمجيات متكاملة مصممة لمساعدتك على الإطلاق بشكل أسرع والنمو بثقة.')) : (settings?.servicesSubtitle || t('services.subtitle', 'End-to-end software development services tailored to help you launch faster, eliminate technical debt, and scale reliably.'))}
+                {resolveField('services.subtitle', settings?.servicesSubtitleAr, settings?.servicesSubtitle, 'End-to-end software development services tailored to help you launch faster, eliminate technical debt, and scale reliably.')}
               </p>
             </div>
           </FadeIn>
@@ -453,8 +486,8 @@ const Home = () => {
       ═══════════════════════════════════════════════════════════════ */}
       <FAQ
         id="faq"
-        title={isAr ? (settings?.faqTitleAr || t('faq.title', 'الأسئلة الشائعة.')) : (settings?.faqTitle || t('faq.title', 'Common Questions.'))}
-        subtitle={isAr ? (settings?.faqBadgeAr || t('faq.subtitle', 'لديك سؤال؟')) : (settings?.faqBadge || t('faq.subtitle', 'Got a question?'))}
+        title={resolveField('faq.title', settings?.faqTitleAr, settings?.faqTitle, 'Common Questions.')}
+        subtitle={resolveField('faq.badge', settings?.faqBadgeAr, settings?.faqBadge, 'Got a question?')}
         categories={isAr ? {
           services: t('faq.categories.services', 'الخدمات والنطاق'),
           process: t('faq.categories.process', 'العملية والجدول الزمني'),
@@ -484,32 +517,32 @@ const Home = () => {
               <div className="flex items-center gap-3 mb-8">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="text-xs font-bold tracking-widest uppercase text-muted-foreground font-mono">
-                  {isAr ? (settings?.contactBadgeAr || t('contact.badge', 'تواصل معي')) : (settings?.contactBadge || t('contact.badge', 'Get In Touch'))}
+                  {resolveField('contact.badge', settings?.contactBadgeAr, settings?.contactBadge, 'Get In Touch')}
                 </span>
               </div>
 
               <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tighter leading-[1.05] mb-6">
                 {isAr ? (
-                  settings?.contactTitleAr || (
+                  resolveField('contact.headline', settings?.contactTitleAr, undefined, '') || (
                     <>
                       لديك فكرة أو مشروع؟
                       <br />
                       <span className="text-muted-foreground/60 italic">دعنا نتحدث.</span>
                     </>
                   )
-                ) : (settings?.contactTitle ? (
-                  settings.contactTitle
                 ) : (
-                  <>
-                    Have an idea?
-                    <br />
-                    <span className="text-muted-foreground/60 italic">Let&apos;s talk.</span>
-                  </>
-                ))}
+                  resolveField('contact.headline', undefined, settings?.contactTitle, '') || (
+                    <>
+                      Have an idea?
+                      <br />
+                      <span className="text-muted-foreground/60 italic">Let&apos;s talk.</span>
+                    </>
+                  )
+                )}
               </h2>
 
               <p className="text-muted-foreground text-base md:text-lg leading-relaxed max-w-md mb-10">
-                {isAr ? (settings?.contactSubtitleAr || t('contact.subtitle', 'سواء كنت بحاجة إلى تطبيق متكامل، أو واجهة برمجية مخصصة، أو استشارة تقنية — أنا جاهز لتحويل فكرتك إلى واقع.')) : (settings?.contactSubtitle || t('contact.subtitle', "Whether you need a full-stack application, a custom API, or a mobile app — I'm ready to bring your vision to life."))}
+                {resolveField('contact.subtitle', settings?.contactSubtitleAr, settings?.contactSubtitle, "Whether you need a full-stack application, a custom API, or a mobile app — I'm ready to bring your vision to life.")}
               </p>
 
               {/* CTA Buttons */}

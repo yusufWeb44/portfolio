@@ -148,13 +148,19 @@ const PublicLayout = () => {
 
   useEffect(() => {
     api.get('/social-links').then(res => setSocialLinks(res.data.data)).catch(() => {});
-    api.get('/settings').then(res => {
-      const data = res.data.data;
-      setSettings(data);
-      try {
-        localStorage.setItem('portfolio_settings', JSON.stringify(data));
-      } catch {}
-    }).catch(() => {});
+    const fetchSettings = () => {
+      api.get('/settings').then(res => {
+        const data = res.data.data;
+        setSettings(data);
+        try {
+          localStorage.setItem('portfolio_settings', JSON.stringify(data));
+        } catch {}
+      }).catch(() => {});
+    };
+    fetchSettings();
+
+    window.addEventListener('portfolio_settings_updated', fetchSettings);
+    return () => window.removeEventListener('portfolio_settings_updated', fetchSettings);
   }, []);
 
   useEffect(() => {
