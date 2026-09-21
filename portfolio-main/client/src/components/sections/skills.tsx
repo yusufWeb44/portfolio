@@ -17,7 +17,7 @@ const FALLBACK_POSITIONS: Array<{ x: number; y: number; depth: number }> = [
   { x: 10, y: 10, depth: 1 },
   { x: 55, y: 5, depth: 0.7 },
   { x: 56, y: 56, depth: 1 },
-  { x: 4, y: 45, depth: 0.85 },
+  { x: 8, y: 45, depth: 0.85 },
   { x: 60, y: 78, depth: 1 },
   { x: 28, y: 68, depth: 0.55 },
   { x: 42, y: 38, depth: 0.5 },
@@ -39,7 +39,7 @@ const FALLBACK_POSITIONS: Array<{ x: number; y: number; depth: number }> = [
   { x: 70, y: 10, depth: 0.5 },
   { x: 20, y: 20, depth: 0.4 },
   { x: 40, y: 58, depth: 0.5 },
-  { x: 5, y: 78, depth: 0.9 },
+  { x: 8, y: 78, depth: 0.9 },
 ];
 
 /* ─── Animation Variants ─────────────────────────────────────────── */
@@ -67,6 +67,11 @@ const ScatterCloud = ({ items }: { items: TechItem[] }) => {
     <div ref={ref} className="relative w-full h-[550px] lg:h-[600px] select-none">
       {items.map((tech, i) => {
         const isActive = hovered === i;
+        const isNearTop = tech.y < 22;
+        const isNearLeft = tech.x < 18;
+        const isNearRight = tech.x > 82;
+
+        const initialX = isNearLeft ? '0%' : isNearRight ? '0%' : '-50%';
 
         return (
           <div
@@ -75,7 +80,7 @@ const ScatterCloud = ({ items }: { items: TechItem[] }) => {
             style={{
               left: `${tech.x}%`,
               top: `${tech.y}%`,
-              zIndex: isActive ? 50 : Math.floor(tech.depth * 10),
+              zIndex: isActive ? 9999 : Math.floor(tech.depth > 1 ? tech.depth * 10 : tech.depth * 100),
             }}
             onMouseEnter={() => setHovered(i)}
             onMouseLeave={() => setHovered(null)}
@@ -83,13 +88,14 @@ const ScatterCloud = ({ items }: { items: TechItem[] }) => {
             <motion.span
               className="inline-block cursor-default whitespace-nowrap font-extrabold tracking-tight transition-colors duration-150"
               style={{
+                fontFamily: 'var(--font-en), var(--font-ar), system-ui, sans-serif',
                 fontSize: `${tech.size}px`,
                 lineHeight: 1.2,
                 color: isActive 
-                  ? 'hsl(var(--emerald-500))' 
-                  : `hsl(var(--emerald-500) / ${Math.max(0.45, tech.depth)})`,
+                  ? 'hsl(var(--emerald-600))' 
+                  : `hsl(var(--emerald-500) / ${Math.max(0.65, tech.depth > 1 ? tech.depth / 10 : tech.depth)})`,
                 textShadow: isActive
-                  ? '0 0 16px hsl(var(--emerald-500) / 0.35)'
+                  ? '0 0 16px hsl(var(--emerald-500) / 0.25)'
                   : 'none',
               }}
               initial={{
@@ -115,25 +121,41 @@ const ScatterCloud = ({ items }: { items: TechItem[] }) => {
               {tech.label}
             </motion.span>
 
-            {/* Floating Tooltip Window - Centered Above Text */}
+            {/* Floating Tooltip Window - Mode adaptive with solid contrast */}
             <AnimatePresence>
               {isActive && (
                 <motion.div
-                  initial={{ opacity: 0, y: 8, x: '-50%', scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, x: '-50%', scale: 1 }}
-                  exit={{ opacity: 0, y: 4, x: '-50%', scale: 0.95 }}
+                  initial={{ opacity: 0, y: isNearTop ? -6 : 6, x: initialX, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, x: initialX, scale: 1 }}
+                  exit={{ opacity: 0, y: isNearTop ? -4 : 4, x: initialX, scale: 0.95 }}
                   transition={{ duration: 0.15, ease: 'easeOut' }}
-                  className="absolute bottom-full left-1/2 mb-3 pointer-events-none w-64 z-50"
+                  className={`absolute pointer-events-none w-64 z-[9999] ${
+                    isNearTop ? 'top-full mt-3' : 'bottom-full mb-3'
+                  } ${
+                    isNearLeft ? 'left-0' : isNearRight ? 'right-0' : 'left-1/2'
+                  }`}
                 >
-                  <div className="bg-card/90 dark:bg-neutral-900/90 border border-emerald-500/40 backdrop-blur-xl p-3 rounded-xl shadow-[0_10px_25px_rgba(0,0,0,0.3)] text-start relative">
-                    <p className="text-xs font-semibold mb-1 text-emerald-400">
+                  <div className="bg-white dark:bg-[#0c100e] border border-emerald-500/40 p-3.5 rounded-xl shadow-[0_12px_30px_rgba(15,23,42,0.12)] dark:shadow-[0_16px_36px_rgba(0,0,0,0.85)] text-start relative select-none">
+                    <p className="text-xs font-bold mb-1 text-emerald-600 dark:text-emerald-400">
                       {tech.label}
                     </p>
-                    <p className="text-[11px] text-foreground/80 leading-relaxed font-normal whitespace-normal">
+                    <p className="text-[11px] text-foreground/90 leading-relaxed font-medium whitespace-normal">
                       {tech.description}
                     </p>
-                    {/* Centered Tooltip Arrow */}
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-[1px] border-8 border-transparent border-t-card/90 dark:border-t-neutral-900/90" />
+                    {/* Centered / Clamped Tooltip Arrow */}
+                    <div
+                      className={`absolute border-8 border-transparent ${
+                        isNearTop
+                          ? 'bottom-full -mb-[1px] border-b-white dark:border-b-[#0c100e]'
+                          : 'top-full -mt-[1px] border-t-white dark:border-t-[#0c100e]'
+                      } ${
+                        isNearLeft
+                          ? 'left-6'
+                          : isNearRight
+                          ? 'right-6'
+                          : 'left-1/2 -translate-x-1/2'
+                      }`}
+                    />
                   </div>
                 </motion.div>
               )}
@@ -154,7 +176,7 @@ const SkillsSection = () => {
   const [selectedMobile, setSelectedMobile] = useState<number | null>(null);
 
   useEffect(() => {
-    const fetchSkillsAndSettings = () => {
+    const fetchData = () => {
       Promise.all([
         api.get('/skills'),
         api.get('/settings')
@@ -176,11 +198,13 @@ const SkillsSection = () => {
         });
     };
 
-    fetchSkillsAndSettings();
-
-    const handleUpdate = () => fetchSkillsAndSettings();
-    window.addEventListener('portfolio_settings_updated', handleUpdate);
-    return () => window.removeEventListener('portfolio_settings_updated', handleUpdate);
+    fetchData();
+    window.addEventListener('portfolio_skills_updated', fetchData);
+    window.addEventListener('portfolio_settings_updated', fetchData);
+    return () => {
+      window.removeEventListener('portfolio_skills_updated', fetchData);
+      window.removeEventListener('portfolio_settings_updated', fetchData);
+    };
   }, []);
 
   const skillsItems: TechItem[] = rawSkillsData.map((s: any, idx: number) => {
@@ -190,39 +214,50 @@ const SkillsSection = () => {
       ? (s.descriptionAr || s.description || `${label} - تطوير وبرمجة متقدمة.`)
       : (s.description || `${s.name} development & integration.`);
 
+    const posX = typeof s.positionX === 'number' ? s.positionX : (typeof s.x === 'number' ? s.x : fallback.x);
+    const posY = typeof s.positionY === 'number' ? s.positionY : (typeof s.y === 'number' ? s.y : fallback.y);
+    const depthVal = typeof s.depth === 'number' ? s.depth : fallback.depth;
+
+    const weightSizes: Record<number, number> = { 1: 18, 2: 22, 3: 26, 4: 32, 5: 38 };
+    const size = typeof s.size === 'number' && s.size > 0 
+      ? s.size 
+      : (typeof s.weight === 'number' ? (weightSizes[s.weight] || s.weight * 6) : 20);
+
     return {
       label,
       description,
-      size: typeof s.size === 'number' && s.size > 0 ? s.size : (fallback.x ? 20 : 20),
-      x: typeof s.x === 'number' ? s.x : fallback.x,
-      y: typeof s.y === 'number' ? s.y : fallback.y,
-      depth: typeof s.depth === 'number' ? s.depth : fallback.depth,
+      size,
+      x: posX,
+      y: posY,
+      depth: depthVal,
     };
   });
 
-  const resolveField = (key: string, arVal?: string, enVal?: string, fallback?: string) => {
-    if (isAr) {
-      return t(key, arVal || fallback);
-    }
-    return t(key, enVal || fallback);
-  };
+  const badgeText = isAr 
+    ? (settings?.skillsBadgeAr || t('skills.badge', 'المهارات والقدرات التقنية')) 
+    : (settings?.skillsBadge || 'Skills & Expertise');
 
-  const badgeText = resolveField('skills.badge', settings?.skillsBadgeAr, settings?.skillsBadge, 'Skills & Expertise');
-  const mainTitle = resolveField('skills.title', settings?.skillsTitleAr, settings?.skillsTitle, 'Engineered Core Capabilities');
-  const p1 = resolveField('skills.subtitle', settings?.skillsParagraph1Ar || settings?.skillsDescriptionAr, settings?.skillsParagraph1 || settings?.skillsDescription, 'I architect full-stack systems end-to-end — from clean Node.js service layers with normalized relational schemas, to reactive React and Next.js frontends built for performance, accessibility, and long-term maintainability.');
+  const mainTitle = isAr 
+    ? (settings?.skillsTitleAr || t('skills.title', 'القدرات الهندسية الأساسية')) 
+    : (settings?.skillsTitle || 'Engineered Core Capabilities');
+
+  const p1 = isAr 
+    ? (settings?.skillsParagraph1Ar || settings?.skillsDescriptionAr || t('skills.description', 'أبني أنظمة متكاملة ومترابطة من البداية إلى النهاية — من طبقات خدمة Node.js النظيفة بقواعد بيانات معيارية، إلى واجهات React و Next.js المتطورة المصممة للأداء العالي وسهولة الصيانة.'))
+    : (settings?.skillsParagraph1 || settings?.skillsDescription || 'I architect full-stack systems end-to-end — from clean Node.js service layers with normalized relational schemas, to reactive React and Next.js frontends built for performance, accessibility, and long-term maintainability.');
+
   const p2 = isAr
     ? (settings?.skillsParagraph2Ar || t('skills.paragraph2', 'كل قرار هندسي يرتكز على قابلية التوسع: تصميم واجهات برمجية API معيارية، وفهرسة دقيقة لقواعد البيانات، وخطوط نشر مجربة تضمن استقرار النظام تحت الضغط العالي.'))
     : (settings?.skillsParagraph2 || 'Every engineering decision is grounded in scalability: modular API design, precise database indexing, and production-tested deployment workflows that keep systems reliable under real-world load and rapid iteration.');
 
-  const point1Title = resolveField('skills.point1.title', settings?.skillsPoint1TitleAr, settings?.skillsPoint1Title, 'Architecture First');
-  const point1Text = resolveField('skills.point1.desc', settings?.skillsPoint1TextAr, settings?.skillsPoint1Text, 'Clean RESTful APIs & modular database design built to last.');
-  const point2Title = resolveField('skills.point2.title', settings?.skillsPoint2TitleAr, settings?.skillsPoint2Title, 'Modern Stack');
-  const point2Text = resolveField('skills.point2.desc', settings?.skillsPoint2TextAr, settings?.skillsPoint2Text, 'High-performance React, Next.js, and Tailwind implementations.');
+  const point1Title = isAr ? (settings?.skillsPoint1TitleAr || 'المعمارية أولاً') : (settings?.skillsPoint1Title || 'Architecture First');
+  const point1Text = isAr ? (settings?.skillsPoint1TextAr || 'واجهات برمجية RESTful نظيفة وتصميم قواعد بيانات متين صُمم ليدوم.') : (settings?.skillsPoint1Text || 'Clean RESTful APIs & modular database design built to last.');
+  const point2Title = isAr ? (settings?.skillsPoint2TitleAr || 'تقنيات حديثة') : (settings?.skillsPoint2Title || 'Modern Stack');
+  const point2Text = isAr ? (settings?.skillsPoint2TextAr || 'تطبيقات عالية الأداء بالاعتماد على React و Next.js و Tailwind.') : (settings?.skillsPoint2Text || 'High-performance React, Next.js, and Tailwind implementations.');
 
   return (
     <section
       id="skills"
-      className="scroll-mt-24 py-24 md:py-36 px-6 bg-transparent overflow-hidden"
+      className="scroll-mt-24 py-24 md:py-36 px-6 bg-transparent overflow-x-clip"
       aria-label="Skills and expertise"
     >
       <div className="max-w-7xl mx-auto">
@@ -298,7 +333,7 @@ const SkillsSection = () => {
           </motion.div>
 
           {/* ── Right Column (7 cols): Scatter Cloud — desktop ── */}
-          <div className="hidden md:block lg:col-span-7 lg:translate-x-20 rtl:lg:-translate-x-20">
+          <div className="hidden md:block lg:col-span-7 lg:translate-x-24 rtl:lg:translate-x-0 rtl:translate-x-0 -mt-5 lg:-mt-5">
             {skillsItems.length > 0 ? (
               <ScatterCloud items={skillsItems} />
             ) : (
@@ -339,6 +374,7 @@ const SkillsSection = () => {
                         ? 'border-emerald-500/50 text-emerald-400 bg-emerald-500/10'
                         : 'border-border/60 text-muted-foreground hover:text-emerald-400 hover:border-emerald-500/30 bg-card/40 backdrop-blur-sm',
                     ].join(' ')}
+                    style={{ fontFamily: 'var(--font-en), var(--font-ar), system-ui, sans-serif' }}
                   >
                     {tech.label}
                   </motion.button>

@@ -10,6 +10,7 @@ import { Input } from '../../components/ui/Input';
 import { Textarea } from '../../components/ui/Textarea';
 import { applyCustomFonts } from '../../utils/fontLoader';
 import { getMediaUrl } from '../../utils/mediaUrl';
+import { THEME_COLOR_OPTIONS, applyThemePalette } from '../../utils/themeEngine';
 
 interface PortfolioSettings {
   name: string;
@@ -116,15 +117,7 @@ interface SocialLink {
   order: number;
 }
 
-const THEME_COLORS = [
-  { id: 'emerald', name: 'Emerald Green', hex: '#10b981', class: 'bg-emerald-500' },
-  { id: 'cyan', name: 'Cyan Blue', hex: '#06b6d4', class: 'bg-cyan-500' },
-  { id: 'violet', name: 'Royal Violet', hex: '#8b5cf6', class: 'bg-violet-500' },
-  { id: 'amber', name: 'Amber Gold', hex: '#f59e0b', class: 'bg-amber-500' },
-  { id: 'rose', name: 'Vibrant Rose', hex: '#f43f5e', class: 'bg-rose-500' },
-  { id: 'blue', name: 'Sapphire Blue', hex: '#3b82f6', class: 'bg-blue-500' },
-  { id: 'indigo', name: 'Deep Indigo', hex: '#6366f1', class: 'bg-indigo-500' },
-];
+const THEME_COLORS = THEME_COLOR_OPTIONS;
 
 const CARD_STYLES = [
   { id: 'glassmorphic', name: 'Glassmorphic Translucent', desc: 'Backdrop blur with delicate translucent glass border.' },
@@ -174,6 +167,9 @@ const Settings = () => {
         ]);
         if (settingsRes.data.data) {
           setSettings(prev => ({ ...prev, ...settingsRes.data.data }));
+          if (settingsRes.data.data.primaryThemeColor) {
+            applyThemePalette(settingsRes.data.data.primaryThemeColor);
+          }
         }
         setSocialLinks(linksRes.data.data || []);
       } catch (error) {
@@ -205,8 +201,12 @@ const Settings = () => {
     try {
       const res = await api.put('/settings', settings);
       setSettings(res.data.data);
+      if (res.data.data?.primaryThemeColor) {
+        applyThemePalette(res.data.data.primaryThemeColor);
+      }
       try {
         localStorage.setItem('portfolio_settings', JSON.stringify(res.data.data));
+        window.dispatchEvent(new Event('portfolio_settings_updated'));
       } catch {}
       showToast("Settings and appearance saved successfully!");
     } catch (error) {
@@ -877,22 +877,25 @@ const Settings = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-3 pt-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-9 gap-3 pt-2">
               {THEME_COLORS.map(color => {
                 const isSelected = (settings.primaryThemeColor || 'emerald').toLowerCase() === color.id;
                 return (
                   <button
                     key={color.id}
                     type="button"
-                    onClick={() => setSettings({ ...settings, primaryThemeColor: color.id })}
+                    onClick={() => {
+                      setSettings({ ...settings, primaryThemeColor: color.id });
+                      applyThemePalette(color.id);
+                    }}
                     className={`p-3 rounded-xl border text-center transition-all flex flex-col items-center gap-2 cursor-pointer ${
-                      isSelected ? 'border-primary bg-accent/20 ring-2 ring-primary/40' : 'border-border bg-card/60 hover:bg-muted'
+                      isSelected ? 'border-primary bg-primary/10 ring-2 ring-primary/40' : 'border-border bg-card/60 hover:bg-muted'
                     }`}
                   >
                     <span className={`w-8 h-8 rounded-full ${color.class} flex items-center justify-center shadow-md`}>
                       {isSelected && <Check size={16} className="text-white" />}
                     </span>
-                    <span className="text-xs font-semibold">{color.name}</span>
+                    <span className="text-xs font-semibold">{color.nameAr || color.name}</span>
                   </button>
                 );
               })}

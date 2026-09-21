@@ -159,14 +159,14 @@ export const getThemeColors = (colorName?: string | null, index = 0) => {
     default:
       return {
         key: 'emerald',
-        accent: '#10B981',
+        accent: 'var(--theme-primary-hex, #10B981)',
         badgeBg: 'bg-emerald-500/10 dark:bg-emerald-500/15',
         badgeBorder: 'border-emerald-500/40 dark:border-emerald-500/60',
         text: 'text-emerald-600 dark:text-emerald-400',
-        glow: 'shadow-[0_0_20px_rgba(16,185,129,0.25)]',
+        glow: 'shadow-[0_0_20px_var(--theme-primary-hex,rgba(16,185,129,0.25))]',
         cardBorder: 'hover:border-emerald-500/40',
         tagBg: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20',
-        lineColor: '#10B981',
+        lineColor: 'var(--theme-primary-hex, #10B981)',
       };
   }
 };
@@ -256,7 +256,7 @@ const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
             {/* Traveling Glowing Light Particle in Brand Emerald at the beam's front tip */}
             <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 translate-y-1/2 pointer-events-none flex items-center justify-center">
               <div className="w-5 h-5 rounded-full bg-emerald-500/40 blur-[3px] animate-pulse" />
-              <div className="absolute w-3 h-3 rounded-full bg-emerald-300 border-2 border-white dark:border-slate-950 shadow-[0_0_10px_#10b981]" />
+              <div className="absolute w-3 h-3 rounded-full bg-emerald-300 border-2 border-white dark:border-slate-950 shadow-[0_0_10px_var(--theme-primary-hex,#10b981)]" />
             </div>
           </motion.div>
         </div>

@@ -283,28 +283,28 @@ const MinimalistHero: React.FC<MinimalistHeroProps> = ({
                 className="absolute w-[280px] h-[280px] sm:w-[360px] sm:h-[360px] lg:w-[480px] lg:h-[480px] z-0 pointer-events-none"
               >
                 {/* Ambient glow behind blob without expensive filter */}
-                <div className="absolute inset-6 rounded-full bg-blue-500/20 dark:bg-emerald-500/25 blur-3xl -z-10" />
+                <div className="absolute inset-6 rounded-full bg-emerald-500/15 dark:bg-emerald-500/25 blur-3xl -z-10" />
                 <svg viewBox="0 0 500 500" className="w-full h-full">
                   <defs>
-                    {/* Dark Mode Gradient: Cyan into Emerald */}
+                    {/* Dark Mode Gradient: Cyan into Primary Theme */}
                     <linearGradient id="fluid-gradient-dark" x1="0%" y1="0%" x2="100%" y2="100%">
                       <stop offset="0%" stopColor="#0EA5E9" />
-                      <stop offset="50%" stopColor="#10B981" />
-                      <stop offset="100%" stopColor="#064E3B" />
+                      <stop offset="50%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)' }} />
+                      <stop offset="100%" stopColor="var(--theme-primary-hex, #064E3B)" style={{ stopColor: 'var(--theme-primary-hex, #064E3B)', filter: 'brightness(0.5)' }} />
                     </linearGradient>
-                    {/* Light Mode Gradient: Electric Sky into Royal Cobalt into Deep Blue */}
+                    {/* Light Mode Gradient: Luminous, eye-friendly theme gradient */}
                     <linearGradient id="fluid-gradient-light" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#38BDF8" />
-                      <stop offset="50%" stopColor="#2563EB" />
-                      <stop offset="100%" stopColor="#1D4ED8" />
+                      <stop offset="0%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)', filter: 'brightness(1.15)' }} />
+                      <stop offset="60%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)' }} />
+                      <stop offset="100%" stopColor="var(--theme-primary-hex, #064E3B)" style={{ stopColor: 'var(--theme-primary-hex, #064E3B)', filter: 'brightness(0.75)' }} />
                     </linearGradient>
                     <radialGradient id="glow-gradient-dark" cx="50%" cy="50%" r="50%">
-                      <stop offset="0%" stopColor="#10B981" stopOpacity="0.45" />
+                      <stop offset="0%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)' }} stopOpacity="0.45" />
                       <stop offset="100%" stopColor="#0EA5E9" stopOpacity="0" />
                     </radialGradient>
                     <radialGradient id="glow-gradient-light" cx="50%" cy="50%" r="50%">
-                      <stop offset="0%" stopColor="#2563EB" stopOpacity="0.3" />
-                      <stop offset="100%" stopColor="#38BDF8" stopOpacity="0" />
+                      <stop offset="0%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)' }} stopOpacity="0.22" />
+                      <stop offset="100%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)' }} stopOpacity="0" />
                     </radialGradient>
                   </defs>
                   <circle cx="250" cy="250" r="230" className="dark:fill-[url(#glow-gradient-dark)] fill-[url(#glow-gradient-light)]" />

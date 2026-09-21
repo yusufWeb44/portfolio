@@ -67,18 +67,18 @@ export function applyCustomFonts(settings?: {
     }
   }
 
-  // 3. Determine active font family by document direction
-  const isRtl = document.documentElement.getAttribute('dir') === 'rtl' || 
-                document.documentElement.classList.contains('rtl');
+  // 3. Composite multi-lingual font stack:
+  // English font is listed first so Latin/English characters always use the sharp English font and never shrink.
+  // Arabic font is listed next so Arabic glyphs (missing from English fonts) seamlessly render in the designated Arabic font.
+  const enStack = cleanEn ? `'${cleanEn}'` : "var(--font-en, 'Inter')";
+  const arStack = cleanAr ? `'${cleanAr}'` : "var(--font-ar, 'Cairo')";
 
-  const activeFont = isRtl
-    ? (cleanAr ? `'${cleanAr}', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif` : "var(--font-ar)")
-    : (cleanEn ? `'${cleanEn}', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif` : "var(--font-en)");
+  const compositeFont = `${enStack}, ${arStack}, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`;
 
-  document.documentElement.style.setProperty('--font-family', activeFont);
-  document.documentElement.style.setProperty('--font-current', activeFont);
+  document.documentElement.style.setProperty('--font-family', compositeFont);
+  document.documentElement.style.setProperty('--font-current', compositeFont);
   if (document.body) {
-    document.body.style.fontFamily = activeFont;
+    document.body.style.fontFamily = compositeFont;
   }
 }
 

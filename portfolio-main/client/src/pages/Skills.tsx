@@ -145,6 +145,7 @@ const Skills = () => {
                         whileHover={{ y: -2 }}
                         title={isAr ? (skill.descriptionAr || skill.description) : skill.description}
                         className={`px-5 py-2.5 rounded-full border border-border bg-card cursor-default text-sm font-medium transition-all duration-200 ${categoryColors[category] || 'hover:border-foreground/30 hover:bg-muted'}`}
+                        style={{ fontFamily: 'var(--font-en), var(--font-ar), system-ui, sans-serif' }}
                       >
                         {isAr ? (skill.nameAr || skill.name) : skill.name}
                       </motion.div>

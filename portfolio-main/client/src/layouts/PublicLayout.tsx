@@ -1,6 +1,6 @@
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { Moon, Sun, Menu, X, ArrowRight } from 'lucide-react';
+import { Menu, X, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
 import { cn } from '../components/ui/Button';
 import api from '../services/api';
@@ -8,56 +8,19 @@ import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { useLanguage } from '../contexts/LanguageContext';
 import { applyCustomFonts } from '../utils/fontLoader';
 import Footer from '../components/Footer';
-
-const themeAuraGradients: Record<string, { orb1: string; orb2: string; orb3: string; orb4: string }> = {
-  emerald: {
-    orb1: 'from-blue-500/12 via-indigo-500/5 to-transparent dark:from-emerald-500/10 dark:via-emerald-500/[0.03]',
-    orb2: 'from-sky-500/10 via-blue-500/5 to-transparent dark:from-teal-500/8 dark:via-cyan-500/[0.02]',
-    orb3: 'from-indigo-600/10 via-blue-500/5 to-transparent dark:from-emerald-600/10 dark:via-emerald-500/[0.03]',
-    orb4: 'bg-blue-500/8 dark:bg-emerald-500/[0.05]',
-  },
-  cyan: {
-    orb1: 'from-cyan-500/15 via-cyan-500/5 to-transparent dark:from-cyan-500/10 dark:via-cyan-500/[0.03]',
-    orb2: 'from-blue-500/12 via-sky-500/5 to-transparent dark:from-blue-500/8 dark:via-sky-500/[0.02]',
-    orb3: 'from-cyan-600/15 via-cyan-500/5 to-transparent dark:from-cyan-600/10 dark:via-cyan-500/[0.03]',
-    orb4: 'bg-cyan-500/10 dark:bg-cyan-500/[0.05]',
-  },
-  violet: {
-    orb1: 'from-violet-500/15 via-violet-500/5 to-transparent dark:from-violet-500/10 dark:via-violet-500/[0.03]',
-    orb2: 'from-purple-500/12 via-fuchsia-500/5 to-transparent dark:from-purple-500/8 dark:via-fuchsia-500/[0.02]',
-    orb3: 'from-violet-600/15 via-violet-500/5 to-transparent dark:from-violet-600/10 dark:via-violet-500/[0.03]',
-    orb4: 'bg-violet-500/10 dark:bg-violet-500/[0.05]',
-  },
-  amber: {
-    orb1: 'from-amber-500/15 via-amber-500/5 to-transparent dark:from-amber-500/10 dark:via-amber-500/[0.03]',
-    orb2: 'from-orange-500/12 via-yellow-500/5 to-transparent dark:from-orange-500/8 dark:via-yellow-500/[0.02]',
-    orb3: 'from-amber-600/15 via-amber-500/5 to-transparent dark:from-amber-600/10 dark:via-amber-500/[0.03]',
-    orb4: 'bg-amber-500/10 dark:bg-amber-500/[0.05]',
-  },
-  rose: {
-    orb1: 'from-rose-500/15 via-rose-500/5 to-transparent dark:from-rose-500/10 dark:via-rose-500/[0.03]',
-    orb2: 'from-pink-500/12 via-red-500/5 to-transparent dark:from-pink-500/8 dark:via-red-500/[0.02]',
-    orb3: 'from-rose-600/15 via-rose-500/5 to-transparent dark:from-rose-600/10 dark:via-rose-500/[0.03]',
-    orb4: 'bg-rose-500/10 dark:bg-rose-500/[0.05]',
-  },
-  blue: {
-    orb1: 'from-blue-500/15 via-blue-500/5 to-transparent dark:from-blue-500/10 dark:via-blue-500/[0.03]',
-    orb2: 'from-indigo-500/12 via-sky-500/5 to-transparent dark:from-indigo-500/8 dark:via-sky-500/[0.02]',
-    orb3: 'from-blue-600/15 via-blue-500/5 to-transparent dark:from-blue-600/10 dark:via-blue-500/[0.03]',
-    orb4: 'bg-blue-500/10 dark:bg-blue-500/[0.05]',
-  },
-  indigo: {
-    orb1: 'from-indigo-500/15 via-indigo-500/5 to-transparent dark:from-indigo-500/10 dark:via-indigo-500/[0.03]',
-    orb2: 'from-violet-500/12 via-blue-500/5 to-transparent dark:from-violet-500/8 dark:via-blue-500/[0.02]',
-    orb3: 'from-indigo-600/15 via-indigo-500/5 to-transparent dark:from-indigo-600/10 dark:via-indigo-500/[0.03]',
-    orb4: 'bg-indigo-500/10 dark:bg-indigo-500/[0.05]',
-  },
-};
+import { applyThemePalette, getThemeAuras } from '../utils/themeEngine';
+import ThemeToggle from '../components/ThemeToggle';
 
 const PublicLayout = () => {
   const { t, currentLang, currentDirection } = useLanguage();
   const isAr = currentLang === 'ar';
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('theme');
+      if (saved) return saved === 'dark';
+    }
+    return true; // Dark is the primary default
+  });
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState<string>('');
@@ -65,7 +28,11 @@ const PublicLayout = () => {
   const [settings, setSettings] = useState<any>(() => {
     try {
       const cached = localStorage.getItem('portfolio_settings');
-      return cached ? JSON.parse(cached) : null;
+      const parsed = cached ? JSON.parse(cached) : null;
+      if (parsed?.primaryThemeColor) {
+        applyThemePalette(parsed.primaryThemeColor);
+      }
+      return parsed;
     } catch {
       return null;
     }
@@ -147,15 +114,18 @@ const PublicLayout = () => {
   };
 
   useEffect(() => {
-    api.get('/social-links').then(res => setSocialLinks(res.data.data)).catch(() => {});
+    api.get('/social-links').then(res => setSocialLinks(res.data.data)).catch(() => { });
     const fetchSettings = () => {
       api.get('/settings').then(res => {
         const data = res.data.data;
         setSettings(data);
+        if (data?.primaryThemeColor) {
+          applyThemePalette(data.primaryThemeColor);
+        }
         try {
           localStorage.setItem('portfolio_settings', JSON.stringify(data));
-        } catch {}
-      }).catch(() => {});
+        } catch { }
+      }).catch(() => { });
     };
     fetchSettings();
 
@@ -164,9 +134,19 @@ const PublicLayout = () => {
   }, []);
 
   useEffect(() => {
+    if (settings?.primaryThemeColor) {
+      applyThemePalette(settings.primaryThemeColor);
+    }
+  }, [settings?.primaryThemeColor]);
+
+  useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    if (savedTheme === 'light') {
+      setIsDark(false);
+    } else {
       setIsDark(true);
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
     }
   }, []);
 
@@ -176,8 +156,10 @@ const PublicLayout = () => {
       localStorage.setItem('theme', 'dark');
     } else {
       document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
     }
-  }, [isDark]);
+    applyThemePalette(settings?.primaryThemeColor, isDark);
+  }, [isDark, settings?.primaryThemeColor]);
 
   useEffect(() => {
     applyCustomFonts({
@@ -188,53 +170,107 @@ const PublicLayout = () => {
     });
   }, [settings?.fontFamilyEn, settings?.fontUrlEn, settings?.fontFamilyAr, settings?.fontUrlAr, currentLang, currentDirection]);
 
-  const toggleTheme = () => setIsDark(!isDark);
+  const toggleTheme = (e?: React.MouseEvent) => {
+    const nextIsDark = !isDark;
 
-  const currentTheme = (settings?.primaryThemeColor || 'emerald').toLowerCase();
-  const auras = themeAuraGradients[currentTheme] || themeAuraGradients.emerald;
+    const performThemeSwitch = () => {
+      if (nextIsDark) {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+      }
+      applyThemePalette(settings?.primaryThemeColor, nextIsDark);
+      setIsDark(nextIsDark);
+    };
+
+    // If browser supports View Transitions API, trigger circular ripple effect from click position
+    if (
+      typeof document !== 'undefined' &&
+      'startViewTransition' in document &&
+      !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      const x = e?.clientX ?? window.innerWidth / 2;
+      const y = e?.clientY ?? 0;
+      const endRadius = Math.hypot(
+        Math.max(x, window.innerWidth - x),
+        Math.max(y, window.innerHeight - y)
+      );
+
+      const transition = (document as any).startViewTransition(() => {
+        performThemeSwitch();
+      });
+
+      transition.ready.then(() => {
+        document.documentElement.animate(
+          {
+            clipPath: [
+              `circle(0px at ${x}px ${y}px)`,
+              `circle(${endRadius}px at ${x}px ${y}px)`,
+            ],
+          },
+          {
+            duration: 320,
+            easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+            pseudoElement: '::view-transition-new(root)',
+          }
+        );
+      });
+      return;
+    }
+
+    // Fallback: Instant synchronous execution
+    performThemeSwitch();
+  };
+
+  const auras = getThemeAuras(settings?.primaryThemeColor);
   const enableGlow = settings?.enableGlow !== false;
   const bgPatternClass = settings?.backgroundPattern === 'dots'
     ? 'bg-dots-pattern'
     : settings?.backgroundPattern === 'none'
-    ? ''
-    : 'bg-grid-pattern';
+      ? ''
+      : 'bg-grid-pattern';
 
   const brandName = isAr
     ? (settings?.nameAr ? settings.nameAr.split(' ')[0] : 'يوسف')
     : (settings?.name ? settings.name.split(' ')[0] : 'Yusuf');
 
   return (
-    <div className="min-h-screen flex flex-col relative bg-background text-foreground transition-colors duration-500 font-sans selection:bg-foreground selection:text-background overflow-x-clip">
-      
+    <div className="min-h-screen flex flex-col relative bg-background text-foreground font-sans selection:bg-foreground selection:text-background overflow-x-clip">
+
       {/* ── Continuous Ambient Glassmorphic Background System (GPU Composited Layer) ── */}
-      <div 
-        className="fixed inset-0 pointer-events-none -z-10 overflow-hidden transform-gpu" 
+      <div
+        className="fixed inset-0 pointer-events-none -z-10 overflow-hidden transform-gpu"
         style={{ contain: 'paint layout', transform: 'translateZ(0)' }}
         aria-hidden="true"
       >
         {/* Ambient Grid Layer */}
         {bgPatternClass && (
-          <div className={`absolute inset-0 ${bgPatternClass} opacity-[0.45] dark:opacity-[0.25]`} />
+          <div className={`absolute inset-0 ${bgPatternClass} opacity-[0.10] dark:opacity-[0.25]`} />
         )}
 
         {/* Floating Atmospheric Ambient Orbs (Optimized GPU Rendering) */}
         {enableGlow && (
-          <div className="absolute inset-0 overflow-hidden opacity-70 dark:opacity-40">
+          <div 
+            className="absolute inset-0 overflow-hidden opacity-35 dark:opacity-40 pointer-events-none select-none"
+            style={{ contain: 'strict', transform: 'translateZ(0)' }}
+          >
             {/* Top-Right Themed Aura */}
-            <div className={`absolute -top-[5%] -right-[5%] w-[480px] h-[480px] rounded-full bg-gradient-to-br ${auras.orb1} blur-3xl`} />
-            
+            <div className={`absolute -top-[5%] -right-[5%] w-[460px] h-[460px] rounded-full bg-gradient-to-br ${auras.orb1} blur-2xl transform-gpu`} />
+
             {/* Mid-Left Secondary Themed Aura */}
-            <div className={`absolute top-[35%] -left-[10%] w-[440px] h-[440px] rounded-full bg-gradient-to-tr ${auras.orb2} blur-3xl`} />
+            <div className={`absolute top-[35%] -left-[10%] w-[420px] h-[420px] rounded-full bg-gradient-to-tr ${auras.orb2} blur-2xl transform-gpu`} />
 
             {/* Lower-Right Deep Themed Aura */}
-            <div className={`absolute top-[70%] -right-[5%] w-[480px] h-[480px] rounded-full bg-gradient-to-tl ${auras.orb3} blur-3xl`} />
+            <div className={`absolute top-[70%] -right-[5%] w-[460px] h-[460px] rounded-full bg-gradient-to-tl ${auras.orb3} blur-2xl transform-gpu`} />
 
             {/* Bottom Ambient Glow for Footer / Contact */}
-            <div className={`absolute -bottom-[5%] left-1/2 -translate-x-1/2 w-[550px] h-[320px] rounded-full ${auras.orb4} blur-3xl`} />
+            <div className={`absolute -bottom-[5%] left-1/2 -translate-x-1/2 w-[520px] h-[300px] rounded-full ${auras.orb4} blur-2xl transform-gpu`} />
           </div>
         )}
       </div>
-      
+
       {/* Fixed Sticky Navbar */}
       <header
         className={cn(
@@ -274,14 +310,9 @@ const PublicLayout = () => {
 
             {/* Language Switcher */}
             <LanguageSwitcher />
-            
-            <button 
-              onClick={toggleTheme}
-              className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted/80 transition-colors text-muted-foreground hover:text-foreground border border-transparent hover:border-border/50 cursor-pointer"
-              aria-label="Toggle theme"
-            >
-              {isDark ? <Sun size={15} /> : <Moon size={15} />}
-            </button>
+
+            {/* Animated Theme Toggle */}
+            <ThemeToggle isDark={isDark} onToggle={toggleTheme} iconSize={15} />
             <button
               onClick={() => scrollToSection('contact')}
               className="ms-2 h-9 px-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-semibold rounded-full transition-colors duration-200 shadow-sm hover:shadow-md hover:shadow-emerald-500/15 flex items-center gap-1.5 cursor-pointer"
@@ -294,14 +325,9 @@ const PublicLayout = () => {
           {/* Mobile Menu Button */}
           <div className="flex md:hidden items-center gap-2 z-50">
             <LanguageSwitcher />
-            <button 
-              onClick={toggleTheme}
-              className="p-2 rounded-full text-muted-foreground"
-            >
-              {isDark ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
-            <button 
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
+            <ThemeToggle isDark={isDark} onToggle={toggleTheme} iconSize={17} />
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 text-foreground"
             >
               {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -367,7 +393,7 @@ const PublicLayout = () => {
           </motion.div>
         </AnimatePresence>
       </main>
-      
+
       <Footer
         settings={settings}
         socialLinks={socialLinks}

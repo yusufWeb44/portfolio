@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
-import { motion, useScroll, useInView, useSpring, useTransform, useMotionValueEvent } from 'framer-motion';
+import { motion, useScroll, useSpring, useTransform, useMotionValueEvent } from 'framer-motion';
 import api from '../../services/api';
 import { useLanguage } from '../../contexts/LanguageContext';
 
@@ -139,57 +139,76 @@ const StickyNoteCard = ({
   isRtl,
   isRevealed,
   isFirst,
-  onReveal,
+  onRevealChange,
 }: {
   step: Step;
   isMobile?: boolean;
   isRtl?: boolean;
   isRevealed: boolean;
   isFirst?: boolean;
-  onReveal?: () => void;
+  onRevealChange?: (revealed: boolean) => void;
 }) => {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: '-5% 0px -5% 0px' });
   const baseTilt = isRtl ? -step.tilt : step.tilt;
   const tilt = isMobile ? baseTilt * 0.55 : baseTilt;
   const isVisualLeft = isRtl ? (step.side === 'right') : (step.side === 'left');
 
+  // First card: driven by scroll entry/exit so it appears on entry and hides when scrolling back up
   useEffect(() => {
-    if (isFirst && isInView) {
-      onReveal?.();
-    }
-  }, [isFirst, isInView, onReveal]);
+    if (!isFirst) return;
 
-  // Safety fallback: if user reloaded or jumped down past this card
-  useEffect(() => {
-    if (!isRevealed && !isFirst && ref.current) {
-      const checkPosition = () => {
-        if (!ref.current) return;
-        const rect = ref.current.getBoundingClientRect();
-        if (rect.top > 0 && rect.top < window.innerHeight * 0.45) {
-          onReveal?.();
-        }
-      };
-      checkPosition();
-      window.addEventListener('scroll', checkPosition, { passive: true });
-      return () => window.removeEventListener('scroll', checkPosition);
-    }
-  }, [isRevealed, isFirst, onReveal]);
+    const handleScroll = () => {
+      if (!ref.current) return;
+      const rect = ref.current.getBoundingClientRect();
+      const vh = window.innerHeight;
 
-  const shouldShow = isFirst ? (isInView || isRevealed) : isRevealed;
+      // Card 0 appears when its top enters comfortable viewing range (78% of viewport)
+      // and disappears when user scrolls back UP above the workflow section (> 86% of viewport)
+      if (rect.top <= vh * 0.78) {
+        onRevealChange?.(true);
+      } else if (rect.top > vh * 0.86) {
+        onRevealChange?.(false);
+      }
+    };
+
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
+  }, [isFirst, onRevealChange]);
+
+  // Relaxed entry kinematics for ultra-smooth, comfortable appearance
+  const entryRotate = tilt * 0.75;
+  const entryY = 16;
+  const entryScale = 0.96;
 
   return (
     <motion.div
       ref={ref}
       className="relative"
-      initial={{ opacity: 0, y: 35, scale: 0.95, rotate: tilt * 1.3 }}
+      initial={{ opacity: 0, y: entryY, scale: entryScale, rotate: entryRotate }}
       animate={
-        shouldShow
+        isRevealed
           ? { opacity: 1, y: 0, scale: 1, rotate: tilt }
-          : { opacity: 0, y: 35, scale: 0.95, rotate: tilt * 1.3 }
+          : { opacity: 0, y: entryY, scale: entryScale, rotate: entryRotate }
       }
-      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      style={{ transformOrigin: isVisualLeft ? '65% 25%' : '35% 25%' }}
+      transition={
+        isRevealed
+          ? {
+              duration: 0.72,
+              ease: [0.16, 1, 0.3, 1],
+              opacity: { duration: 0.55, ease: 'easeOut' },
+            }
+          : {
+              duration: 0.4,
+              ease: [0.25, 0.1, 0.25, 1],
+              opacity: { duration: 0.32, ease: 'easeIn' },
+            }
+      }
+      style={{ transformOrigin: isVisualLeft ? '60% 16%' : '40% 16%' }}
     >
       {/* Paper stack behind */}
       <div className="absolute -inset-0.5 rounded-[1px]"
@@ -305,7 +324,7 @@ const ConnectorSegment = ({
   isMobile,
   isRtl,
   isActive,
-  onReach,
+  onReachChange,
 }: {
   fromSide: 'left' | 'right';
   toSide: 'left' | 'right';
@@ -315,18 +334,19 @@ const ConnectorSegment = ({
   isMobile?: boolean;
   isRtl?: boolean;
   isActive: boolean;
-  onReach?: () => void;
+  onReachChange?: (reached: boolean) => void;
 }) => {
   const ref = useRef<HTMLDivElement>(null);
 
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ['start 82%', 'end 52%'],
+    offset: isMobile ? ['start 84%', 'end 58%'] : ['start 80%', 'end 54%'],
   });
 
   const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 100,
-    damping: 28,
+    stiffness: 120,
+    damping: 26,
+    mass: 0.6,
     restDelta: 0.001,
   });
 
@@ -352,22 +372,55 @@ const ConnectorSegment = ({
 
   const d = `M ${fromXNum} ${startY} C ${fromXNum} ${cp1Y}, ${toXNum} ${cp2Y}, ${toXNum} ${endY}`;
 
-  const hasReachedRef = useRef(false);
+  const isReachedRef = useRef(false);
 
-  // Notify parent when line reaches the end (touches the card)
+  // Monitor line progress to trigger card reveal when touching (0.975) and hide when retracting (< 0.90)
   useMotionValueEvent(smoothProgress, 'change', (latest) => {
-    if (isActive && latest >= 0.95 && !hasReachedRef.current) {
-      hasReachedRef.current = true;
-      onReach?.();
+    if (!isActive) {
+      if (isReachedRef.current) {
+        isReachedRef.current = false;
+        onReachChange?.(false);
+      }
+      return;
+    }
+
+    if (latest >= 0.975 && !isReachedRef.current) {
+      isReachedRef.current = true;
+      onReachChange?.(true);
+    } else if (latest < 0.90 && isReachedRef.current) {
+      isReachedRef.current = false;
+      onReachChange?.(false);
     }
   });
 
+  // Synchronize on mount or when isActive updates
   useEffect(() => {
-    if (isActive && smoothProgress.get() >= 0.95 && !hasReachedRef.current) {
-      hasReachedRef.current = true;
-      onReach?.();
+    if (!isActive) {
+      if (isReachedRef.current) {
+        isReachedRef.current = false;
+        onReachChange?.(false);
+      }
+      return;
     }
-  }, [isActive, smoothProgress, onReach]);
+
+    const checkState = () => {
+      const rawVal = scrollYProgress.get();
+      const smoothVal = smoothProgress.get();
+      const currentVal = Math.max(rawVal, smoothVal);
+
+      if (currentVal >= 0.975 && !isReachedRef.current) {
+        isReachedRef.current = true;
+        onReachChange?.(true);
+      } else if (currentVal < 0.90 && isReachedRef.current) {
+        isReachedRef.current = false;
+        onReachChange?.(false);
+      }
+    };
+
+    checkState();
+    const timer = setTimeout(checkState, 60);
+    return () => clearTimeout(timer);
+  }, [isActive, scrollYProgress, smoothProgress, onReachChange]);
 
   // Transform scroll progress to pixel height for drawing the line
   // If not active yet, height stays at 0
@@ -418,10 +471,23 @@ const HowItWorks = () => {
   const [isMobile, setIsMobile] = useState(() =>
     typeof window !== 'undefined' ? window.innerWidth < 640 : false
   );
-  const [revealedIndices, setRevealedIndices] = useState<number[]>([]);
+  const [revealedCards, setRevealedCards] = useState<Record<number, boolean>>({});
 
-  const handleReveal = useCallback((idx: number) => {
-    setRevealedIndices((prev) => (prev.includes(idx) ? prev : [...prev, idx]));
+  const handleRevealChange = useCallback((idx: number, revealed: boolean) => {
+    setRevealedCards((prev) => {
+      if (prev[idx] === revealed) return prev;
+      const next = { ...prev, [idx]: revealed };
+      // When a card is hidden (scrolling up), also hide all subsequent cards immediately
+      if (!revealed) {
+        Object.keys(next).forEach((key) => {
+          const numKey = Number(key);
+          if (numKey > idx) {
+            next[numKey] = false;
+          }
+        });
+      }
+      return next;
+    });
   }, []);
 
   useEffect(() => {
@@ -537,8 +603,8 @@ const HowItWorks = () => {
                     isMobile={isMobile}
                     isRtl={isRtl}
                     isFirst={i === 0}
-                    isRevealed={revealedIndices.includes(i)}
-                    onReveal={() => handleReveal(i)}
+                    isRevealed={Boolean(revealedCards[i])}
+                    onRevealChange={(revealed) => handleRevealChange(i, revealed)}
                   />
                 </div>
               </div>
@@ -553,8 +619,8 @@ const HowItWorks = () => {
                   index={i}
                   isMobile={isMobile}
                   isRtl={isRtl}
-                  isActive={revealedIndices.includes(i)}
-                  onReach={() => handleReveal(i + 1)}
+                  isActive={Boolean(revealedCards[i])}
+                  onReachChange={(reached) => handleRevealChange(i + 1, reached)}
                 />
               )}
             </div>

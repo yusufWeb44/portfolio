@@ -4,46 +4,52 @@
 
 @layer base {
   :root {
-    /* Base Canvas in Light Mode: Crisp Modern Slate Surface */
-    --background: 210 25% 98%;
-    --foreground: 222 47% 11%;
+    /* Base Canvas in Light Mode: Luxurious Soothing Natural Slate / Silk Paper */
+    --background: 220 14% 96%;
+    /* #f4f6f8 - soft, soothing, relaxed on the eye */
+    --foreground: 222 47% 13%;
+    /* #111827 - rich deep charcoal, high contrast but zero glare */
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    /* pure crisp white cards creating elegant elevation over soft background */
+    --card-foreground: 222 47% 13%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    --primary: 221 83% 53%;
+    --popover-foreground: 222 47% 13%;
+    --primary: 160 84% 39%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 214 32% 94%;
-    --secondary-foreground: 222 47% 11%;
-    --muted: 214 32% 94%;
-    --muted-foreground: 215 25% 36%;
-    --accent: 221 83% 53%;
+    --secondary: 220 14% 92%;
+    /* #e9ecef */
+    --secondary-foreground: 222 47% 13%;
+    --muted: 220 14% 92%;
+    --muted-foreground: 215 16% 46%;
+    /* #64748b - clean, readable secondary text */
+    --accent: 160 84% 39%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 214 32% 86%;
-    --input: 214 32% 86%;
-    --ring: 221 83% 53%;
-    --radius: 0.5rem;
+    --border: 220 13% 89%;
+    /* #dfe3ea - delicate silk hairline border */
+    --input: 220 13% 89%;
+    --ring: 160 84% 39%;
+    --radius: 0.75rem;
 
     /* Dynamic Fonts */
-    --font-en: 'Geist', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-en: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     --font-ar: 'Cairo', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    --font-family: var(--font-ar);
-    --font-current: var(--font-ar);
+    --font-family: var(--font-en), var(--font-ar), system-ui, sans-serif;
+    --font-current: var(--font-en), var(--font-ar), system-ui, sans-serif;
 
-    /* Light Mode Identity Palette: Royal Cobalt Blue (#2563EB) */
-    --emerald-50: 214 100% 97%;   /* #eff6ff */
-    --emerald-100: 214 95% 93%;   /* #dbeafe */
-    --emerald-200: 213 97% 87%;   /* #bfdbfe */
-    --emerald-300: 212 96% 78%;   /* #93c5fd */
-    --emerald-400: 221 83% 45%;   /* #1d4ed8 - High-contrast readable royal blue for text */
-    --emerald-500: 221 83% 53%;   /* #2563eb - Primary vibrant royal cobalt blue */
-    --emerald-600: 224 76% 45%;   /* #1d4ed8 - Deep rich blue for buttons */
-    --emerald-700: 226 71% 38%;   /* #1e40af */
-    --emerald-800: 224 64% 30%;   /* #1e3a8a */
-    --emerald-900: 226 55% 22%;   /* #172554 */
-    --emerald-950: 224 71% 12%;   /* #0f172a */
+    /* Default Light Mode Palette: Terminal Emerald */
+    --emerald-50: 152 76% 96%;
+    --emerald-100: 149 80% 90%;
+    --emerald-200: 152 76% 80%;
+    --emerald-300: 156 72% 67%;
+    --emerald-400: 161 84% 34%;
+    --emerald-500: 160 84% 39%;
+    --emerald-600: 161 94% 30%;
+    --emerald-700: 163 88% 23%;
+    --emerald-800: 163 79% 18%;
+    --emerald-900: 164 74% 14%;
+    --emerald-950: 166 87% 8%;
   }
 
   .dark {
@@ -73,13 +79,20 @@
     --emerald-100: 149 80% 90%;
     --emerald-200: 152 76% 80%;
     --emerald-300: 156 72% 67%;
-    --emerald-400: 158 64% 52%;  /* #34d399 */
-    --emerald-500: 160 84% 39%;  /* #10b981 */
-    --emerald-600: 161 94% 30%;  /* #059669 */
-    --emerald-700: 163 88% 23%;  /* #047857 */
-    --emerald-800: 163 79% 19%;  /* #065f46 */
-    --emerald-900: 164 74% 16%;  /* #064e3b */
-    --emerald-950: 166 87% 8%;   /* #022c22 */
+    --emerald-400: 158 64% 52%;
+    /* #34d399 */
+    --emerald-500: 160 84% 39%;
+    /* #10b981 */
+    --emerald-600: 161 94% 30%;
+    /* #059669 */
+    --emerald-700: 163 88% 23%;
+    /* #047857 */
+    --emerald-800: 163 79% 19%;
+    /* #065f46 */
+    --emerald-900: 164 74% 16%;
+    /* #064e3b */
+    --emerald-950: 166 87% 8%;
+    /* #022c22 */
   }
 }
 
@@ -87,18 +100,19 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
-  
+
   /* Improve font rendering */
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     scroll-behavior: smooth;
   }
-  
+
   /* Custom selection */
   ::selection {
     @apply bg-foreground text-background;
@@ -108,20 +122,24 @@
   html[dir="rtl"],
   body[dir="rtl"],
   .rtl {
-    --font-family: var(--font-ar, 'Cairo', system-ui, sans-serif);
-    --font-current: var(--font-ar, 'Cairo', system-ui, sans-serif);
-    font-family: var(--font-ar, 'Cairo'), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    --font-family: var(--font-en), var(--font-ar, 'Cairo'), system-ui, sans-serif;
+    --font-current: var(--font-en), var(--font-ar, 'Cairo'), system-ui, sans-serif;
+    font-family: var(--font-en), var(--font-ar, 'Cairo'), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
 
   html[dir="ltr"],
   body[dir="ltr"],
   .ltr {
-    --font-family: var(--font-en, 'Geist Sans', system-ui, sans-serif);
-    --font-current: var(--font-en, 'Geist Sans', system-ui, sans-serif);
-    font-family: var(--font-en, 'Geist Sans'), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    --font-family: var(--font-en, 'Inter'), var(--font-ar, 'Cairo'), system-ui, sans-serif;
+    --font-current: var(--font-en, 'Inter'), var(--font-ar, 'Cairo'), system-ui, sans-serif;
+    font-family: var(--font-en, 'Inter'), var(--font-ar, 'Cairo'), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
 
-  body, button, input, select, textarea {
+  body,
+  button,
+  input,
+  select,
+  textarea {
     font-family: var(--font-family);
   }
 
@@ -142,20 +160,24 @@
 }
 
 @layer utilities {
+
   /* Dynamic Background Patterns */
   .bg-grid-pattern {
     background-size: 40px 40px;
     background-image: linear-gradient(to right, rgba(15, 23, 42, 0.05) 1px, transparent 1px),
-                      linear-gradient(to bottom, rgba(15, 23, 42, 0.05) 1px, transparent 1px);
+      linear-gradient(to bottom, rgba(15, 23, 42, 0.05) 1px, transparent 1px);
   }
+
   .dark .bg-grid-pattern {
     background-image: linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-                      linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
   }
+
   .bg-dots-pattern {
     background-size: 28px 28px;
     background-image: radial-gradient(rgba(15, 23, 42, 0.08) 1px, transparent 1px);
   }
+
   .dark .bg-dots-pattern {
     background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
   }
@@ -164,71 +186,101 @@
   .glass {
     @apply bg-background/80 backdrop-blur-xl border-b border-border;
   }
+
   .glass-card {
-    @apply bg-card/90 backdrop-blur-xl border border-border transition-all duration-300;
+    @apply bg-card/90 backdrop-blur-xl border border-border;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
+
   .dark .glass-card {
     background-color: rgba(255, 255, 255, 0.025);
     border-color: rgba(255, 255, 255, 0.08);
   }
+
   .dark .glass-card:hover {
     border-color: rgba(16, 185, 129, 0.4);
     box-shadow: 0 0 25px rgba(16, 185, 129, 0.08);
   }
 
-  /* ─── Light Mode Container & Card Definition ─── */
+  /* ─── 120 FPS Hardware-Accelerated View Transitions for Circular Theme Ripple ─── */
+  ::view-transition-group(root) {
+    animation-duration: 0.35s;
+  }
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
+    transform: translateZ(0);
+    will-change: clip-path;
+    contain: paint;
+  }
+  ::view-transition-old(root) {
+    z-index: 1;
+  }
+  ::view-transition-new(root) {
+    z-index: 9999;
+  }
+
+  /* ─── Light Mode Container & Card Definition (GPU Optimized) ─── */
   :root:not(.dark) .bg-card\/30,
   :root:not(.dark) .bg-card\/40,
   :root:not(.dark) .bg-card\/60,
   :root:not(.dark) .bg-card\/70,
   :root:not(.dark) .bg-card\/80,
   :root:not(.dark) .glass-card {
-    background-color: rgba(255, 255, 255, 0.94) !important;
-    border-color: rgba(203, 213, 225, 0.85) !important;
-    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03) !important;
+    background-color: #ffffff !important;
+    border-color: rgba(226, 232, 240, 0.9) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02) !important;
   }
 
-  /* ─── Light Mode Hover Glow: Royal Cobalt Accent ─── */
+  /* ─── Light Mode Hover Glow: Theme Dynamic Accent Glow ─── */
   :root:not(.dark) .hover\:border-emerald-500\/40:hover,
   :root:not(.dark) .hover\:border-emerald-500\/50:hover,
   :root:not(.dark) .hover\:border-emerald-500\/70:hover,
   :root:not(.dark) .glass-card:hover,
   :root:not(.dark) .group:hover .group-hover\:border-emerald-500\/40,
   :root:not(.dark) .group:hover .group-hover\:border-emerald-500\/50 {
-    border-color: rgba(37, 99, 235, 0.5) !important;
-    box-shadow: 0 12px 28px -6px rgba(37, 99, 235, 0.14), 0 6px 12px -3px rgba(37, 99, 235, 0.06) !important;
+    border-color: hsl(var(--emerald-500) / 0.5) !important;
+    box-shadow: 0 10px 24px -4px hsl(var(--emerald-500) / 0.12), 0 4px 8px -2px hsl(var(--emerald-500) / 0.04) !important;
   }
 
-  /* ─── Light Mode CTA Buttons & Badges High-Contrast ─── */
+  /* ─── Light Mode Theme-Synchronized CTA Buttons & Badges ─── */
   :root:not(.dark) .bg-emerald-500 {
-    background-color: #2563eb !important;
+    background-color: hsl(var(--emerald-500)) !important;
     color: #ffffff !important;
   }
+
   :root:not(.dark) .bg-emerald-500:hover,
   :root:not(.dark) .hover\:bg-emerald-400:hover {
-    background-color: #1d4ed8 !important;
+    background-color: hsl(var(--emerald-600)) !important;
     color: #ffffff !important;
   }
+
   :root:not(.dark) .bg-emerald-500 *,
   :root:not(.dark) .bg-emerald-500 svg {
     color: #ffffff !important;
   }
 
-  /* Light Mode Status Badges */
+  /* Light Mode Status Badges & Accents - 100% Theme Driven */
   :root:not(.dark) .bg-emerald-500\/10 {
-    background-color: rgba(37, 99, 235, 0.08) !important;
+    background-color: hsl(var(--emerald-500) / 0.08) !important;
   }
+
   :root:not(.dark) .border-emerald-500\/25,
   :root:not(.dark) .border-emerald-500\/20 {
-    border-color: rgba(37, 99, 235, 0.28) !important;
+    border-color: hsl(var(--emerald-500) / 0.25) !important;
   }
+
   :root:not(.dark) .text-emerald-400,
   :root:not(.dark) .text-emerald-500 {
-    color: #1d4ed8 !important;
+    color: hsl(var(--emerald-400)) !important;
   }
+
   :root:not(.dark) .hover\:text-emerald-400:hover,
   :root:not(.dark) .group:hover .group-hover\:text-emerald-400 {
-    color: #1d4ed8 !important;
+    color: hsl(var(--emerald-600)) !important;
   }
 
   /* Card Style: Deep Obsidian */
@@ -254,12 +306,15 @@
   .glass-badge {
     @apply backdrop-blur-md bg-emerald-500/10 border border-emerald-500/25 text-emerald-400;
   }
+
   .text-balance {
     text-wrap: balance;
   }
+
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
+
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
