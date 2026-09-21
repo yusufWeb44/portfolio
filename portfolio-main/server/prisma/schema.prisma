@@ -266,10 +266,13 @@ model Skill {
   description   String?  @db.Text
   descriptionAr String?  @db.Text
   icon          String?
+  positionX     Float?   @default(50)
+  positionY     Float?   @default(50)
+  depth         Float?   @default(5.0)
+  weight        Int?     @default(3)
   size          Int?     @default(20)
   x             Float?
   y             Float?
-  depth         Float?   @default(1.0)
   order         Int      @default(0)
   isEnabled     Boolean  @default(true)
   createdAt     DateTime @default(now())

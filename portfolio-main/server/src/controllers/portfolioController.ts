@@ -56,18 +56,122 @@ export const updateSettings = async (req: Request, res: Response) => {
 // --- Skills ---
 export const getSkills = async (req: Request, res: Response) => {
   const skills = await prisma.skill.findMany({ orderBy: { order: 'asc' } });
-  res.json({ success: true, data: skills });
+  const normalized = skills.map((s) => {
+    const positionX = s.positionX ?? s.x ?? 50;
+    const positionY = s.positionY ?? s.y ?? 50;
+    const depth = s.depth ?? 5.0;
+    const weight = s.weight ?? (s.size ? Math.min(5, Math.max(1, Math.round(s.size / 6))) : 3);
+    const size = s.size ?? (weight * 6);
+    return {
+      ...s,
+      positionX,
+      positionY,
+      depth,
+      weight,
+      x: positionX,
+      y: positionY,
+      size,
+    };
+  });
+  res.json({ success: true, data: normalized });
 };
 
 export const createSkill = async (req: Request, res: Response) => {
-  const skill = await prisma.skill.create({ data: req.body });
-  res.status(201).json({ success: true, data: skill });
+  try {
+    const raw = req.body;
+    const posX = parseFloat(raw.positionX !== undefined ? raw.positionX : (raw.x !== undefined ? raw.x : 50));
+    const posY = parseFloat(raw.positionY !== undefined ? raw.positionY : (raw.y !== undefined ? raw.y : 50));
+    const positionX = !isNaN(posX) ? posX : 50;
+    const positionY = !isNaN(posY) ? posY : 50;
+    const d = parseFloat(raw.depth);
+    const depth = !isNaN(d) ? d : 5.0;
+    const w = parseInt(raw.weight);
+    const weight = !isNaN(w) ? w : 3;
+    const weightSizes: Record<number, number> = { 1: 18, 2: 22, 3: 26, 4: 32, 5: 38 };
+    const size = weightSizes[weight] || (weight * 6);
+
+    const skill = await prisma.skill.create({
+      data: {
+        name: String(raw.name || 'New Skill'),
+        nameAr: raw.nameAr ? String(raw.nameAr) : null,
+        category: String(raw.category || 'Frontend'),
+        categoryAr: raw.categoryAr ? String(raw.categoryAr) : null,
+        description: raw.description ? String(raw.description) : null,
+        descriptionAr: raw.descriptionAr ? String(raw.descriptionAr) : null,
+        icon: raw.icon ? String(raw.icon) : null,
+        positionX,
+        positionY,
+        depth,
+        weight,
+        size,
+        x: positionX,
+        y: positionY,
+        order: parseInt(raw.order) || 0,
+        isEnabled: raw.isEnabled !== undefined ? Boolean(raw.isEnabled) : true,
+      },
+    });
+    res.status(201).json({ success: true, data: skill });
+  } catch (error: any) {
+    console.error('Create skill error:', error);
+    res.status(500).json({ success: false, message: error.message || 'Failed to create skill' });
+  }
 };
 
 export const updateSkill = async (req: Request, res: Response) => {
-  const id = String(req.params.id);
-  const skill = await prisma.skill.update({ where: { id }, data: req.body });
-  res.json({ success: true, data: skill });
+  try {
+    const id = String(req.params.id);
+    const raw = req.body;
+    
+    // Whitelist and sanitize fields for Prisma update
+    const updateData: Record<string, any> = {};
+    
+    if (raw.name !== undefined) updateData.name = String(raw.name);
+    if (raw.nameAr !== undefined) updateData.nameAr = raw.nameAr ? String(raw.nameAr) : null;
+    if (raw.category !== undefined) updateData.category = String(raw.category);
+    if (raw.categoryAr !== undefined) updateData.categoryAr = raw.categoryAr ? String(raw.categoryAr) : null;
+    if (raw.description !== undefined) updateData.description = raw.description ? String(raw.description) : null;
+    if (raw.descriptionAr !== undefined) updateData.descriptionAr = raw.descriptionAr ? String(raw.descriptionAr) : null;
+    if (raw.icon !== undefined) updateData.icon = raw.icon ? String(raw.icon) : null;
+    if (raw.isEnabled !== undefined) updateData.isEnabled = Boolean(raw.isEnabled);
+    if (raw.order !== undefined) updateData.order = parseInt(raw.order) || 0;
+
+    if (raw.positionX !== undefined || raw.x !== undefined) {
+      const posX = parseFloat(raw.positionX !== undefined ? raw.positionX : raw.x);
+      if (!isNaN(posX)) {
+        updateData.positionX = posX;
+        updateData.x = posX;
+      }
+    }
+    if (raw.positionY !== undefined || raw.y !== undefined) {
+      const posY = parseFloat(raw.positionY !== undefined ? raw.positionY : raw.y);
+      if (!isNaN(posY)) {
+        updateData.positionY = posY;
+        updateData.y = posY;
+      }
+    }
+    if (raw.depth !== undefined) {
+      const d = parseFloat(raw.depth);
+      if (!isNaN(d)) updateData.depth = d;
+    }
+    if (raw.weight !== undefined) {
+      const w = parseInt(raw.weight);
+      if (!isNaN(w)) {
+        updateData.weight = w;
+        const weightSizes: Record<number, number> = { 1: 18, 2: 22, 3: 26, 4: 32, 5: 38 };
+        updateData.size = weightSizes[w] || (w * 6);
+      }
+    }
+    if (raw.size !== undefined && raw.weight === undefined) {
+      const s = parseInt(raw.size);
+      if (!isNaN(s)) updateData.size = s;
+    }
+
+    const skill = await prisma.skill.update({ where: { id }, data: updateData });
+    res.json({ success: true, data: skill });
+  } catch (error: any) {
+    console.error('Update skill error:', error);
+    res.status(500).json({ success: false, message: error.message || 'Failed to update skill' });
+  }
 };
 
 export const deleteSkill = async (req: Request, res: Response) => {

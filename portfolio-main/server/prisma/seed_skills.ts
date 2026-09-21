@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -253,16 +254,6 @@ const EXACT_SKILLS = [
     order: 25,
     description: 'Developing strongly-typed object-oriented applications, backend services, and algorithmic problem solutions.',
   },
-  {
-    name: 'Data Structures & Algorithims',
-    category: 'Core CS',
-    size: 18,
-    x: 5,
-    y: 78,
-    depth: 0.9,
-    order: 26,
-    description: 'Developing DSA concepts and implementing them in real-world scenarios.',
-  },
 ];
 
 async function main() {
@@ -284,10 +275,13 @@ async function main() {
         data: {
           name: s.name,
           category: s.category,
+          positionX: s.x,
+          positionY: s.y,
+          depth: typeof s.depth === 'number' ? (s.depth <= 1 ? Math.round(s.depth * 10) : s.depth) : 5,
+          weight: typeof s.size === 'number' ? Math.min(5, Math.max(1, Math.round(s.size / 6))) : 3,
           size: s.size,
           x: s.x,
           y: s.y,
-          depth: s.depth,
           order: s.order,
           description: s.description,
           isEnabled: true,
@@ -299,16 +293,19 @@ async function main() {
         data: {
           name: s.name,
           category: s.category,
+          positionX: s.x,
+          positionY: s.y,
+          depth: typeof s.depth === 'number' ? (s.depth <= 1 ? Math.round(s.depth * 10) : s.depth) : 5,
+          weight: typeof s.size === 'number' ? Math.min(5, Math.max(1, Math.round(s.size / 6))) : 3,
           size: s.size,
           x: s.x,
           y: s.y,
-          depth: s.depth,
           order: s.order,
           description: s.description,
           isEnabled: true,
         },
       });
-      console.log(`Created skill: ${s.name} at (x: ${s.x}, y: ${s.y})`);
+      console.log(`Created skill: ${s.name} at (positionX: ${s.x}%, positionY: ${s.y}%)`);
     }
   }
 
@@ -318,7 +315,7 @@ async function main() {
     data: {
       skillsBadge: 'SKILLS & EXPERTISE',
       skillsTitle: 'Engineered Core Capabilities',
-      skillsParagraph1: 'I architect full-stack systems end-to-end — from clean Node.js service layers with normalized relational schemas, to reactive React and Next.js frontends built for performance, accessibility, and long-term maintainability.',
+      skillsParagraph1: 'I architect full-stack systems end-to-end — from clean Laravel & Node.js service layers with normalized relational schemas, to reactive React and Next.js frontends built for performance, accessibility, and long-term maintainability.',
       skillsParagraph2: 'Every engineering decision is grounded in scalability: modular API design, precise database indexing, and production-tested deployment workflows that keep systems reliable under real-world load and rapid iteration.',
       skillsPoint1Title: 'Architecture First',
       skillsPoint1Text: 'Clean RESTful APIs & modular database design built to last.',
