@@ -13,20 +13,24 @@ import {
   WhatsappIcon,
   TelegramIcon,
 } from '../components/ui/BrandIcons';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, lazy, Suspense, startTransition } from 'react';
 import api from '../services/api';
 import { getMediaUrl } from '../utils/mediaUrl';
 import MinimalistHero from '../components/MinimalistHero';
-import AboutSection from '../components/AboutSection';
-import HowItWorks from '../components/ui/how-it-works';
-import SkillsSection from '../components/sections/skills';
-import ProjectsSection from '../components/sections/projects';
-import { FAQ } from '../components/ui/faq-tabs';
-import { ServiceCarousel } from '../components/ui/services-card';
-import ExperienceTimeline, { type ExperienceItem } from '../components/ExperienceTimeline';
-import CertificatesCarousel, { type CertificateItem } from '../components/CertificatesCarousel';
+import type { ExperienceItem } from '../components/ExperienceTimeline';
+import type { CertificateItem } from '../components/CertificatesCarousel';
 import SEO from '../components/SEO';
 import { useLanguage } from '../contexts/LanguageContext';
+
+// Below-the-fold sections dynamically imported to minimize initial bundle size and main-thread work
+const AboutSection = lazy(() => import('../components/AboutSection'));
+const HowItWorks = lazy(() => import('../components/ui/how-it-works'));
+const SkillsSection = lazy(() => import('../components/sections/skills'));
+const ProjectsSection = lazy(() => import('../components/sections/projects'));
+const FAQ = lazy(() => import('../components/ui/faq-tabs').then(m => ({ default: m.FAQ })));
+const ServiceCarousel = lazy(() => import('../components/ui/services-card').then(m => ({ default: m.ServiceCarousel })));
+const ExperienceTimeline = lazy(() => import('../components/ExperienceTimeline'));
+const CertificatesCarousel = lazy(() => import('../components/CertificatesCarousel'));
 
 /* ─── Types ──────────────────────────────────────────────────────── */
 
@@ -163,6 +167,7 @@ const Home = () => {
           api.get('/faqs'),
         ]);
 
+        // Settings are critical (above-the-fold hero) — update urgently
         if (settRes.status === 'fulfilled') {
           const settData = settRes.value.data.data;
           setSettings(settData);
@@ -171,27 +176,27 @@ const Home = () => {
           } catch {}
         }
 
-        if (expRes.status === 'fulfilled') {
-          const expData = expRes.value.data.data || [];
-          setExperiences(expData);
-        }
-        if (certRes.status === 'fulfilled') {
-          const certData = certRes.value.data.data || [];
-          setCertificates(certData);
-        }
-        if (servRes.status === 'fulfilled') {
-          const servData = (servRes.value.data.data || []).filter((s: Service) => s.isEnabled);
-          setServices(servData);
-        }
-        if (socialRes.status === 'fulfilled') {
-          setSocialLinks(socialRes.value.data.data || []);
-        }
-        if (faqRes.status === 'fulfilled') {
-          const fetchedFaqs = faqRes.value.data.data || [];
-          if (Array.isArray(fetchedFaqs)) {
-            setRawFaqs(fetchedFaqs.filter((f: any) => f.isEnabled !== false));
+        // Below-the-fold data — defer with startTransition to avoid blocking paint
+        startTransition(() => {
+          if (expRes.status === 'fulfilled') {
+            setExperiences(expRes.value.data.data || []);
           }
-        }
+          if (certRes.status === 'fulfilled') {
+            setCertificates(certRes.value.data.data || []);
+          }
+          if (servRes.status === 'fulfilled') {
+            setServices((servRes.value.data.data || []).filter((s: Service) => s.isEnabled));
+          }
+          if (socialRes.status === 'fulfilled') {
+            setSocialLinks(socialRes.value.data.data || []);
+          }
+          if (faqRes.status === 'fulfilled') {
+            const fetchedFaqs = faqRes.value.data.data || [];
+            if (Array.isArray(fetchedFaqs)) {
+              setRawFaqs(fetchedFaqs.filter((f: any) => f.isEnabled !== false));
+            }
+          }
+        });
       } catch (err) {
         console.error('Failed to load portfolio data', err);
       }
@@ -310,7 +315,7 @@ const Home = () => {
   const instagramUrl = socialLinks.find(s => s.platform.toLowerCase() === 'instagram')?.url;
   const facebookUrl = socialLinks.find(s => s.platform.toLowerCase() === 'facebook')?.url;
 
-  const typewriterWords = (() => {
+  const typewriterWords = useMemo(() => {
     const source = isAr ? settings?.typewriterWordsAr : settings?.typewriterWords;
     if (Array.isArray(source) && source.length > 0) return source;
     if (typeof source === 'string' && source.trim()) {
@@ -335,9 +340,9 @@ const Home = () => {
       'Mobile App Developer',
       'UI/UX Designer',
     ];
-  })();
+  }, [isAr, settings?.typewriterWordsAr, settings?.typewriterWords, t]);
 
-  const heroStats = (() => {
+  const heroStats = useMemo(() => {
     const source = isAr ? settings?.heroStatsAr : settings?.heroStats;
     if (source) {
       try {
@@ -356,7 +361,7 @@ const Home = () => {
       { value: '+35', label: 'Completed Projects' },
       { value: '+4', label: 'Years Experience' },
     ];
-  })();
+  }, [isAr, settings?.heroStatsAr, settings?.heroStats, t]);
 
   return (
     <div className="w-full bg-transparent overflow-x-clip">
@@ -389,22 +394,30 @@ const Home = () => {
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 1: ABOUT
       ═══════════════════════════════════════════════════════════════ */}
-      <AboutSection />
+      <Suspense fallback={<div className="min-h-[160px]" />}>
+        <AboutSection />
+      </Suspense>
 
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 1.5: HOW I WORK
       ═══════════════════════════════════════════════════════════════ */}
-      <HowItWorks />
+      <Suspense fallback={<div className="min-h-[160px]" />}>
+        <HowItWorks />
+      </Suspense>
 
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 2: PROJECTS (Horizontal Scroll Carousel)
       ═══════════════════════════════════════════════════════════════ */}
-      <ProjectsSection />
+      <Suspense fallback={<div className="min-h-[200px]" />}>
+        <ProjectsSection />
+      </Suspense>
 
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 3: SKILLS (3D Tag Cloud Sphere)
       ═══════════════════════════════════════════════════════════════ */}
-      <SkillsSection />
+      <Suspense fallback={<div className="min-h-[200px]" />}>
+        <SkillsSection />
+      </Suspense>
 
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 4: EXPERIENCE (Vertical Animated Timeline & Certificates)
@@ -426,11 +439,11 @@ const Home = () => {
             </p>
           </FadeIn>
 
-          {/* Vertical Timeline with Scroll Effects */}
-          <ExperienceTimeline experiences={experiences} />
-
-          {/* Horizontal Certificates Carousel */}
-          <CertificatesCarousel certificates={certificates} />
+          {/* Vertical Timeline with Scroll Effects & Horizontal Certificates Carousel */}
+          <Suspense fallback={<div className="min-h-[200px]" />}>
+            <ExperienceTimeline experiences={experiences} />
+            <CertificatesCarousel certificates={certificates} />
+          </Suspense>
         </div>
       </section>
 
@@ -441,7 +454,7 @@ const Home = () => {
         <div className="max-w-7xl mx-auto space-y-20">
           <FadeIn>
             <div className="flex items-center gap-3 mb-4">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-xs font-bold tracking-widest uppercase text-muted-foreground font-mono">
                 {resolveField('services.badge', settings?.servicesBadgeAr, settings?.servicesBadge, 'Consulting & Offerings')}
               </span>
@@ -462,21 +475,22 @@ const Home = () => {
               <p className="text-muted-foreground">{isAr ? 'يتم تحديث الخدمات حالياً.' : 'Services are being updated.'}</p>
             </div>
           ) : (
-            <ServiceCarousel
-              services={services.map((service, i) => ({
-                id: service.id,
-                number: String(i + 1).padStart(2, '0'),
-                title: isAr ? (service.titleAr || service.title) : service.title,
-                description: isAr ? (service.descriptionAr || service.description) : service.description,
-              }))}
-              whatsappBaseUrl={
-                settings?.whatsappNumber 
-                  ? `https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, '')}` 
-                  : socialLinks.find(s => s.platform.toLowerCase() === 'whatsapp')?.url
-              }
-            />
+            <Suspense fallback={<div className="min-h-[160px]" />}>
+              <ServiceCarousel
+                services={services.map((service, i) => ({
+                  id: service.id,
+                  number: String(i + 1).padStart(2, '0'),
+                  title: isAr ? (service.titleAr || service.title) : service.title,
+                  description: isAr ? (service.descriptionAr || service.description) : service.description,
+                }))}
+                whatsappBaseUrl={
+                  settings?.whatsappNumber 
+                    ? `https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, '')}` 
+                    : socialLinks.find(s => s.platform.toLowerCase() === 'whatsapp')?.url
+                }
+              />
+            </Suspense>
           )}
-
 
         </div>
       </section>
@@ -484,18 +498,20 @@ const Home = () => {
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 6: FAQ
       ═══════════════════════════════════════════════════════════════ */}
-      <FAQ
-        id="faq"
-        title={resolveField('faq.title', settings?.faqTitleAr, settings?.faqTitle, 'Common Questions.')}
-        subtitle={resolveField('faq.badge', settings?.faqBadgeAr, settings?.faqBadge, 'Got a question?')}
-        categories={isAr ? {
-          services: t('faq.categories.services', 'الخدمات والنطاق'),
-          process: t('faq.categories.process', 'العملية والجدول الزمني'),
-          tech: t('faq.categories.tech', 'التقنيات المستخدمة'),
-          collab: t('faq.categories.collab', 'التعاون والعمل معاً'),
-        } : faqCategories}
-        faqData={faqDataMap}
-      />
+      <Suspense fallback={<div className="min-h-[160px]" />}>
+        <FAQ
+          id="faq"
+          title={resolveField('faq.title', settings?.faqTitleAr, settings?.faqTitle, 'Common Questions.')}
+          subtitle={resolveField('faq.badge', settings?.faqBadgeAr, settings?.faqBadge, 'Got a question?')}
+          categories={isAr ? {
+            services: t('faq.categories.services', 'الخدمات والنطاق'),
+            process: t('faq.categories.process', 'العملية والجدول الزمني'),
+            tech: t('faq.categories.tech', 'التقنيات المستخدمة'),
+            collab: t('faq.categories.collab', 'التعاون والعمل معاً'),
+          } : faqCategories}
+          faqData={faqDataMap}
+        />
+      </Suspense>
 
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 7: CONTACT

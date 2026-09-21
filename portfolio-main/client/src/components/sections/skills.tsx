@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
 import api from '../../services/api';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -207,31 +207,33 @@ const SkillsSection = () => {
     };
   }, []);
 
-  const skillsItems: TechItem[] = rawSkillsData.map((s: any, idx: number) => {
-    const fallback = FALLBACK_POSITIONS[idx % FALLBACK_POSITIONS.length];
-    const label = isAr ? (s.nameAr || s.name) : s.name;
-    const description = isAr 
-      ? (s.descriptionAr || s.description || `${label} - تطوير وبرمجة متقدمة.`)
-      : (s.description || `${s.name} development & integration.`);
+  const skillsItems: TechItem[] = useMemo(() => {
+    return rawSkillsData.map((s: any, idx: number) => {
+      const fallback = FALLBACK_POSITIONS[idx % FALLBACK_POSITIONS.length];
+      const label = isAr ? (s.nameAr || s.name) : s.name;
+      const description = isAr 
+        ? (s.descriptionAr || s.description || `${label} - تطوير وبرمجة متقدمة.`)
+        : (s.description || `${s.name} development & integration.`);
 
-    const posX = typeof s.positionX === 'number' ? s.positionX : (typeof s.x === 'number' ? s.x : fallback.x);
-    const posY = typeof s.positionY === 'number' ? s.positionY : (typeof s.y === 'number' ? s.y : fallback.y);
-    const depthVal = typeof s.depth === 'number' ? s.depth : fallback.depth;
+      const posX = typeof s.positionX === 'number' ? s.positionX : (typeof s.x === 'number' ? s.x : fallback.x);
+      const posY = typeof s.positionY === 'number' ? s.positionY : (typeof s.y === 'number' ? s.y : fallback.y);
+      const depthVal = typeof s.depth === 'number' ? s.depth : fallback.depth;
 
-    const weightSizes: Record<number, number> = { 1: 18, 2: 22, 3: 26, 4: 32, 5: 38 };
-    const size = typeof s.size === 'number' && s.size > 0 
-      ? s.size 
-      : (typeof s.weight === 'number' ? (weightSizes[s.weight] || s.weight * 6) : 20);
+      const weightSizes: Record<number, number> = { 1: 18, 2: 22, 3: 26, 4: 32, 5: 38 };
+      const size = typeof s.size === 'number' && s.size > 0 
+        ? s.size 
+        : (typeof s.weight === 'number' ? (weightSizes[s.weight] || s.weight * 6) : 20);
 
-    return {
-      label,
-      description,
-      size,
-      x: posX,
-      y: posY,
-      depth: depthVal,
-    };
-  });
+      return {
+        label,
+        description,
+        size,
+        x: posX,
+        y: posY,
+        depth: depthVal,
+      };
+    });
+  }, [rawSkillsData, isAr]);
 
   const badgeText = isAr 
     ? (settings?.skillsBadgeAr || t('skills.badge', 'المهارات والقدرات التقنية')) 

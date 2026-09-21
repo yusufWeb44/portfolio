@@ -153,32 +153,29 @@ const StickyNoteCard = ({
   const tilt = isMobile ? baseTilt * 0.55 : baseTilt;
   const isVisualLeft = isRtl ? (step.side === 'right') : (step.side === 'left');
 
-  // First card: driven by scroll entry/exit so it appears on entry and hides when scrolling back up
+  const onRevealChangeRef = useRef(onRevealChange);
   useEffect(() => {
-    if (!isFirst) return;
+    onRevealChangeRef.current = onRevealChange;
+  });
 
-    const handleScroll = () => {
-      if (!ref.current) return;
-      const rect = ref.current.getBoundingClientRect();
-      const vh = window.innerHeight;
+  // First card: driven by IntersectionObserver with expansive top margin so it never hides while reading subsequent cards
+  useEffect(() => {
+    if (!isFirst || !ref.current) return;
 
-      // Card 0 appears when its top enters comfortable viewing range (78% of viewport)
-      // and disappears when user scrolls back UP above the workflow section (> 86% of viewport)
-      if (rect.top <= vh * 0.78) {
-        onRevealChange?.(true);
-      } else if (rect.top > vh * 0.86) {
-        onRevealChange?.(false);
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        onRevealChangeRef.current?.(entry.isIntersecting);
+      },
+      {
+        root: null,
+        rootMargin: '200000px 0px -22% 0px',
+        threshold: 0,
       }
-    };
+    );
 
-    handleScroll();
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('resize', handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', handleScroll);
-    };
-  }, [isFirst, onRevealChange]);
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [isFirst]);
 
   // Relaxed entry kinematics for ultra-smooth, comfortable appearance
   const entryRotate = tilt * 0.75;
@@ -246,12 +243,12 @@ const StickyNoteCard = ({
           `,
         }}
       >
-        {/* Paper texture */}
+        {/* Paper texture — lightweight CSS pattern instead of expensive SVG feTurbulence filter */}
         <div className="absolute inset-0 pointer-events-none mix-blend-multiply"
           style={{
-            opacity: 0.06,
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='256' height='256' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E")`,
-            backgroundSize: '128px 128px',
+            opacity: 0.04,
+            backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px)',
+            backgroundSize: '8px 8px',
           }}
         />
         {/* Ruled lines */}
@@ -373,23 +370,27 @@ const ConnectorSegment = ({
   const d = `M ${fromXNum} ${startY} C ${fromXNum} ${cp1Y}, ${toXNum} ${cp2Y}, ${toXNum} ${endY}`;
 
   const isReachedRef = useRef(false);
+  const onReachChangeRef = useRef(onReachChange);
+  useEffect(() => {
+    onReachChangeRef.current = onReachChange;
+  });
 
-  // Monitor line progress to trigger card reveal when touching (0.975) and hide when retracting (< 0.90)
+  // Monitor line progress to trigger card reveal when touching (0.92) and hide when retracting (< 0.78)
   useMotionValueEvent(smoothProgress, 'change', (latest) => {
     if (!isActive) {
       if (isReachedRef.current) {
         isReachedRef.current = false;
-        onReachChange?.(false);
+        onReachChangeRef.current?.(false);
       }
       return;
     }
 
-    if (latest >= 0.975 && !isReachedRef.current) {
+    if (latest >= 0.92 && !isReachedRef.current) {
       isReachedRef.current = true;
-      onReachChange?.(true);
-    } else if (latest < 0.90 && isReachedRef.current) {
+      onReachChangeRef.current?.(true);
+    } else if (latest < 0.78 && isReachedRef.current) {
       isReachedRef.current = false;
-      onReachChange?.(false);
+      onReachChangeRef.current?.(false);
     }
   });
 
@@ -398,7 +399,7 @@ const ConnectorSegment = ({
     if (!isActive) {
       if (isReachedRef.current) {
         isReachedRef.current = false;
-        onReachChange?.(false);
+        onReachChangeRef.current?.(false);
       }
       return;
     }
@@ -408,31 +409,31 @@ const ConnectorSegment = ({
       const smoothVal = smoothProgress.get();
       const currentVal = Math.max(rawVal, smoothVal);
 
-      if (currentVal >= 0.975 && !isReachedRef.current) {
+      if (currentVal >= 0.92 && !isReachedRef.current) {
         isReachedRef.current = true;
-        onReachChange?.(true);
-      } else if (currentVal < 0.90 && isReachedRef.current) {
+        onReachChangeRef.current?.(true);
+      } else if (currentVal < 0.78 && isReachedRef.current) {
         isReachedRef.current = false;
-        onReachChange?.(false);
+        onReachChangeRef.current?.(false);
       }
     };
 
     checkState();
     const timer = setTimeout(checkState, 60);
     return () => clearTimeout(timer);
-  }, [isActive, scrollYProgress, smoothProgress, onReachChange]);
+  }, [isActive, scrollYProgress, smoothProgress]);
 
-  // Transform scroll progress to pixel height for drawing the line
-  // If not active yet, height stays at 0
+  // Transform scroll progress to hardware-accelerated clipPath for drawing the line
+  // If not active yet, clipPath hides the line completely without causing layout reflows
   const progress = useTransform(smoothProgress, (val) => (isActive ? val : 0));
-  const revealHeight = useTransform(progress, [0, 1], [0, svgHeight], { clamp: true });
+  const clipInset = useTransform(progress, (v) => `inset(0 0 ${(1 - Math.max(0, Math.min(1, v))) * 100}% 0)`);
 
   return (
     <div ref={ref} className="w-full relative" style={{ height: svgHeight }}>
-      {/* Dashed line entirely drawn on scroll — no background track */}
+      {/* Dashed line entirely revealed on scroll via GPU composited clipPath — zero layout reflow */}
       <motion.div
-        className="absolute top-0 left-0 right-0 overflow-hidden pointer-events-none"
-        style={{ height: revealHeight }}
+        className="absolute inset-0 overflow-hidden pointer-events-none"
+        style={{ clipPath: clipInset }}
       >
         <svg
           className="w-full pointer-events-none"
@@ -449,9 +450,6 @@ const ConnectorSegment = ({
             strokeLinecap="round"
             fill="none"
             vectorEffect="non-scaling-stroke"
-            style={{
-              filter: 'drop-shadow(0 0 4px rgba(255, 255, 255, 0.6)) drop-shadow(0 0 8px rgba(255, 255, 255, 0.2))',
-            }}
           />
         </svg>
       </motion.div>

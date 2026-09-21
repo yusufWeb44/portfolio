@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* CSS-driven cursor blink — avoids JS setInterval re-renders */
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
 @layer base {
   :root {
     /* Base Canvas in Light Mode: Luxurious Soothing Natural Slate / Silk Paper */
@@ -318,5 +324,11 @@
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+
+  /* content-visibility optimization: skip rendering for off-screen sections only (never hero) */
+  section[id]:not(#hero) {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 600px;
   }
 }

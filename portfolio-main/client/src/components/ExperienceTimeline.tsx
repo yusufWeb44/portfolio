@@ -206,7 +206,8 @@ const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
     restDelta: 0.0005,
   });
 
-  const lineHeight = useTransform(smoothProgress, [0, 1], ['0%', '100%']);
+  const beamClip = useTransform(smoothProgress, (val) => `inset(0 0 ${(1 - Math.max(0, Math.min(1, val))) * 100}% 0)`);
+  const particleTop = useTransform(smoothProgress, (val) => `${Math.max(0, Math.min(1, val)) * 100}%`);
 
   const getTypeLabel = (type?: string) => {
     if (type === 'education') return isRtl ? '🎓 دراسة ومؤهلات' : '🎓 Education';
@@ -245,19 +246,21 @@ const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
           }`}
         />
 
-        {/* Active Scroll Beam: Slim 2.5px with silky height growth and traveling head */}
+        {/* Active Scroll Beam: Slim 2.5px with silky GPU clipPath growth and traveling head */}
         <div className={`absolute top-0 bottom-6 w-[2.5px] rounded-full ${
           isRtl ? 'right-8 md:right-1/2 translate-x-1/2' : 'left-8 md:left-1/2 -translate-x-1/2'
         } pointer-events-none z-10 overflow-visible`}>
           <motion.div
-            style={{ height: lineHeight }}
-            className="w-full bg-gradient-to-b from-emerald-400 via-teal-400 to-emerald-500 rounded-full shadow-[0_0_12px_rgba(16,185,129,0.85)] relative"
+            style={{ clipPath: beamClip }}
+            className="w-full h-full bg-gradient-to-b from-emerald-400 via-teal-400 to-emerald-500 rounded-full shadow-[0_0_12px_rgba(16,185,129,0.85)]"
+          />
+          {/* Traveling Glowing Light Particle in Brand Emerald at the beam's front tip */}
+          <motion.div
+            style={{ top: particleTop }}
+            className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none flex items-center justify-center z-20 will-change-[top]"
           >
-            {/* Traveling Glowing Light Particle in Brand Emerald at the beam's front tip */}
-            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 translate-y-1/2 pointer-events-none flex items-center justify-center">
-              <div className="w-5 h-5 rounded-full bg-emerald-500/40 blur-[3px] animate-pulse" />
-              <div className="absolute w-3 h-3 rounded-full bg-emerald-300 border-2 border-white dark:border-slate-950 shadow-[0_0_10px_var(--theme-primary-hex,#10b981)]" />
-            </div>
+            <div className="w-5 h-5 rounded-full bg-emerald-500/40 blur-[3px] animate-pulse" />
+            <div className="absolute w-3 h-3 rounded-full bg-emerald-300 border-2 border-white dark:border-slate-950 shadow-[0_0_10px_var(--theme-primary-hex,#10b981)]" />
           </motion.div>
         </div>
 

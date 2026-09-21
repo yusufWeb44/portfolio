@@ -19,11 +19,11 @@ export function Typewriter({
   cursorChar,
   className = "",
 }: TypewriterProps) {
-  const [displayText, setDisplayText] = useState("")
+  const firstWord = (words && words.length > 0) ? words[0] : ""
+  const [displayText, setDisplayText] = useState(firstWord)
   const [isDeleting, setIsDeleting] = useState(false)
   const [wordIndex, setWordIndex] = useState(0)
-  const [charIndex, setCharIndex] = useState(0)
-  const [showCursor, setShowCursor] = useState(true)
+  const [charIndex, setCharIndex] = useState(firstWord.length)
 
   useEffect(() => {
     if (!words || words.length === 0) return
@@ -59,16 +59,6 @@ export function Typewriter({
     return () => clearTimeout(timer)
   }, [charIndex, isDeleting, wordIndex, words, speed, delayBetweenWords])
 
-  useEffect(() => {
-    if (!cursor) return
-
-    const cursorInterval = setInterval(() => {
-      setShowCursor((prev) => !prev)
-    }, 500)
-
-    return () => clearTimeout(cursorInterval)
-  }, [cursor])
-
   const useCustomChar = cursorChar && cursorChar !== "_" && cursorChar !== "|"
 
   // Bind the last word and the cursor together in whitespace-nowrap so cursor never drops to a new line
@@ -86,17 +76,17 @@ export function Typewriter({
           useCustomChar ? (
             <span
               aria-hidden="true"
-              className="ms-1 text-emerald-500 font-normal transition-opacity duration-100 select-none inline-block align-baseline"
-              style={{ opacity: showCursor ? 1 : 0 }}
+              className="ms-1 text-emerald-500 font-normal select-none inline-block align-baseline"
+              style={{ animation: 'cursorBlink 1s step-end infinite' }}
             >
               {cursorChar}
             </span>
           ) : (
             <span
               aria-hidden="true"
-              className="inline-block w-[3.5px] h-[0.85em] bg-emerald-500 rounded-full mx-1.5 align-baseline transition-opacity duration-100 select-none shrink-0"
+              className="inline-block w-[3.5px] h-[0.85em] bg-emerald-500 rounded-full mx-1.5 align-baseline select-none shrink-0"
               style={{
-                opacity: showCursor ? 1 : 0,
+                animation: 'cursorBlink 1s step-end infinite',
                 transform: 'translateY(1px)',
               }}
             />

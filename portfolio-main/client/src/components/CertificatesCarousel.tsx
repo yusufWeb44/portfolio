@@ -66,6 +66,7 @@ export const CertificatesCarousel = ({ certificates }: CertificatesCarouselProps
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
+  const rafIdRef = useRef<number | null>(null);
 
   const checkScroll = () => {
     if (scrollContainerRef.current) {
@@ -83,10 +84,22 @@ export const CertificatesCarousel = ({ certificates }: CertificatesCarouselProps
     }
   };
 
+  const handleContainerScroll = () => {
+    if (rafIdRef.current) return;
+    rafIdRef.current = requestAnimationFrame(() => {
+      checkScroll();
+      rafIdRef.current = null;
+    });
+  };
+
   useEffect(() => {
-    checkScroll();
-    window.addEventListener('resize', checkScroll);
-    return () => window.removeEventListener('resize', checkScroll);
+    const mountRaf = requestAnimationFrame(() => checkScroll());
+    window.addEventListener('resize', handleContainerScroll, { passive: true });
+    return () => {
+      cancelAnimationFrame(mountRaf);
+      window.removeEventListener('resize', handleContainerScroll);
+      if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
+    };
   }, [certificates, isRtl]);
 
   const handleScroll = (direction: 'left' | 'right') => {
@@ -118,7 +131,7 @@ export const CertificatesCarousel = ({ certificates }: CertificatesCarouselProps
     const x = e.pageX - scrollContainerRef.current.offsetLeft;
     const walk = (x - startX) * 1.5;
     scrollContainerRef.current.scrollLeft = scrollLeft - walk;
-    checkScroll();
+    handleContainerScroll();
   };
 
   if (!certificates || certificates.length === 0) {
@@ -171,7 +184,7 @@ export const CertificatesCarousel = ({ certificates }: CertificatesCarouselProps
       {/* Horizontal Swipeable Track */}
       <div
         ref={scrollContainerRef}
-        onScroll={checkScroll}
+        onScroll={handleContainerScroll}
         onMouseDown={handleMouseDown}
         onMouseLeave={handleMouseLeaveOrUp}
         onMouseUp={handleMouseLeaveOrUp}

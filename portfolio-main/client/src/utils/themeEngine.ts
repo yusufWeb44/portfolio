@@ -458,13 +458,8 @@ export function applyThemePalette(themeId?: string | null, isDark?: boolean) {
   const accentVal = inDarkMode ? palette.accent : (palette.lightAccent || palette.accent);
   const ringVal = inDarkMode ? palette.ring : (palette.lightRing || palette.ring);
 
-  // Set primary, accent, ring tokens
-  root.style.setProperty('--primary', primaryVal);
-  root.style.setProperty('--accent', accentVal);
-  root.style.setProperty('--ring', ringVal);
-  root.style.setProperty('--theme-primary-hex', palette.hex);
-
-  // Set all emerald color shade variables to the target palette
+  // Batch all CSS custom property updates into a single animation frame
+  // to prevent forced reflows from multiple synchronous style mutations
   const varsToCache: Record<string, string> = {
     '--primary': primaryVal,
     '--accent': accentVal,
@@ -473,9 +468,14 @@ export function applyThemePalette(themeId?: string | null, isDark?: boolean) {
   };
 
   Object.entries(targetShades).forEach(([shade, hslValue]) => {
-    const varName = `--emerald-${shade}`;
-    root.style.setProperty(varName, hslValue);
-    varsToCache[varName] = hslValue;
+    varsToCache[`--emerald-${shade}`] = hslValue;
+  });
+
+  // Apply all properties in one batch
+  requestAnimationFrame(() => {
+    Object.entries(varsToCache).forEach(([key, value]) => {
+      root.style.setProperty(key, value);
+    });
   });
 
   try {

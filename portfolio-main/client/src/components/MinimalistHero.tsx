@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { Typewriter } from '@/components/ui/typewriter';
@@ -17,8 +17,27 @@ const AnimatedStatValue: React.FC<{ value: string }> = ({ value }) => {
   const suffix = match[3];
 
   const [currentNum, setCurrentNum] = useState(0);
+  const [hasAnimated, setHasAnimated] = useState(false);
+  const ref = useRef<HTMLSpanElement>(null);
+
+  // Only start animation when element is visible in viewport
+  useEffect(() => {
+    if (hasAnimated || !ref.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setHasAnimated(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [hasAnimated]);
 
   useEffect(() => {
+    if (!hasAnimated) return;
     let startTimestamp: number | null = null;
     const duration = 1600;
     let animationFrameId: number;
@@ -36,18 +55,12 @@ const AnimatedStatValue: React.FC<{ value: string }> = ({ value }) => {
       }
     };
 
-    const timeout = setTimeout(() => {
-      animationFrameId = requestAnimationFrame(step);
-    }, 400);
-
-    return () => {
-      clearTimeout(timeout);
-      cancelAnimationFrame(animationFrameId);
-    };
-  }, [targetNum]);
+    animationFrameId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [hasAnimated, targetNum]);
 
   return (
-    <span className="tabular-nums">
+    <span ref={ref} className="tabular-nums">
       {prefix}{currentNum}{suffix}
     </span>
   );
@@ -96,8 +109,8 @@ const AvailabilityBadge = ({ text }: { text: string }) => (
   </div>
 );
 
-const MinimalistHero: React.FC<MinimalistHeroProps> = ({
-  imageSrc = '/portfolio_photo_1.png',
+const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
+  imageSrc = '/portfolio_photo.webp',
   headline,
   heroText,
   bioText = 'Building scalable web applications, custom CRM systems, and high-performance APIs for startups and businesses. Delivering clean, maintainable code engineered for reliability and seamless growth.',
@@ -116,6 +129,12 @@ const MinimalistHero: React.FC<MinimalistHeroProps> = ({
   const blobPath1 = 'M410.5,317.5Q372,385,299,419.5Q226,454,161.5,410Q97,366,66,298Q35,230,73.5,166Q112,102,181,71.5Q250,41,319,72Q388,103,418.5,176.5Q449,250,410.5,317.5Z';
   const blobPath2 = 'M395,310Q350,370,285,410Q220,450,155,410Q90,370,65,300Q40,230,75,165Q110,100,180,65Q250,30,320,65Q390,100,415,165Q440,230,395,310Z';
   const blobPath3 = 'M420,320Q380,390,300,425Q220,460,150,415Q80,370,55,295Q30,220,70,155Q110,90,185,60Q260,30,330,60Q400,90,430,160Q460,230,420,320Z';
+
+  const [startMorph, setStartMorph] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => setStartMorph(true), 1200);
+    return () => clearTimeout(timer);
+  }, []);
 
   const headlineContent = headline || heroText || 'End-to-End Web Development & Software Engineering';
   const availabilityStatus = availability || 'Available for Freelance & Consulting';
@@ -151,9 +170,9 @@ const MinimalistHero: React.FC<MinimalistHeroProps> = ({
           {/* ── Left Column (desktop): Headline, Bio, CTA, Social, Stats ── */}
           <div className="order-2 lg:order-1 lg:col-span-5 flex flex-col items-start z-10 min-w-0">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.8 }}
+              transition={{ duration: 0.3 }}
               className="space-y-6 w-full"
             >
               {/* Headline + Bio */}
@@ -181,9 +200,9 @@ const MinimalistHero: React.FC<MinimalistHeroProps> = ({
 
               {/* Social Icons */}
               <motion.div
-                initial={{ opacity: 0, y: 15 }}
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 1.0 }}
+                transition={{ duration: 0.3, delay: 0.06 }}
                 className="flex items-center gap-2.5 pt-1"
               >
                 {resolvedLinks.map((s, i) => (
@@ -194,9 +213,9 @@ const MinimalistHero: React.FC<MinimalistHeroProps> = ({
                     rel="noreferrer"
                     aria-label={s.label}
                     title={s.label}
-                    initial={{ opacity: 0, scale: 0.8 }}
+                    initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 1.1 + i * 0.08, duration: 0.35, ease: cubicEase }}
+                    transition={{ delay: 0.08 + i * 0.03, duration: 0.2 }}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     className="w-9 h-9 rounded-full flex items-center justify-center border border-border/70 bg-card/60 dark:bg-white/[0.04] backdrop-blur-sm text-muted-foreground hover:text-emerald-400 hover:border-emerald-500/50 hover:bg-emerald-500/10 transition-colors duration-200 cursor-pointer shadow-sm"
@@ -208,9 +227,9 @@ const MinimalistHero: React.FC<MinimalistHeroProps> = ({
 
               {/* Stats Bar */}
               <motion.div
-                initial={{ opacity: 0, y: 15 }}
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 1.2 }}
+                transition={{ duration: 0.3, delay: 0.1 }}
                 className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6 border-t border-border/40 mt-6 w-full"
               >
                 {activeStats.map((stat, idx) => (
@@ -238,9 +257,9 @@ const MinimalistHero: React.FC<MinimalistHeroProps> = ({
             <div className="lg:hidden w-full flex flex-col gap-3.5 mb-4 px-1">
               {/* Availability Badge */}
               <motion.div
-                initial={{ opacity: 0, y: -10 }}
+                initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.5 }}
+                transition={{ duration: 0.3, delay: 0.04 }}
                 className="flex justify-center sm:justify-start rtl:sm:justify-start"
               >
                 <AvailabilityBadge text={availabilityStatus} />
@@ -248,9 +267,9 @@ const MinimalistHero: React.FC<MinimalistHeroProps> = ({
 
               {/* Typewriter — centered below badge with stable height to prevent layout shift */}
               <motion.div
-                initial={{ opacity: 0, y: -10 }}
+                initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.6 }}
+                transition={{ duration: 0.3, delay: 0.06 }}
                 className="flex justify-center items-start min-h-[3.6rem] sm:min-h-[4.2rem] pt-1"
               >
                 <h2
@@ -275,11 +294,10 @@ const MinimalistHero: React.FC<MinimalistHeroProps> = ({
             {/* Blob + Profile Image */}
             <div className="relative flex justify-center items-center min-h-[320px] sm:min-h-[400px] lg:min-h-[500px] w-full">
               {/* Fluid Blob */}
-              {/* Fluid Blob */}
               <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
+                initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.8, ease: cubicEase, delay: 0.2 }}
+                transition={{ duration: 0.4, ease: cubicEase }}
                 className="absolute w-[280px] h-[280px] sm:w-[360px] sm:h-[360px] lg:w-[480px] lg:h-[480px] z-0 pointer-events-none"
               >
                 {/* Ambient glow behind blob without expensive filter */}
@@ -311,27 +329,29 @@ const MinimalistHero: React.FC<MinimalistHeroProps> = ({
                   <motion.path
                     className="dark:fill-[url(#fluid-gradient-dark)] fill-[url(#fluid-gradient-light)]"
                     d={blobPath1}
-                    animate={{ d: [blobPath1, blobPath2, blobPath3, blobPath1] }}
-                    transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
+                    animate={startMorph ? { d: [blobPath1, blobPath2, blobPath3, blobPath1] } : undefined}
+                    transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
                   />
                 </svg>
               </motion.div>
 
               {/* Profile Image */}
               <motion.div
-                initial={{ opacity: 0, y: 50 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1, ease: cubicEase, delay: 0.4 }}
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.35, ease: cubicEase }}
                 className="relative z-10 flex items-center justify-center pointer-events-none"
               >
-                <motion.img
+                <img
                   src={imageSrc}
                   alt=""
                   aria-label="Profile photo"
                   loading="eager"
                   decoding="async"
                   // @ts-ignore
-                  fetchpriority="high"
+                  fetchPriority="high"
+                  width={420}
+                  height={420}
                   style={{
                     maskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)',
                     WebkitMaskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)',
@@ -345,9 +365,9 @@ const MinimalistHero: React.FC<MinimalistHeroProps> = ({
           {/* ── Right Column (desktop only): Availability Badge + Typewriter ── */}
           <div className="hidden lg:flex order-3 lg:col-span-3 lg:justify-end rtl:lg:justify-start lg:items-start z-10 min-w-0 w-full pt-1">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 1.2 }}
+              transition={{ duration: 0.3, delay: 0.08 }}
               className="w-full lg:max-w-[380px] xl:max-w-[440px] flex flex-col items-end rtl:items-start text-right rtl:text-right"
             >
               {/* Dynamic Availability Badge — Increased separation */}
@@ -383,4 +403,5 @@ const MinimalistHero: React.FC<MinimalistHeroProps> = ({
   );
 };
 
+const MinimalistHero = React.memo(MinimalistHeroComponent);
 export default MinimalistHero;

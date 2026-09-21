@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { LazyMotion, domAnimation } from 'framer-motion';
 import PublicLayout from './layouts/PublicLayout';
 import AdminLayout from './layouts/AdminLayout';
 
@@ -39,43 +40,45 @@ const PageLoader = () => (
 function App() {
   return (
     <Router>
-      <Suspense fallback={<PageLoader />}>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<PublicLayout />}>
-            <Route index element={<Home />} />
-            <Route path="about" element={<About />} />
-            <Route path="projects" element={<ProjectsPage />} />
-            <Route path="projects/:slug" element={<ProjectDetail />} />
-            <Route path="skills" element={<Skills />} />
-            <Route path="experience" element={<Experience />} />
-            <Route path="services" element={<Services />} />
-            <Route path="contact" element={<Contact />} />
-            <Route path="demo" element={<Demo />} />
-          </Route>
+      <LazyMotion features={domAnimation} strict={false}>
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<PublicLayout />}>
+              <Route index element={<Home />} />
+              <Route path="about" element={<About />} />
+              <Route path="projects" element={<ProjectsPage />} />
+              <Route path="projects/:slug" element={<ProjectDetail />} />
+              <Route path="skills" element={<Skills />} />
+              <Route path="experience" element={<Experience />} />
+              <Route path="services" element={<Services />} />
+              <Route path="contact" element={<Contact />} />
+              <Route path="demo" element={<Demo />} />
+            </Route>
 
-          {/* Admin Auth Route */}
-          <Route path="/admin/login" element={<Login />} />
+            {/* Admin Auth Route */}
+            <Route path="/admin/login" element={<Login />} />
 
-          {/* Protected Admin Routes */}
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="settings" element={<AdminSettings />} />
-            <Route path="about" element={<AdminAbout />} />
-            <Route path="workflow" element={<AdminWorkflow />} />
-            <Route path="projects" element={<AdminProjects />} />
-            <Route path="skills" element={<AdminSkills />} />
-            <Route path="experience" element={<AdminExperience />} />
-            <Route path="certificates" element={<AdminCertificates />} />
-            <Route path="services" element={<AdminServices />} />
-            <Route path="faqs" element={<AdminFaqs />} />
-            <Route path="messages" element={<AdminMessages />} />
-            <Route path="seo" element={<AdminSeo />} />
-            <Route path="translations" element={<AdminTranslations />} />
-          </Route>
-        </Routes>
-      </Suspense>
+            {/* Protected Admin Routes */}
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<Dashboard />} />
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="settings" element={<AdminSettings />} />
+              <Route path="about" element={<AdminAbout />} />
+              <Route path="workflow" element={<AdminWorkflow />} />
+              <Route path="projects" element={<AdminProjects />} />
+              <Route path="skills" element={<AdminSkills />} />
+              <Route path="experience" element={<AdminExperience />} />
+              <Route path="certificates" element={<AdminCertificates />} />
+              <Route path="services" element={<AdminServices />} />
+              <Route path="faqs" element={<AdminFaqs />} />
+              <Route path="messages" element={<AdminMessages />} />
+              <Route path="seo" element={<AdminSeo />} />
+              <Route path="translations" element={<AdminTranslations />} />
+            </Route>
+          </Routes>
+        </Suspense>
+      </LazyMotion>
     </Router>
   );
 }

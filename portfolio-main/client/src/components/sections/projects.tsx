@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, useScroll } from 'framer-motion';
 import { ArrowRight, ArrowUpRight, ChevronDown, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -123,6 +123,8 @@ const ProjectMediaVisual = ({
         <img
           src={getMediaUrl(coverImage)}
           alt={project.title}
+          width={700}
+          height={450}
           className="w-full h-full object-cover select-none transition-transform duration-700 group-hover:scale-105"
           loading="lazy"
         />
@@ -420,7 +422,7 @@ const ProjectsSection = () => {
   }, []);
 
   // Assemble exactly 3 projects for the stacked deck:
-  const deckProjects: Project[] = (() => {
+  const deckProjects: Project[] = useMemo(() => {
     const featuredList = projects.filter((p: any) => p.isFeatured);
     const nonFeaturedList = projects.filter((p: any) => !p.isFeatured);
     const combined = [...featuredList, ...nonFeaturedList];
@@ -431,7 +433,7 @@ const ProjectsSection = () => {
     const needed = 3 - combined.length;
     const fillers = FALLBACK_PROJECTS.slice(0, needed);
     return [...combined, ...fillers];
-  })();
+  }, [projects]);
 
   // Card selector with glitch-free smooth scrolling lock
   const handleSelectCard = (index: number) => {
