@@ -2,6 +2,7 @@ import { useRef, useEffect, useState, useCallback } from 'react';
 import { motion, useScroll, useSpring, useTransform, useMotionValueEvent } from 'framer-motion';
 import api from '../../services/api';
 import { useLanguage } from '../../contexts/LanguageContext';
+import SectionBadge from './SectionBadge';
 
 /* ═══════════════════════════════════════════════════════════════════
    Pushpin SVG — 3D pinned head with punctured paper effect
@@ -563,7 +564,7 @@ const HowItWorks = () => {
   return (
     <section
       id="how-i-work"
-      className="scroll-mt-24 py-16 sm:py-24 md:py-32 px-4 sm:px-6 bg-transparent overflow-x-hidden overflow-y-visible"
+      className="scroll-mt-24 py-20 sm:py-24 md:py-28 px-4 sm:px-6 lg:px-8 bg-transparent overflow-x-hidden overflow-y-visible"
       aria-label="Engineering process and workflow"
     >
       <div className="max-w-5xl mx-auto">
@@ -573,18 +574,17 @@ const HowItWorks = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-60px' }}
           transition={{ duration: 0.6, ease: 'easeOut' }}
-          className="text-center mb-12 sm:mb-16 md:mb-28 px-2"
+          className="text-center mb-12 sm:mb-16 md:mb-20 px-2"
         >
-          <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full border border-border/60 bg-card/40 dark:bg-white/[0.04] backdrop-blur-md mb-4 sm:mb-6">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-            <span className="text-[11px] sm:text-xs font-mono font-semibold uppercase tracking-widest text-muted-foreground">
+          <div className="flex justify-center">
+            <SectionBadge>
               {displayBadge}
-            </span>
+            </SectionBadge>
           </div>
-          <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-foreground tracking-tight leading-tight mb-3 sm:mb-4">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-foreground tracking-tight leading-[1.15] mb-4">
             {displayTitle}
           </h2>
-          <p className="text-sm sm:text-base md:text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
+          <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
             {displaySubtitle}
           </p>
         </motion.div>

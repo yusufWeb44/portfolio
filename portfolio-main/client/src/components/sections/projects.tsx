@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import api from '../../services/api';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { getMediaUrl } from '../../utils/mediaUrl';
+import SectionBadge from '../ui/SectionBadge';
 
 /* ─── Data Interfaces ─────────────────────────────────────────────── */
 interface ProjectImage {
@@ -481,22 +482,19 @@ const ProjectsSection = () => {
   const totalCount = Math.max(projects.length, 3);
 
   return (
-    <section id="projects" className="scroll-mt-20 relative bg-transparent">
-      {/* ── 1. Section Header: Slim, Elegant & Compact ── */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 pt-8 sm:pt-12 pb-3 sm:pb-4">
-        <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full border border-border/60 bg-card/40 dark:bg-white/[0.04] backdrop-blur-md mb-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-          <span className="text-[10px] sm:text-[11px] font-mono font-semibold uppercase tracking-widest text-muted-foreground">
-            {displayBadge}
-          </span>
-        </div>
+    <section id="projects" className="scroll-mt-24 relative bg-transparent">
+      {/* ── 1. Section Header: Unified & Elegant ── */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 sm:pt-16 pb-4 sm:pb-6">
+        <SectionBadge>
+          {displayBadge}
+        </SectionBadge>
 
-        <div className="max-w-2xl">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight leading-tight text-foreground mb-1.5">
+        <div className="max-w-3xl">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight leading-[1.15] text-foreground mb-3">
             {displayTitle}
           </h2>
           {displaySubtitle && (
-            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed line-clamp-2">
+            <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
               {displaySubtitle}
             </p>
           )}

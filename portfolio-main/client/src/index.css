@@ -112,11 +112,12 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
-  /* Improve font rendering */
+  /* Improve font rendering & eliminate scrollbar layout shifts */
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     scroll-behavior: smooth;
+    scrollbar-gutter: stable;
   }
 
   /* Custom selection */

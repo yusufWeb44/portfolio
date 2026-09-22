@@ -16,6 +16,7 @@ import {
   Image as ImageIcon
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import SectionBadge from './ui/SectionBadge';
 
 export interface CertificateItem {
   id: string;
@@ -143,12 +144,9 @@ export const CertificatesCarousel = ({ certificates }: CertificatesCarouselProps
       {/* Sub-Section Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 px-2">
         <div className="text-start">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-            <span className="text-xs font-mono font-bold tracking-widest uppercase text-muted-foreground">
-              {isRtl ? 'التراخيص والشهادات' : 'Licenses & Credentials'}
-            </span>
-          </div>
+          <SectionBadge className="mb-2">
+            {isRtl ? 'التراخيص والشهادات' : 'Licenses & Credentials'}
+          </SectionBadge>
           <h3 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
             {isRtl ? 'الشهادات والاعتمادات' : 'Certifications & Honors'}
             <Sparkles size={20} className="text-amber-500" />

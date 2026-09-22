@@ -10,10 +10,21 @@ import { applyCustomFonts } from '../utils/fontLoader';
 import Footer from '../components/Footer';
 import { applyThemePalette, getThemeAuras } from '../utils/themeEngine';
 import ThemeToggle from '../components/ThemeToggle';
+import SplashScreen from '../components/ui/SplashScreen';
 
 const PublicLayout = () => {
   const { t, currentLang, currentDirection } = useLanguage();
   const isAr = currentLang === 'ar';
+  const [showSplash, setShowSplash] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        return sessionStorage.getItem('portfolio_splash_seen') !== 'true';
+      } catch {
+        return false;
+      }
+    }
+    return false;
+  });
   const [isDark, setIsDark] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('theme');
@@ -170,6 +181,13 @@ const PublicLayout = () => {
     });
   }, [settings?.fontFamilyEn, settings?.fontUrlEn, settings?.fontFamilyAr, settings?.fontUrlAr, currentLang, currentDirection]);
 
+  // Support manual replay for testing: window.dispatchEvent(new Event('replay_splash_screen'))
+  useEffect(() => {
+    const handleReplay = () => setShowSplash(true);
+    window.addEventListener('replay_splash_screen', handleReplay);
+    return () => window.removeEventListener('replay_splash_screen', handleReplay);
+  }, []);
+
   const toggleTheme = (e?: React.MouseEvent) => {
     const nextIsDark = !isDark;
 
@@ -239,6 +257,16 @@ const PublicLayout = () => {
   return (
     <div className="min-h-screen flex flex-col relative bg-background text-foreground font-sans selection:bg-foreground selection:text-background overflow-x-clip">
 
+      {/* ── First-Time Session Splash Screen (Architecture Boot) ── */}
+      <AnimatePresence>
+        {showSplash && (
+          <SplashScreen
+            onComplete={() => setShowSplash(false)}
+            isAr={isAr}
+          />
+        )}
+      </AnimatePresence>
+
       {/* ── Continuous Ambient Glassmorphic Background System (GPU Composited Layer) ── */}
       <div
         className="fixed inset-0 pointer-events-none -z-10 overflow-hidden transform-gpu"
@@ -274,7 +302,7 @@ const PublicLayout = () => {
       {/* Fixed Sticky Navbar */}
       <header
         className={cn(
-          "fixed top-0 left-0 right-0 z-50 py-4 transition-all duration-300",
+          "fixed top-0 left-0 right-0 z-50 py-4 transition-[background-color,border-color,box-shadow,backdrop-filter] duration-300",
           scrolled ? "bg-background/90 backdrop-blur-xl border-b border-border/50 shadow-sm" : "bg-transparent"
         )}
       >

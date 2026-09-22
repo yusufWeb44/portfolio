@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Plus } from 'lucide-react';
 import { cn } from './Button';
+import SectionBadge from './SectionBadge';
 
 /* ─── Types ──────────────────────────────────────────────────────── */
 interface FAQItem {
@@ -28,14 +29,11 @@ interface FAQProps {
 
 /* ─── FAQ Header ─────────────────────────────────────────────────── */
 const FAQHeader = ({ title, subtitle }: { title: string; subtitle: string }) => (
-  <div className="relative z-10 flex flex-col items-start justify-start mb-12">
-    <div className="flex items-center gap-3 mb-4">
-      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-      <span className="text-xs font-bold tracking-widest uppercase text-muted-foreground font-mono">
-        {subtitle}
-      </span>
-    </div>
-    <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter leading-[1.05]">
+  <div className="relative z-10 flex flex-col items-start justify-start mb-10 sm:mb-12">
+    <SectionBadge>
+      {subtitle}
+    </SectionBadge>
+    <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight leading-[1.15] text-foreground">
       {title}
     </h2>
   </div>
@@ -177,7 +175,7 @@ export const FAQ = ({
   return (
     <section
       className={cn(
-        'relative overflow-hidden bg-transparent px-6 py-28',
+        'relative overflow-hidden bg-transparent px-4 sm:px-6 lg:px-8 py-20 sm:py-24 md:py-28',
         className
       )}
       {...props}

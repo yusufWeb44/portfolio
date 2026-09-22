@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import api from '../services/api';
 import { useLanguage } from '../contexts/LanguageContext';
+import SectionBadge from '../components/ui/SectionBadge';
 
 interface Skill {
   id: string;
@@ -62,13 +63,13 @@ const Skills = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
           >
-            <span className="text-xs font-bold tracking-widest uppercase text-muted-foreground block mb-6">
+            <SectionBadge>
               {isAr ? 'الترسانة والمهارات التقنية' : 'Technical Stack'}
-            </span>
-            <h1 className="text-5xl md:text-8xl font-bold tracking-tighter leading-[1.05] mb-6">
+            </SectionBadge>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight leading-[1.15] text-foreground mb-4">
               {isAr ? 'المهارات والقدرات.' : 'My Arsenal.'}
             </h1>
-            <p className="text-xl text-muted-foreground max-w-lg leading-relaxed">
+            <p className="text-base md:text-lg text-muted-foreground max-w-xl leading-relaxed">
               {isAr 
                 ? 'مجموعة متكاملة من الأدوات والتقنيات البرمجية التي أعتمد عليها لبناء حلول رقمية موثوقة وعالية الأداء.'
                 : 'Tools and technologies I use to craft high-quality digital products. Click a category to filter.'}

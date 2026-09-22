@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Layers, TrendingUp, Zap, Cpu, Code2, ShieldCheck, Database, Server, Globe, Sparkles } from 'lucide-react';
 import api from '../services/api';
 import { useLanguage } from '../contexts/LanguageContext';
+import SectionBadge from './ui/SectionBadge';
 
 /* ─── Animation Variants ─────────────────────────────────────────── */
 const containerVariants = {
@@ -119,7 +120,7 @@ const AboutSection = () => {
   return (
     <section
       id="about"
-      className="scroll-mt-24 py-20 md:py-24 px-6 bg-transparent overflow-hidden"
+      className="scroll-mt-24 py-20 sm:py-24 md:py-28 px-4 sm:px-6 lg:px-8 bg-transparent overflow-hidden"
       aria-label="About me"
     >
       <div className="max-w-7xl mx-auto">
@@ -137,17 +138,14 @@ const AboutSection = () => {
           >
             {/* Top Badge */}
             <motion.div variants={fadeUpVariants}>
-              <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full border border-border/60 bg-card/40 dark:bg-white/[0.04] backdrop-blur-md">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-                <span className="text-xs font-mono font-semibold uppercase tracking-widest text-muted-foreground">
-                  {displayBadge}
-                </span>
-              </div>
+              <SectionBadge>
+                {displayBadge}
+              </SectionBadge>
             </motion.div>
 
             {/* Main Title */}
             <motion.div variants={fadeUpVariants}>
-              <h2 className="text-3xl md:text-4xl lg:text-[2.6rem] font-extrabold text-foreground tracking-tight leading-[1.15]">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-foreground tracking-tight leading-[1.15]">
                 {displayHeadline}
               </h2>
             </motion.div>
@@ -192,7 +190,7 @@ const AboutSection = () => {
                   variants={cardVariants}
                   className={[
                     card.colSpan || (i === 2 && displayCards.length === 3 ? 'sm:col-span-2' : ''),
-                    'group relative flex flex-col gap-5 rounded-2xl p-6 md:p-7',
+                    'group relative flex flex-col gap-5 rounded-2xl sm:rounded-3xl p-6 sm:p-7 md:p-8',
                     'bg-card/40 dark:bg-white/[0.03] border border-border/60 backdrop-blur-xl',
                     'hover:border-emerald-500/40 hover:-translate-y-1.5',
                     'hover:shadow-[0_0_25px_rgba(16,185,129,0.1)]',
@@ -201,7 +199,7 @@ const AboutSection = () => {
                   ].join(' ')}
                 >
                   {/* Subtle background glow on hover */}
-                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-emerald-500/0 to-emerald-500/0 group-hover:from-emerald-500/[0.03] group-hover:to-transparent transition-all duration-500 pointer-events-none" />
+                  <div className="absolute inset-0 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-emerald-500/0 to-emerald-500/0 group-hover:from-emerald-500/[0.03] group-hover:to-transparent transition-all duration-500 pointer-events-none" />
 
                   {/* Card Header */}
                   <div className="flex items-start justify-between gap-4 relative z-10">

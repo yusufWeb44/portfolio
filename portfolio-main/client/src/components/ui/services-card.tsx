@@ -319,12 +319,12 @@ export const ServiceCard = ({
     ? `${whatsappBaseUrl}${whatsappBaseUrl.includes('?') ? '&' : '?'}text=${inquiryMsg}`
     : `https://wa.me/?text=${inquiryMsg}`;
 
-  // Tailored gradient for cards fitting the light mode blue and dark mode emerald identity
+  // Unified theme-harmonized gradient for cards fitting both light mode and dark mode
   const cardGradients = [
-    "from-blue-500/10 via-blue-500/[0.03] to-card dark:from-emerald-500/10 dark:via-white/[0.03] dark:to-white/[0.01]",
-    "from-indigo-500/10 via-indigo-500/[0.03] to-card dark:from-teal-500/10 dark:via-white/[0.03] dark:to-white/[0.01]",
-    "from-sky-500/10 via-sky-500/[0.03] to-card dark:from-cyan-500/10 dark:via-white/[0.03] dark:to-white/[0.01]",
-    "from-blue-600/10 via-blue-600/[0.03] to-card dark:from-indigo-500/10 dark:via-white/[0.03] dark:to-white/[0.01]",
+    "from-emerald-500/[0.08] via-emerald-500/[0.02] to-card dark:from-emerald-500/10 dark:via-white/[0.03] dark:to-white/[0.01]",
+    "from-teal-500/[0.08] via-teal-500/[0.02] to-card dark:from-teal-500/10 dark:via-white/[0.03] dark:to-white/[0.01]",
+    "from-emerald-600/[0.06] via-emerald-500/[0.02] to-card dark:from-emerald-600/10 dark:via-white/[0.03] dark:to-white/[0.01]",
+    "from-teal-600/[0.06] via-teal-500/[0.02] to-card dark:from-teal-600/10 dark:via-white/[0.03] dark:to-white/[0.01]",
   ];
 
   const activeGradient = service.gradient || cardGradients[index % cardGradients.length];
@@ -333,7 +333,7 @@ export const ServiceCard = ({
     <motion.div
       variants={cardVariants}
       className={cn(
-        "group relative flex h-[460px] w-full flex-col justify-between overflow-hidden rounded-3xl p-7 sm:p-8 border border-border/70 bg-gradient-to-b backdrop-blur-xl shadow-xl hover:border-emerald-500/50 hover:shadow-2xl hover:shadow-emerald-500/10 transition-all duration-500 select-none",
+        "group relative flex min-h-[440px] sm:h-[460px] w-full flex-col justify-between overflow-hidden rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-border/70 bg-gradient-to-b backdrop-blur-xl shadow-lg hover:border-emerald-500/50 hover:shadow-xl hover:shadow-emerald-500/10 transition-all duration-300 select-none",
         activeGradient
       )}
     >

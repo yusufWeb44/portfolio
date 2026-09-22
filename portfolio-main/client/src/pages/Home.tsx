@@ -21,6 +21,7 @@ import type { ExperienceItem } from '../components/ExperienceTimeline';
 import type { CertificateItem } from '../components/CertificatesCarousel';
 import SEO from '../components/SEO';
 import { useLanguage } from '../contexts/LanguageContext';
+import SectionBadge from '../components/ui/SectionBadge';
 
 // Below-the-fold sections dynamically imported to minimize initial bundle size and main-thread work
 const AboutSection = lazy(() => import('../components/AboutSection'));
@@ -422,19 +423,16 @@ const Home = () => {
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 4: EXPERIENCE (Vertical Animated Timeline & Certificates)
       ═══════════════════════════════════════════════════════════════ */}
-      <section id="experience" className="scroll-mt-24 py-28 px-4 sm:px-6 relative overflow-hidden">
+      <section id="experience" className="scroll-mt-24 py-20 sm:py-24 md:py-28 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
         <div className="max-w-7xl mx-auto space-y-12">
           <FadeIn>
-            <div className="flex items-center gap-3 mb-4">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-xs font-bold tracking-widest uppercase text-muted-foreground font-mono">
-                {resolveField('experience.badge', settings?.experienceBadgeAr, settings?.experienceBadge, 'Career History & Academic Journey')}
-              </span>
-            </div>
-            <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter leading-[1.05]">
+            <SectionBadge>
+              {resolveField('experience.badge', settings?.experienceBadgeAr, settings?.experienceBadge, 'Career History & Academic Journey')}
+            </SectionBadge>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-foreground leading-[1.15] mb-4">
               {resolveField('experience.title', settings?.experienceTitleAr, settings?.experienceTitle, 'Experience.')}
             </h2>
-            <p className="text-base md:text-lg text-muted-foreground mt-4 max-w-2xl">
+            <p className="text-base md:text-lg text-muted-foreground max-w-2xl leading-relaxed">
               {resolveField('experience.subtitle', settings?.experienceSubtitleAr, settings?.experienceSubtitle, 'An interactive roadmap of academic foundations, professional roles, and specialized technical credentials.')}
             </p>
           </FadeIn>
@@ -450,20 +448,17 @@ const Home = () => {
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 5: SERVICES (Offerings & Workflow Process)
       ═══════════════════════════════════════════════════════════════ */}
-      <section id="services" className="scroll-mt-24 py-28 px-6">
-        <div className="max-w-7xl mx-auto space-y-20">
+      <section id="services" className="scroll-mt-24 py-20 sm:py-24 md:py-28 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto space-y-16">
           <FadeIn>
-            <div className="flex items-center gap-3 mb-4">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-xs font-bold tracking-widest uppercase text-muted-foreground font-mono">
-                {resolveField('services.badge', settings?.servicesBadgeAr, settings?.servicesBadge, 'Consulting & Offerings')}
-              </span>
-            </div>
-            <div className="grid md:grid-cols-2 gap-8 items-end justify-between">
-              <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter leading-[1.05]">
+            <SectionBadge>
+              {resolveField('services.badge', settings?.servicesBadgeAr, settings?.servicesBadge, 'Consulting & Offerings')}
+            </SectionBadge>
+            <div className="grid md:grid-cols-2 gap-6 lg:gap-8 items-end justify-between">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-foreground leading-[1.15]">
                 {resolveField('services.title', settings?.servicesTitleAr, settings?.servicesTitle, 'Services.')}
               </h2>
-              <p className="text-muted-foreground text-base max-w-md">
+              <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-xl">
                 {resolveField('services.subtitle', settings?.servicesSubtitleAr, settings?.servicesSubtitle, 'End-to-end software development services tailored to help you launch faster, eliminate technical debt, and scale reliably.')}
               </p>
             </div>
@@ -518,10 +513,10 @@ const Home = () => {
       ═══════════════════════════════════════════════════════════════ */}
       <section
         id="contact"
-        className="scroll-mt-24 relative overflow-hidden bg-transparent text-foreground"
+        className="scroll-mt-24 relative overflow-hidden bg-transparent text-foreground py-20 sm:py-24 md:py-28 px-4 sm:px-6 lg:px-8"
       >
-        <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-10 py-24 md:py-32">
-          <div className="grid lg:grid-cols-2 gap-16 lg:gap-20 items-center">
+        <div className="relative z-10 max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
 
             {/* ── Left Column: Headline + CTAs ── */}
             <motion.div
@@ -530,14 +525,11 @@ const Home = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             >
-              <div className="flex items-center gap-3 mb-8">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-xs font-bold tracking-widest uppercase text-muted-foreground font-mono">
-                  {resolveField('contact.badge', settings?.contactBadgeAr, settings?.contactBadge, 'Get In Touch')}
-                </span>
-              </div>
+              <SectionBadge>
+                {resolveField('contact.badge', settings?.contactBadgeAr, settings?.contactBadge, 'Get In Touch')}
+              </SectionBadge>
 
-              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tighter leading-[1.05] mb-6">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight leading-[1.15] mb-6 text-foreground">
                 {isAr ? (
                   resolveField('contact.headline', settings?.contactTitleAr, undefined, '') || (
                     <>
@@ -557,7 +549,7 @@ const Home = () => {
                 )}
               </h2>
 
-              <p className="text-muted-foreground text-base md:text-lg leading-relaxed max-w-md mb-10">
+              <p className="text-muted-foreground text-base md:text-lg leading-relaxed max-w-md mb-8">
                 {resolveField('contact.subtitle', settings?.contactSubtitleAr, settings?.contactSubtitle, "Whether you need a full-stack application, a custom API, or a mobile app — I'm ready to bring your vision to life.")}
               </p>
 
@@ -596,7 +588,7 @@ const Home = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
             >
-              <div className="bg-card/40 dark:bg-white/[0.03] backdrop-blur-xl border border-border/60 rounded-3xl p-8 md:p-10 space-y-8 shadow-sm">
+              <div className="bg-card/40 dark:bg-white/[0.03] backdrop-blur-xl border border-border/60 rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 space-y-6 sm:space-y-8 shadow-sm">
 
                 {/* Email row */}
                 <a
@@ -610,7 +602,7 @@ const Home = () => {
                     <p className="text-[11px] font-mono text-muted-foreground tracking-wider uppercase mb-0.5">Email</p>
                     <p className="text-sm font-semibold text-foreground truncate">{email}</p>
                   </div>
-                  <ArrowUpRight size={14} className="ml-auto shrink-0 opacity-0 group-hover:opacity-60 transition-opacity" />
+                  <ArrowUpRight size={14} className="ms-auto shrink-0 opacity-0 group-hover:opacity-60 transition-opacity rtl:rotate-[-90deg]" />
                 </a>
 
                 {/* Location row */}

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
 import api from '../../services/api';
 import { useLanguage } from '../../contexts/LanguageContext';
+import SectionBadge from '../ui/SectionBadge';
 
 /* ─── Technology Data Types ───────────────────────────────────────── */
 export interface TechItem {
@@ -259,7 +260,7 @@ const SkillsSection = () => {
   return (
     <section
       id="skills"
-      className="scroll-mt-24 py-24 md:py-36 px-6 bg-transparent overflow-x-clip"
+      className="scroll-mt-24 py-20 sm:py-24 md:py-28 px-4 sm:px-6 lg:px-8 bg-transparent overflow-x-clip"
       aria-label="Skills and expertise"
     >
       <div className="max-w-7xl mx-auto">
@@ -275,17 +276,14 @@ const SkillsSection = () => {
           >
             {/* Badge */}
             <motion.div variants={fadeUpVariants}>
-              <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full border border-border/60 bg-card/40 dark:bg-white/[0.04] backdrop-blur-md">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-                <span className="text-xs font-mono font-semibold uppercase tracking-widest text-muted-foreground">
-                  {badgeText}
-                </span>
-              </div>
+              <SectionBadge>
+                {badgeText}
+              </SectionBadge>
             </motion.div>
 
             {/* Headline */}
             <motion.div variants={fadeUpVariants}>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight leading-[1.15]">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-foreground tracking-tight leading-[1.15]">
                 {mainTitle === 'Engineered Core Capabilities' ? (
                   <>
                     Engineered Core{' '}
