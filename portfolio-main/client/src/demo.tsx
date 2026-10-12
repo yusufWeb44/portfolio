@@ -1,55 +1,49 @@
 // demo.tsx
+import Component from '@/components/ui/stacking-card';
 
-import {
-  ServiceCarousel,
-  type Service,
-} from "@/components/ui/services-card";
-import { Palette, Code, Search } from "lucide-react"; // Example icons
-
-// Define the data for the services
-const services: Service[] = [
+const projects = [
   {
-    number: "001",
-    title: "Branding",
+    title: 'Matthias Leidinger',
     description:
-      "We craft logos and brand systems that leave a lasting impression.",
-    icon: Palette,
-    gradient: "from-purple-100 to-purple-200 dark:from-purple-900/50 dark:to-purple-800/50",
+      'Originally hailing from Austria, Berlin-based photographer Matthias Leindinger is a young creative brimming with talent and ideas.',
+    link: 'https://cdn.21st.dev/assets/mirror/68/688e3a84bc3a2949290945455c7927eae33b1bcf702e14ff82f32620918b7f44.jpg',
+    color: '#5196fd',
   },
   {
-    number: "002",
-    title: "Development",
+    title: 'Clément Chapillon',
     description:
-      "Beautiful and functional websites built with purpose and precision.",
-    icon: Code,
-    gradient: "from-green-100 to-green-200 dark:from-green-900/50 dark:to-green-800/50",
+      'This is a story on the border between reality and imaginary, about the contradictory feelings that the insularity of a rocky, arid, and wild territory provokes”—so French photographer Clément.',
+    link: 'https://cdn.21st.dev/assets/mirror/a1/a161a794d3ce6a559a66480d2efb6381f5014557e7fd54c40d305efb07dc9b0a.jpg',
+    color: '#8f89ff',
   },
   {
-    number: "003",
-    title: "SEO Optimization",
+    title: 'Zissou',
     description:
-      "Get found faster with tailored SEO strategies backed by real data.",
-    icon: Search,
-    gradient: "from-red-100 to-red-200 dark:from-red-900/50 dark:to-red-800/50",
+      'Though he views photography as a medium for storytelling, Zissou’s images don’t insist on a narrative. Both crisp and ethereal.',
+    link: 'https://cdn.21st.dev/assets/mirror/8a/8a8a38ac8585b1441da451da11fca95a7a396c03363d376f81887ef369baa9e7.jpg',
+    color: '#13006c',
   },
   {
-    number: "004",
-    title: "UI/UX Design",
+    title: 'Mathias Svold and Ulrik Hasemann',
     description:
-      "Intuitive and engaging user interfaces designed for seamless user experiences.",
-    icon: Palette,
-    gradient: "from-blue-100 to-blue-200 dark:from-blue-900/50 dark:to-blue-800/50",
+      'The coastlines of Denmark are documented in tonal colors in a pensive new series by Danish photographers Ulrik Hasemann and Mathias Svold; an ongoing project investigating how humans interact with and disrupt the Danish coast.',
+    link: 'https://cdn.21st.dev/assets/mirror/08/081c3280302a235d562557777a69b8dee7bb4e6da3065da587ed4d5d4b1c851b.jpg',
+    color: '#ed649e',
+  },
+  {
+    title: 'Mark Rammers',
+    description:
+      'Dutch photographer Mark Rammers has shared with IGNANT the first chapter of his latest photographic project, ‘all over again’—captured while in residency at Hektor, an old farm in Los Valles, Lanzarote.',
+    link: 'https://cdn.21st.dev/assets/mirror/b1/b11aaf5d7ee133af4a77d7aadee376a2b81eb8152a3fc821532c08e299f67443.jpg',
+    color: '#fd521a',
   },
 ];
 
-// The demo component
-export default function AnimatedServiceCardDemo() {
+function ComponentDemo() {
   return (
-    <div className="w-full bg-background flex flex-col items-center justify-center p-8">
-      <div className="text-left w-full max-w-6xl mb-12">
-        <h1 className="text-6xl font-bold tracking-tighter">Services.</h1>
-      </div>
-      <ServiceCarousel services={services} />
-    </div>
+    <Component projects={projects} />
   );
 }
+
+export { ComponentDemo as DemoOne };
+export default ComponentDemo;
