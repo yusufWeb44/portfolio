@@ -341,3 +341,47 @@ model Message {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model FooterSettings {
+  id                 String   @id @default("singleton")
+  brandName          String?  @default("Yousef Ayoubi")
+  brandNameAr        String?  @default("يوسف الأيوبي")
+  brandRole          String?  @default("Software Engineer")
+  brandRoleAr        String?  @default("هندسة برمجيات")
+  brandDescription   String?  @db.Text
+  brandDescriptionAr String?  @db.Text
+  showSocialLinks    Boolean  @default(true)
+  customSocialLinks  String?  @db.Text
+
+  servicesTitle      String?  @default("Services")
+  servicesTitleAr    String?  @default("خدماتي")
+  servicesLinkText   String?  @default("All Services →")
+  servicesLinkTextAr String?  @default("جميع الخدمات ←")
+  servicesLinkUrl    String?  @default("#services")
+  servicesLimit      Int      @default(5)
+  showServicesCol    Boolean  @default(true)
+
+  quickLinksTitle    String?  @default("Quick Links")
+  quickLinksTitleAr  String?  @default("روابط سريعة")
+  quickLinks         String?  @db.Text
+  showQuickLinksCol  Boolean  @default(true)
+
+  contactTitle       String?  @default("Support & Contact")
+  contactTitleAr     String?  @default("الدعم والتواصل")
+  contactEmail       String?
+  contactLocation    String?
+  contactLocationAr  String?
+  contactPhone       String?
+  availabilityText   String?
+  availabilityTextAr String?
+  showContactCol     Boolean  @default(true)
+
+  copyrightText      String?  @db.Text
+  copyrightTextAr    String?  @db.Text
+  secondaryBadge     String?
+  secondaryBadgeAr   String?
+  showBackToTop      Boolean  @default(true)
+
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}

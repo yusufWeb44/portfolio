@@ -61,6 +61,7 @@ const PublicLayout = () => {
     { name: t('nav.experience', 'Experience'), id: 'experience', icon: Briefcase },
     { name: t('nav.services', 'Services'), id: 'services', icon: Wrench },
     { name: t('nav.faq', 'FAQ'), id: 'faq', icon: HelpCircle },
+    { name: t('nav.contact', isAr ? 'تواصل' : 'Contact'), id: 'contact', icon: Mail },
   ];
 
   // Passive RAF scroll detection (zero reflows/lag)
@@ -393,22 +394,9 @@ const PublicLayout = () => {
               })}
             </nav>
 
-            {/* End: Desktop Action Controls (CTA, Theme Toggle, Language) */}
+            {/* End: Desktop Action Controls (Theme Toggle, Language) */}
             <div className="hidden md:flex items-center gap-2.5 sm:gap-3">
-              {/* 1. CTA Button (Contact Us / تواصل معنا) */}
-              <button
-                type="button"
-                onClick={() => scrollToSection('contact')}
-                className="flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl bg-white/50 hover:bg-white/80 dark:bg-white/[0.08] dark:hover:bg-white/[0.14] border border-slate-900/[0.07] hover:border-emerald-500/40 dark:border-white/[0.12] dark:hover:border-emerald-400/40 text-foreground hover:text-emerald-500 dark:hover:text-emerald-400 text-xs sm:text-sm font-bold transition-all cursor-pointer group shadow-xs dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.10)] backdrop-blur-md"
-                title={isAr ? 'تواصل معنا' : 'Contact Us'}
-              >
-                <Mail className="w-4 h-4 text-emerald-500 dark:text-emerald-400 group-hover:scale-110 transition-transform" />
-                <span className="hidden lg:inline text-xs sm:text-sm font-bold">
-                  {isAr ? 'تواصل معنا' : 'Contact Us'}
-                </span>
-              </button>
-
-              {/* 2. Theme Toggle (Sun / Moon) */}
+              {/* 1. Theme Toggle (Sun / Moon) */}
               <button
                 type="button"
                 onClick={toggleTheme}
@@ -423,7 +411,7 @@ const PublicLayout = () => {
                 )}
               </button>
 
-              {/* 3. Language Selector Dropdown */}
+              {/* 2. Language Selector Dropdown */}
               <LanguageSwitcher />
             </div>
 
@@ -517,20 +505,7 @@ const PublicLayout = () => {
 
               {/* Scrollable Body */}
               <div className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar overscroll-contain">
-                {/* Quick CTA */}
-                <div className="pb-3.5 border-b border-border/70 dark:border-white/10">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMobileMenuOpen(false);
-                      scrollToSection('contact');
-                    }}
-                    className="w-full py-2.5 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold text-center flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer active:scale-95"
-                  >
-                    <Mail className="w-4 h-4" />
-                    <span>{isAr ? 'تواصل معنا' : 'Contact Us'}</span>
-                  </button>
-                </div>
+
 
                 {/* Theme Toggle - Clean Row */}
                 <div className="flex items-center justify-between py-1 text-xs font-medium text-muted-foreground border-b border-border/70 dark:border-white/10 pb-3">

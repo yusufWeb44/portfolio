@@ -11,6 +11,7 @@ import {
   getSocialLinks, createSocialLink, updateSocialLink, deleteSocialLink
 } from '../controllers/portfolioController';
 import { getAbout, updateAbout } from '../controllers/aboutController';
+import { getFooter, updateFooter } from '../controllers/footerController';
 import {
   getWorkflowSteps, createWorkflowStep, updateWorkflowStep,
   deleteWorkflowStep, reorderWorkflowSteps
@@ -30,6 +31,11 @@ const router = express.Router();
 router.route('/settings')
   .get(getSettings)
   .put(protect, updateSettings);
+
+// Footer Section
+router.route('/footer')
+  .get(getFooter)
+  .put(protect, updateFooter);
 
 // About Section
 router.route('/about')

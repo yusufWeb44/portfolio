@@ -4,7 +4,7 @@ import { useAuthStore } from '../store/authStore';
 import { 
   LogOut, LayoutDashboard, FolderKanban, Briefcase, Wrench, 
   MessageSquare, Settings, Menu, X, ArrowLeft, Terminal,
-  Layers, Pin, Award, HelpCircle, Globe, Languages 
+  Layers, Pin, Award, HelpCircle, Globe, Languages, PanelBottom
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { Helmet } from 'react-helmet-async';
@@ -47,6 +47,7 @@ const AdminLayout = () => {
     { label: 'Certificates', path: '/admin/certificates', icon: <Award size={17} /> },
     { label: 'Services', path: '/admin/services', icon: <Wrench size={17} /> },
     { label: 'FAQs', path: '/admin/faqs', icon: <HelpCircle size={17} /> },
+    { label: 'Footer Section', path: '/admin/footer', icon: <PanelBottom size={17} /> },
   ];
 
   const systemNavItems = [
