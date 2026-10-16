@@ -13,7 +13,7 @@ import {
   WhatsappIcon,
   TelegramIcon,
 } from '../components/ui/BrandIcons';
-import { useEffect, useState, useMemo, lazy, Suspense, startTransition } from 'react';
+import { useEffect, useState, useMemo, Suspense, startTransition } from 'react';
 import api from '../services/api';
 import { getMediaUrl } from '../utils/mediaUrl';
 import MinimalistHero from '../components/MinimalistHero';
@@ -23,15 +23,15 @@ import SEO from '../components/SEO';
 import { useLanguage } from '../contexts/LanguageContext';
 import SectionBadge from '../components/ui/SectionBadge';
 
-// Below-the-fold sections dynamically imported to minimize initial bundle size and main-thread work
-const AboutSection = lazy(() => import('../components/AboutSection'));
-const HowItWorks = lazy(() => import('../components/ui/how-it-works'));
-const SkillsSection = lazy(() => import('../components/sections/skills'));
-const ProjectsSection = lazy(() => import('../components/sections/projects'));
-const FAQ = lazy(() => import('../components/ui/faq-tabs').then(m => ({ default: m.FAQ })));
-const ServiceCarousel = lazy(() => import('../components/ui/services-card').then(m => ({ default: m.ServiceCarousel })));
-const ExperienceTimeline = lazy(() => import('../components/ExperienceTimeline'));
-const CertificatesCarousel = lazy(() => import('../components/CertificatesCarousel'));
+// Direct imports for stable section rendering, zero scroll jumps, and immediate anchor availability
+import AboutSection from '../components/AboutSection';
+import HowItWorks from '../components/ui/how-it-works';
+import SkillsSection from '../components/sections/skills';
+import ProjectsSection from '../components/sections/projects';
+import { FAQ } from '../components/ui/faq-tabs';
+import { ServiceCarousel } from '../components/ui/services-card';
+import ExperienceTimeline from '../components/ExperienceTimeline';
+import CertificatesCarousel from '../components/CertificatesCarousel';
 
 /* ─── Types ──────────────────────────────────────────────────────── */
 

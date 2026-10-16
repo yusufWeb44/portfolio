@@ -164,7 +164,7 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
     <div className="relative min-h-[calc(100vh-4rem)] flex flex-col justify-between overflow-hidden bg-transparent select-none">
 
       {/* Main Hero Content */}
-      <div className="flex-1 max-w-7xl mx-auto w-full px-6 pt-20 pb-8 flex flex-col justify-center">
+      <div className="flex-1 max-w-7xl mx-auto w-full px-6 pt-24 sm:pt-28 md:pt-32 pb-8 flex flex-col justify-center">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
 
           {/* ── Left Column (desktop): Headline, Bio, CTA, Social, Stats ── */}
@@ -293,13 +293,14 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
 
             {/* Blob + Profile Image */}
             <div className="relative flex justify-center items-center min-h-[320px] sm:min-h-[400px] lg:min-h-[500px] w-full">
-              {/* Fluid Blob */}
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.4, ease: cubicEase }}
-                className="absolute w-[280px] h-[280px] sm:w-[360px] sm:h-[360px] lg:w-[480px] lg:h-[480px] z-0 pointer-events-none"
-              >
+              {/* Fluid Blob Backdrop — Enlarged to match reference photo, perfectly framing profile */}
+              <div className="absolute -top-6 sm:-top-8 lg:-top-11 w-[290px] h-[290px] sm:w-[360px] sm:h-[360px] lg:w-[450px] lg:h-[450px] z-0 pointer-events-none">
+                <motion.div
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.4, ease: cubicEase }}
+                  className="w-full h-full relative"
+                >
                 {/* Ambient glow behind blob without expensive filter */}
                 <div className="absolute inset-6 rounded-full bg-emerald-500/15 dark:bg-emerald-500/25 blur-3xl -z-10" />
                 <svg viewBox="0 0 500 500" className="w-full h-full">
@@ -334,8 +335,9 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
                   />
                 </svg>
               </motion.div>
+            </div>
 
-              {/* Profile Image */}
+              {/* Profile Image — Completely fluid, continuous feather-soft eased gradient with zero visible steps or lines */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.96 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -353,8 +355,8 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
                   width={420}
                   height={420}
                   style={{
-                    maskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)',
-                    WebkitMaskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)',
+                    maskImage: 'linear-gradient(to bottom, black 0%, black 76%, rgba(0, 0, 0, 0.99) 79%, rgba(0, 0, 0, 0.96) 82%, rgba(0, 0, 0, 0.91) 85%, rgba(0, 0, 0, 0.82) 88%, rgba(0, 0, 0, 0.69) 91%, rgba(0, 0, 0, 0.52) 94%, rgba(0, 0, 0, 0.33) 96.5%, rgba(0, 0, 0, 0.15) 98.2%, rgba(0, 0, 0, 0.04) 99.2%, transparent 100%)',
+                    WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 76%, rgba(0, 0, 0, 0.99) 79%, rgba(0, 0, 0, 0.96) 82%, rgba(0, 0, 0, 0.91) 85%, rgba(0, 0, 0, 0.82) 88%, rgba(0, 0, 0, 0.69) 91%, rgba(0, 0, 0, 0.52) 94%, rgba(0, 0, 0, 0.33) 96.5%, rgba(0, 0, 0, 0.15) 98.2%, rgba(0, 0, 0, 0.04) 99.2%, transparent 100%)',
                   }}
                   className="w-[240px] sm:w-[300px] lg:w-[420px] h-auto object-contain scale-[1.55] pointer-events-auto transition-transform duration-500 hover:scale-[1.6]"
                 />

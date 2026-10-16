@@ -118,6 +118,7 @@
     -moz-osx-font-smoothing: grayscale;
     scroll-behavior: smooth;
     scrollbar-gutter: stable;
+    scroll-padding-top: 5.5rem;
   }
 
   /* Custom selection */

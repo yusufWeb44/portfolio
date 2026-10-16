@@ -58,8 +58,12 @@ const AdminLayout = () => {
   const SidebarContent = () => (
     <>
       <div className="p-5 border-b border-border/40 shrink-0">
-        <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <div className="w-8 h-8 bg-foreground text-background rounded flex items-center justify-center font-bold font-serif">Y</div>
+        <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+          <img
+            src="/logo.webp"
+            alt="Logo"
+            className="h-8 w-auto object-contain filter invert contrast-125 dark:filter-none select-none"
+          />
           <div>
             <span className="font-bold tracking-tight text-base block leading-none">Yusuf CMS</span>
             <span className="text-[10px] text-muted-foreground">Admin Control Center</span>

@@ -1,7 +1,10 @@
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import { Menu, X, ArrowRight } from 'lucide-react';
-import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
+import { useState, useEffect, useRef } from 'react';
+import { 
+  Menu, X, Mail, Sun, Moon, 
+  ChevronRight, User, FolderKanban, Terminal, Briefcase, Wrench, HelpCircle 
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../components/ui/Button';
 import api from '../services/api';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
@@ -9,7 +12,6 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { applyCustomFonts } from '../utils/fontLoader';
 import Footer from '../components/Footer';
 import { applyThemePalette, getThemeAuras } from '../utils/themeEngine';
-import ThemeToggle from '../components/ThemeToggle';
 import SplashScreen from '../components/ui/SplashScreen';
 
 const PublicLayout = () => {
@@ -48,24 +50,39 @@ const PublicLayout = () => {
       return null;
     }
   });
-  const { scrollY } = useScroll();
   const location = useLocation();
   const navigate = useNavigate();
+  const isNavigatingRef = useRef(false);
 
   const navLinks = [
-    { name: t('nav.about', 'About'), id: 'about' },
-    { name: t('nav.projects', 'Projects'), id: 'projects' },
-    { name: t('nav.skills', 'Skills'), id: 'skills' },
-    { name: t('nav.experience', 'Experience'), id: 'experience' },
-    { name: t('nav.services', 'Services'), id: 'services' },
-    { name: t('nav.faq', 'FAQ'), id: 'faq' },
+    { name: t('nav.about', 'About'), id: 'about', icon: User },
+    { name: t('nav.projects', 'Projects'), id: 'projects', icon: FolderKanban },
+    { name: t('nav.skills', 'Skills'), id: 'skills', icon: Terminal },
+    { name: t('nav.experience', 'Experience'), id: 'experience', icon: Briefcase },
+    { name: t('nav.services', 'Services'), id: 'services', icon: Wrench },
+    { name: t('nav.faq', 'FAQ'), id: 'faq', icon: HelpCircle },
   ];
 
-  useMotionValueEvent(scrollY, "change", (latest) => {
-    setScrolled(latest > 20);
-  });
+  // Passive RAF scroll detection (zero reflows/lag)
+  useEffect(() => {
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setScrolled(window.scrollY > 20);
+          if (window.scrollY < 80 && !isNavigatingRef.current) {
+            setActiveSection('');
+          }
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
-  // Track active section via Intersection Observer
+  // Track active section via Intersection Observer without jitter
   useEffect(() => {
     if (location.pathname !== '/') {
       setActiveSection('');
@@ -75,15 +92,18 @@ const PublicLayout = () => {
     const sections = navLinks.map(l => document.getElementById(l.id)).filter(Boolean) as HTMLElement[];
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
-          }
-        });
+        if (isNavigatingRef.current) return;
+        const visibleEntries = entries.filter(e => e.isIntersecting);
+        if (visibleEntries.length > 0) {
+          visibleEntries.sort(
+            (a, b) => Math.abs(a.boundingClientRect.top - 120) - Math.abs(b.boundingClientRect.top - 120)
+          );
+          setActiveSection(visibleEntries[0].target.id);
+        }
       },
       {
-        rootMargin: '-30% 0px -50% 0px',
-        threshold: 0,
+        rootMargin: '-15% 0px -50% 0px',
+        threshold: [0, 0.1, 0.25],
       }
     );
 
@@ -98,9 +118,8 @@ const PublicLayout = () => {
       const timer = setTimeout(() => {
         const el = document.getElementById(id);
         if (el) {
-          const yOffset = -75;
-          const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
-          window.scrollTo({ top: y, behavior: 'smooth' });
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          setActiveSection(id);
         }
       }, 150);
       return () => clearTimeout(timer);
@@ -113,16 +132,48 @@ const PublicLayout = () => {
       return;
     }
 
+    if (id === 'hero') {
+      setActiveSection('');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
     const el = document.getElementById(id);
     if (el) {
-      const yOffset = -75;
-      const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
-      window.scrollTo({ top: y, behavior: 'smooth' });
       setActiveSection(id);
-    } else if (id === 'hero') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      isNavigatingRef.current = true;
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      try {
+        window.history.replaceState(null, '', `#${id}`);
+      } catch {}
+      setTimeout(() => {
+        isNavigatingRef.current = false;
+      }, 700);
     }
   };
+
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setMobileMenuOpen(false);
+      }
+    };
+    if (mobileMenuOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [mobileMenuOpen]);
 
   useEffect(() => {
     api.get('/social-links').then(res => setSocialLinks(res.data.data)).catch(() => { });
@@ -203,7 +254,6 @@ const PublicLayout = () => {
       setIsDark(nextIsDark);
     };
 
-    // If browser supports View Transitions API, trigger circular ripple effect from click position
     if (
       typeof document !== 'undefined' &&
       'startViewTransition' in document &&
@@ -238,7 +288,6 @@ const PublicLayout = () => {
       return;
     }
 
-    // Fallback: Instant synchronous execution
     performThemeSwitch();
   };
 
@@ -252,7 +301,7 @@ const PublicLayout = () => {
 
   const brandName = isAr
     ? (settings?.nameAr ? settings.nameAr.split(' ')[0] : 'يوسف')
-    : (settings?.name ? settings.name.split(' ')[0] : 'Yusuf');
+    : (settings?.name ? settings.name.split(' ')[0] : 'Yousef');
 
   return (
     <div className="min-h-screen flex flex-col relative bg-background text-foreground font-sans selection:bg-foreground selection:text-background overflow-x-clip">
@@ -273,138 +322,300 @@ const PublicLayout = () => {
         style={{ contain: 'paint layout', transform: 'translateZ(0)' }}
         aria-hidden="true"
       >
-        {/* Ambient Grid Layer */}
         {bgPatternClass && (
           <div className={`absolute inset-0 ${bgPatternClass} opacity-[0.10] dark:opacity-[0.25]`} />
         )}
 
-        {/* Floating Atmospheric Ambient Orbs (Optimized GPU Rendering) */}
         {enableGlow && (
           <div 
             className="absolute inset-0 overflow-hidden opacity-35 dark:opacity-40 pointer-events-none select-none"
             style={{ contain: 'strict', transform: 'translateZ(0)' }}
           >
-            {/* Top-Right Themed Aura */}
             <div className={`absolute -top-[5%] -right-[5%] w-[460px] h-[460px] rounded-full bg-gradient-to-br ${auras.orb1} blur-2xl transform-gpu`} />
-
-            {/* Mid-Left Secondary Themed Aura */}
             <div className={`absolute top-[35%] -left-[10%] w-[420px] h-[420px] rounded-full bg-gradient-to-tr ${auras.orb2} blur-2xl transform-gpu`} />
-
-            {/* Lower-Right Deep Themed Aura */}
             <div className={`absolute top-[70%] -right-[5%] w-[460px] h-[460px] rounded-full bg-gradient-to-tl ${auras.orb3} blur-2xl transform-gpu`} />
-
-            {/* Bottom Ambient Glow for Footer / Contact */}
             <div className={`absolute -bottom-[5%] left-1/2 -translate-x-1/2 w-[520px] h-[300px] rounded-full ${auras.orb4} blur-2xl transform-gpu`} />
           </div>
         )}
       </div>
 
-      {/* Fixed Sticky Navbar */}
-      <header
-        className={cn(
-          "fixed top-0 left-0 right-0 z-50 py-4 transition-[background-color,border-color,box-shadow,backdrop-filter] duration-300",
-          scrolled ? "bg-background/90 backdrop-blur-xl border-b border-border/50 shadow-sm" : "bg-transparent"
-        )}
-      >
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 flex justify-between items-center">
-          <button
-            onClick={() => scrollToSection('hero')}
-            className="text-lg font-bold tracking-tighter uppercase z-50 cursor-pointer bg-transparent border-none p-0 text-start"
+      {/* ── Floating Glassmorphic Header (Island Architecture) ── */}
+      <header className="fixed top-0 inset-x-0 z-50 py-0 md:py-3 pointer-events-none transition-all duration-300">
+        <div className="w-full md:max-w-[1380px] 2xl:max-w-[1440px] md:mx-auto px-0 md:px-6 lg:px-8 pointer-events-auto">
+          <div
+            className={cn(
+              "flex items-center justify-between px-4 sm:px-6 py-2.5 md:py-3 min-h-[64px] sm:min-h-[68px] md:min-h-[72px]",
+              "rounded-none md:rounded-2xl border-b md:border",
+              "border-slate-900/[0.07] dark:border-white/[0.09]",
+              "bg-white/45 dark:bg-zinc-900/35",
+              "backdrop-blur-xl backdrop-saturate-150",
+              "shadow-[0_2px_12px_rgba(0,0,0,0.03)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_4px_16px_rgba(0,0,0,0.20)]",
+              "transition-all duration-300",
+              scrolled
+                ? "bg-white/70 dark:bg-zinc-900/55 border-slate-900/[0.09] dark:border-white/[0.13] shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_6px_24px_rgba(0,0,0,0.30)]"
+                : ""
+            )}
           >
-            {brandName}<span className="text-accent opacity-50">.</span>
-          </button>
+            {/* Start: Brand Logo Only (Frameless, clean, responsive) */}
+            <button
+              onClick={() => scrollToSection('hero')}
+              className="group flex items-center transition-transform duration-200 hover:opacity-90 cursor-pointer bg-transparent border-none p-0 focus:outline-none shrink-0"
+              aria-label="Home"
+            >
+              <img
+                src="/logo.webp"
+                alt="Logo"
+                className="h-8 sm:h-9 md:h-10 w-auto max-w-[95px] sm:max-w-[115px] md:max-w-[130px] object-contain filter invert contrast-125 dark:filter-none select-none shrink-0 transition-transform duration-200 group-hover:scale-105"
+              />
+            </button>
 
-          {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-2">
-            <div className="flex bg-muted/50 rounded-full p-1 border border-border/50 me-2 backdrop-blur-md">
-              {navLinks.map(link => {
+            {/* Center: Desktop Navigation Links (No rectangular container on hover, text color only) */}
+            <nav
+              className="hidden md:flex items-center gap-1 sm:gap-2"
+              aria-label="Main Navigation"
+            >
+              {navLinks.map((link) => {
                 const isActive = activeSection === link.id;
                 return (
                   <button
                     key={link.id}
                     onClick={() => scrollToSection(link.id)}
                     className={cn(
-                      "px-4 py-1.5 text-sm font-medium rounded-full transition-all duration-300 cursor-pointer",
+                      "px-3 sm:px-3.5 py-1.5 text-sm sm:text-[15px] font-semibold transition-colors duration-200 flex items-center justify-center cursor-pointer bg-transparent border-none select-none",
                       isActive
-                        ? "bg-foreground text-background shadow-sm"
-                        : "text-muted-foreground hover:text-foreground hover:bg-background/60"
+                        ? "text-emerald-500 dark:text-emerald-400 font-bold"
+                        : "text-muted-foreground hover:text-black dark:hover:text-white"
                     )}
                   >
-                    {link.name}
+                    <span>{link.name}</span>
                   </button>
                 );
               })}
+            </nav>
+
+            {/* End: Desktop Action Controls (CTA, Theme Toggle, Language) */}
+            <div className="hidden md:flex items-center gap-2.5 sm:gap-3">
+              {/* 1. CTA Button (Contact Us / تواصل معنا) */}
+              <button
+                type="button"
+                onClick={() => scrollToSection('contact')}
+                className="flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl bg-white/50 hover:bg-white/80 dark:bg-white/[0.08] dark:hover:bg-white/[0.14] border border-slate-900/[0.07] hover:border-emerald-500/40 dark:border-white/[0.12] dark:hover:border-emerald-400/40 text-foreground hover:text-emerald-500 dark:hover:text-emerald-400 text-xs sm:text-sm font-bold transition-all cursor-pointer group shadow-xs dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.10)] backdrop-blur-md"
+                title={isAr ? 'تواصل معنا' : 'Contact Us'}
+              >
+                <Mail className="w-4 h-4 text-emerald-500 dark:text-emerald-400 group-hover:scale-110 transition-transform" />
+                <span className="hidden lg:inline text-xs sm:text-sm font-bold">
+                  {isAr ? 'تواصل معنا' : 'Contact Us'}
+                </span>
+              </button>
+
+              {/* 2. Theme Toggle (Sun / Moon) */}
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className="p-2 sm:p-2.5 rounded-xl bg-white/50 hover:bg-white/80 dark:bg-white/[0.08] dark:hover:bg-white/[0.14] border border-slate-900/[0.07] hover:border-slate-900/[0.15] dark:border-white/[0.12] dark:hover:border-white/[0.22] text-slate-700 dark:text-slate-100 hover:text-emerald-500 dark:hover:text-emerald-400 transition-all cursor-pointer group shadow-xs dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.10)] backdrop-blur-md flex items-center justify-center shrink-0"
+                title={isDark ? (isAr ? 'تفعيل الوضع الفاتح' : 'Switch to Light Mode') : (isAr ? 'تفعيل الوضع الداكن' : 'Switch to Dark Mode')}
+                aria-label="Toggle Theme"
+              >
+                {isDark ? (
+                  <Sun className="w-4 h-4 text-amber-400 group-hover:rotate-45 transition-transform duration-300" />
+                ) : (
+                  <Moon className="w-4 h-4 text-emerald-500 group-hover:-rotate-12 transition-transform duration-300" />
+                )}
+              </button>
+
+              {/* 3. Language Selector Dropdown */}
+              <LanguageSwitcher />
             </div>
 
-            {/* Language Switcher */}
-            <LanguageSwitcher />
+            {/* Mobile Controls: Language + Theme + Hamburger Button */}
+            <div className="flex md:hidden items-center gap-2">
+              <LanguageSwitcher />
+              
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className="p-2 rounded-xl bg-white/50 hover:bg-white/80 dark:bg-white/[0.08] dark:hover:bg-white/[0.14] border border-slate-900/[0.07] dark:border-white/[0.12] text-foreground transition-all cursor-pointer shadow-xs dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.10)] flex items-center justify-center shrink-0 backdrop-blur-md"
+                aria-label="Toggle Theme"
+              >
+                {isDark ? (
+                  <Sun className="w-4 h-4 text-amber-400" />
+                ) : (
+                  <Moon className="w-4 h-4 text-emerald-500" />
+                )}
+              </button>
 
-            {/* Animated Theme Toggle */}
-            <ThemeToggle isDark={isDark} onToggle={toggleTheme} iconSize={15} />
-            <button
-              onClick={() => scrollToSection('contact')}
-              className="ms-2 h-9 px-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-semibold rounded-full transition-colors duration-200 shadow-sm hover:shadow-md hover:shadow-emerald-500/15 flex items-center gap-1.5 cursor-pointer"
-            >
-              <span>{t('nav.startProject', 'Start a project')}</span>
-              <ArrowRight size={13} className="rtl:rotate-180" />
-            </button>
-          </nav>
-
-          {/* Mobile Menu Button */}
-          <div className="flex md:hidden items-center gap-2 z-50">
-            <LanguageSwitcher />
-            <ThemeToggle isDark={isDark} onToggle={toggleTheme} iconSize={17} />
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-foreground"
-            >
-              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(true)}
+                className="w-10 h-10 rounded-xl bg-white/50 hover:bg-white/80 dark:bg-white/[0.08] dark:hover:bg-white/[0.14] border border-slate-900/[0.07] dark:border-white/[0.12] text-foreground transition-all cursor-pointer shadow-xs active:scale-95 flex items-center justify-center shrink-0 backdrop-blur-md"
+                aria-label="Open menu"
+                aria-expanded={mobileMenuOpen}
+              >
+                <Menu className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+              </button>
+            </div>
           </div>
         </div>
       </header>
 
-      {/* Mobile Menu Overlay */}
+      {/* ── Mobile Sidebar Drawer (Backdrop + Sliding Panel) ── */}
       <AnimatePresence>
         {mobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, clipPath: "circle(0% at 100% 0)" }}
-            animate={{ opacity: 1, clipPath: "circle(150% at 100% 0)" }}
-            exit={{ opacity: 0, clipPath: "circle(0% at 100% 0)" }}
-            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed inset-0 z-40 bg-background/95 backdrop-blur-xl pt-32 px-8 flex flex-col"
-          >
-            <nav className="flex flex-col space-y-8 text-4xl font-bold tracking-tighter">
-              {navLinks.map((link, idx) => (
-                <motion.button
-                  key={link.name}
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              className="fixed inset-0 z-[9998] bg-black/70 backdrop-blur-sm md:hidden"
+              onClick={() => setMobileMenuOpen(false)}
+              aria-hidden="true"
+            />
+
+            {/* Sliding Panel */}
+            <motion.aside
+              initial={{ x: currentDirection === 'rtl' ? '100%' : '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: currentDirection === 'rtl' ? '100%' : '-100%' }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className={cn(
+                "fixed inset-y-0 top-0 bottom-0 z-[9999] w-[80vw] max-w-[320px] sm:max-w-[340px] h-screen bg-background dark:bg-slate-950 text-foreground shadow-2xl flex flex-col md:hidden",
+                currentDirection === 'rtl'
+                  ? "right-0 border-s border-border/70 dark:border-white/10"
+                  : "left-0 border-e border-border/70 dark:border-white/10"
+              )}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Navigation Drawer"
+            >
+              {/* Drawer Header */}
+              <div className="flex items-center justify-between p-4 border-b border-border/70 dark:border-white/10 shrink-0">
+                <button
                   onClick={() => {
                     setMobileMenuOpen(false);
-                    scrollToSection(link.id);
+                    scrollToSection('hero');
                   }}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 * idx, duration: 0.4 }}
-                  className="text-start hover:text-muted-foreground transition-colors cursor-pointer bg-transparent border-none p-0"
+                  className="flex items-center cursor-pointer bg-transparent border-none p-0 focus:outline-none"
                 >
-                  {link.name}
-                </motion.button>
-              ))}
-              <motion.button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  scrollToSection('contact');
-                }}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4, duration: 0.4 }}
-                className="text-accent flex items-center gap-4 text-2xl mt-8 text-start cursor-pointer bg-transparent border-none p-0"
-              >
-                <span>{t('nav.startProject', 'Start a project')}</span>
-                <ArrowRight className="rtl:rotate-180" />
-              </motion.button>
-            </nav>
-          </motion.div>
+                  <img
+                    src="/logo.webp"
+                    alt="Logo"
+                    className="h-8 w-auto max-w-[90px] object-contain filter invert contrast-125 dark:filter-none select-none shrink-0"
+                  />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 border border-transparent hover:border-border text-muted-foreground hover:text-emerald-500 transition-all cursor-pointer active:scale-95"
+                  aria-label="Close menu"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Scrollable Body */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar overscroll-contain">
+                {/* Quick CTA */}
+                <div className="pb-3.5 border-b border-border/70 dark:border-white/10">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      scrollToSection('contact');
+                    }}
+                    className="w-full py-2.5 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold text-center flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer active:scale-95"
+                  >
+                    <Mail className="w-4 h-4" />
+                    <span>{isAr ? 'تواصل معنا' : 'Contact Us'}</span>
+                  </button>
+                </div>
+
+                {/* Theme Toggle - Clean Row */}
+                <div className="flex items-center justify-between py-1 text-xs font-medium text-muted-foreground border-b border-border/70 dark:border-white/10 pb-3">
+                  <span className="flex items-center gap-2">
+                    {isDark ? (
+                      <Moon className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
+                    ) : (
+                      <Sun className="w-4 h-4 text-amber-500" />
+                    )}
+                    <span>{isAr ? (isDark ? 'المظهر الداكن' : 'المظهر الفاتح') : (isDark ? 'Dark Theme' : 'Light Theme')}</span>
+                  </span>
+
+                  <button
+                    type="button"
+                    onClick={toggleTheme}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/70 hover:border-emerald-500/50 text-xs font-semibold text-foreground transition-all cursor-pointer"
+                    title="Toggle theme"
+                  >
+                    <span>{isDark ? (isAr ? 'تفعيل الفاتح' : 'Light') : (isAr ? 'تفعيل الداكن' : 'Dark')}</span>
+                    {isDark ? (
+                      <Sun className="w-3.5 h-3.5 text-amber-400" />
+                    ) : (
+                      <Moon className="w-3.5 h-3.5 text-emerald-500" />
+                    )}
+                  </button>
+                </div>
+
+                {/* Navigation Links - Clean list with active highlight */}
+                <nav className="space-y-1 pt-1" aria-label="Sidebar Navigation">
+                  {navLinks.map((item) => {
+                    const isActive = activeSection === item.id;
+                    const Icon = item.icon;
+
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          scrollToSection(item.id);
+                        }}
+                        className={cn(
+                          "w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer bg-transparent border-none text-start",
+                          isActive
+                            ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 dark:bg-emerald-500/20 font-bold border border-emerald-500/30 dark:shadow-[0_0_12px_rgba(16,185,129,0.15)]"
+                            : "text-muted-foreground hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.06]"
+                        )}
+                      >
+                        <div className="flex items-center gap-3">
+                          <Icon
+                            className={cn(
+                              "w-4 h-4",
+                              isActive ? "text-emerald-500 dark:text-emerald-400" : "text-muted-foreground"
+                            )}
+                          />
+                          <span>{item.name}</span>
+                        </div>
+
+                        <ChevronRight
+                          className={cn(
+                            "w-3.5 h-3.5 rtl:rotate-180 transition-transform",
+                            isActive ? "text-emerald-500 dark:text-emerald-400" : "text-muted-foreground/60"
+                          )}
+                        />
+                      </button>
+                    );
+                  })}
+                </nav>
+              </div>
+
+              {/* Drawer Footer */}
+              <div className="p-3.5 border-t border-border/70 dark:border-white/10 text-center text-[11px] text-muted-foreground space-y-1 shrink-0">
+                {settings?.email && (
+                  <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+                    <Mail className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
+                    <a href={`mailto:${settings.email}`} className="hover:text-foreground transition-colors" dir="ltr">
+                      {settings.email}
+                    </a>
+                  </div>
+                )}
+                <p className="text-[10px] text-muted-foreground/75">
+                  © {new Date().getFullYear()} {brandName}. {isAr ? 'جميع الحقوق محفوظة' : 'All rights reserved'}
+                </p>
+              </div>
+            </motion.aside>
+          </>
         )}
       </AnimatePresence>
 

@@ -31,7 +31,12 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted/30">
       <div className="w-full max-w-md p-8 bg-card rounded-xl border border-border shadow-lg">
-        <div className="mb-8 text-center">
+        <div className="mb-8 text-center flex flex-col items-center">
+          <img
+            src="/logo.webp"
+            alt="Logo"
+            className="h-10 sm:h-12 w-auto mb-4 object-contain filter invert contrast-125 dark:filter-none select-none"
+          />
           <h1 className="text-2xl font-bold tracking-tight mb-2">Admin Login</h1>
           <p className="text-muted-foreground text-sm">Enter your credentials to access the dashboard</p>
         </div>

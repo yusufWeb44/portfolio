@@ -175,7 +175,7 @@ export const FAQ = ({
   return (
     <section
       className={cn(
-        'relative overflow-hidden bg-transparent px-4 sm:px-6 lg:px-8 py-20 sm:py-24 md:py-28',
+        'scroll-mt-24 relative overflow-hidden bg-transparent px-4 sm:px-6 lg:px-8 py-20 sm:py-24 md:py-28',
         className
       )}
       {...props}

@@ -31,7 +31,8 @@ export const defaultEnTranslations: Record<string, string> = {
   "nav.services": "Services",
   "nav.faq": "FAQ",
   "nav.contact": "Contact",
-  "nav.startProject": "Start a project",
+  "nav.startProject": "Contact Us",
+  "nav.contactUs": "Contact Us",
 
   "hero.greeting": "Available for Freelance & Consulting",
   "hero.headline": "End-to-End Web Development & Software Engineering",

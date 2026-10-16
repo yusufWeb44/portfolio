@@ -79,13 +79,17 @@ export const Footer: React.FC<FooterProps> = ({ settings, socialLinks = [], scro
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-10 lg:gap-16">
           {/* Brand & Identity Column */}
           <div className="space-y-3.5 max-w-md">
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-3">
               <button
                 onClick={() => scrollToSection('hero')}
-                className="text-xl font-bold tracking-tight text-foreground hover:opacity-85 transition-opacity text-start cursor-pointer bg-transparent border-none p-0"
+                className="flex items-center gap-2 hover:opacity-85 transition-opacity text-start cursor-pointer bg-transparent border-none p-0 group"
+                aria-label="Home"
               >
-                {brandName}
-                <span className="text-emerald-500">.</span>
+                <img
+                  src="/logo.webp"
+                  alt={brandName}
+                  className="h-7 sm:h-8 w-auto max-w-[110px] object-contain filter invert contrast-125 dark:filter-none select-none transition-transform duration-300 group-hover:scale-105"
+                />
               </button>
               <span className="text-[10px] font-mono tracking-wider uppercase px-2 py-0.5 rounded-full border border-border/60 bg-muted/40 text-muted-foreground">
                 {isAr ? 'هندسة برمجيات' : 'Software Engineer'}
