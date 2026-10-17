@@ -13,6 +13,7 @@ import { applyCustomFonts } from '../utils/fontLoader';
 import Footer from '../components/Footer';
 import { applyThemePalette, getThemeAuras } from '../utils/themeEngine';
 import SplashScreen from '../components/ui/SplashScreen';
+import SmoothScrollProvider from '../components/SmoothScroll';
 
 const PublicLayout = () => {
   const { t, currentLang, currentDirection } = useLanguage();
@@ -112,14 +113,31 @@ const PublicLayout = () => {
     return () => observer.disconnect();
   }, [location.pathname, t]);
 
-  // Handle hash scrolling on direct load or navigation
+  // Handle hash scrolling on direct load or navigation (skipped on reload so refresh starts cleanly at top)
   useEffect(() => {
+    const navEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
+    const isReload = (navEntries.length > 0 && navEntries[0].type === 'reload') ||
+      (window.performance && (window.performance as any).navigation?.type === 1);
+
+    if (isReload) {
+      if (window.location.hash) {
+        try {
+          window.history.replaceState(null, '', window.location.pathname);
+        } catch {}
+      }
+      return;
+    }
+
     if (location.hash) {
       const id = location.hash.replace('#', '');
       const timer = setTimeout(() => {
         const el = document.getElementById(id);
         if (el) {
-          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          if (window.__lenis) {
+            window.__lenis.scrollTo(el, { offset: -80, duration: 1.2 });
+          } else {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
           setActiveSection(id);
         }
       }, 150);
@@ -135,7 +153,11 @@ const PublicLayout = () => {
 
     if (id === 'hero') {
       setActiveSection('');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (window.__lenis) {
+        window.__lenis.scrollTo(0, { duration: 1.2 });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
       return;
     }
 
@@ -143,10 +165,11 @@ const PublicLayout = () => {
     if (el) {
       setActiveSection(id);
       isNavigatingRef.current = true;
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      try {
-        window.history.replaceState(null, '', `#${id}`);
-      } catch {}
+      if (window.__lenis) {
+        window.__lenis.scrollTo(el, { offset: -80, duration: 1.2 });
+      } else {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
       setTimeout(() => {
         isNavigatingRef.current = false;
       }, 700);
@@ -156,11 +179,14 @@ const PublicLayout = () => {
   useEffect(() => {
     if (mobileMenuOpen) {
       document.body.style.overflow = 'hidden';
+      window.__lenis?.stop();
     } else {
       document.body.style.overflow = '';
+      window.__lenis?.start();
     }
     return () => {
       document.body.style.overflow = '';
+      window.__lenis?.start();
     };
   }, [mobileMenuOpen]);
 
@@ -305,7 +331,8 @@ const PublicLayout = () => {
     : (settings?.name ? settings.name.split(' ')[0] : 'Yousef');
 
   return (
-    <div className="min-h-screen flex flex-col relative bg-background text-foreground font-sans selection:bg-foreground selection:text-background overflow-x-clip">
+    <SmoothScrollProvider>
+      <div className="min-h-screen flex flex-col relative bg-background text-foreground font-sans selection:bg-foreground selection:text-background overflow-x-clip">
 
       {/* ── First-Time Session Splash Screen (Architecture Boot) ── */}
       <AnimatePresence>
@@ -604,6 +631,7 @@ const PublicLayout = () => {
         scrollToSection={scrollToSection}
       />
     </div>
+    </SmoothScrollProvider>
   );
 };
 

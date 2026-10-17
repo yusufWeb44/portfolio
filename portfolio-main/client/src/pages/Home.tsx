@@ -32,6 +32,7 @@ import { FAQ } from '../components/ui/faq-tabs';
 import { ServiceCarousel } from '../components/ui/services-card';
 import ExperienceTimeline from '../components/ExperienceTimeline';
 import CertificatesCarousel from '../components/CertificatesCarousel';
+import { DEFAULT_FAQS } from '../data/defaultFaqs';
 
 /* ─── Types ──────────────────────────────────────────────────────── */
 
@@ -150,10 +151,28 @@ const Home = () => {
   });
 
   const [experiences, setExperiences] = useState<ExperienceItem[]>([]);
-  const [certificates, setCertificates] = useState<CertificateItem[]>([]);
+  const [certificates, setCertificates] = useState<CertificateItem[]>(() => {
+    try {
+      const cached = localStorage.getItem('portfolio_certificates');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch { }
+    return [];
+  });
   const [services, setServices] = useState<Service[]>([]);
   const [socialLinks, setSocialLinks] = useState<SocialLinkItem[]>([]);
-  const [rawFaqs, setRawFaqs] = useState<any[]>([]);
+  const [rawFaqs, setRawFaqs] = useState<any[]>(() => {
+    try {
+      const cached = localStorage.getItem('portfolio_faqs');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch { }
+    return DEFAULT_FAQS;
+  });
 
   /* ─── Data Fetching ─────────────────────────────────────────────── */
   useEffect(() => {
@@ -174,7 +193,7 @@ const Home = () => {
           setSettings(settData);
           try {
             localStorage.setItem('portfolio_settings', JSON.stringify(settData));
-          } catch {}
+          } catch { }
         }
 
         // Below-the-fold data — defer with startTransition to avoid blocking paint
@@ -183,7 +202,11 @@ const Home = () => {
             setExperiences(expRes.value.data.data || []);
           }
           if (certRes.status === 'fulfilled') {
-            setCertificates(certRes.value.data.data || []);
+            const certData = certRes.value.data.data || [];
+            setCertificates(certData);
+            try {
+              localStorage.setItem('portfolio_certificates', JSON.stringify(certData));
+            } catch { }
           }
           if (servRes.status === 'fulfilled') {
             setServices((servRes.value.data.data || []).filter((s: Service) => s.isEnabled));
@@ -192,9 +215,13 @@ const Home = () => {
             setSocialLinks(socialRes.value.data.data || []);
           }
           if (faqRes.status === 'fulfilled') {
-            const fetchedFaqs = faqRes.value.data.data || [];
-            if (Array.isArray(fetchedFaqs)) {
-              setRawFaqs(fetchedFaqs.filter((f: any) => f.isEnabled !== false));
+            const fetchedFaqs = faqRes.value.data.data;
+            if (Array.isArray(fetchedFaqs) && fetchedFaqs.length > 0) {
+              const valid = fetchedFaqs.filter((f: any) => f.isEnabled !== false);
+              setRawFaqs(valid);
+              try {
+                localStorage.setItem('portfolio_faqs', JSON.stringify(valid));
+              } catch { }
             }
           }
         });
@@ -211,9 +238,9 @@ const Home = () => {
           setSettings(res.data.data);
           try {
             localStorage.setItem('portfolio_settings', JSON.stringify(res.data.data));
-          } catch {}
+          } catch { }
         }
-      }).catch(() => {});
+      }).catch(() => { });
     };
 
     window.addEventListener('portfolio_settings_updated', handleSettingsUpdated);
@@ -237,10 +264,22 @@ const Home = () => {
       collab: 'التعاون والبدء',
     };
 
-    const cats: Record<string, string> = {};
-    const map: Record<string, Array<{ question: string; answer: string }>> = {};
+    const cats: Record<string, string> = {
+      services: isAr ? categoryNamesAr.services : categoryNamesEn.services,
+      process: isAr ? categoryNamesAr.process : categoryNamesEn.process,
+      tech: isAr ? categoryNamesAr.tech : categoryNamesEn.tech,
+      collab: isAr ? categoryNamesAr.collab : categoryNamesEn.collab,
+    };
+    const map: Record<string, Array<{ question: string; answer: string }>> = {
+      services: [],
+      process: [],
+      tech: [],
+      collab: [],
+    };
 
-    rawFaqs.forEach((item: any) => {
+    const itemsToProcess = rawFaqs.length > 0 ? rawFaqs : DEFAULT_FAQS;
+
+    itemsToProcess.forEach((item: any) => {
       const catKey = item.category || 'services';
       if (!cats[catKey]) {
         cats[catKey] = isAr
@@ -349,7 +388,7 @@ const Home = () => {
       try {
         const parsed = typeof source === 'string' ? JSON.parse(source) : source;
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      } catch {}
+      } catch { }
     }
     return isAr ? [
       { value: t('hero.stats.uptimeValue', '24/7'), label: t('hero.stats.uptimeLabel', 'دعم واستشارات مستمرة') },
@@ -423,8 +462,8 @@ const Home = () => {
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 4: EXPERIENCE (Vertical Animated Timeline & Certificates)
       ═══════════════════════════════════════════════════════════════ */}
-      <section id="experience" className="scroll-mt-24 py-20 sm:py-24 md:py-28 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto space-y-12">
+      <section id="experience" className="scroll-mt-24 pt-20 sm:pt-24 md:pt-28 pb-4 sm:pb-6 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto space-y-12 px-4 sm:px-6 lg:px-8 mb-8 sm:mb-12">
           <FadeIn>
             <SectionBadge>
               {resolveField('experience.badge', settings?.experienceBadgeAr, settings?.experienceBadge, 'Career History & Academic Journey')}
@@ -437,18 +476,22 @@ const Home = () => {
             </p>
           </FadeIn>
 
-          {/* Vertical Timeline with Scroll Effects & Horizontal Certificates Carousel */}
+          {/* Vertical Timeline with Scroll Effects */}
           <Suspense fallback={<div className="min-h-[200px]" />}>
             <ExperienceTimeline experiences={experiences} />
-            <CertificatesCarousel certificates={certificates} />
           </Suspense>
         </div>
+
+        {/* Full-width seamless Certificates Carousel */}
+        <Suspense fallback={<div className="min-h-[300px]" />}>
+          <CertificatesCarousel certificates={certificates} />
+        </Suspense>
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 5: SERVICES (Offerings & Workflow Process)
       ═══════════════════════════════════════════════════════════════ */}
-      <section id="services" className="scroll-mt-24 py-20 sm:py-24 md:py-28 px-4 sm:px-6 lg:px-8">
+      <section id="services" className="scroll-mt-24 pt-10 sm:pt-14 pb-20 sm:pb-24 md:pb-28 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto space-y-16">
           <FadeIn>
             <SectionBadge>
@@ -479,8 +522,8 @@ const Home = () => {
                   description: isAr ? (service.descriptionAr || service.description) : service.description,
                 }))}
                 whatsappBaseUrl={
-                  settings?.whatsappNumber 
-                    ? `https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, '')}` 
+                  settings?.whatsappNumber
+                    ? `https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, '')}`
                     : socialLinks.find(s => s.platform.toLowerCase() === 'whatsapp')?.url
                 }
               />
@@ -498,12 +541,7 @@ const Home = () => {
           id="faq"
           title={resolveField('faq.title', settings?.faqTitleAr, settings?.faqTitle, 'Common Questions.')}
           subtitle={resolveField('faq.badge', settings?.faqBadgeAr, settings?.faqBadge, 'Got a question?')}
-          categories={isAr ? {
-            services: t('faq.categories.services', 'الخدمات والنطاق'),
-            process: t('faq.categories.process', 'العملية والجدول الزمني'),
-            tech: t('faq.categories.tech', 'التقنيات المستخدمة'),
-            collab: t('faq.categories.collab', 'التعاون والعمل معاً'),
-          } : faqCategories}
+          categories={faqCategories}
           faqData={faqDataMap}
         />
       </Suspense>

@@ -8,6 +8,7 @@
   50% { opacity: 0; }
 }
 
+
 @layer base {
   :root {
     /* Base Canvas in Light Mode: Luxurious Soothing Natural Slate / Silk Paper */
@@ -116,9 +117,26 @@
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    scroll-behavior: smooth;
     scrollbar-gutter: stable;
     scroll-padding-top: 5.5rem;
+  }
+
+  /* Lenis smooth scroll optimization */
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+
+  .lenis.lenis-smooth [data-lenis-prevent] {
+    overscroll-behavior: contain;
+  }
+
+  .lenis.lenis-stopped {
+    overflow: hidden;
   }
 
   /* Custom selection */

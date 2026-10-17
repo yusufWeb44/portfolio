@@ -57,7 +57,7 @@ const FAQTabs = ({
         className={cn(
           'relative overflow-hidden whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-300 cursor-pointer',
           selected === key
-            ? 'border-emerald-500/50 text-background'
+            ? 'border-emerald-500/50 text-white font-semibold shadow-sm shadow-emerald-500/20'
             : 'border-border bg-transparent text-muted-foreground hover:text-foreground hover:border-border/80'
         )}
       >
@@ -79,29 +79,34 @@ const FAQTabs = ({
 );
 
 /* ─── FAQ List ───────────────────────────────────────────────────── */
-const FAQList = ({ faqData, selected }: { faqData: FAQData; selected: string }) => (
-  <div className="w-full">
-    <AnimatePresence mode="wait">
-      {Object.entries(faqData).map(([category, questions]) => {
-        if (selected !== category) return null;
-        return (
-          <motion.div
-            key={category}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 16 }}
-            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="space-y-3"
-          >
-            {questions.map((faq, index) => (
-              <FAQItemCard key={index} {...faq} />
-            ))}
-          </motion.div>
-        );
-      })}
-    </AnimatePresence>
-  </div>
-);
+const FAQList = ({ faqData, selected }: { faqData: FAQData; selected: string }) => {
+  const questions = faqData[selected] || [];
+
+  return (
+    <div className="w-full">
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={selected || 'empty'}
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -14 }}
+          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+          className="space-y-3"
+        >
+          {questions.length > 0 ? (
+            questions.map((faq, index) => (
+              <FAQItemCard key={`${selected}-${index}`} {...faq} />
+            ))
+          ) : (
+            <div className="py-12 text-center border border-dashed border-border/60 rounded-2xl bg-card/20 backdrop-blur-sm">
+              <p className="text-sm text-muted-foreground">No questions found for this category.</p>
+            </div>
+          )}
+        </motion.div>
+      </AnimatePresence>
+    </div>
+  );
+};
 
 /* ─── FAQ Item Card ──────────────────────────────────────────────── */
 const FAQItemCard = ({ question, answer }: FAQItem) => {
@@ -164,13 +169,18 @@ const FAQItemCard = ({ question, answer }: FAQItem) => {
 export const FAQ = ({
   title = 'FAQs',
   subtitle = 'Frequently Asked Questions',
-  categories,
-  faqData,
+  categories = {},
+  faqData = {},
   className,
   ...props
 }: FAQProps) => {
-  const categoryKeys = Object.keys(categories);
-  const [selectedCategory, setSelectedCategory] = useState(categoryKeys[0]);
+  const categoryKeys = Object.keys(categories || {});
+  const [selectedCategory, setSelectedCategory] = useState<string>(() => categoryKeys[0] || '');
+
+  // Synchronously determine active category so the first category is always selected on initial mount
+  const activeCategory = (selectedCategory && categories[selectedCategory])
+    ? selectedCategory
+    : (categoryKeys[0] || '');
 
   return (
     <section
@@ -182,12 +192,14 @@ export const FAQ = ({
     >
       <div className="max-w-7xl mx-auto">
         <FAQHeader title={title} subtitle={subtitle} />
-        <FAQTabs
-          categories={categories}
-          selected={selectedCategory}
-          setSelected={setSelectedCategory}
-        />
-        <FAQList faqData={faqData} selected={selectedCategory} />
+        {categoryKeys.length > 0 && (
+          <FAQTabs
+            categories={categories}
+            selected={activeCategory}
+            setSelected={setSelectedCategory}
+          />
+        )}
+        <FAQList faqData={faqData} selected={activeCategory} />
       </div>
     </section>
   );

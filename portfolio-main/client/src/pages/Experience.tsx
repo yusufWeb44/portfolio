@@ -80,12 +80,16 @@ const Experience = () => {
             <div className="space-y-16">
               {/* Vertical Animated Timeline */}
               <ExperienceTimeline experiences={experiences} />
-
-              {/* Horizontal Certificates Carousel (Underneath the Vertical Timeline) */}
-              <CertificatesCarousel certificates={certificates} />
             </div>
           )}
         </div>
+
+        {/* Horizontal Certificates Carousel (Full-width across viewport) */}
+        {!loading && (
+          <div className="w-full mt-12">
+            <CertificatesCarousel certificates={certificates} />
+          </div>
+        )}
       </section>
     </div>
   );
