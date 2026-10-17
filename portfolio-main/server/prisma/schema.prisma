@@ -311,6 +311,7 @@ model Certificate {
   issueDate     String?
   credentialUrl String?  @db.Text
   credentialId  String?
+  imageUrl      String?  @db.Text
   icon          String?  @default("award")
   skills        String?
   skillsAr      String?
