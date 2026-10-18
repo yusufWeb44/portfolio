@@ -2,7 +2,6 @@ import { useRef, useEffect, useState, useCallback } from 'react';
 import { motion, useScroll, useSpring, useTransform, useMotionValueEvent } from 'framer-motion';
 import api from '../../services/api';
 import { useLanguage } from '../../contexts/LanguageContext';
-import SectionBadge from './SectionBadge';
 
 /* ═══════════════════════════════════════════════════════════════════
    Pushpin SVG — 3D pinned head with punctured paper effect
@@ -546,7 +545,7 @@ const HowItWorks = () => {
     return t(key, enVal || fallback);
   };
 
-  const displayBadge = resolveField('workflow.badge', settings?.workflowBadgeAr, settings?.workflowBadge, 'Workflow & Methodology');
+
   const displayTitle = resolveField('workflow.title', settings?.workflowTitleAr, settings?.workflowTitle, 'How I Engineer Digital Products');
   const displaySubtitle = resolveField('workflow.subtitle', settings?.workflowSubtitleAr, settings?.workflowSubtitle, 'A structured, end-to-end development process ensuring total reliability and business alignment.');
 
@@ -576,11 +575,7 @@ const HowItWorks = () => {
           transition={{ duration: 0.6, ease: 'easeOut' }}
           className="text-center mb-12 sm:mb-16 md:mb-20 px-2"
         >
-          <div className="flex justify-center">
-            <SectionBadge>
-              {displayBadge}
-            </SectionBadge>
-          </div>
+
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-foreground tracking-tight leading-[1.15] mb-4">
             {displayTitle}
           </h2>

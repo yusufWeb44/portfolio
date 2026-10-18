@@ -151,8 +151,7 @@ const ProjectShowcaseItem = ({
               </>
             )}
             <span className="text-border">•</span>
-            <div className="flex items-center gap-1.5 text-emerald-400">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <div className="flex items-center gap-1.5 text-emerald-400 text-xs font-semibold font-mono">
               <span>{t('projects.production', 'PRODUCTION')}</span>
             </div>
           </div>
@@ -379,12 +378,7 @@ const Projects = () => {
               </Link>
             </div>
 
-            <div className="flex items-center gap-2 mb-4">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-xs font-mono font-bold tracking-widest uppercase text-muted-foreground">
-                {t('projects.badge', 'All Case Studies')}
-              </span>
-            </div>
+
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
               <h1 className="text-5xl md:text-8xl font-bold tracking-tighter leading-[1.05]">
                 {t('projects.title', 'Selected Work.')}

@@ -73,9 +73,7 @@ const Contact = () => {
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         >
           <div>
-            <span className="text-xs font-bold tracking-widest uppercase text-background/40 block mb-8">
-              {t('contact.badge', 'Contact')}
-            </span>
+
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tighter leading-[1.05] text-balance mb-8">
               {t('contact.directStatement', "Let's build something great together.")}
             </h1>
@@ -112,7 +110,7 @@ const Contact = () => {
 
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 rounded-full border border-background/20 flex items-center justify-center">
-                <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                <span className="w-2 h-2 rounded-full bg-emerald-500" />
               </div>
               <div>
                 <p className="text-xs text-background/40 font-medium mb-0.5">{isAr ? 'حالة التفرغ' : t('hero.greeting', 'Status')}</p>

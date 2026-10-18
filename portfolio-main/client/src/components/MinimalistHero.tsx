@@ -76,7 +76,6 @@ export interface MinimalistHeroProps {
   headline?: string;
   heroText?: string;
   bioText?: string;
-  availability?: string;
   stats?: StatItem[];
   typewriterWords?: string[];
   ctaText?: string;
@@ -101,20 +100,11 @@ const defaultStats: StatItem[] = [
   { value: '24/7', label: 'Availability & Support' },
 ];
 
-/* ─── Availability Badge (shared between mobile & desktop) ─────── */
-const AvailabilityBadge = ({ text }: { text: string }) => (
-  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-600 dark:text-emerald-400 text-xs font-semibold tracking-normal shadow-sm backdrop-blur-sm">
-    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-    <span className="truncate">{text}</span>
-  </div>
-);
-
 const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
   imageSrc = '/portfolio_photo.webp',
   headline,
   heroText,
   bioText = 'Building scalable web applications, custom CRM systems, and high-performance APIs for startups and businesses. Delivering clean, maintainable code engineered for reliability and seamless growth.',
-  availability,
   stats,
   typewriterWords,
   ctaText = 'See My Work',
@@ -137,15 +127,13 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
   }, []);
 
   const headlineContent = headline || heroText || 'End-to-End Web Development & Software Engineering';
-  const availabilityStatus = availability || 'Available for Freelance & Consulting';
   const activeStats = stats && stats.length > 0 ? stats : defaultStats;
 
   const words = typewriterWords && typewriterWords.length > 0
     ? typewriterWords
     : [
+      'Computer Engineer',
       'Full-Stack Developer',
-      'Software Developer',
-      'Web Developer',
       'Mobile App Developer',
       'UI/UX Designer',
     ];
@@ -253,24 +241,13 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
           */}
           <div className="order-1 lg:order-2 lg:col-span-4 relative flex flex-col justify-center items-center min-w-0">
 
-            {/* ── Mobile-only: badge then typewriter stacked above image ── */}
-            <div className="lg:hidden w-full flex flex-col gap-3.5 mb-4 px-1">
-              {/* Availability Badge */}
+            {/* ── Mobile-only: typewriter above image ── */}
+            <div className="lg:hidden w-full flex flex-col mb-4 px-1">
               <motion.div
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.04 }}
-                className="flex justify-center sm:justify-start rtl:sm:justify-start"
-              >
-                <AvailabilityBadge text={availabilityStatus} />
-              </motion.div>
-
-              {/* Typewriter — centered below badge with stable height to prevent layout shift */}
-              <motion.div
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.06 }}
-                className="flex justify-center items-start min-h-[3.6rem] sm:min-h-[4.2rem] pt-1"
+                transition={{ duration: 0.3, delay: 0.05 }}
+                className="flex justify-center items-center min-h-[3.2rem] sm:min-h-[3.8rem]"
               >
                 <h2
                   className="text-xl sm:text-2xl font-extrabold tracking-tight rtl:tracking-normal uppercase rtl:normal-case text-foreground text-center leading-[1.45] rtl:leading-[1.55]"
@@ -364,38 +341,39 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
             </div>
           </div>
 
-          {/* ── Right Column (desktop only): Availability Badge + Typewriter ── */}
-          <div className="hidden lg:flex order-3 lg:col-span-3 lg:justify-end rtl:lg:justify-start lg:items-start z-10 min-w-0 w-full pt-1">
+          {/* ── Right Column (desktop only): Specialties stacked vertically, single line with prestige dash prefix ── */}
+          <div className="hidden lg:flex order-3 lg:col-span-3 lg:justify-start rtl:lg:justify-start lg:items-center z-10 min-w-0 w-full pl-2 lg:pl-4 xl:pl-6 rtl:pl-0 rtl:pr-2 rtl:lg:pr-4 rtl:xl:pr-6">
             <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.08 }}
-              className="w-full lg:max-w-[380px] xl:max-w-[440px] flex flex-col items-end rtl:items-start text-right rtl:text-right"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.35, delay: 0.08 }}
+              className="w-auto min-w-max flex flex-col items-start rtl:items-start text-start rtl:text-start space-y-4 lg:space-y-5 xl:space-y-6"
             >
-              {/* Dynamic Availability Badge — Increased separation */}
-              <div className="flex items-center justify-end rtl:justify-start mb-5 sm:mb-6 w-full">
-                <AvailabilityBadge text={availabilityStatus} />
-              </div>
+              {words.map((role, idx) => {
+                const cleanRole = typeof role === 'string'
+                  ? (role.trim().startsWith('-') || role.trim().startsWith('—') ? role.trim().substring(1).trim() : role.trim())
+                  : role;
 
-              {/* Typewriter — Top-aligned with spacious multi-line leading */}
-              <div className="min-h-[95px] lg:min-h-[125px] w-full flex flex-col justify-start items-end rtl:items-start">
-                <h2
-                  className="text-xl sm:text-2xl lg:text-[1.85rem] xl:text-[2.2rem] font-extrabold tracking-tight rtl:tracking-normal uppercase rtl:normal-case text-foreground text-right rtl:text-right leading-[1.45] sm:leading-[1.5] lg:leading-[1.48] xl:leading-[1.5] rtl:leading-[1.6] w-full"
-                  dir="auto"
-                  style={{
-                    overflowWrap: 'break-word',
-                    wordBreak: 'normal',
-                  }}
-                >
-                  <Typewriter
-                    words={words}
-                    speed={65}
-                    delayBetweenWords={2200}
-                    cursor={true}
-                    className="text-foreground inline-block"
-                  />
-                </h2>
-              </div>
+                return (
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: 0.08 + idx * 0.05 }}
+                    className="flex items-center group cursor-default select-none"
+                  >
+                    <span className="text-emerald-500 dark:text-emerald-400 font-extrabold text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl mr-3 rtl:mr-0 rtl:ml-3 select-none shrink-0 group-hover:text-emerald-400 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-all duration-200 leading-none">
+                      -
+                    </span>
+                    <span
+                      className="whitespace-nowrap text-lg sm:text-xl lg:text-[1.35rem] xl:text-[1.7rem] 2xl:text-[1.95rem] font-extrabold tracking-tight rtl:tracking-normal uppercase rtl:normal-case text-foreground/90 group-hover:text-emerald-400 transition-colors duration-200 select-none leading-none"
+                      dir="auto"
+                    >
+                      {cleanRole}
+                    </span>
+                  </motion.div>
+                );
+              })}
             </motion.div>
           </div>
 

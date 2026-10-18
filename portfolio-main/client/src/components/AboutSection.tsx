@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Layers, TrendingUp, Zap, Cpu, Code2, ShieldCheck, Database, Server, Globe, Sparkles } from 'lucide-react';
 import api from '../services/api';
 import { useLanguage } from '../contexts/LanguageContext';
-import SectionBadge from './ui/SectionBadge';
+import { getTechBrandIcon } from './ui/TechBrandIcons';
 
 /* ─── Animation Variants ─────────────────────────────────────────── */
 const containerVariants = {
@@ -49,13 +49,6 @@ const getCardIcon = (iconName: string) => {
   return <Globe {...iconProps} />;
 };
 
-/* ─── Stack Pill ─────────────────────────────────────────────────── */
-const StackPill = ({ label }: { label: string }) => (
-  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-mono font-medium bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 leading-none">
-    {label}
-  </span>
-);
-
 /* ─── AboutSection ───────────────────────────────────────────────── */
 const AboutSection = () => {
   const { t, currentLang } = useLanguage();
@@ -88,7 +81,6 @@ const AboutSection = () => {
     return t(key, enVal || fallback);
   };
 
-  const displayBadge = resolveAboutField('about.badge', aboutData?.badgeAr, aboutData?.badge, 'About Me');
   const displayHeadline = resolveAboutField('about.headline', aboutData?.headlineAr, aboutData?.headline, 'Crafting Scalable Software with Purpose & Precision.');
   const displayBio1 = resolveAboutField('about.bio1', aboutData?.bioParagraph1Ar, aboutData?.bioParagraph1, '');
   const displayBio2 = resolveAboutField('about.bio2', aboutData?.bioParagraph2Ar, aboutData?.bioParagraph2, '');
@@ -125,24 +117,17 @@ const AboutSection = () => {
     >
       <div className="max-w-7xl mx-auto">
 
-        {/* ── 12-Column Main Grid ── */}
+        {/* ── 12-Column Main Grid (Both Left & Right aligned at the exact same horizontal level) ── */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
 
-          {/* ── Left Column: 5 cols — Badge, Title, Bio, Stack ── */}
+          {/* ── Left Column: 5 cols — Title & Bio (pushed to match right cards level) ── */}
           <motion.div
-            className="lg:col-span-5 flex flex-col gap-7"
+            className="lg:col-span-5 flex flex-col gap-7 lg:pt-[70px]"
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: '-100px' }}
           >
-            {/* Top Badge */}
-            <motion.div variants={fadeUpVariants}>
-              <SectionBadge>
-                {displayBadge}
-              </SectionBadge>
-            </motion.div>
-
             {/* Main Title */}
             <motion.div variants={fadeUpVariants}>
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-foreground tracking-tight leading-[1.15]">
@@ -161,21 +146,9 @@ const AboutSection = () => {
                 </p>
               )}
             </motion.div>
-
-            {/* Tech Stack Chips */}
-            <motion.div variants={fadeUpVariants}>
-              <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground/60 mb-3">
-                {displayCoreStackTitle}
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {coreStack.map((tech) => (
-                  <StackPill key={tech} label={tech} />
-                ))}
-              </div>
-            </motion.div>
           </motion.div>
 
-          {/* ── Right Column: 7 cols — Bento Cards (aligned with bio text) ── */}
+          {/* ── Right Column: 7 cols — Bento Cards ── */}
           <motion.div
             className="lg:col-span-7 lg:pt-[70px]"
             variants={containerVariants}
@@ -229,6 +202,41 @@ const AboutSection = () => {
           </motion.div>
 
         </div>
+
+        {/* ── Core Stack (Full-width row below entire container, aligned to left) ── */}
+        {coreStack.length > 0 && (
+          <motion.div
+            variants={fadeUpVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-50px' }}
+            className="mt-12 sm:mt-16 md:mt-20 w-full"
+          >
+            <div className="flex flex-col items-start gap-5">
+              <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground/60">
+                {displayCoreStackTitle}
+              </p>
+
+              {/* Technologies: names & original authentic brand icons neatly arranged */}
+              <div className="flex flex-wrap items-center gap-x-8 sm:gap-x-10 gap-y-6 sm:gap-y-7">
+                {coreStack.map((tech) => (
+                  <div
+                    key={tech}
+                    className="group flex items-center gap-2.5 transition-all duration-200 hover:-translate-y-0.5 select-none cursor-default"
+                  >
+                    <span className="shrink-0 flex items-center justify-center transition-transform duration-200 group-hover:scale-110 drop-shadow-sm">
+                      {getTechBrandIcon(tech, 24)}
+                    </span>
+                    <span className="text-sm sm:text-base font-semibold text-foreground/85 group-hover:text-emerald-400 transition-colors">
+                      {tech}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+
       </div>
     </section>
   );

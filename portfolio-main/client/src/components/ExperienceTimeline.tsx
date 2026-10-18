@@ -254,13 +254,12 @@ const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
             style={{ clipPath: beamClip }}
             className="w-full h-full bg-gradient-to-b from-emerald-400 via-teal-400 to-emerald-500 rounded-full shadow-[0_0_12px_rgba(16,185,129,0.85)]"
           />
-          {/* Traveling Glowing Light Particle in Brand Emerald at the beam's front tip */}
+          {/* Traveling Light Particle at the beam's front tip */}
           <motion.div
             style={{ top: particleTop }}
             className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none flex items-center justify-center z-20 will-change-[top]"
           >
-            <div className="w-5 h-5 rounded-full bg-emerald-500/40 blur-[3px] animate-pulse" />
-            <div className="absolute w-3 h-3 rounded-full bg-emerald-300 border-2 border-white dark:border-slate-950 shadow-[0_0_10px_var(--theme-primary-hex,#10b981)]" />
+            <div className="w-3 h-3 rounded-full bg-emerald-400 border-2 border-white dark:border-slate-950 shadow-sm" />
           </motion.div>
         </div>
 
@@ -495,13 +494,7 @@ const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
             </div>
           </div>
 
-          {/* Text Label */}
-          <div className="ps-16 sm:ps-20 md:ps-0 pt-1 md:pt-11 flex md:justify-center">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-mono font-medium tracking-wider uppercase bg-muted/60 text-muted-foreground border border-border/60">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span>{isRtl ? 'تطور مستمر ورؤى مستقبلية' : 'Continuous Evolution & Future Roles'}</span>
-            </div>
-          </div>
+
         </div>
       </div>
     </div>

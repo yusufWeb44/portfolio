@@ -21,7 +21,6 @@ import type { ExperienceItem } from '../components/ExperienceTimeline';
 import type { CertificateItem } from '../components/CertificatesCarousel';
 import SEO from '../components/SEO';
 import { useLanguage } from '../contexts/LanguageContext';
-import SectionBadge from '../components/ui/SectionBadge';
 
 // Direct imports for stable section rendering, zero scroll jumps, and immediate anchor availability
 import AboutSection from '../components/AboutSection';
@@ -368,15 +367,13 @@ const Home = () => {
       }
     }
     return isAr ? [
-      t('hero.typewriter.fullStack', 'مطور تطبيقات ويب متكامل'),
-      t('hero.typewriter.softwareEngineer', 'مهندس برمجيات ونظم'),
-      t('hero.typewriter.reactNext', 'خبير React و Next.js'),
-      t('hero.typewriter.backendNode', 'معماري Node.js و واجهات برمجية'),
-      t('hero.typewriter.uiUx', 'مصمم واجهات وتجربة مستخدم'),
+      'مهندس حاسوب',
+      'مطور ويب شامل',
+      'مطور تطبيقات الموبايل',
+      'مصمم واجهات المستخدم',
     ] : [
+      'Computer Engineer',
       'Full-Stack Developer',
-      'Software Developer',
-      'Web Developer',
       'Mobile App Developer',
       'UI/UX Designer',
     ];
@@ -418,7 +415,6 @@ const Home = () => {
         <MinimalistHero
           headline={heroText}
           bioText={bio}
-          availability={availability}
           ctaText={ctaText}
           ctaHref="#projects"
           imageSrc={settings?.profilePhoto ? getMediaUrl(settings.profilePhoto) : '/portfolio_photo.webp'}
@@ -465,9 +461,6 @@ const Home = () => {
       <section id="experience" className="scroll-mt-24 pt-20 sm:pt-24 md:pt-28 pb-4 sm:pb-6 relative overflow-hidden">
         <div className="max-w-7xl mx-auto space-y-12 px-4 sm:px-6 lg:px-8 mb-8 sm:mb-12">
           <FadeIn>
-            <SectionBadge>
-              {resolveField('experience.badge', settings?.experienceBadgeAr, settings?.experienceBadge, 'Career History & Academic Journey')}
-            </SectionBadge>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-foreground leading-[1.15] mb-4">
               {resolveField('experience.title', settings?.experienceTitleAr, settings?.experienceTitle, 'Experience.')}
             </h2>
@@ -494,9 +487,6 @@ const Home = () => {
       <section id="services" className="scroll-mt-24 pt-10 sm:pt-14 pb-20 sm:pb-24 md:pb-28 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto space-y-16">
           <FadeIn>
-            <SectionBadge>
-              {resolveField('services.badge', settings?.servicesBadgeAr, settings?.servicesBadge, 'Consulting & Offerings')}
-            </SectionBadge>
             <div className="grid md:grid-cols-2 gap-6 lg:gap-8 items-end justify-between">
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-foreground leading-[1.15]">
                 {resolveField('services.title', settings?.servicesTitleAr, settings?.servicesTitle, 'Services.')}
@@ -563,10 +553,6 @@ const Home = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             >
-              <SectionBadge>
-                {resolveField('contact.badge', settings?.contactBadgeAr, settings?.contactBadge, 'Get In Touch')}
-              </SectionBadge>
-
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight leading-[1.15] mb-6 text-foreground">
                 {isAr ? (
                   resolveField('contact.headline', settings?.contactTitleAr, undefined, '') || (
@@ -657,7 +643,7 @@ const Home = () => {
                 {/* Availability row */}
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center shrink-0">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
                   </div>
                   <div>
                     <p className="text-[11px] font-mono text-muted-foreground tracking-wider uppercase mb-0.5">Status</p>

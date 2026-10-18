@@ -5,7 +5,6 @@ import { Link } from 'react-router-dom';
 import api from '../../services/api';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { getMediaUrl } from '../../utils/mediaUrl';
-import SectionBadge from '../ui/SectionBadge';
 
 /* ─── Data Interfaces ─────────────────────────────────────────────── */
 interface ProjectImage {
@@ -359,8 +358,7 @@ const ProjectsSection = () => {
     return t(key, enVal || fallback);
   };
 
-  // Section Heading & Subtitle Overrides from Dashboard
-  const displayBadge = resolveField('projects.badge', settings?.projectsBadgeAr, settings?.projectsBadge, 'Featured Case Studies');
+
   const displayTitle = resolveField('projects.title', settings?.projectsTitleAr, settings?.projectsTitle, 'Selected Work.');
   const displaySubtitle = resolveField(
     'projects.subtitle',
@@ -375,9 +373,7 @@ const ProjectsSection = () => {
     <section id="projects" className="scroll-mt-24 relative bg-transparent">
       {/* ── 1. Section Header ── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 sm:pt-16 pb-4 sm:pb-6">
-        <SectionBadge>
-          {displayBadge}
-        </SectionBadge>
+
 
         <div className="max-w-3xl">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight leading-[1.15] text-foreground mb-3">

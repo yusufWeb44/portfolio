@@ -52,12 +52,7 @@ const Experience = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <div className="flex items-center gap-2.5 mb-4">
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
-              <span className="text-xs font-mono font-bold tracking-widest uppercase text-muted-foreground">
-                {t('experience.badge', 'Career Roadmap & Milestones')}
-              </span>
-            </div>
+
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter leading-[1.05] text-foreground">
               {t('experience.title', 'Experience.')}
             </h1>

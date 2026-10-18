@@ -84,9 +84,7 @@ const About = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
             >
-              <span className="text-xs font-bold tracking-widest uppercase text-muted-foreground block mb-6">
-                {t('about.badge', 'About')}
-              </span>
+
               <h1 className="text-5xl md:text-7xl font-bold tracking-tighter leading-[1.06] mb-8">
                 {name.split(' ')[0]}<br />
                 <span className="text-muted-foreground">{name.split(' ').slice(1).join(' ')}</span>

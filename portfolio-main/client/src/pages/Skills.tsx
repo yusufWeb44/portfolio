@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import api from '../services/api';
 import { useLanguage } from '../contexts/LanguageContext';
-import SectionBadge from '../components/ui/SectionBadge';
 
 interface Skill {
   id: string;
@@ -63,9 +62,7 @@ const Skills = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
           >
-            <SectionBadge>
-              {isAr ? 'الترسانة والمهارات التقنية' : 'Technical Stack'}
-            </SectionBadge>
+
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight leading-[1.15] text-foreground mb-4">
               {isAr ? 'المهارات والقدرات.' : 'My Arsenal.'}
             </h1>

@@ -55,9 +55,7 @@ const Services = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
           >
-            <span className="text-xs font-mono font-bold tracking-widest uppercase text-muted-foreground block mb-6">
-              {isAr ? 'الخدمات والاستشارات' : 'What I Offer'}
-            </span>
+
             <div className="grid md:grid-cols-2 gap-12 items-end">
               <h1 className="text-5xl md:text-7xl font-bold tracking-tighter leading-[1.05]">
                 {isAr ? 'الخدمات.' : 'Services.'}

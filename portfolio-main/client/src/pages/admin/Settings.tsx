@@ -132,6 +132,22 @@ const PATTERNS = [
   { id: 'none', name: 'Clean Solid (No Pattern)' },
 ];
 
+const parseListToInput = (val: any): string => {
+  if (!val) return '';
+  if (Array.isArray(val)) return val.join(', ');
+  if (typeof val === 'string') {
+    const trimmed = val.trim();
+    if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (Array.isArray(parsed)) return parsed.join(', ');
+      } catch {}
+    }
+    return val;
+  }
+  return String(val);
+};
+
 const Settings = () => {
   const [activeTab, setActiveTab] = useState<'profile' | 'sections' | 'appearance'>('profile');
   const [settings, setSettings] = useState<PortfolioSettings>({
@@ -166,9 +182,15 @@ const Settings = () => {
           api.get('/social-links')
         ]);
         if (settingsRes.data.data) {
-          setSettings(prev => ({ ...prev, ...settingsRes.data.data }));
-          if (settingsRes.data.data.primaryThemeColor) {
-            applyThemePalette(settingsRes.data.data.primaryThemeColor);
+          const data = settingsRes.data.data;
+          setSettings(prev => ({
+            ...prev,
+            ...data,
+            typewriterWords: parseListToInput(data.typewriterWords),
+            typewriterWordsAr: parseListToInput(data.typewriterWordsAr),
+          }));
+          if (data.primaryThemeColor) {
+            applyThemePalette(data.primaryThemeColor);
           }
         }
         setSocialLinks(linksRes.data.data || []);
@@ -199,8 +221,28 @@ const Settings = () => {
     if (e) e.preventDefault();
     setSaving(true);
     try {
-      const res = await api.put('/settings', settings);
-      setSettings(res.data.data);
+      const toSave = { ...settings };
+      if (typeof toSave.typewriterWords === 'string') {
+        const trimmed = toSave.typewriterWords.trim();
+        if (!trimmed.startsWith('[')) {
+          const arr = trimmed.split(',').map((s: string) => s.trim()).filter(Boolean);
+          toSave.typewriterWords = JSON.stringify(arr);
+        }
+      }
+      if (typeof toSave.typewriterWordsAr === 'string') {
+        const trimmed = toSave.typewriterWordsAr.trim();
+        if (!trimmed.startsWith('[')) {
+          const arr = trimmed.split(',').map((s: string) => s.trim()).filter(Boolean);
+          toSave.typewriterWordsAr = JSON.stringify(arr);
+        }
+      }
+      const res = await api.put('/settings', toSave);
+      setSettings(prev => ({
+        ...prev,
+        ...res.data.data,
+        typewriterWords: parseListToInput(res.data.data?.typewriterWords),
+        typewriterWordsAr: parseListToInput(res.data.data?.typewriterWordsAr),
+      }));
       if (res.data.data?.primaryThemeColor) {
         applyThemePalette(res.data.data.primaryThemeColor);
       }
@@ -389,26 +431,7 @@ const Settings = () => {
                 </div>
               </div>
 
-              {/* Availability EN & AR */}
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Availability Status (English)</label>
-                  <Input 
-                    value={settings.availability || ''} 
-                    onChange={e => setSettings({...settings, availability: e.target.value})}
-                    placeholder="Available for Freelance & Consulting" 
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">حالة التوفر (بالعربية)</label>
-                  <Input 
-                    value={settings.availabilityAr || ''} 
-                    onChange={e => setSettings({...settings, availabilityAr: e.target.value})}
-                    placeholder="متاح للمشاريع الحرة والاستشارات"
-                    dir="rtl"
-                  />
-                </div>
-              </div>
+
 
               {/* Hero Headline EN & AR */}
               <div className="grid md:grid-cols-2 gap-6">
@@ -473,22 +496,22 @@ const Settings = () => {
                 </div>
               </div>
 
-              {/* Typewriter Roles EN & AR */}
+              {/* Hero Roles / Specialties EN & AR */}
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Typewriter Roles (English, comma-separated)</label>
+                  <label className="text-sm font-medium">Hero Roles / Specialties (English, comma-separated)</label>
                   <Input 
                     value={settings.typewriterWords || ''} 
                     onChange={e => setSettings({...settings, typewriterWords: e.target.value})}
-                    placeholder="Full-Stack Developer, Software Developer, React Expert" 
+                    placeholder="Computer Engineer, Full-Stack Developer, Mobile App Developer, UI/UX Designer" 
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">كلمات التايب رايتر (بالعربية، مفصولة بفواصل)</label>
+                  <label className="text-sm font-medium">التخصصات / الأدوار الرئيسية (بالعربية، مفصولة بفواصل)</label>
                   <Input 
                     value={settings.typewriterWordsAr || ''} 
                     onChange={e => setSettings({...settings, typewriterWordsAr: e.target.value})}
-                    placeholder="مطور تطبيقات ويب متكامل, مهندس برمجيات ونظم, خبير React"
+                    placeholder="مهندس حاسوب, مطور ويب شامل, مطور تطبيقات الموبايل, مصمم واجهات المستخدم"
                     dir="rtl"
                   />
                 </div>
@@ -1208,7 +1231,7 @@ const Settings = () => {
                   : 'glass-card'
               }`}>
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
                   <span className="text-xs font-mono font-semibold uppercase text-muted-foreground">Sample Card Preview</span>
                 </div>
                 <h3 className="text-lg font-bold mb-2">Modern Digital Solution</h3>

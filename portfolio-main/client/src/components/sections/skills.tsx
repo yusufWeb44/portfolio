@@ -2,7 +2,6 @@ import { useState, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
 import api from '../../services/api';
 import { useLanguage } from '../../contexts/LanguageContext';
-import SectionBadge from '../ui/SectionBadge';
 
 /* ─── Technology Data Types ───────────────────────────────────────── */
 export interface TechItem {
@@ -236,9 +235,7 @@ const SkillsSection = () => {
     });
   }, [rawSkillsData, isAr]);
 
-  const badgeText = isAr 
-    ? (settings?.skillsBadgeAr || t('skills.badge', 'المهارات والقدرات التقنية')) 
-    : (settings?.skillsBadge || 'Skills & Expertise');
+
 
   const mainTitle = isAr 
     ? (settings?.skillsTitleAr || t('skills.title', 'القدرات الهندسية الأساسية')) 
@@ -274,12 +271,7 @@ const SkillsSection = () => {
             whileInView="visible"
             viewport={{ once: true, margin: '-100px' }}
           >
-            {/* Badge */}
-            <motion.div variants={fadeUpVariants}>
-              <SectionBadge>
-                {badgeText}
-              </SectionBadge>
-            </motion.div>
+
 
             {/* Headline */}
             <motion.div variants={fadeUpVariants}>

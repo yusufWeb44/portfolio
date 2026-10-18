@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Plus } from 'lucide-react';
 import { cn } from './Button';
-import SectionBadge from './SectionBadge';
 
 /* ─── Types ──────────────────────────────────────────────────────── */
 interface FAQItem {
@@ -27,12 +26,9 @@ interface FAQProps {
   [key: string]: any;
 }
 
-/* ─── FAQ Header ─────────────────────────────────────────────────── */
-const FAQHeader = ({ title, subtitle }: { title: string; subtitle: string }) => (
+const FAQHeader = ({ title }: { title: string; subtitle?: string }) => (
   <div className="relative z-10 flex flex-col items-start justify-start mb-10 sm:mb-12">
-    <SectionBadge>
-      {subtitle}
-    </SectionBadge>
+
     <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight leading-[1.15] text-foreground">
       {title}
     </h2>

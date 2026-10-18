@@ -2,12 +2,13 @@ import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { 
   Save, Loader2, Check, Plus, Trash2, 
-  Sparkles, RefreshCw
+  Sparkles, RefreshCw, ArrowLeft, ArrowRight, X
 } from 'lucide-react';
 import api from '../../services/api';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Textarea } from '../../components/ui/Textarea';
+import { getTechBrandIcon } from '../../components/ui/TechBrandIcons';
 
 interface BentoCard {
   id?: string;
@@ -184,6 +185,19 @@ const AdminAbout = () => {
     setData({
       ...data,
       coreStack: data.coreStack.filter(t => t !== tag)
+    });
+  };
+
+  const handleMoveStackTag = (index: number, direction: 'prev' | 'next') => {
+    const targetIndex = direction === 'prev' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= data.coreStack.length) return;
+    const newStack = [...data.coreStack];
+    const temp = newStack[index];
+    newStack[index] = newStack[targetIndex];
+    newStack[targetIndex] = temp;
+    setData({
+      ...data,
+      coreStack: newStack
     });
   };
 
@@ -367,22 +381,61 @@ const AdminAbout = () => {
 
         {/* Core Technical Stack */}
         <div className="p-6 bg-card rounded-xl border border-border space-y-4">
-          <h2 className="text-lg font-semibold">Core Technical Stack (التقنيات الأساسية)</h2>
-          <div className="flex flex-wrap gap-2 mb-3">
-            {data.coreStack.map((tag) => (
-              <span
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+            <div>
+              <h2 className="text-lg font-semibold">Core Technical Stack (التقنيات الأساسية)</h2>
+              <p className="text-xs text-muted-foreground">
+                تحكّم بترتيب التقنيات بسهولة باستخدام الأسهم (← / →)، مع ظهور الأيقونة الأصلية تلقائياً.
+              </p>
+            </div>
+            <span className="text-xs font-mono text-muted-foreground bg-muted px-2.5 py-1 rounded-md">
+              {data.coreStack.length} items
+            </span>
+          </div>
+
+          <div className="flex flex-wrap gap-2.5 mb-3 p-3 bg-muted/20 rounded-xl border border-border/50 min-h-[56px] items-center">
+            {data.coreStack.map((tag, index) => (
+              <div
                 key={tag}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-mono font-medium bg-muted text-foreground border border-border"
+                className="group inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-mono font-medium bg-card text-foreground border border-border shadow-sm hover:border-emerald-500/50 transition-all select-none"
               >
-                {tag}
-                <button
-                  onClick={() => handleDeleteStackTag(tag)}
-                  className="text-muted-foreground hover:text-destructive transition-colors ml-1 cursor-pointer"
-                >
-                  ×
-                </button>
-              </span>
+                <span className="shrink-0 flex items-center justify-center">
+                  {getTechBrandIcon(tag, 16)}
+                </span>
+                <span className="font-semibold">{tag}</span>
+                <div className="flex items-center gap-0.5 border-l border-border pl-1.5 ml-0.5">
+                  <button
+                    type="button"
+                    onClick={() => handleMoveStackTag(index, 'prev')}
+                    disabled={index === 0}
+                    title="Move Earlier (تقديم للأمام)"
+                    className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-20 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                  >
+                    <ArrowLeft size={12} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleMoveStackTag(index, 'next')}
+                    disabled={index === data.coreStack.length - 1}
+                    title="Move Later (تأخير للخلف)"
+                    className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-20 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                  >
+                    <ArrowRight size={12} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteStackTag(tag)}
+                    title="Delete (حذف)"
+                    className="p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive cursor-pointer transition-colors ml-0.5"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+              </div>
             ))}
+            {data.coreStack.length === 0 && (
+              <p className="text-xs text-muted-foreground italic py-1">لا توجد تقنيات مضافة حالياً.</p>
+            )}
           </div>
           <div className="flex gap-2 max-w-md">
             <Input
