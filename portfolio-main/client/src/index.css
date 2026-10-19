@@ -37,7 +37,7 @@
     /* #dfe3ea - delicate silk hairline border */
     --input: 220 13% 89%;
     --ring: 160 84% 39%;
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
     /* Dynamic Fonts */
     --font-en: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;

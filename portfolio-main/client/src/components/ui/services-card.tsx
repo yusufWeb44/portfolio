@@ -333,7 +333,7 @@ export const ServiceCard = ({
     <motion.div
       variants={cardVariants}
       className={cn(
-        "group relative flex min-h-[440px] sm:h-[460px] w-full flex-col justify-between overflow-hidden rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-border/70 bg-gradient-to-b backdrop-blur-xl shadow-lg hover:border-emerald-500/50 hover:shadow-xl hover:shadow-emerald-500/10 transition-all duration-300 select-none",
+        "group relative flex min-h-[440px] sm:h-[460px] w-full flex-col justify-between overflow-hidden rounded-xl sm:rounded-2xl p-6 sm:p-8 border border-border/70 bg-gradient-to-b backdrop-blur-xl shadow-lg hover:border-emerald-500/50 hover:shadow-xl hover:shadow-emerald-500/10 transition-all duration-300 select-none",
         activeGradient
       )}
     >
@@ -349,7 +349,7 @@ export const ServiceCard = ({
           <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/40 group-hover:bg-emerald-400 group-hover:scale-125 transition-all duration-300" />
         </div>
 
-        <div className="w-12 h-12 rounded-2xl bg-card/80 dark:bg-white/[0.06] border border-border/80 flex items-center justify-center text-foreground group-hover:text-emerald-400 group-hover:border-emerald-500/40 transition-colors duration-200 shadow-inner">
+        <div className="w-12 h-12 rounded-xl bg-card/80 dark:bg-white/[0.06] border border-border/80 flex items-center justify-center text-foreground group-hover:text-emerald-400 group-hover:border-emerald-500/40 transition-colors duration-200 shadow-inner">
           <IconComp className="h-6 w-6" />
         </div>
       </div>

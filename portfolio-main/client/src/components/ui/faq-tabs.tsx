@@ -94,7 +94,7 @@ const FAQList = ({ faqData, selected }: { faqData: FAQData; selected: string }) 
               <FAQItemCard key={`${selected}-${index}`} {...faq} />
             ))
           ) : (
-            <div className="py-12 text-center border border-dashed border-border/60 rounded-2xl bg-card/20 backdrop-blur-sm">
+            <div className="py-12 text-center border border-dashed border-border/60 rounded-xl bg-card/20 backdrop-blur-sm">
               <p className="text-sm text-muted-foreground">No questions found for this category.</p>
             </div>
           )}
@@ -112,7 +112,7 @@ const FAQItemCard = ({ question, answer }: FAQItem) => {
     <motion.div
       animate={isOpen ? 'open' : 'closed'}
       className={cn(
-        'rounded-2xl border backdrop-blur-xl transition-all duration-300',
+        'rounded-xl border backdrop-blur-xl transition-all duration-300',
         isOpen
           ? 'bg-card/60 dark:bg-white/[0.04] border-emerald-500/30 shadow-lg shadow-emerald-500/5'
           : 'bg-card/30 dark:bg-white/[0.02] border-border/50 hover:border-emerald-500/25'
@@ -181,7 +181,7 @@ export const FAQ = ({
   return (
     <section
       className={cn(
-        'scroll-mt-24 relative overflow-hidden bg-transparent px-4 sm:px-6 lg:px-8 py-20 sm:py-24 md:py-28',
+        'scroll-mt-24 relative overflow-hidden bg-transparent px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20',
         className
       )}
       {...props}

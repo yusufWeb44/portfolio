@@ -31,79 +31,11 @@ interface Project {
   categoryAr?: string | null;
   year?: string | null;
   liveDemo?: string | null;
-  github?: string | null;
   isFeatured?: boolean;
   order?: number;
   images: ProjectImage[];
   technologies: Technology[];
 }
-
-/* ─── Fallback Projects (Guarantees complete deck matching reference) ─── */
-const FALLBACK_PROJECTS: Project[] = [
-  {
-    id: 'healio-medical-app',
-    title: 'Healio',
-    titleAr: 'هيليو',
-    slug: 'healio-medical-app',
-    year: '2025',
-    category: 'Medical • Mobile App',
-    categoryAr: 'رعاية صحية • تطبيق هاتف',
-    description:
-      'A patient-centered platform with intuitive navigation and calming visual architecture focused on healthcare accessibility and real-time consultations.',
-    descriptionAr:
-      'منصة طبية متكاملة تركز على تجربة المريض مع تصميم هادئ وواجهات سلسة تهدف لتسهيل الوصول للرعاية الصحية والاستشارات الفورية.',
-    technologies: [
-      { name: 'React Native' },
-      { name: 'Node.js' },
-      { name: 'TypeScript' },
-      { name: 'Tailwind CSS' },
-      { name: 'PostgreSQL' },
-    ],
-    images: [],
-  },
-  {
-    id: 'finflow-banking-system',
-    title: 'FinFlow',
-    titleAr: 'فين فلو',
-    slug: 'finflow-banking-system',
-    year: '2024',
-    category: 'Fintech • Enterprise Core',
-    categoryAr: 'تقنية مالية • أنظمة مصرفية',
-    description:
-      'Next-generation treasury management and automated financial ledger system engineered for high-throughput transactional velocity and audit-grade safety.',
-    descriptionAr:
-      'منصة مالية ومصرفية متقدمة لإدارة السيولة والتحويلات المالية الفورية بنظام قيود مشفر يلبي أعلى معايير الأمان المالي.',
-    technologies: [
-      { name: 'Next.js' },
-      { name: 'TypeScript' },
-      { name: 'Go' },
-      { name: 'Prisma' },
-      { name: 'Redis' },
-    ],
-    images: [],
-  },
-  {
-    id: 'aether-crm-enterprise',
-    title: 'Aether CRM',
-    titleAr: 'إيثر سي آر إم',
-    slug: 'aether-crm-enterprise',
-    year: '2024',
-    category: 'Enterprise • SaaS Platform',
-    categoryAr: 'أنظمة سحابية • إدارة أعمال',
-    description:
-      'Scalable multi-tenant enterprise orchestration suite providing deep revenue analytics, automated pipeline workflows, and unified team collaboration.',
-    descriptionAr:
-      'نظام إدارة علاقات عملاء مؤسسي متعدد المستأجرين مع تحليلات إيرادات مدعومة بالأتمتة وخطط سير عمل مخصصة لفرق المبيعات.',
-    technologies: [
-      { name: 'React' },
-      { name: 'Node.js' },
-      { name: 'Docker' },
-      { name: 'GraphQL' },
-      { name: 'PostgreSQL' },
-    ],
-    images: [],
-  },
-];
 
 /* ─── Project Media Visual ─────────────────────────────────────────── */
 const ProjectMediaVisual = ({
@@ -164,7 +96,7 @@ const ProjectMediaVisual = ({
 
       {/* Minimalistic corner branding tag */}
       <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 text-[10px] font-mono tracking-widest uppercase text-white/30 font-medium">
-        {project.slug.split('-')[0].toUpperCase()}
+        {(project.slug || project.title || 'PRJ').split('-')[0].toUpperCase()}
       </div>
     </div>
   );
@@ -175,18 +107,13 @@ interface StackedCardProps {
   project: Project;
   i: number;
   total: number;
-  progress: MotionValue<number>;
-  range: [number, number];
-  targetScale: number;
   isAr: boolean;
 }
 
 const StackedCard = ({
   project,
   i,
-  progress,
-  range,
-  targetScale,
+  total,
   isAr,
 }: StackedCardProps) => {
   const cardContainerRef = useRef<HTMLDivElement>(null);
@@ -198,69 +125,65 @@ const StackedCard = ({
   // Parallax scale on media preview while scrolling into view
   const imageScale = useTransform(scrollYProgress, [0, 1], [1.5, 1]);
 
-  // Dynamic gradual scale-down on scroll as subsequent cards stack over this card
-  const scale = useTransform(progress, range, [1, targetScale]);
-
   // Dynamic Content Overrides
   const displayTitle = isAr ? project.titleAr || project.title : project.title;
   const displayCategory = isAr ? project.categoryAr || project.category : project.category;
   const displayDescription = isAr ? project.descriptionAr || project.description : project.description;
   const formattedNumber = String(i + 1).padStart(2, '0');
+  const diff = Math.max(0, total - 1 - i);
 
   return (
     <div
       ref={cardContainerRef}
-      className="h-screen flex items-center justify-center sticky top-0 px-4 sm:px-6 pointer-events-none"
+      style={{
+        top: `calc(5.5rem + ${i * 44}px)`,
+      }}
+      className="sticky flex justify-center px-4 sm:px-6 mb-[15vh] sm:mb-[20vh] last:mb-6 pointer-events-auto"
     >
       <motion.div
         style={{
-          scale,
-          top: `calc(-2vh + ${i * 28}px)`,
+          maxWidth: `calc(1020px - ${diff * 28}px)`,
+          width: `calc(100% - ${diff * 14}px)`,
           transformOrigin: 'top center',
         }}
-        className="w-full max-w-[920px] lg:max-w-[1020px] rounded-[28px] sm:rounded-[34px] border border-slate-200/90 dark:border-emerald-500/25 bg-white dark:bg-[#0c1017] shadow-[0_20px_50px_-15px_rgba(0,0,0,0.1),0_0_30px_-10px_rgba(16,185,129,0.1)] dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.95),0_0_35px_-10px_rgba(16,185,129,0.16)] overflow-hidden relative pointer-events-auto"
+        className="rounded-xl sm:rounded-2xl border border-transparent dark:border-white/[0.14] bg-background dark:bg-background shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_4px_16px_-2px_rgba(0,0,0,0.10),0_12px_32px_-4px_rgba(0,0,0,0.14),0_24px_60px_-12px_rgba(0,0,0,0.18)] dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.95)] overflow-hidden relative"
       >
-        {/* Subtle atmospheric brand emerald sheen in corner */}
-        <div className="absolute -top-20 -left-20 w-56 h-56 bg-emerald-500/10 dark:bg-emerald-500/12 rounded-full blur-3xl pointer-events-none" />
-
         {/* ── Main Card Body Grid: Balanced layout with wider media preview (5:7 ratio) ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-7 p-6 sm:p-7 lg:p-8 items-stretch min-h-[410px] sm:min-h-[435px] lg:min-h-[460px]">
-          
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6 p-4 sm:p-5 lg:p-6 pt-3.5 sm:pt-4 items-stretch min-h-[350px] sm:min-h-[380px] lg:min-h-[400px]">
+
           {/* Details Column (5 cols of 12) */}
           <div
-            className={`lg:col-span-5 flex flex-col justify-between ${
-              isAr ? 'text-right lg:order-2' : 'text-left lg:order-1'
-            }`}
+            className={`lg:col-span-5 flex flex-col justify-between ${isAr ? 'text-right lg:order-2' : 'text-left lg:order-1'
+              }`}
           >
             <div>
-              {/* 1. Pill Number Badge */}
-              <div className={`flex items-center mb-4 sm:mb-5 ${isAr ? 'justify-end' : 'justify-start'}`}>
-                <div className="w-12 h-7 sm:w-13 sm:h-7.5 rounded-full border border-emerald-500/30 dark:border-emerald-500/25 bg-emerald-500/5 dark:bg-emerald-500/10 flex items-center justify-center font-mono text-xs font-semibold text-foreground dark:text-emerald-400">
+              {/* 1. Large Order Number without background */}
+              <div className={`flex items-baseline gap-3 sm:gap-3.5 mb-2 sm:mb-2.5 ${isAr ? 'justify-end flex-row-reverse' : 'justify-start'}`}>
+                <span className="text-3xl sm:text-4xl lg:text-[2.65rem] font-black font-sans tracking-tighter text-foreground dark:text-white leading-none select-none">
                   {formattedNumber}
-                </div>
-              </div>
-
-              {/* 2. Metadata Line: Year • Category */}
-              <div className="text-[11px] sm:text-xs font-mono font-medium uppercase tracking-wider text-muted-foreground dark:text-zinc-400 mb-2">
-                {project.year || '2025'}{displayCategory ? ` • ${displayCategory}` : ''}
+                </span>
+                {(project.year || displayCategory) && (
+                  <span className="text-[10.5px] sm:text-xs font-mono font-bold uppercase tracking-wider text-muted-foreground dark:text-zinc-400">
+                    {displayCategory ? displayCategory : ''}{project.year ? ` • ${project.year}` : ''}
+                  </span>
+                )}
               </div>
 
               {/* 3. Project Title */}
-              <h3 className="text-2xl sm:text-3xl lg:text-[2.1rem] font-bold tracking-tight text-foreground dark:text-white mb-2.5 leading-snug">
+              <h3 className="text-xl sm:text-2xl lg:text-[1.8rem] font-bold tracking-tight text-foreground dark:text-white mb-2 leading-snug">
                 {displayTitle}
               </h3>
 
               {/* 4. Project Description */}
-              <p className="text-xs sm:text-[13.5px] lg:text-sm text-muted-foreground dark:text-zinc-300 leading-relaxed sm:leading-[1.65] line-clamp-5 sm:line-clamp-6 mb-4 sm:mb-5 w-full">
+              <p className="text-xs sm:text-[13px] lg:text-[13.5px] text-muted-foreground dark:text-zinc-300 leading-relaxed line-clamp-3 sm:line-clamp-4 mb-3.5 sm:mb-4 w-full">
                 {displayDescription}
               </p>
 
               {/* 5. Technologies Badges */}
               {project.technologies && project.technologies.length > 0 && (
                 <div
-                  className={`flex flex-wrap items-center gap-1.5 sm:gap-2 mb-5 ${
-                    isAr ? 'justify-end' : 'justify-start'
-                  }`}
+                  className={`flex flex-wrap items-center gap-1.5 sm:gap-2 mb-3.5 sm:mb-4 ${isAr ? 'justify-end' : 'justify-start'
+                    }`}
                 >
                   {project.technologies.map((tech, tIdx) => (
                     <span
@@ -291,7 +214,7 @@ const StackedCard = ({
 
           {/* Media Column (7 cols of 12) */}
           <div className={`lg:col-span-7 flex items-stretch ${isAr ? 'lg:order-1' : 'lg:order-2'}`}>
-            <div className="w-full h-full min-h-[260px] sm:min-h-[300px] md:min-h-[340px] lg:min-h-[380px] rounded-[22px] sm:rounded-[26px] overflow-hidden border border-foreground/15 dark:border-white/10 bg-muted/20 shadow-inner group">
+            <div className="w-full h-full min-h-[220px] sm:min-h-[260px] md:min-h-[290px] lg:min-h-[320px] rounded-lg sm:rounded-xl overflow-hidden border border-foreground/15 dark:border-white/10 bg-muted/20 shadow-inner group">
               <ProjectMediaVisual project={project} cardIndex={i} imageScale={imageScale} />
             </div>
           </div>
@@ -312,21 +235,15 @@ const ProjectsSection = () => {
   const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  // Scroll Container for the entire stacking deck
-  const containerRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ['start start', 'end end'],
-  });
 
   // Load Settings & Projects directly from Backend API (Dashboard Driven)
   useEffect(() => {
     const fetchSettingsAndProjects = () => {
-      api.get('/settings').then((res) => setSettings(res.data?.data)).catch(() => {});
+      api.get('/settings').then((res) => setSettings(res.data?.data)).catch(() => { });
       api
         .get('/projects?public=true')
         .then((res) => setProjects(res.data.data || []))
-        .catch(() => {})
+        .catch(() => { })
         .finally(() => setLoading(false));
     };
 
@@ -342,13 +259,7 @@ const ProjectsSection = () => {
     const featuredList = projects.filter((p: any) => p.isFeatured);
     const nonFeaturedList = projects.filter((p: any) => !p.isFeatured);
     const combined = [...featuredList, ...nonFeaturedList];
-
-    if (combined.length >= 3) {
-      return combined.slice(0, Math.min(combined.length, 5));
-    }
-    const needed = 3 - combined.length;
-    const fillers = FALLBACK_PROJECTS.slice(0, needed);
-    return [...combined, ...fillers];
+    return combined.slice(0, Math.min(combined.length, 5));
   }, [projects]);
 
   const resolveField = (key: string, arVal?: string, enVal?: string, fallback?: string) => {
@@ -358,7 +269,6 @@ const ProjectsSection = () => {
     return t(key, enVal || fallback);
   };
 
-
   const displayTitle = resolveField('projects.title', settings?.projectsTitleAr, settings?.projectsTitle, 'Selected Work.');
   const displaySubtitle = resolveField(
     'projects.subtitle',
@@ -367,16 +277,14 @@ const ProjectsSection = () => {
     'A curated selection of production web applications, custom CRM platforms, and full-stack software architectures built for performance and measurable business impact.'
   );
 
-  const totalCount = Math.max(projects.length, deckProjects.length);
+  const totalCount = projects.length;
 
   return (
     <section id="projects" className="scroll-mt-24 relative bg-transparent">
       {/* ── 1. Section Header ── */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 sm:pt-16 pb-4 sm:pb-6">
-
-
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-10 pb-3 sm:pb-4">
         <div className="max-w-3xl">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight leading-[1.15] text-foreground mb-3">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight leading-[1.15] text-foreground mb-2 sm:mb-3">
             {displayTitle}
           </h2>
           {displaySubtitle && (
@@ -388,15 +296,14 @@ const ProjectsSection = () => {
       </div>
 
       {/* ── 2. Scrollable Stacking Cards Track ── */}
-      <div ref={containerRef} className="relative">
-        {/* Fixed Sticky Scroll Indicator (Rendered ONLY ONCE for the entire section) */}
-        {!loading && (
-          <div className="sticky top-0 h-0 w-full pointer-events-none z-30 flex justify-center">
-            <div className="relative w-full max-w-[920px] lg:max-w-[1020px] h-screen flex items-center px-4 sm:px-6">
+      <div className="relative mt-2 sm:mt-4">
+        {/* Fixed Sticky Scroll Indicator (Rendered ONLY when projects exist) */}
+        {!loading && deckProjects.length > 0 && (
+          <div className="sticky top-32 h-0 w-full pointer-events-none z-30 flex justify-center">
+            <div className="relative w-full max-w-[920px] lg:max-w-[1020px] flex items-center px-4 sm:px-6">
               <div
-                className={`hidden xl:flex flex-col items-center gap-2.5 absolute ${
-                  isAr ? '-left-14' : '-right-14'
-                } top-1/2 -translate-y-1/2 select-none`}
+                className={`hidden xl:flex flex-col items-center gap-2.5 absolute ${isAr ? '-left-14' : '-right-14'
+                  } top-0 select-none`}
               >
                 <div className="w-5 h-9 rounded-full border border-emerald-500/40 dark:border-emerald-400/30 flex justify-center pt-1.5 bg-card/40 dark:bg-black/40 backdrop-blur-xs shadow-xs">
                   <motion.div
@@ -415,44 +322,45 @@ const ProjectsSection = () => {
         )}
 
         {loading ? (
-          <div className="h-screen flex items-center justify-center px-4">
-            <div className="w-full max-w-[920px] h-[450px] rounded-[32px] bg-card/40 dark:bg-white/[0.02] border border-border/50 animate-pulse flex items-center justify-center">
+          <div className="h-[400px] flex items-center justify-center px-4">
+            <div className="w-full max-w-[920px] h-[350px] rounded-xl bg-card/40 dark:bg-white/[0.02] border border-border/50 animate-pulse flex items-center justify-center">
               <Sparkles className="w-8 h-8 text-emerald-500 animate-spin" />
             </div>
           </div>
+        ) : deckProjects.length === 0 ? (
+          <div className="max-w-4xl mx-auto my-8 py-16 px-4 text-center border border-dashed border-border/70 rounded-xl bg-card/30 backdrop-blur-md">
+            <p className="text-muted-foreground text-base">
+              {isAr ? 'لا توجد مشاريع منشورة حالياً.' : 'No projects published yet.'}
+            </p>
+          </div>
         ) : (
-          deckProjects.map((project, i) => {
-            const targetScale = 1 - (deckProjects.length - i) * 0.05;
-            const range: [number, number] = [i * 0.25, 1];
-            return (
-              <StackedCard
-                key={project.id || `p_${i}`}
-                project={project}
-                i={i}
-                total={deckProjects.length}
-                progress={scrollYProgress}
-                range={range}
-                targetScale={targetScale}
-                isAr={isAr}
-              />
-            );
-          })
+          deckProjects.map((project, i) => (
+            <StackedCard
+              key={project.id || `p_${i}`}
+              project={project}
+              i={i}
+              total={deckProjects.length}
+              isAr={isAr}
+            />
+          ))
         )}
       </div>
 
       {/* ── 3. Bottom Section: Explore All Projects Button ── */}
-      <div className="pt-6 sm:pt-10 pb-16 sm:pb-24 flex justify-center px-4">
-        <Link
-          to="/projects"
-          className="group relative inline-flex items-center gap-3 h-12 px-8 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-mono font-bold text-xs sm:text-sm uppercase tracking-wider transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] shadow-md hover:shadow-xl hover:shadow-emerald-500/30 cursor-pointer overflow-hidden"
-        >
-          <span className="relative z-10">{isAr ? `استكشاف جميع المشاريع (${totalCount})` : `EXPLORE ALL PROJECTS (${totalCount})`}</span>
-          <ArrowUpRight
-            size={16}
-            className="relative z-10 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 rtl:rotate-[-90deg] text-slate-950"
-          />
-        </Link>
-      </div>
+      {totalCount > 0 && (
+        <div className="pt-4 sm:pt-6 pb-12 sm:pb-16 flex justify-center px-4">
+          <Link
+            to="/projects"
+            className="group relative inline-flex items-center gap-3 h-12 px-8 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-mono font-bold text-xs sm:text-sm uppercase tracking-wider transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] shadow-md hover:shadow-xl hover:shadow-emerald-500/30 cursor-pointer overflow-hidden"
+          >
+            <span className="relative z-10">{isAr ? `استكشاف جميع المشاريع (${totalCount})` : `EXPLORE ALL PROJECTS (${totalCount})`}</span>
+            <ArrowUpRight
+              size={16}
+              className="relative z-10 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 rtl:rotate-[-90deg] text-slate-950"
+            />
+          </Link>
+        </div>
+      )}
     </section>
   );
 };

@@ -373,7 +373,7 @@ const PublicLayout = () => {
           <div
             className={cn(
               "flex items-center justify-between px-4 sm:px-6 py-2.5 md:py-3 min-h-[64px] sm:min-h-[68px] md:min-h-[72px]",
-              "rounded-none md:rounded-2xl border-b md:border",
+              "rounded-none md:rounded-xl border-b md:border",
               "border-slate-900/[0.07] dark:border-white/[0.09]",
               "bg-white/45 dark:bg-zinc-900/35",
               "backdrop-blur-xl backdrop-saturate-150",
@@ -427,7 +427,7 @@ const PublicLayout = () => {
               <button
                 type="button"
                 onClick={toggleTheme}
-                className="p-2 sm:p-2.5 rounded-xl bg-white/50 hover:bg-white/80 dark:bg-white/[0.08] dark:hover:bg-white/[0.14] border border-slate-900/[0.07] hover:border-slate-900/[0.15] dark:border-white/[0.12] dark:hover:border-white/[0.22] text-slate-700 dark:text-slate-100 hover:text-emerald-500 dark:hover:text-emerald-400 transition-all cursor-pointer group shadow-xs dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.10)] backdrop-blur-md flex items-center justify-center shrink-0"
+                className="p-2 sm:p-2.5 rounded-lg bg-white/50 hover:bg-white/80 dark:bg-white/[0.08] dark:hover:bg-white/[0.14] border border-slate-900/[0.07] hover:border-slate-900/[0.15] dark:border-white/[0.12] dark:hover:border-white/[0.22] text-slate-700 dark:text-slate-100 hover:text-emerald-500 dark:hover:text-emerald-400 transition-all cursor-pointer group shadow-xs dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.10)] backdrop-blur-md flex items-center justify-center shrink-0"
                 title={isDark ? (isAr ? 'تفعيل الوضع الفاتح' : 'Switch to Light Mode') : (isAr ? 'تفعيل الوضع الداكن' : 'Switch to Dark Mode')}
                 aria-label="Toggle Theme"
               >
@@ -449,7 +449,7 @@ const PublicLayout = () => {
               <button
                 type="button"
                 onClick={toggleTheme}
-                className="p-2 rounded-xl bg-white/50 hover:bg-white/80 dark:bg-white/[0.08] dark:hover:bg-white/[0.14] border border-slate-900/[0.07] dark:border-white/[0.12] text-foreground transition-all cursor-pointer shadow-xs dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.10)] flex items-center justify-center shrink-0 backdrop-blur-md"
+                className="p-2 rounded-lg bg-white/50 hover:bg-white/80 dark:bg-white/[0.08] dark:hover:bg-white/[0.14] border border-slate-900/[0.07] dark:border-white/[0.12] text-foreground transition-all cursor-pointer shadow-xs dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.10)] flex items-center justify-center shrink-0 backdrop-blur-md"
                 aria-label="Toggle Theme"
               >
                 {isDark ? (
@@ -462,7 +462,7 @@ const PublicLayout = () => {
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(true)}
-                className="w-10 h-10 rounded-xl bg-white/50 hover:bg-white/80 dark:bg-white/[0.08] dark:hover:bg-white/[0.14] border border-slate-900/[0.07] dark:border-white/[0.12] text-foreground transition-all cursor-pointer shadow-xs active:scale-95 flex items-center justify-center shrink-0 backdrop-blur-md"
+                className="w-10 h-10 rounded-lg bg-white/50 hover:bg-white/80 dark:bg-white/[0.08] dark:hover:bg-white/[0.14] border border-slate-900/[0.07] dark:border-white/[0.12] text-foreground transition-all cursor-pointer shadow-xs active:scale-95 flex items-center justify-center shrink-0 backdrop-blur-md"
                 aria-label="Open menu"
                 aria-expanded={mobileMenuOpen}
               >

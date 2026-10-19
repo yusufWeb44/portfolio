@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { Link } from 'react-router-dom';
 import { 
   Save, Loader2, Plus, Trash2, Check, Image as ImageIcon, 
-  Palette, Type, LayoutGrid, Sparkles, Eye
+  Palette, Type, LayoutGrid, Sparkles, Eye, ArrowRight
 } from 'lucide-react';
 import api from '../../services/api';
 import { Button } from '../../components/ui/Button';
@@ -356,7 +357,7 @@ const Settings = () => {
               : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
-          Profile & Hero
+          General & Contact Info
         </button>
         <button
           onClick={() => setActiveTab('sections')}
@@ -381,15 +382,34 @@ const Settings = () => {
         </button>
       </div>
 
-      {/* TAB 1: Profile & Hero */}
+      {/* TAB 1: General & Contact Information */}
       {activeTab === 'profile' && (
-        <div className="grid lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-6">
-            <form onSubmit={handleSaveSettings} className="bg-card border border-border rounded-xl overflow-hidden space-y-6 p-6">
-              <div className="border-b border-border pb-4">
-                <h2 className="text-lg font-bold">General Information & Hero</h2>
-                <p className="text-sm text-muted-foreground">Provide information in English and Arabic for complete bilingual control.</p>
+        <div className="space-y-6">
+          {/* Quick link banner to Hero CMS */}
+          <div className="p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-lg bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                <Sparkles size={20} />
               </div>
+              <div>
+                <p className="text-sm font-bold text-foreground">Looking to edit your Hero section or Statistics?</p>
+                <p className="text-xs text-muted-foreground">Hero headline, bio, CTA, specialties, and the new stats manager are now in the dedicated Hero section.</p>
+              </div>
+            </div>
+            <Button size="sm" variant="outline" asChild>
+              <Link to="/admin/hero" className="flex items-center gap-1.5 whitespace-nowrap">
+                Go to Hero Section <ArrowRight size={14} />
+              </Link>
+            </Button>
+          </div>
+
+          <div className="grid lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-6">
+              <form onSubmit={handleSaveSettings} className="bg-card border border-border rounded-xl overflow-hidden space-y-6 p-6">
+                <div className="border-b border-border pb-4">
+                  <h2 className="text-lg font-bold">General Profile & Contact Information</h2>
+                  <p className="text-sm text-muted-foreground">Personal display identity, communication channels, and footer copy in English and Arabic.</p>
+                </div>
 
               {/* Display Name EN & AR */}
               <div className="grid md:grid-cols-2 gap-6">
@@ -412,7 +432,7 @@ const Settings = () => {
                 </div>
               </div>
 
-              {/* Email & Location */}
+              {/* Email & WhatsApp Number */}
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Contact Email</label>
@@ -420,117 +440,59 @@ const Settings = () => {
                     type="email"
                     value={settings.email || ''} 
                     onChange={e => setSettings({...settings, email: e.target.value})} 
+                    placeholder="example@gmail.com"
                   />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Location</label>
-                  <Input 
-                    value={settings.location || ''} 
-                    onChange={e => setSettings({...settings, location: e.target.value})} 
-                  />
-                </div>
-              </div>
-
-
-
-              {/* Hero Headline EN & AR */}
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Hero Headline (English)</label>
-                  <Textarea 
-                    value={settings.heroText || ''} 
-                    onChange={e => setSettings({...settings, heroText: e.target.value})}
-                    rows={2} 
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">عنوان الهيرو الرئيسي (بالعربية)</label>
-                  <Textarea 
-                    value={settings.heroTextAr || ''} 
-                    onChange={e => setSettings({...settings, heroTextAr: e.target.value})}
-                    rows={2}
-                    dir="rtl"
-                  />
-                </div>
-              </div>
-
-              {/* Biography EN & AR */}
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Biography (English)</label>
-                  <Textarea 
-                    value={settings.bio || ''} 
-                    onChange={e => setSettings({...settings, bio: e.target.value})}
-                    rows={4} 
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">النبذة التعريفية (بالعربية)</label>
-                  <Textarea 
-                    value={settings.bioAr || ''} 
-                    onChange={e => setSettings({...settings, bioAr: e.target.value})}
-                    rows={4}
-                    dir="rtl"
-                  />
-                </div>
-              </div>
-
-              {/* CTA Button Text EN & AR */}
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">CTA Button Text (English)</label>
-                  <Input 
-                    value={settings.ctaText || ''} 
-                    onChange={e => setSettings({...settings, ctaText: e.target.value})}
-                    placeholder="See My Work" 
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">نص زر الدعوة للعمل (بالعربية)</label>
-                  <Input 
-                    value={settings.ctaTextAr || ''} 
-                    onChange={e => setSettings({...settings, ctaTextAr: e.target.value})}
-                    placeholder="شاهد أعمالي"
-                    dir="rtl"
-                  />
-                </div>
-              </div>
-
-              {/* Hero Roles / Specialties EN & AR */}
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Hero Roles / Specialties (English, comma-separated)</label>
-                  <Input 
-                    value={settings.typewriterWords || ''} 
-                    onChange={e => setSettings({...settings, typewriterWords: e.target.value})}
-                    placeholder="Computer Engineer, Full-Stack Developer, Mobile App Developer, UI/UX Designer" 
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">التخصصات / الأدوار الرئيسية (بالعربية، مفصولة بفواصل)</label>
-                  <Input 
-                    value={settings.typewriterWordsAr || ''} 
-                    onChange={e => setSettings({...settings, typewriterWordsAr: e.target.value})}
-                    placeholder="مهندس حاسوب, مطور ويب شامل, مطور تطبيقات الموبايل, مصمم واجهات المستخدم"
-                    dir="rtl"
-                  />
-                </div>
-              </div>
-
-              {/* WhatsApp & Footer */}
-              <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">WhatsApp Number (e.g. +90 555 123 4567)</label>
                   <Input 
                     value={settings.whatsappNumber || ''} 
-                    onChange={e => setSettings({...settings, whatsappNumber: e.target.value})}
+                    onChange={e => setSettings({...settings, whatsappNumber: e.target.value})} 
+                    placeholder="+90 555 123 4567"
+                  />
+                </div>
+              </div>
+
+
+
+              {/* Location EN & AR */}
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Location (English)</label>
+                  <Input 
+                    value={settings.location || ''} 
+                    onChange={e => setSettings({...settings, location: e.target.value})} 
+                    placeholder="Istanbul, Turkey"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Footer Text (Arabic)</label>
+                  <label className="text-sm font-medium">الموقع الجغرافي (بالعربية)</label>
                   <Input 
+                    value={settings.locationAr || ''} 
+                    onChange={e => setSettings({...settings, locationAr: e.target.value})} 
+                    placeholder="إسطنبول، تركيا / عن بُعد"
+                    dir="rtl"
+                  />
+                </div>
+              </div>
+
+              {/* Footer Text EN & AR */}
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Footer Text (English)</label>
+                  <Textarea 
+                    value={settings.footerText || ''} 
+                    onChange={e => setSettings({...settings, footerText: e.target.value})} 
+                    rows={3}
+                    placeholder="Full-Stack Engineer crafting performant digital products and resilient software architectures."
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">نص التذييل (بالعربية)</label>
+                  <Textarea 
                     value={settings.footerTextAr || ''} 
-                    onChange={e => setSettings({...settings, footerTextAr: e.target.value})}
+                    onChange={e => setSettings({...settings, footerTextAr: e.target.value})} 
+                    rows={3}
                     placeholder="مهندس برمجيات متكامل يطور حلولاً رقمية وتطبيقات ويب سريعة وموثوقة."
                     dir="rtl"
                   />
@@ -604,6 +566,7 @@ const Settings = () => {
             </div>
           </div>
         </div>
+      </div>
       )}
 
       {/* TAB 2: Section Copywriting (Bilingual EN & AR) */}

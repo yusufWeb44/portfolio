@@ -59,8 +59,19 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({ cert
     const titleGap = isLg ? 68 : (isMd ? 58 : (isSm ? 46 : 36));
     const cardHeight = cardWidth / 1.414;
     const titleTop = Math.round(topBaseline + cardHeight + titleGap);
-    const outerDrop = (1 - Math.cos(2 * angleStep * Math.PI / 180)) * arcRadius;
-    const containerHeight = Math.round(topBaseline + cardHeight + outerDrop + 15);
+    const outerDrop = (1 - Math.cos(2.4 * angleStep * Math.PI / 180)) * arcRadius;
+    const containerHeight = Math.round(topBaseline + cardHeight + outerDrop + 20);
+
+    const halfW = windowWidth / 2;
+    // Calculate the angle where the card reaches the screen edge
+    const edgeRatio = Math.min(0.88, (halfW + cardWidth * 0.25) / arcRadius);
+    const edgeAngle = Math.asin(edgeRatio) * (180 / Math.PI);
+    
+    // Cards remain 100% sharp and visible until almost at the viewport edge
+    const fadeEnd = (isMd || isLg)
+      ? Math.max(50, Math.min(62, Math.round(edgeAngle + 6)))
+      : Math.max(38, Math.round(edgeAngle + 8));
+    const sharpThreshold = Math.max(26, fadeEnd - 12);
 
     return {
       cardWidth,
@@ -69,8 +80,8 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({ cert
       topBaseline,
       titleTop,
       containerHeight,
-      sharpThreshold: 30.0,
-      fadeEnd: 40.0,
+      sharpThreshold,
+      fadeEnd,
     };
   }, [windowWidth]);
 
@@ -86,12 +97,12 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({ cert
   const velocityRef = useRef(0);
   const animFrameRef = useRef<number | null>(null);
 
-  // Keep a repeating list of certificates so the wheel has enough slots for full 360-degree coverage
+  // Keep a repeating list of certificates so the wheel has enough slots for full coverage
   const wheelItems = useMemo(() => {
     if (!certificates || certificates.length === 0) return [];
     
     let list: CertificateItem[] = [...certificates];
-    while (list.length < 8) {
+    while (list.length < 12) {
       list = [...list, ...certificates];
     }
     return list;
@@ -260,21 +271,16 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({ cert
             const yDrop = (1 - Math.cos(rad)) * layout.arcRadius;
 
             // Visual parameters:
-            // 1. Sharp for almost the entire arc (|angle| <= sharpThreshold)
-            // 2. Only blurs in the brief window as it disappears at the very edge (34deg to 45deg)
-            //    with quadratic falloff so it clears up almost immediately upon entering!
-            let blurPx = 0;
+            // Sharp across the arc, smoothly fading out with opacity at the edges (no blur)
             let opacity = 1.0;
             let scale = 1.0;
 
             if (absAngle <= layout.sharpThreshold) {
-              blurPx = 0;
               opacity = 1.0;
               scale = 1.0;
             } else {
-              const t = (absAngle - layout.sharpThreshold) / (layout.fadeEnd - layout.sharpThreshold);
-              // Quadratic blur ramp: drops to 0 very fast as card enters
-              blurPx = Math.pow(t, 2) * 4.5;
+              const t = Math.min(1, Math.max(0, (absAngle - layout.sharpThreshold) / (layout.fadeEnd - layout.sharpThreshold)));
+              // Smooth cosine opacity fadeout without any blur filter
               opacity = Math.cos((t * Math.PI) / 2);
               scale = 1.0 - t * 0.05;
             }
@@ -293,10 +299,9 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({ cert
                   transform: `translate3d(calc(-50% + ${xOffset}px), ${yDrop}px, 0) rotate(${angle}deg) scale(${scale})`,
                   transformOrigin: 'center bottom',
                   opacity,
-                  filter: blurPx > 0 ? `blur(${blurPx}px)` : 'none',
                   zIndex,
                   width: `${layout.cardWidth}px`,
-                  transition: isDraggingRef.current ? 'none' : 'filter 0.15s ease, opacity 0.15s ease',
+                  transition: isDraggingRef.current ? 'none' : 'opacity 0.15s ease',
                 }}
                 className="aspect-[1.41/1] pointer-events-auto"
               >

@@ -76,11 +76,11 @@ const Services = () => {
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-pulse">
               {[1, 2, 3].map(i => (
-                <div key={i} className="h-[460px] bg-muted/40 rounded-3xl border border-border/50" />
+                <div key={i} className="h-[460px] bg-muted/40 rounded-xl border border-border/50" />
               ))}
             </div>
           ) : services.length === 0 ? (
-            <div className="py-16 text-center border border-dashed border-border/70 rounded-3xl bg-card/30">
+            <div className="py-16 text-center border border-dashed border-border/70 rounded-xl bg-card/30">
               <p className="text-muted-foreground">{isAr ? 'يتم تحديث الخدمات حالياً.' : 'No services published yet.'}</p>
             </div>
           ) : (

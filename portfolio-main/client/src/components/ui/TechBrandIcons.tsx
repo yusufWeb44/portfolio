@@ -55,7 +55,7 @@ export const NextIcon: React.FC<TechIconProps> = ({ size = 20, className = '' })
     style={{ display: 'inline-block', verticalAlign: 'middle' }}
     fill="none"
   >
-    <circle cx="90" cy="90" r="88" fill="#000000" stroke="#333333" strokeWidth="3" />
+    <circle cx="90" cy="90" r="86" fill="#000000" stroke="rgba(255,255,255,0.28)" strokeWidth="5" />
     <path
       d="M149.5 157.5L69.1 54H54v72h12.1V69.4l73.9 95.5c3.3-2.2 6.5-4.7 9.5-7.4z"
       fill="url(#nextG1)"
@@ -483,6 +483,173 @@ export const CssIcon: React.FC<TechIconProps> = ({ size = 20, className = '' }) 
   </svg>
 );
 
+// ── Official Microsoft C# Logo (Authentic Purple Hexagon) ───────────
+export const CSharpIcon: React.FC<TechIconProps> = ({ size = 20, className = '' }) => (
+  <svg
+    viewBox="0 0 128 128"
+    width={size}
+    height={size}
+    className={className}
+    style={{ display: 'inline-block', verticalAlign: 'middle' }}
+    fill="none"
+  >
+    <path
+      d="M115.4 30.7L66.7 2.6c-1.7-1-3.7-1-5.4 0L12.6 30.7c-1.7 1-2.7 2.7-2.7 4.7v57.2c0 1.9 1 3.7 2.7 4.7l48.7 28.1c1.7 1 3.7 1 5.4 0l48.7-28.1c1.7-1 2.7-2.7 2.7-4.7V35.4c0-2-1-3.7-2.7-4.7z"
+      fill="#9B4993"
+    />
+    <path
+      d="M109.8 33.9L65.4 8.3c-.9-.5-1.9-.5-2.8 0L18.2 33.9c-.9.5-1.4 1.4-1.4 2.5v55.2c0 1 .5 2 1.4 2.5l44.4 25.6c.9.5 1.9.5 2.8 0l44.4-25.6c.9-.5 1.4-1.4 1.4-2.5V36.4c0-1.1-.5-2-1.4-2.5z"
+      fill="#68217A"
+    />
+    <path
+      d="M62 42.5c-11.9 0-21.5 9.6-21.5 21.5s9.6 21.5 21.5 21.5c7.3 0 13.8-3.7 17.6-9.3l-8.5-4.9c-2.3 3.3-6.1 5.4-10.4 5.4-7 0-12.7-5.7-12.7-12.7s5.7-12.7 12.7-12.7c4.3 0 8.1 2.1 10.4 5.4l8.5-4.9c-3.8-5.6-10.3-9.3-17.6-9.3z"
+      fill="#FFFFFF"
+    />
+    <path
+      d="M86.2 57.5h-2.5l.7-4h-3.2l-.7 4h-3.2l.7-4h-3.2l-.7 4h-2.5v3.2h2.8l-.8 4.5h-2.8v3.2h2.3l-.7 4h3.2l.7-4h3.2l-.7 4h3.2l.7-4h2.5v-3.2h-2.8l.8-4.5h2.8v-3.2zm-6.2 7.7h-3.2l.8-4.5h3.2l-.8 4.5z"
+      fill="#FFFFFF"
+    />
+  </svg>
+);
+
+// ── Official Microsoft .NET / ASP.NET Logo ───────────────────────────
+export const AspNetIcon: React.FC<TechIconProps> = ({ size = 20, className = '' }) => (
+  <svg
+    viewBox="0 0 128 128"
+    width={size}
+    height={size}
+    className={className}
+    style={{ display: 'inline-block', verticalAlign: 'middle' }}
+    fill="none"
+  >
+    <circle cx="64" cy="64" r="60" fill="#512BD4" stroke="rgba(255,255,255,0.25)" strokeWidth="3" />
+    <circle cx="34" cy="78" r="5.5" fill="#FFFFFF" />
+    <path d="M47 42h8l14 26V42h7v44h-7.5L54.5 61.5V86H47V42z" fill="#FFFFFF" />
+    <path d="M83 42h16.5v6.5H89.5v12h9v6.5h-9v12.5H100V86H83V42z" fill="#FFFFFF" />
+    <path d="M109 48.5h-7V42h21v6.5h-7V86h-7V48.5z" fill="#FFFFFF" />
+  </svg>
+);
+
+// ── Official Java Coffee Cup Logo ────────────────────────────────────
+export const JavaIcon: React.FC<TechIconProps> = ({ size = 20, className = '' }) => (
+  <svg
+    viewBox="0 0 128 128"
+    width={size}
+    height={size}
+    className={className}
+    style={{ display: 'inline-block', verticalAlign: 'middle' }}
+    fill="none"
+  >
+    <path d="M48.2 92.4c-12.7 1.4-23.8-3.7-27.1-7.2 9.1-1.2 19.3.9 27.1 7.2z" fill="#5382A1"/>
+    <path d="M43.7 75.3c-14.8 3.5-27.3-3.2-31.2-8.3 11.2-.8 23.4 2.8 31.2 8.3z" fill="#5382A1"/>
+    <path d="M72.5 107.6c-21.2 4.4-44.1 2.3-56.3-5.2 7.8 2.2 21.8 3.8 38.4 1.1 14.2-2.3 26.2-7.8 35.7-14.3-4.2 8.1-10.4 14.8-17.8 18.4z" fill="#5382A1"/>
+    <path d="M85.4 69.8c3.2-1.8 6.5-4.2 9.7-7.4 6.8-6.8 9.5-16.1 7.2-23.4-2.8-8.9-12.8-13.6-24.8-12.1 2.5 1.8 4.7 4 6.4 6.7 4.1 6.4 4.5 14.4.9 20.9-2.5 4.6-6.7 8.3-11.4 10.9 4.3 1.5 8.4 2.9 12 4.4z" fill="#EA2D2E"/>
+    <path d="M60.1 53.6c4.6-5.4 6.8-12.4 5.7-18.7-.9-5.4-4.2-9.7-8.8-11.8 1.4 1.8 2.5 3.9 3 6.3 1.2 5.5-.3 11.4-3.8 15.9-3.2 4.2-7.9 7.1-13 8.7 5.7.5 11.9.1 16.9-.4z" fill="#EA2D2E"/>
+    <path d="M41.8 116.8c18.5 1.2 38.6-1.5 53.9-9.1-13.5 4.3-32.9 6.2-53.9 9.1z" fill="#5382A1"/>
+  </svg>
+);
+
+// ── Database Design (Relational Schema & Architecture) ─────────────────
+export const DatabaseDesignIcon: React.FC<TechIconProps> = ({ size = 20, className = '' }) => (
+  <svg
+    viewBox="0 0 24 24"
+    width={size}
+    height={size}
+    className={className}
+    style={{ display: 'inline-block', verticalAlign: 'middle' }}
+    fill="none"
+  >
+    <rect x="2.5" y="3" width="19" height="18" rx="3.5" stroke="#0284C7" strokeWidth="2" />
+    <path d="M2.5 9h19" stroke="#0284C7" strokeWidth="2" />
+    <path d="M9 9v12" stroke="#0284C7" strokeWidth="2" />
+    <circle cx="5.5" cy="6" r="1.2" fill="#0284C7" />
+    <circle cx="5.5" cy="13" r="1.2" fill="#38BDF8" />
+    <circle cx="5.5" cy="17" r="1.2" fill="#38BDF8" />
+    <path d="M12.5 13h5.5" stroke="#38BDF8" strokeWidth="2" strokeLinecap="round" />
+    <path d="M12.5 17h4" stroke="#38BDF8" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+);
+
+// ── Data Structures & Algorithms (Binary Tree & Graph) ────────────────
+export const DataStructuresIcon: React.FC<TechIconProps> = ({ size = 20, className = '' }) => (
+  <svg
+    viewBox="0 0 24 24"
+    width={size}
+    height={size}
+    className={className}
+    style={{ display: 'inline-block', verticalAlign: 'middle' }}
+    fill="none"
+  >
+    <path d="M10 7.5L6.5 15" stroke="#A78BFA" strokeWidth="2" strokeLinecap="round" />
+    <path d="M14 7.5L17.5 15" stroke="#A78BFA" strokeWidth="2" strokeLinecap="round" />
+    <circle cx="12" cy="5" r="3.2" fill="#8B5CF6" />
+    <circle cx="5.5" cy="17.5" r="3" fill="#38BDF8" />
+    <circle cx="18.5" cy="17.5" r="3" fill="#38BDF8" />
+  </svg>
+);
+
+// ── OOP (Object-Oriented Programming Architecture) ────────────────────
+export const OopIcon: React.FC<TechIconProps> = ({ size = 20, className = '' }) => (
+  <svg
+    viewBox="0 0 24 24"
+    width={size}
+    height={size}
+    className={className}
+    style={{ display: 'inline-block', verticalAlign: 'middle' }}
+    fill="none"
+  >
+    <path d="M12 2.5L3.5 7.4v9.2L12 21.5l8.5-4.9V7.4L12 2.5z" stroke="#F59E0B" strokeWidth="2" strokeLinejoin="round" />
+    <path d="M12 21.5v-9.5" stroke="#F59E0B" strokeWidth="2" />
+    <path d="M20.5 7.4L12 12 3.5 7.4" stroke="#F59E0B" strokeWidth="2" />
+    <circle cx="12" cy="12" r="2.2" fill="#FBBF24" />
+  </svg>
+);
+
+// ── Prompt Engineering & Generative AI ────────────────────────────────
+export const PromptEngineeringIcon: React.FC<TechIconProps> = ({ size = 20, className = '' }) => (
+  <svg
+    viewBox="0 0 24 24"
+    width={size}
+    height={size}
+    className={className}
+    style={{ display: 'inline-block', verticalAlign: 'middle' }}
+    fill="none"
+  >
+    <path
+      d="M12 2L14.6 8.4L21 11L14.6 13.6L12 20L9.4 13.6L3 11L9.4 8.4L12 2Z"
+      fill="url(#ai-grad-official)"
+      stroke="#10B981"
+      strokeWidth="1.5"
+    />
+    <circle cx="18.5" cy="5.5" r="1.5" fill="#38BDF8" />
+    <circle cx="5.5" cy="18.5" r="1.2" fill="#34D399" />
+    <defs>
+      <linearGradient id="ai-grad-official" x1="3" y1="2" x2="21" y2="20" gradientUnits="userSpaceOnUse">
+        <stop stopColor="#10B981" />
+        <stop offset="100%" stopColor="#06B6D4" />
+      </linearGradient>
+    </defs>
+  </svg>
+);
+
+// ── SEO (Search Engine Optimization & Growth) ─────────────────────────
+export const SeoIcon: React.FC<TechIconProps> = ({ size = 20, className = '' }) => (
+  <svg
+    viewBox="0 0 24 24"
+    width={size}
+    height={size}
+    className={className}
+    style={{ display: 'inline-block', verticalAlign: 'middle' }}
+    fill="none"
+  >
+    <circle cx="10.5" cy="10.5" r="7" stroke="#3B82F6" strokeWidth="2.2" />
+    <path d="M19.5 19.5l-4-4" stroke="#3B82F6" strokeWidth="2.5" strokeLinecap="round" />
+    <path d="M7.5 12l2.2-2.2 2 1.6 3-3.4" stroke="#10B981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+export const ReactNativeIcon = ReactIcon;
+
 // ── Fallback Code Terminal Icon ───────────────────────────────────────
 export const DefaultCodeIcon: React.FC<TechIconProps> = ({ size = 20, className = '' }) => (
   <svg
@@ -513,10 +680,14 @@ export function getTechBrandIcon(techName: string, size: number = 20) {
   const clean = techName.toLowerCase().replace(/[\s\-_.]/g, '');
 
   // Exact & substring priority matching
+  if (clean.includes('reactnative')) return <ReactNativeIcon size={size} />;
   if (clean.includes('flutter')) return <FlutterIcon size={size} />;
   if (clean.includes('dart')) return <DartIcon size={size} />;
+  if (clean.includes('c#') || clean.includes('csharp')) return <CSharpIcon size={size} />;
+  if (clean.includes('asp') || clean.includes('dotnet')) return <AspNetIcon size={size} />;
+  if (clean.includes('java') && !clean.includes('javascript')) return <JavaIcon size={size} />;
   if (clean.includes('html')) return <HtmlIcon size={size} />;
-  if (clean.includes('css')) return <CssIcon size={size} />;
+  if (clean.includes('css') && !clean.includes('tailwind')) return <CssIcon size={size} />;
   if (clean.includes('mysql') || (clean.includes('sql') && !clean.includes('postgre'))) return <MySQLIcon size={size} />;
   if (clean.includes('postgres')) return <PostgreSQLIcon size={size} />;
   if (clean.includes('react')) return <ReactIcon size={size} />;
@@ -537,7 +708,12 @@ export function getTechBrandIcon(techName: string, size: number = 20) {
   if (clean.includes('mongo')) return <MongoIcon size={size} />;
   if (clean.includes('python')) return <PythonIcon size={size} />;
   if (clean.includes('redis')) return <RedisIcon size={size} />;
-  if (clean.includes('git')) return <GitIcon size={size} />;
+  if (clean.includes('git') || clean.includes('github')) return <GitIcon size={size} />;
+  if (clean.includes('database') || clean.includes('dbdesign')) return <DatabaseDesignIcon size={size} />;
+  if (clean.includes('datastructure') || clean.includes('algorithm') || clean.includes('algo')) return <DataStructuresIcon size={size} />;
+  if (clean.includes('oop') || clean.includes('objectoriented')) return <OopIcon size={size} />;
+  if (clean.includes('prompt') || clean.includes('ai') || clean.includes('gpt')) return <PromptEngineeringIcon size={size} />;
+  if (clean.includes('seo')) return <SeoIcon size={size} />;
 
   return <DefaultCodeIcon size={size} />;
 }

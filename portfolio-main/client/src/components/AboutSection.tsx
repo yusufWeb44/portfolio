@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Layers, TrendingUp, Zap, Cpu, Code2, ShieldCheck, Database, Server, Globe, Sparkles } from 'lucide-react';
 import api from '../services/api';
 import { useLanguage } from '../contexts/LanguageContext';
-import { getTechBrandIcon } from './ui/TechBrandIcons';
+import TechStackMarquee, { DEFAULT_CORE_STACK } from './ui/TechStackMarquee';
 
 /* ─── Animation Variants ─────────────────────────────────────────── */
 const containerVariants = {
@@ -82,8 +82,8 @@ const AboutSection = () => {
   };
 
   const displayHeadline = resolveAboutField('about.headline', aboutData?.headlineAr, aboutData?.headline, 'Crafting Scalable Software with Purpose & Precision.');
-  const displayBio1 = resolveAboutField('about.bio1', aboutData?.bioParagraph1Ar, aboutData?.bioParagraph1, '');
-  const displayBio2 = resolveAboutField('about.bio2', aboutData?.bioParagraph2Ar, aboutData?.bioParagraph2, '');
+  const displayBio1 = isAr ? (aboutData?.bioParagraph1Ar || aboutData?.bioParagraph1) : aboutData?.bioParagraph1;
+  const displayBio2 = isAr ? (aboutData?.bioParagraph2Ar || aboutData?.bioParagraph2) : aboutData?.bioParagraph2;
 
   const displayCoreStackTitle = isAr ? t('about.coreStack', 'التقنيات الأساسية') : 'Core Stack';
 
@@ -112,17 +112,17 @@ const AboutSection = () => {
   return (
     <section
       id="about"
-      className="scroll-mt-24 py-20 sm:py-24 md:py-28 px-4 sm:px-6 lg:px-8 bg-transparent overflow-hidden"
+      className="scroll-mt-24 py-12 sm:py-16 md:py-20 bg-transparent overflow-hidden"
       aria-label="About me"
     >
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* ── 12-Column Main Grid (Both Left & Right aligned at the exact same horizontal level) ── */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
 
-          {/* ── Left Column: 5 cols — Title & Bio (pushed to match right cards level) ── */}
+          {/* ── Left Column: 5 cols — Title & Bio ── */}
           <motion.div
-            className="lg:col-span-5 flex flex-col gap-7 lg:pt-[70px]"
+            className={`flex flex-col gap-7 lg:pt-[70px] ${displayCards.length > 0 ? 'lg:col-span-5' : 'lg:col-span-8'}`}
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"
@@ -137,33 +137,42 @@ const AboutSection = () => {
 
             {/* Bio Text */}
             <motion.div variants={fadeUpVariants} className="space-y-4">
-              <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
-                {displayBio1}
-              </p>
-              {displayBio2 && (
+              {displayBio1 ? (
+                <>
+                  <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
+                    {displayBio1}
+                  </p>
+                  {displayBio2 && (
+                    <p className="text-base text-muted-foreground leading-relaxed">
+                      {displayBio2}
+                    </p>
+                  )}
+                </>
+              ) : (
                 <p className="text-base text-muted-foreground leading-relaxed">
-                  {displayBio2}
+                  {isAr ? 'يتم تحديث معلومات النبذة التعريفية حالياً.' : 'About content is being updated.'}
                 </p>
               )}
             </motion.div>
           </motion.div>
 
-          {/* ── Right Column: 7 cols — Bento Cards ── */}
-          <motion.div
-            className="lg:col-span-7 lg:pt-[70px]"
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: '-100px' }}
-          >
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* ── Right Column: 7 cols — Bento Cards (Rendered ONLY if data exists) ── */}
+          {displayCards.length > 0 && (
+            <motion.div
+              className="lg:col-span-7 lg:pt-[70px]"
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: '-100px' }}
+            >
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {displayCards.map((card, i) => (
                 <motion.div
                   key={card.id || i}
                   variants={cardVariants}
                   className={[
                     card.colSpan || (i === 2 && displayCards.length === 3 ? 'sm:col-span-2' : ''),
-                    'group relative flex flex-col gap-5 rounded-2xl sm:rounded-3xl p-6 sm:p-7 md:p-8',
+                    'group relative flex flex-col gap-5 rounded-xl sm:rounded-2xl p-6 sm:p-7 md:p-8',
                     'bg-card/40 dark:bg-white/[0.03] border border-border/60 backdrop-blur-xl',
                     'hover:border-emerald-500/40 hover:-translate-y-1.5',
                     'hover:shadow-[0_0_25px_rgba(16,185,129,0.1)]',
@@ -172,12 +181,12 @@ const AboutSection = () => {
                   ].join(' ')}
                 >
                   {/* Subtle background glow on hover */}
-                  <div className="absolute inset-0 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-emerald-500/0 to-emerald-500/0 group-hover:from-emerald-500/[0.03] group-hover:to-transparent transition-all duration-500 pointer-events-none" />
+                  <div className="absolute inset-0 rounded-xl sm:rounded-2xl bg-gradient-to-br from-emerald-500/0 to-emerald-500/0 group-hover:from-emerald-500/[0.03] group-hover:to-transparent transition-all duration-500 pointer-events-none" />
 
                   {/* Card Header */}
                   <div className="flex items-start justify-between gap-4 relative z-10">
                     <div className="flex items-center gap-3">
-                      <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono text-xs font-bold shrink-0">
+                      <span className="flex items-center justify-center w-8 h-8 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono text-xs font-bold shrink-0">
                         {card.id || String(i + 1).padStart(2, '0')}
                       </span>
                       <h3 className="text-base md:text-lg font-bold text-foreground tracking-tight group-hover:text-emerald-400 transition-colors duration-300">
@@ -200,43 +209,23 @@ const AboutSection = () => {
               ))}
             </div>
           </motion.div>
+        )}
 
         </div>
 
-        {/* ── Core Stack (Full-width row below entire container, aligned to left) ── */}
-        {coreStack.length > 0 && (
-          <motion.div
-            variants={fadeUpVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: '-50px' }}
-            className="mt-12 sm:mt-16 md:mt-20 w-full"
-          >
-            <div className="flex flex-col items-start gap-5">
-              <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground/60">
-                {displayCoreStackTitle}
-              </p>
-
-              {/* Technologies: names & original authentic brand icons neatly arranged */}
-              <div className="flex flex-wrap items-center gap-x-8 sm:gap-x-10 gap-y-6 sm:gap-y-7">
-                {coreStack.map((tech) => (
-                  <div
-                    key={tech}
-                    className="group flex items-center gap-2.5 transition-all duration-200 hover:-translate-y-0.5 select-none cursor-default"
-                  >
-                    <span className="shrink-0 flex items-center justify-center transition-transform duration-200 group-hover:scale-110 drop-shadow-sm">
-                      {getTechBrandIcon(tech, 24)}
-                    </span>
-                    <span className="text-sm sm:text-base font-semibold text-foreground/85 group-hover:text-emerald-400 transition-colors">
-                      {tech}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        )}
-
+        {/* ── Core Stack (Infinite Marquee Ticker) ── */}
+        <motion.div
+          variants={fadeUpVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-50px' }}
+          className="mt-14 sm:mt-18 md:mt-24 w-full"
+        >
+          <TechStackMarquee
+            technologies={coreStack.length > 0 ? coreStack : DEFAULT_CORE_STACK}
+            title={displayCoreStackTitle}
+          />
+        </motion.div>
       </div>
     </section>
   );

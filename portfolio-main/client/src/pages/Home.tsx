@@ -31,7 +31,6 @@ import { FAQ } from '../components/ui/faq-tabs';
 import { ServiceCarousel } from '../components/ui/services-card';
 import ExperienceTimeline from '../components/ExperienceTimeline';
 import CertificatesCarousel from '../components/CertificatesCarousel';
-import { DEFAULT_FAQS } from '../data/defaultFaqs';
 
 /* ─── Types ──────────────────────────────────────────────────────── */
 
@@ -140,41 +139,22 @@ const FadeIn = ({
 const Home = () => {
   const { t, currentLang } = useLanguage();
   /* ─── State ──────────────────────────────────────────────────────── */
-  const [settings, setSettings] = useState<Settings | null>(() => {
-    try {
-      const cached = localStorage.getItem('portfolio_settings');
-      return cached ? JSON.parse(cached) : null;
-    } catch {
-      return null;
-    }
-  });
-
+  const [settings, setSettings] = useState<Settings | null>(null);
   const [experiences, setExperiences] = useState<ExperienceItem[]>([]);
-  const [certificates, setCertificates] = useState<CertificateItem[]>(() => {
-    try {
-      const cached = localStorage.getItem('portfolio_certificates');
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-    } catch { }
-    return [];
-  });
+  const [certificates, setCertificates] = useState<CertificateItem[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [socialLinks, setSocialLinks] = useState<SocialLinkItem[]>([]);
-  const [rawFaqs, setRawFaqs] = useState<any[]>(() => {
-    try {
-      const cached = localStorage.getItem('portfolio_faqs');
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-    } catch { }
-    return DEFAULT_FAQS;
-  });
+  const [rawFaqs, setRawFaqs] = useState<any[]>([]);
 
   /* ─── Data Fetching ─────────────────────────────────────────────── */
   useEffect(() => {
+    // Clear any stale cached DB content from earlier sessions
+    try {
+      localStorage.removeItem('portfolio_certificates');
+      localStorage.removeItem('portfolio_faqs');
+      localStorage.removeItem('portfolio_settings');
+    } catch { }
+
     const fetchAll = async () => {
       try {
         const [settRes, expRes, certRes, servRes, socialRes, faqRes] = await Promise.allSettled([
@@ -186,42 +166,46 @@ const Home = () => {
           api.get('/faqs'),
         ]);
 
-        // Settings are critical (above-the-fold hero) — update urgently
         if (settRes.status === 'fulfilled') {
           const settData = settRes.value.data.data;
           setSettings(settData);
-          try {
-            localStorage.setItem('portfolio_settings', JSON.stringify(settData));
-          } catch { }
+        } else {
+          setSettings(null);
         }
 
         // Below-the-fold data — defer with startTransition to avoid blocking paint
         startTransition(() => {
           if (expRes.status === 'fulfilled') {
             setExperiences(expRes.value.data.data || []);
+          } else {
+            setExperiences([]);
           }
           if (certRes.status === 'fulfilled') {
             const certData = certRes.value.data.data || [];
             setCertificates(certData);
-            try {
-              localStorage.setItem('portfolio_certificates', JSON.stringify(certData));
-            } catch { }
+          } else {
+            setCertificates([]);
           }
           if (servRes.status === 'fulfilled') {
             setServices((servRes.value.data.data || []).filter((s: Service) => s.isEnabled));
+          } else {
+            setServices([]);
           }
           if (socialRes.status === 'fulfilled') {
             setSocialLinks(socialRes.value.data.data || []);
+          } else {
+            setSocialLinks([]);
           }
           if (faqRes.status === 'fulfilled') {
             const fetchedFaqs = faqRes.value.data.data;
             if (Array.isArray(fetchedFaqs) && fetchedFaqs.length > 0) {
               const valid = fetchedFaqs.filter((f: any) => f.isEnabled !== false);
               setRawFaqs(valid);
-              try {
-                localStorage.setItem('portfolio_faqs', JSON.stringify(valid));
-              } catch { }
+            } else {
+              setRawFaqs([]);
             }
+          } else {
+            setRawFaqs([]);
           }
         });
       } catch (err) {
@@ -276,7 +260,7 @@ const Home = () => {
       collab: [],
     };
 
-    const itemsToProcess = rawFaqs.length > 0 ? rawFaqs : DEFAULT_FAQS;
+    const itemsToProcess = rawFaqs || [];
 
     itemsToProcess.forEach((item: any) => {
       const catKey = item.category || 'services';
@@ -322,7 +306,7 @@ const Home = () => {
     'hero.bio',
     settings?.bioAr,
     settings?.bio,
-    "Building scalable web applications, custom CRM systems, and high-performance APIs for startups and businesses. Delivering clean, maintainable code engineered for reliability and seamless growth."
+    ""
   );
 
   const heroText = resolveField(
@@ -332,14 +316,14 @@ const Home = () => {
     'End-to-End Web Development & Software Engineering'
   );
 
-  const email = settings?.email || 'hello@example.com';
-  const location = settings?.location || 'Istanbul, Turkey';
+  const email = settings?.email || '';
+  const location = settings?.location || '';
 
   const availability = resolveField(
     'hero.availability',
     settings?.availabilityAr,
     settings?.availability,
-    'Available for Freelance & Consulting'
+    ''
   );
 
   const ctaText = resolveField(
@@ -366,18 +350,8 @@ const Home = () => {
         if (split.length > 0) return split;
       }
     }
-    return isAr ? [
-      'مهندس حاسوب',
-      'مطور ويب شامل',
-      'مطور تطبيقات الموبايل',
-      'مصمم واجهات المستخدم',
-    ] : [
-      'Computer Engineer',
-      'Full-Stack Developer',
-      'Mobile App Developer',
-      'UI/UX Designer',
-    ];
-  }, [isAr, settings?.typewriterWordsAr, settings?.typewriterWords, t]);
+    return [];
+  }, [isAr, settings?.typewriterWordsAr, settings?.typewriterWords]);
 
   const heroStats = useMemo(() => {
     const source = isAr ? settings?.heroStatsAr : settings?.heroStats;
@@ -387,18 +361,8 @@ const Home = () => {
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       } catch { }
     }
-    return isAr ? [
-      { value: t('hero.stats.uptimeValue', '24/7'), label: t('hero.stats.uptimeLabel', 'دعم واستشارات مستمرة') },
-      { value: t('hero.stats.satisfactionValue', '100%'), label: t('hero.stats.satisfactionLabel', 'رضا العملاء') },
-      { value: t('hero.stats.projectsValue', '+35'), label: t('hero.stats.projectsLabel', 'مشروع مكتمل') },
-      { value: t('hero.stats.experienceValue', '+4'), label: t('hero.stats.experienceLabel', 'سنوات خبرة') },
-    ] : [
-      { value: '24/7', label: 'Availability & Support' },
-      { value: '100%', label: 'Client Satisfaction' },
-      { value: '+35', label: 'Completed Projects' },
-      { value: '+4', label: 'Years Experience' },
-    ];
-  }, [isAr, settings?.heroStatsAr, settings?.heroStats, t]);
+    return [];
+  }, [isAr, settings?.heroStatsAr, settings?.heroStats]);
 
   return (
     <div className="w-full bg-transparent overflow-x-clip">
@@ -458,8 +422,8 @@ const Home = () => {
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 4: EXPERIENCE (Vertical Animated Timeline & Certificates)
       ═══════════════════════════════════════════════════════════════ */}
-      <section id="experience" className="scroll-mt-24 pt-20 sm:pt-24 md:pt-28 pb-4 sm:pb-6 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto space-y-12 px-4 sm:px-6 lg:px-8 mb-8 sm:mb-12">
+      <section id="experience" className="scroll-mt-24 pt-10 sm:pt-14 md:pt-18 pb-4 sm:pb-6 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto space-y-8 sm:space-y-10 px-4 sm:px-6 lg:px-8 mb-6 sm:mb-8">
           <FadeIn>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-foreground leading-[1.15] mb-4">
               {resolveField('experience.title', settings?.experienceTitleAr, settings?.experienceTitle, 'Experience.')}
@@ -470,22 +434,30 @@ const Home = () => {
           </FadeIn>
 
           {/* Vertical Timeline with Scroll Effects */}
-          <Suspense fallback={<div className="min-h-[200px]" />}>
-            <ExperienceTimeline experiences={experiences} />
-          </Suspense>
+          {experiences.length > 0 ? (
+            <Suspense fallback={<div className="min-h-[200px]" />}>
+              <ExperienceTimeline experiences={experiences} />
+            </Suspense>
+          ) : (
+            <div className="py-14 text-center border border-dashed border-border/70 rounded-xl bg-card/30 backdrop-blur-md">
+              <p className="text-muted-foreground">{isAr ? 'يتم تحديث مسار الخبرات حالياً.' : 'Experience timeline is being updated.'}</p>
+            </div>
+          )}
         </div>
 
         {/* Full-width seamless Certificates Carousel */}
-        <Suspense fallback={<div className="min-h-[300px]" />}>
-          <CertificatesCarousel certificates={certificates} />
-        </Suspense>
+        {certificates.length > 0 && (
+          <Suspense fallback={<div className="min-h-[300px]" />}>
+            <CertificatesCarousel certificates={certificates} />
+          </Suspense>
+        )}
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 5: SERVICES (Offerings & Workflow Process)
       ═══════════════════════════════════════════════════════════════ */}
-      <section id="services" className="scroll-mt-24 pt-10 sm:pt-14 pb-20 sm:pb-24 md:pb-28 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto space-y-16">
+      <section id="services" className="scroll-mt-24 pt-10 sm:pt-12 md:pt-14 pb-12 sm:pb-16 md:pb-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto space-y-10 sm:space-y-12">
           <FadeIn>
             <div className="grid md:grid-cols-2 gap-6 lg:gap-8 items-end justify-between">
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-foreground leading-[1.15]">
@@ -499,7 +471,7 @@ const Home = () => {
 
           {/* Draggable Services Horizontal Carousel */}
           {services.length === 0 ? (
-            <div className="py-14 text-center border border-dashed border-border/70 rounded-3xl bg-card/30 backdrop-blur-md">
+            <div className="py-14 text-center border border-dashed border-border/70 rounded-xl bg-card/30 backdrop-blur-md">
               <p className="text-muted-foreground">{isAr ? 'يتم تحديث الخدمات حالياً.' : 'Services are being updated.'}</p>
             </div>
           ) : (
@@ -526,22 +498,24 @@ const Home = () => {
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 6: FAQ
       ═══════════════════════════════════════════════════════════════ */}
-      <Suspense fallback={<div className="min-h-[160px]" />}>
-        <FAQ
-          id="faq"
-          title={resolveField('faq.title', settings?.faqTitleAr, settings?.faqTitle, 'Common Questions.')}
-          subtitle={resolveField('faq.badge', settings?.faqBadgeAr, settings?.faqBadge, 'Got a question?')}
-          categories={faqCategories}
-          faqData={faqDataMap}
-        />
-      </Suspense>
+      {rawFaqs.length > 0 && (
+        <Suspense fallback={<div className="min-h-[160px]" />}>
+          <FAQ
+            id="faq"
+            title={resolveField('faq.title', settings?.faqTitleAr, settings?.faqTitle, 'Common Questions.')}
+            subtitle={resolveField('faq.badge', settings?.faqBadgeAr, settings?.faqBadge, 'Got a question?')}
+            categories={faqCategories}
+            faqData={faqDataMap}
+          />
+        </Suspense>
+      )}
 
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 7: CONTACT
       ═══════════════════════════════════════════════════════════════ */}
       <section
         id="contact"
-        className="scroll-mt-24 relative overflow-hidden bg-transparent text-foreground py-20 sm:py-24 md:py-28 px-4 sm:px-6 lg:px-8"
+        className="scroll-mt-24 relative overflow-hidden bg-transparent text-foreground py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8"
       >
         <div className="relative z-10 max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
@@ -612,14 +586,14 @@ const Home = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
             >
-              <div className="bg-card/40 dark:bg-white/[0.03] backdrop-blur-xl border border-border/60 rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 space-y-6 sm:space-y-8 shadow-sm">
+              <div className="bg-card/40 dark:bg-white/[0.03] backdrop-blur-xl border border-border/60 rounded-xl sm:rounded-2xl p-6 sm:p-8 md:p-10 space-y-6 sm:space-y-8 shadow-sm">
 
                 {/* Email row */}
                 <a
                   href={`mailto:${email}`}
                   className="group flex items-center gap-4 hover:opacity-80 transition-opacity"
                 >
-                  <div className="w-12 h-12 rounded-2xl bg-card/60 dark:bg-white/[0.05] border border-border/50 flex items-center justify-center shrink-0">
+                  <div className="w-12 h-12 rounded-xl bg-card/60 dark:bg-white/[0.05] border border-border/50 flex items-center justify-center shrink-0">
                     <Mail size={18} />
                   </div>
                   <div className="min-w-0">
@@ -631,7 +605,7 @@ const Home = () => {
 
                 {/* Location row */}
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-card/60 dark:bg-white/[0.05] border border-border/50 flex items-center justify-center shrink-0">
+                  <div className="w-12 h-12 rounded-xl bg-card/60 dark:bg-white/[0.05] border border-border/50 flex items-center justify-center shrink-0">
                     <Globe size={18} />
                   </div>
                   <div>
@@ -642,7 +616,7 @@ const Home = () => {
 
                 {/* Availability row */}
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center shrink-0">
+                  <div className="w-12 h-12 rounded-xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center shrink-0">
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
                   </div>
                   <div>

@@ -209,8 +209,11 @@ const Dashboard = () => {
             <Link to="/admin/projects" className="inline-flex items-center justify-center h-10 px-4 rounded-md bg-foreground text-background text-sm font-medium hover:opacity-90 transition-opacity">
               + New Project
             </Link>
+            <Link to="/admin/hero" className="inline-flex items-center justify-center h-10 px-4 rounded-md border border-border bg-background text-foreground text-sm font-medium hover:bg-muted transition-colors">
+              Hero & Stats
+            </Link>
             <Link to="/admin/settings" className="inline-flex items-center justify-center h-10 px-4 rounded-md border border-border bg-background text-foreground text-sm font-medium hover:bg-muted transition-colors">
-              Update Bio
+              General Settings
             </Link>
           </div>
         </div>

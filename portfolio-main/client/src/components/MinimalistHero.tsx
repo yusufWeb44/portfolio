@@ -6,10 +6,11 @@ import { GithubIcon, LinkedinIcon, InstagramIcon, FacebookIcon } from './ui/Bran
 
 /* ─── Animated Count-up for Hero Stats ────────────────────────────── */
 const AnimatedStatValue: React.FC<{ value: string }> = ({ value }) => {
-  const match = value.match(/^([^0-9]*)(\d+)(.*)$/);
+  const strVal = String(value ?? '');
+  const match = strVal.match(/^([^0-9]*)(\d+)(.*)$/);
 
   if (!match) {
-    return <span>{value}</span>;
+    return <span>{strVal}</span>;
   }
 
   const prefix = match[1];
@@ -86,33 +87,49 @@ export interface MinimalistHeroProps {
   facebookUrl?: string;
 }
 
-const socialLinks = [
-  { label: 'GitHub', href: 'https://github.com', Icon: GithubIcon },
-  { label: 'LinkedIn', href: 'https://linkedin.com', Icon: LinkedinIcon },
-  { label: 'Instagram', href: 'https://instagram.com', Icon: InstagramIcon },
-  { label: 'Facebook', href: 'https://facebook.com', Icon: FacebookIcon },
-];
-
-const defaultStats: StatItem[] = [
-  { value: '+4', label: 'Years Experience' },
-  { value: '+8', label: 'Completed Projects' },
-  { value: '100%', label: 'Client Satisfaction' },
-  { value: '24/7', label: 'Availability & Support' },
-];
+const formatStatLabel = (label: string) => {
+  if (!label) return null;
+  if (label.includes('\n')) {
+    return label.split('\n').map((line, i) => (
+      <span key={i} className="block leading-tight">{line}</span>
+    ));
+  }
+  const words = label.trim().split(/\s+/);
+  if (words.length === 2) {
+    return (
+      <>
+        <span className="block leading-tight">{words[0]}</span>
+        <span className="block leading-tight">{words[1]}</span>
+      </>
+    );
+  }
+  if (words.length >= 3) {
+    const mid = Math.ceil(words.length / 2);
+    const line1 = words.slice(0, mid).join(' ');
+    const line2 = words.slice(mid).join(' ');
+    return (
+      <>
+        <span className="block leading-tight">{line1}</span>
+        <span className="block leading-tight">{line2}</span>
+      </>
+    );
+  }
+  return <span className="block leading-tight">{label}</span>;
+};
 
 const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
   imageSrc = '/portfolio_photo.webp',
   headline,
   heroText,
-  bioText = 'Building scalable web applications, custom CRM systems, and high-performance APIs for startups and businesses. Delivering clean, maintainable code engineered for reliability and seamless growth.',
-  stats,
-  typewriterWords,
+  bioText = '',
+  stats = [],
+  typewriterWords = [],
   ctaText = 'See My Work',
   ctaHref = '#projects',
-  githubUrl = 'https://github.com',
-  linkedinUrl = 'https://linkedin.com',
-  instagramUrl = 'https://instagram.com',
-  facebookUrl = 'https://facebook.com',
+  githubUrl,
+  linkedinUrl,
+  instagramUrl,
+  facebookUrl,
 }) => {
   const cubicEase = [0.22, 1, 0.36, 1] as any;
 
@@ -127,26 +144,15 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
   }, []);
 
   const headlineContent = headline || heroText || 'End-to-End Web Development & Software Engineering';
-  const activeStats = stats && stats.length > 0 ? stats : defaultStats;
+  const activeStats = stats || [];
+  const words = typewriterWords || [];
 
-  const words = typewriterWords && typewriterWords.length > 0
-    ? typewriterWords
-    : [
-      'Computer Engineer',
-      'Full-Stack Developer',
-      'Mobile App Developer',
-      'UI/UX Designer',
-    ];
-
-  const resolvedLinks = socialLinks.map((s) => ({
-    ...s,
-    href:
-      s.label === 'GitHub' ? (githubUrl || s.href) :
-        s.label === 'LinkedIn' ? (linkedinUrl || s.href) :
-          s.label === 'Instagram' ? (instagramUrl || s.href) :
-            s.label === 'Facebook' ? (facebookUrl || s.href) :
-              s.href,
-  }));
+  const resolvedLinks = [
+    githubUrl && { label: 'GitHub', href: githubUrl, Icon: GithubIcon },
+    linkedinUrl && { label: 'LinkedIn', href: linkedinUrl, Icon: LinkedinIcon },
+    instagramUrl && { label: 'Instagram', href: instagramUrl, Icon: InstagramIcon },
+    facebookUrl && { label: 'Facebook', href: facebookUrl, Icon: FacebookIcon },
+  ].filter(Boolean) as { label: string; href: string; Icon: any }[];
 
   return (
     <div className="relative min-h-[calc(100vh-4rem)] flex flex-col justify-between overflow-hidden bg-transparent select-none">
@@ -168,9 +174,11 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-foreground tracking-tight leading-tight mb-3">
                   {headlineContent}
                 </h1>
-                <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-xl">
-                  {bioText}
-                </p>
+                {bioText ? (
+                  <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-xl">
+                    {bioText}
+                  </p>
+                ) : null}
               </div>
 
               {/* CTA Button */}
@@ -187,50 +195,54 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
               </div>
 
               {/* Social Icons */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.06 }}
-                className="flex items-center gap-2.5 pt-1"
-              >
-                {resolvedLinks.map((s, i) => (
-                  <motion.a
-                    key={s.label}
-                    href={s.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label={s.label}
-                    title={s.label}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.08 + i * 0.03, duration: 0.2 }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="w-9 h-9 rounded-full flex items-center justify-center border border-border/70 bg-card/60 dark:bg-white/[0.04] backdrop-blur-sm text-muted-foreground hover:text-emerald-400 hover:border-emerald-500/50 hover:bg-emerald-500/10 transition-colors duration-200 cursor-pointer shadow-sm"
-                  >
-                    <s.Icon size={16} />
-                  </motion.a>
-                ))}
-              </motion.div>
+              {resolvedLinks.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.06 }}
+                  className="flex items-center gap-2.5 pt-1"
+                >
+                  {resolvedLinks.map((s, i) => (
+                    <motion.a
+                      key={s.label}
+                      href={s.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label={s.label}
+                      title={s.label}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.08 + i * 0.03, duration: 0.2 }}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="w-9 h-9 rounded-full flex items-center justify-center border border-border/70 bg-card/60 dark:bg-white/[0.04] backdrop-blur-sm text-muted-foreground hover:text-emerald-400 hover:border-emerald-500/50 hover:bg-emerald-500/10 transition-colors duration-200 cursor-pointer shadow-sm"
+                    >
+                      <s.Icon size={16} />
+                    </motion.a>
+                  ))}
+                </motion.div>
+              )}
 
               {/* Stats Bar */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.1 }}
-                className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6 border-t border-border/40 mt-6 w-full"
-              >
-                {activeStats.map((stat, idx) => (
-                  <div key={idx} className="flex flex-col group">
-                    <span className="text-xl sm:text-2xl font-extrabold text-foreground font-mono transition-colors group-hover:text-emerald-400">
-                      <AnimatedStatValue value={stat.value} />
-                    </span>
-                    <span className="text-xs text-muted-foreground uppercase tracking-wider mt-1 leading-snug">
-                      {stat.label}
-                    </span>
-                  </div>
-                ))}
-              </motion.div>
+              {activeStats.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.1 }}
+                  className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6 border-t border-border/40 mt-6 w-full"
+                >
+                  {activeStats.map((stat, idx) => (
+                    <div key={idx} className="flex flex-col group">
+                      <span className="text-xl sm:text-2xl font-extrabold text-foreground font-mono transition-colors group-hover:text-emerald-400">
+                        <AnimatedStatValue value={stat.value} />
+                      </span>
+                      <span className="text-xs text-muted-foreground uppercase tracking-wider mt-1.5 leading-snug">
+                        {formatStatLabel(stat.label)}
+                      </span>
+                    </div>
+                  ))}
+                </motion.div>
+              )}
             </motion.div>
           </div>
 
@@ -242,31 +254,33 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
           <div className="order-1 lg:order-2 lg:col-span-4 relative flex flex-col justify-center items-center min-w-0">
 
             {/* ── Mobile-only: typewriter above image ── */}
-            <div className="lg:hidden w-full flex flex-col mb-4 px-1">
-              <motion.div
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.05 }}
-                className="flex justify-center items-center min-h-[3.2rem] sm:min-h-[3.8rem]"
-              >
-                <h2
-                  className="text-xl sm:text-2xl font-extrabold tracking-tight rtl:tracking-normal uppercase rtl:normal-case text-foreground text-center leading-[1.45] rtl:leading-[1.55]"
-                  dir="auto"
-                  style={{
-                    overflowWrap: 'break-word',
-                    wordBreak: 'normal',
-                  }}
+            {words.length > 0 && (
+              <div className="lg:hidden w-full flex flex-col mb-4 px-1">
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.05 }}
+                  className="flex justify-center items-center min-h-[3.2rem] sm:min-h-[3.8rem]"
                 >
-                  <Typewriter
-                    words={words}
-                    speed={65}
-                    delayBetweenWords={2200}
-                    cursor={true}
-                    className="text-foreground inline-block"
-                  />
-                </h2>
-              </motion.div>
-            </div>
+                  <h2
+                    className="text-xl sm:text-2xl font-extrabold tracking-tight rtl:tracking-normal uppercase rtl:normal-case text-foreground text-center leading-[1.45] rtl:leading-[1.55]"
+                    dir="auto"
+                    style={{
+                      overflowWrap: 'break-word',
+                      wordBreak: 'normal',
+                    }}
+                  >
+                    <Typewriter
+                      words={words}
+                      speed={65}
+                      delayBetweenWords={2200}
+                      cursor={true}
+                      className="text-foreground inline-block"
+                    />
+                  </h2>
+                </motion.div>
+              </div>
+            )}
 
             {/* Blob + Profile Image */}
             <div className="relative flex justify-center items-center min-h-[320px] sm:min-h-[400px] lg:min-h-[500px] w-full">
@@ -278,41 +292,41 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
                   transition={{ duration: 0.4, ease: cubicEase }}
                   className="w-full h-full relative"
                 >
-                {/* Ambient glow behind blob without expensive filter */}
-                <div className="absolute inset-6 rounded-full bg-emerald-500/15 dark:bg-emerald-500/25 blur-3xl -z-10" />
-                <svg viewBox="0 0 500 500" className="w-full h-full">
-                  <defs>
-                    {/* Dark Mode Gradient: Cyan into Primary Theme */}
-                    <linearGradient id="fluid-gradient-dark" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#0EA5E9" />
-                      <stop offset="50%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)' }} />
-                      <stop offset="100%" stopColor="var(--theme-primary-hex, #064E3B)" style={{ stopColor: 'var(--theme-primary-hex, #064E3B)', filter: 'brightness(0.5)' }} />
-                    </linearGradient>
-                    {/* Light Mode Gradient: Luminous, eye-friendly theme gradient */}
-                    <linearGradient id="fluid-gradient-light" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)', filter: 'brightness(1.15)' }} />
-                      <stop offset="60%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)' }} />
-                      <stop offset="100%" stopColor="var(--theme-primary-hex, #064E3B)" style={{ stopColor: 'var(--theme-primary-hex, #064E3B)', filter: 'brightness(0.75)' }} />
-                    </linearGradient>
-                    <radialGradient id="glow-gradient-dark" cx="50%" cy="50%" r="50%">
-                      <stop offset="0%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)' }} stopOpacity="0.45" />
-                      <stop offset="100%" stopColor="#0EA5E9" stopOpacity="0" />
-                    </radialGradient>
-                    <radialGradient id="glow-gradient-light" cx="50%" cy="50%" r="50%">
-                      <stop offset="0%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)' }} stopOpacity="0.22" />
-                      <stop offset="100%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)' }} stopOpacity="0" />
-                    </radialGradient>
-                  </defs>
-                  <circle cx="250" cy="250" r="230" className="dark:fill-[url(#glow-gradient-dark)] fill-[url(#glow-gradient-light)]" />
-                  <motion.path
-                    className="dark:fill-[url(#fluid-gradient-dark)] fill-[url(#fluid-gradient-light)]"
-                    d={blobPath1}
-                    animate={startMorph ? { d: [blobPath1, blobPath2, blobPath3, blobPath1] } : undefined}
-                    transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
-                  />
-                </svg>
-              </motion.div>
-            </div>
+                  {/* Ambient glow behind blob without expensive filter */}
+                  <div className="absolute inset-6 rounded-full bg-emerald-500/15 dark:bg-emerald-500/25 blur-3xl -z-10" />
+                  <svg viewBox="0 0 500 500" className="w-full h-full">
+                    <defs>
+                      {/* Dark Mode Gradient: Cyan into Primary Theme */}
+                      <linearGradient id="fluid-gradient-dark" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#0EA5E9" />
+                        <stop offset="50%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)' }} />
+                        <stop offset="100%" stopColor="var(--theme-primary-hex, #064E3B)" style={{ stopColor: 'var(--theme-primary-hex, #064E3B)', filter: 'brightness(0.5)' }} />
+                      </linearGradient>
+                      {/* Light Mode Gradient: Luminous, eye-friendly theme gradient */}
+                      <linearGradient id="fluid-gradient-light" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)', filter: 'brightness(1.15)' }} />
+                        <stop offset="60%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)' }} />
+                        <stop offset="100%" stopColor="var(--theme-primary-hex, #064E3B)" style={{ stopColor: 'var(--theme-primary-hex, #064E3B)', filter: 'brightness(0.75)' }} />
+                      </linearGradient>
+                      <radialGradient id="glow-gradient-dark" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)' }} stopOpacity="0.45" />
+                        <stop offset="100%" stopColor="#0EA5E9" stopOpacity="0" />
+                      </radialGradient>
+                      <radialGradient id="glow-gradient-light" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)' }} stopOpacity="0.22" />
+                        <stop offset="100%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)' }} stopOpacity="0" />
+                      </radialGradient>
+                    </defs>
+                    <circle cx="250" cy="250" r="230" className="dark:fill-[url(#glow-gradient-dark)] fill-[url(#glow-gradient-light)]" />
+                    <motion.path
+                      className="dark:fill-[url(#fluid-gradient-dark)] fill-[url(#fluid-gradient-light)]"
+                      d={blobPath1}
+                      animate={startMorph ? { d: [blobPath1, blobPath2, blobPath3, blobPath1] } : undefined}
+                      transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
+                    />
+                  </svg>
+                </motion.div>
+              </div>
 
               {/* Profile Image — Completely fluid, continuous feather-soft eased gradient with zero visible steps or lines */}
               <motion.div
@@ -342,40 +356,42 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
           </div>
 
           {/* ── Right Column (desktop only): Specialties stacked vertically, single line with prestige dash prefix ── */}
-          <div className="hidden lg:flex order-3 lg:col-span-3 lg:justify-start rtl:lg:justify-start lg:items-center z-10 min-w-0 w-full pl-2 lg:pl-4 xl:pl-6 rtl:pl-0 rtl:pr-2 rtl:lg:pr-4 rtl:xl:pr-6">
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.35, delay: 0.08 }}
-              className="w-auto min-w-max flex flex-col items-start rtl:items-start text-start rtl:text-start space-y-4 lg:space-y-5 xl:space-y-6"
-            >
-              {words.map((role, idx) => {
-                const cleanRole = typeof role === 'string'
-                  ? (role.trim().startsWith('-') || role.trim().startsWith('—') ? role.trim().substring(1).trim() : role.trim())
-                  : role;
+          {words.length > 0 && (
+            <div className="hidden lg:flex order-3 lg:col-span-3 lg:justify-start rtl:lg:justify-start lg:items-center z-10 min-w-0 w-full pl-1 lg:pl-2 xl:pl-3 rtl:pl-0 rtl:pr-1 rtl:lg:pr-2 rtl:xl:pr-3">
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.35, delay: 0.08 }}
+                className="w-auto min-w-max flex flex-col items-start rtl:items-start text-start rtl:text-start space-y-3.5 lg:space-y-4 xl:space-y-5"
+              >
+                {words.map((role, idx) => {
+                  const cleanRole = typeof role === 'string'
+                    ? (role.trim().startsWith('-') || role.trim().startsWith('—') ? role.trim().substring(1).trim() : role.trim())
+                    : role;
 
-                return (
-                  <motion.div
-                    key={idx}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: 0.08 + idx * 0.05 }}
-                    className="flex items-center group cursor-default select-none"
-                  >
-                    <span className="text-emerald-500 dark:text-emerald-400 font-extrabold text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl mr-3 rtl:mr-0 rtl:ml-3 select-none shrink-0 group-hover:text-emerald-400 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-all duration-200 leading-none">
-                      -
-                    </span>
-                    <span
-                      className="whitespace-nowrap text-lg sm:text-xl lg:text-[1.35rem] xl:text-[1.7rem] 2xl:text-[1.95rem] font-extrabold tracking-tight rtl:tracking-normal uppercase rtl:normal-case text-foreground/90 group-hover:text-emerald-400 transition-colors duration-200 select-none leading-none"
-                      dir="auto"
+                  return (
+                    <motion.div
+                      key={idx}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: 0.08 + idx * 0.05 }}
+                      className="flex items-center group cursor-default select-none"
                     >
-                      {cleanRole}
-                    </span>
-                  </motion.div>
-                );
-              })}
-            </motion.div>
-          </div>
+                      <span className="text-emerald-500 dark:text-emerald-400 font-extrabold text-lg lg:text-xl xl:text-2xl 2xl:text-3xl mr-2.5 rtl:mr-0 rtl:ml-2.5 select-none shrink-0 group-hover:text-emerald-400 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-all duration-200 leading-none">
+                        -
+                      </span>
+                      <span
+                        className="whitespace-nowrap text-base sm:text-lg lg:text-[1.15rem] xl:text-[1.4rem] 2xl:text-[1.65rem] font-extrabold tracking-tight rtl:tracking-normal uppercase rtl:normal-case text-foreground/90 group-hover:text-emerald-400 transition-colors duration-200 select-none leading-none"
+                        dir="auto"
+                      >
+                        {cleanRole}
+                      </span>
+                    </motion.div>
+                  );
+                })}
+              </motion.div>
+            </div>
+          )}
 
         </div>
       </div>

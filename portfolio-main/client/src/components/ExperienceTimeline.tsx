@@ -177,7 +177,7 @@ export const ExperienceTimeline = ({ experiences }: ExperienceTimelineProps) => 
 
   if (!experiences || experiences.length === 0) {
     return (
-      <div className="py-20 text-center border border-dashed border-border rounded-2xl">
+      <div className="py-20 text-center border border-dashed border-border rounded-xl">
         <p className="text-muted-foreground text-sm font-medium">
           {isAr ? 'لم تتم إضافة خبرات حتى الآن.' : 'No experience items added yet.'}
         </p>
@@ -364,7 +364,7 @@ const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
                       </div>
 
                       {/* Content Card */}
-                      <div className={`w-full p-5 rounded-2xl bg-card/60 dark:bg-white/[0.03] backdrop-blur-xl border border-border/70 ${theme.cardBorder} transition-all duration-300 shadow-sm text-start`}>
+                      <div className={`w-full p-5 rounded-xl bg-card/60 dark:bg-white/[0.03] backdrop-blur-xl border border-border/70 ${theme.cardBorder} transition-all duration-300 shadow-sm text-start`}>
                         <h3 className="text-lg md:text-xl font-bold tracking-tight text-foreground">
                           {isRtl ? (item.positionAr || item.position) : item.position}
                         </h3>
@@ -443,7 +443,7 @@ const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
                       </div>
 
                       {/* Content Card */}
-                      <div className={`w-full p-5 rounded-2xl bg-card/60 dark:bg-white/[0.03] backdrop-blur-xl border border-border/70 ${theme.cardBorder} transition-all duration-300 shadow-sm text-start`}>
+                      <div className={`w-full p-5 rounded-xl bg-card/60 dark:bg-white/[0.03] backdrop-blur-xl border border-border/70 ${theme.cardBorder} transition-all duration-300 shadow-sm text-start`}>
                         <h3 className="text-lg md:text-xl font-bold tracking-tight text-foreground">
                           {isRtl ? (item.positionAr || item.position) : item.position}
                         </h3>

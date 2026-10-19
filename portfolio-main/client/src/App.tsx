@@ -22,6 +22,7 @@ const AdminProjects = lazy(() => import('./pages/admin/Projects'));
 const AdminSkills = lazy(() => import('./pages/admin/Skills'));
 const AdminExperience = lazy(() => import('./pages/admin/Experience'));
 const AdminServices = lazy(() => import('./pages/admin/Services'));
+const AdminHero = lazy(() => import('./pages/admin/Hero'));
 const AdminSettings = lazy(() => import('./pages/admin/Settings'));
 const AdminMessages = lazy(() => import('./pages/admin/Messages'));
 const AdminAbout = lazy(() => import('./pages/admin/About'));
@@ -64,6 +65,7 @@ function App() {
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<Dashboard />} />
               <Route path="dashboard" element={<Dashboard />} />
+              <Route path="hero" element={<AdminHero />} />
               <Route path="settings" element={<AdminSettings />} />
               <Route path="about" element={<AdminAbout />} />
               <Route path="workflow" element={<AdminWorkflow />} />

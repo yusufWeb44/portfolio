@@ -127,7 +127,7 @@ const About = () => {
           >
             <div className="relative w-full max-w-md mx-auto lg:ml-auto">
               {/* Main photo */}
-              <div className="aspect-[3/4] rounded-[2rem] overflow-hidden bg-muted border border-border relative">
+              <div className="aspect-[3/4] rounded-xl overflow-hidden bg-muted border border-border relative">
                 {photo ? (
                   <img src={photo} alt={name} className="w-full h-full object-cover" />
                 ) : (
@@ -163,7 +163,7 @@ const About = () => {
 
               {/* Floating stat card */}
               <motion.div
-                className="absolute -bottom-4 right-4 bg-card border border-border rounded-2xl px-5 py-4 shadow-lg"
+                className="absolute -bottom-4 right-4 bg-card border border-border rounded-xl px-5 py-4 shadow-lg"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.8, duration: 0.6 }}
@@ -187,7 +187,7 @@ const About = () => {
             {values.map((v, i) => (
               <motion.div
                 key={v.label}
-                className="bg-card/40 dark:bg-white/[0.03] backdrop-blur-xl border border-border/60 rounded-2xl p-8 md:p-10 cursor-default group hover:border-emerald-500/40 transition-all"
+                className="bg-card/40 dark:bg-white/[0.03] backdrop-blur-xl border border-border/60 rounded-xl p-8 md:p-10 cursor-default group hover:border-emerald-500/40 transition-all"
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}

@@ -5,6 +5,7 @@ import { LanguageProvider } from './contexts/LanguageContext'
 import './index.css'
 import App from './App.tsx'
 import { applyCustomFonts } from './utils/fontLoader'
+import { ErrorBoundary } from './components/ErrorBoundary'
 
 // Synchronously apply custom fonts from cache before initial paint
 try {
@@ -16,10 +17,12 @@ try {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <HelmetProvider>
-      <LanguageProvider>
-        <App />
-      </LanguageProvider>
-    </HelmetProvider>
+    <ErrorBoundary>
+      <HelmetProvider>
+        <LanguageProvider>
+          <App />
+        </LanguageProvider>
+      </HelmetProvider>
+    </ErrorBoundary>
   </StrictMode>,
 )

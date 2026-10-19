@@ -242,22 +242,22 @@ const SkillsSection = () => {
     : (settings?.skillsTitle || 'Engineered Core Capabilities');
 
   const p1 = isAr 
-    ? (settings?.skillsParagraph1Ar || settings?.skillsDescriptionAr || t('skills.description', 'أبني أنظمة متكاملة ومترابطة من البداية إلى النهاية — من طبقات خدمة Node.js النظيفة بقواعد بيانات معيارية، إلى واجهات React و Next.js المتطورة المصممة للأداء العالي وسهولة الصيانة.'))
-    : (settings?.skillsParagraph1 || settings?.skillsDescription || 'I architect full-stack systems end-to-end — from clean Node.js service layers with normalized relational schemas, to reactive React and Next.js frontends built for performance, accessibility, and long-term maintainability.');
+    ? (settings?.skillsParagraph1Ar || settings?.skillsDescriptionAr || '')
+    : (settings?.skillsParagraph1 || settings?.skillsDescription || '');
 
   const p2 = isAr
-    ? (settings?.skillsParagraph2Ar || t('skills.paragraph2', 'كل قرار هندسي يرتكز على قابلية التوسع: تصميم واجهات برمجية API معيارية، وفهرسة دقيقة لقواعد البيانات، وخطوط نشر مجربة تضمن استقرار النظام تحت الضغط العالي.'))
-    : (settings?.skillsParagraph2 || 'Every engineering decision is grounded in scalability: modular API design, precise database indexing, and production-tested deployment workflows that keep systems reliable under real-world load and rapid iteration.');
+    ? (settings?.skillsParagraph2Ar || '')
+    : (settings?.skillsParagraph2 || '');
 
-  const point1Title = isAr ? (settings?.skillsPoint1TitleAr || 'المعمارية أولاً') : (settings?.skillsPoint1Title || 'Architecture First');
-  const point1Text = isAr ? (settings?.skillsPoint1TextAr || 'واجهات برمجية RESTful نظيفة وتصميم قواعد بيانات متين صُمم ليدوم.') : (settings?.skillsPoint1Text || 'Clean RESTful APIs & modular database design built to last.');
-  const point2Title = isAr ? (settings?.skillsPoint2TitleAr || 'تقنيات حديثة') : (settings?.skillsPoint2Title || 'Modern Stack');
-  const point2Text = isAr ? (settings?.skillsPoint2TextAr || 'تطبيقات عالية الأداء بالاعتماد على React و Next.js و Tailwind.') : (settings?.skillsPoint2Text || 'High-performance React, Next.js, and Tailwind implementations.');
+  const point1Title = isAr ? settings?.skillsPoint1TitleAr : settings?.skillsPoint1Title;
+  const point1Text = isAr ? settings?.skillsPoint1TextAr : settings?.skillsPoint1Text;
+  const point2Title = isAr ? settings?.skillsPoint2TitleAr : settings?.skillsPoint2Title;
+  const point2Text = isAr ? settings?.skillsPoint2TextAr : settings?.skillsPoint2Text;
 
   return (
     <section
       id="skills"
-      className="scroll-mt-24 py-20 sm:py-24 md:py-28 px-4 sm:px-6 lg:px-8 bg-transparent overflow-x-clip"
+      className="scroll-mt-24 py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-transparent overflow-x-clip"
       aria-label="Skills and expertise"
     >
       <div className="max-w-7xl mx-auto">
@@ -271,7 +271,6 @@ const SkillsSection = () => {
             whileInView="visible"
             viewport={{ once: true, margin: '-100px' }}
           >
-
 
             {/* Headline */}
             <motion.div variants={fadeUpVariants}>
@@ -289,39 +288,51 @@ const SkillsSection = () => {
 
             {/* Body Paragraphs */}
             <motion.div variants={fadeUpVariants} className="space-y-4">
-              <p className="text-base md:text-lg text-muted-foreground leading-relaxed whitespace-pre-line">
-                {p1}
-              </p>
-              {p2 && (
-                <p className="text-base text-muted-foreground leading-relaxed whitespace-pre-line">
-                  {p2}
+              {p1 ? (
+                <>
+                  <p className="text-base md:text-lg text-muted-foreground leading-relaxed whitespace-pre-line">
+                    {p1}
+                  </p>
+                  {p2 && (
+                    <p className="text-base text-muted-foreground leading-relaxed whitespace-pre-line">
+                      {p2}
+                    </p>
+                  )}
+                </>
+              ) : (
+                <p className="text-base text-muted-foreground leading-relaxed">
+                  {isAr ? 'يتم تحديث المهارات والتقنيات حالياً.' : 'Skills and technical capabilities are being updated.'}
                 </p>
               )}
             </motion.div>
 
             {/* Key Metrics / Highlights */}
-            <motion.div variants={fadeUpVariants} className="space-y-3 pt-1">
-              <div className="flex items-start gap-3">
-                <span className="mt-1.5 shrink-0 w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                <p className="text-sm text-muted-foreground">
-                  <span className="text-foreground font-bold">
-                    {point1Title}
-                  </span>
-                  {' — '}
-                  {point1Text}
-                </p>
-              </div>
-              <div className="flex items-start gap-3">
-                <span className="mt-1.5 shrink-0 w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                <p className="text-sm text-muted-foreground">
-                  <span className="text-foreground font-bold">
-                    {point2Title}
-                  </span>
-                  {' — '}
-                  {point2Text}
-                </p>
-              </div>
-            </motion.div>
+            {(point1Title || point2Title) && (
+              <motion.div variants={fadeUpVariants} className="space-y-3 pt-1">
+                {point1Title && (
+                  <div className="flex items-start gap-3">
+                    <span className="mt-1.5 shrink-0 w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    <p className="text-sm text-muted-foreground">
+                      <span className="text-foreground font-bold">
+                        {point1Title}
+                      </span>
+                      {point1Text ? ` — ${point1Text}` : ''}
+                    </p>
+                  </div>
+                )}
+                {point2Title && (
+                  <div className="flex items-start gap-3">
+                    <span className="mt-1.5 shrink-0 w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    <p className="text-sm text-muted-foreground">
+                      <span className="text-foreground font-bold">
+                        {point2Title}
+                      </span>
+                      {point2Text ? ` — ${point2Text}` : ''}
+                    </p>
+                  </div>
+                )}
+              </motion.div>
+            )}
           </motion.div>
 
           {/* ── Right Column (7 cols): Scatter Cloud — desktop ── */}
@@ -329,50 +340,51 @@ const SkillsSection = () => {
             {skillsItems.length > 0 ? (
               <ScatterCloud items={skillsItems} />
             ) : (
-              <div className="h-[500px] flex items-center justify-center text-muted-foreground text-sm">
-                Loading skills...
+              <div className="h-[240px] flex items-center justify-center border border-dashed border-border/70 rounded-3xl bg-card/20 text-muted-foreground text-sm">
+                {isAr ? 'لا توجد مهارات معروضة حالياً.' : 'No skills available yet.'}
               </div>
             )}
           </div>
 
           {/* ── Mobile: Text badge grid ── */}
-          <div className="md:hidden lg:col-span-7 space-y-4">
-            <motion.div
-              className="flex flex-wrap gap-2.5 justify-center"
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: '-50px' }}
-              variants={{
-                hidden: {},
-                visible: { transition: { staggerChildren: 0.04 } },
-              }}
-            >
-              {skillsItems.map((tech, i) => {
-                const isSelected = selectedMobile === i;
-                return (
-                  <motion.button
-                    key={tech.label + i}
-                    variants={{
-                      hidden: { opacity: 0, scale: 0.8 },
-                      visible: { opacity: 1, scale: 1, transition: { duration: 0.3 } },
-                    }}
-                    whileTap={{ scale: 0.93 }}
-                    onClick={() =>
-                      setSelectedMobile(isSelected ? null : i)
-                    }
-                    className={[
-                      'px-3.5 py-1.5 rounded-full text-xs font-bold tracking-tight border cursor-pointer transition-all duration-200',
-                      isSelected
-                        ? 'border-emerald-500/50 text-emerald-400 bg-emerald-500/10'
-                        : 'border-border/60 text-muted-foreground hover:text-emerald-400 hover:border-emerald-500/30 bg-card/40 backdrop-blur-sm',
-                    ].join(' ')}
-                    style={{ fontFamily: 'var(--font-en), var(--font-ar), system-ui, sans-serif' }}
-                  >
-                    {tech.label}
-                  </motion.button>
-                );
-              })}
-            </motion.div>
+          {skillsItems.length > 0 && (
+            <div className="md:hidden lg:col-span-7 space-y-4">
+              <motion.div
+                className="flex flex-wrap gap-2.5 justify-center"
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: '-50px' }}
+                variants={{
+                  hidden: {},
+                  visible: { transition: { staggerChildren: 0.04 } },
+                }}
+              >
+                {skillsItems.map((tech, i) => {
+                  const isSelected = selectedMobile === i;
+                  return (
+                    <motion.button
+                      key={tech.label + i}
+                      variants={{
+                        hidden: { opacity: 0, scale: 0.8 },
+                        visible: { opacity: 1, scale: 1, transition: { duration: 0.3 } },
+                      }}
+                      whileTap={{ scale: 0.93 }}
+                      onClick={() =>
+                        setSelectedMobile(isSelected ? null : i)
+                      }
+                      className={[
+                        'px-3.5 py-1.5 rounded-full text-xs font-bold tracking-tight border cursor-pointer transition-all duration-200',
+                        isSelected
+                          ? 'border-emerald-500/50 text-emerald-400 bg-emerald-500/10'
+                          : 'border-border/60 text-muted-foreground hover:text-emerald-400 hover:border-emerald-500/30 bg-card/40 backdrop-blur-sm',
+                      ].join(' ')}
+                      style={{ fontFamily: 'var(--font-en), var(--font-ar), system-ui, sans-serif' }}
+                    >
+                      {tech.label}
+                    </motion.button>
+                  );
+                })}
+              </motion.div>
 
             {/* Mobile: description drawer */}
             <AnimatePresence mode="wait">
@@ -398,6 +410,7 @@ const SkillsSection = () => {
               )}
             </AnimatePresence>
           </div>
+        )}
 
         </div>
       </div>

@@ -4,7 +4,7 @@ import { useAuthStore } from '../store/authStore';
 import { 
   LogOut, LayoutDashboard, FolderKanban, Briefcase, Wrench, 
   MessageSquare, Settings, Menu, X, ArrowLeft, Terminal,
-  Layers, Pin, Award, HelpCircle, Globe, Languages, PanelBottom
+  Layers, Pin, Award, HelpCircle, Globe, Languages, PanelBottom, Sparkles
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { Helmet } from 'react-helmet-async';
@@ -38,7 +38,8 @@ const AdminLayout = () => {
 
   const contentNavItems = [
     { label: 'Overview', path: '/admin/dashboard', icon: <LayoutDashboard size={17} /> },
-    { label: 'Hero & Settings', path: '/admin/settings', icon: <Settings size={17} /> },
+    { label: 'Hero Section', path: '/admin/hero', icon: <Sparkles size={17} /> },
+    { label: 'General Settings', path: '/admin/settings', icon: <Settings size={17} /> },
     { label: 'About Section', path: '/admin/about', icon: <Layers size={17} /> },
     { label: 'Workflow Steps', path: '/admin/workflow', icon: <Pin size={17} /> },
     { label: 'Projects', path: '/admin/projects', icon: <FolderKanban size={17} /> },

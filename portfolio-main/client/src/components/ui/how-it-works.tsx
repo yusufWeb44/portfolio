@@ -560,10 +560,14 @@ const HowItWorks = () => {
     return step;
   });
 
+  if (displaySteps.length === 0) {
+    return null;
+  }
+
   return (
     <section
       id="how-i-work"
-      className="scroll-mt-24 py-20 sm:py-24 md:py-28 px-4 sm:px-6 lg:px-8 bg-transparent overflow-x-hidden overflow-y-visible"
+      className="scroll-mt-24 py-10 sm:py-14 md:py-18 px-4 sm:px-6 lg:px-8 bg-transparent overflow-x-hidden overflow-y-visible"
       aria-label="Engineering process and workflow"
     >
       <div className="max-w-5xl mx-auto">
@@ -573,7 +577,7 @@ const HowItWorks = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-60px' }}
           transition={{ duration: 0.6, ease: 'easeOut' }}
-          className="text-center mb-12 sm:mb-16 md:mb-20 px-2"
+          className="text-center mb-8 sm:mb-10 md:mb-12 px-2"
         >
 
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-foreground tracking-tight leading-[1.15] mb-4">
