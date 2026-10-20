@@ -137,8 +137,9 @@ const StackedCard = ({
       ref={cardContainerRef}
       style={{
         top: `calc(5.5rem + ${i * 44}px)`,
+        zIndex: i + 10,
       }}
-      className="sticky flex justify-center px-4 sm:px-6 mb-[15vh] sm:mb-[20vh] last:mb-6 pointer-events-auto"
+      className="sticky flex justify-center px-4 sm:px-6 mb-[15vh] sm:mb-[20vh] pointer-events-auto"
     >
       <motion.div
         style={{
@@ -334,15 +335,19 @@ const ProjectsSection = () => {
             </p>
           </div>
         ) : (
-          deckProjects.map((project, i) => (
-            <StackedCard
-              key={project.id || `p_${i}`}
-              project={project}
-              i={i}
-              total={deckProjects.length}
-              isAr={isAr}
-            />
-          ))
+          <>
+            {deckProjects.map((project, i) => (
+              <StackedCard
+                key={project.id || `p_${i}`}
+                project={project}
+                i={i}
+                total={deckProjects.length}
+                isAr={isAr}
+              />
+            ))}
+            {/* In-flow scroll track spacer to give the final card sticking travel room */}
+            <div className="h-[60vh] sm:h-[75vh] pointer-events-none" aria-hidden="true" />
+          </>
         )}
       </div>
 
