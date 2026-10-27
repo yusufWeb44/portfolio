@@ -14,7 +14,6 @@ import {
   Cloud,
   ChevronDown,
   MapPin,
-  Sparkles
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -159,14 +158,14 @@ export const getThemeColors = (colorName?: string | null, index = 0) => {
     default:
       return {
         key: 'emerald',
-        accent: 'var(--theme-primary-hex, #10B981)',
+        accent: '#10B981',
         badgeBg: 'bg-emerald-500/10 dark:bg-emerald-500/15',
         badgeBorder: 'border-emerald-500/40 dark:border-emerald-500/60',
         text: 'text-emerald-600 dark:text-emerald-400',
-        glow: 'shadow-[0_0_20px_var(--theme-primary-hex,rgba(16,185,129,0.25))]',
+        glow: 'shadow-[0_0_20px_rgba(16,185,129,0.25)]',
         cardBorder: 'hover:border-emerald-500/40',
         tagBg: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20',
-        lineColor: 'var(--theme-primary-hex, #10B981)',
+        lineColor: '#10B981',
       };
   }
 };
@@ -189,7 +188,7 @@ export const ExperienceTimeline = ({ experiences }: ExperienceTimelineProps) => 
 };
 
 const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
-  const { t, currentLang, currentDirection } = useLanguage();
+  const { currentLang, currentDirection } = useLanguage();
   const isRtl = currentDirection === 'rtl' || currentLang === 'ar';
   const containerRef = useRef<HTMLDivElement>(null);
   
@@ -209,45 +208,36 @@ const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
   const beamClip = useTransform(smoothProgress, (val) => `inset(0 0 ${(1 - Math.max(0, Math.min(1, val))) * 100}% 0)`);
   const particleTop = useTransform(smoothProgress, (val) => `${Math.max(0, Math.min(1, val)) * 100}%`);
 
-  const getTypeLabel = (type?: string) => {
-    if (type === 'education') return isRtl ? '🎓 دراسة ومؤهلات' : '🎓 Education';
-    if (type === 'milestone') return isRtl ? '⭐ إنجاز ومحطة' : '⭐ Milestone';
-    return isRtl ? '💼 مسار مهني' : '💼 Career';
-  };
-
   return (
     <div ref={containerRef} className="relative w-full py-4 max-w-5xl mx-auto">
-      {/* ─── Top Origin Header & Chevron ────────────────────────────── */}
-      <div className={`relative z-20 flex flex-col items-start ${isRtl ? 'pr-4 sm:pr-6 md:pr-0' : 'pl-4 sm:pl-6 md:pl-0'} md:items-center justify-center mb-10`}>
-        <motion.div
-          initial={{ opacity: 0, y: -12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="flex flex-col items-start md:items-center"
-        >
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-mono font-semibold tracking-wider uppercase bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 mb-3 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
-            <Sparkles size={13} className="text-emerald-500" />
-            <span>{isRtl ? t('experience.badge', 'المسيرة الأكاديمية والمهنية') : 'Academic & Career Journey'}</span>
-          </div>
-          
-          {/* Top Arrow Badge - Directly anchored to the top of the vertical spine */}
-          <div className="w-8 h-8 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center shadow-md shadow-emerald-500/20 ring-4 ring-emerald-500/20">
-            <ChevronDown size={16} className="stroke-[2.5]" />
-          </div>
-        </motion.div>
-      </div>
-
       {/* ─── Timeline Container with Centered Continuous Spine ────────── */}
-      <div className="relative">
-        {/* Base Inactive Vertical Spine Track: Slim 2px */}
+      <div className="relative pt-10 md:pt-12">
+        {/* Top Origin Green Chevron Indicator - Vertical line emerges directly from inside it */}
         <div 
-          className={`absolute top-0 bottom-6 w-[2px] bg-border/60 dark:bg-white/10 rounded-full ${
+          className={`absolute top-0 z-30 flex items-center justify-center ${
+            isRtl ? 'right-8 md:right-1/2 translate-x-1/2' : 'left-8 md:left-1/2 -translate-x-1/2'
+          }`}
+        >
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            whileInView={{ scale: 1, opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+            className="w-8 h-8 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.4)] ring-4 ring-emerald-500/20 z-30 pointer-events-none"
+          >
+            <ChevronDown size={16} className="stroke-[2.5]" />
+          </motion.div>
+        </div>
+
+        {/* Base Inactive Vertical Spine Track: Starts from top-4 (inside the green circle) */}
+        <div 
+          className={`absolute top-4 bottom-6 w-[2px] bg-border/60 dark:bg-white/10 rounded-full ${
             isRtl ? 'right-8 md:right-1/2 translate-x-1/2' : 'left-8 md:left-1/2 -translate-x-1/2'
           }`}
         />
 
-        {/* Active Scroll Beam: Slim 2.5px with silky GPU clipPath growth and traveling head */}
-        <div className={`absolute top-0 bottom-6 w-[2.5px] rounded-full ${
+        {/* Active Scroll Beam: Starts from top-4 (inside the green circle) with traveling head */}
+        <div className={`absolute top-4 bottom-6 w-[2.5px] rounded-full ${
           isRtl ? 'right-8 md:right-1/2 translate-x-1/2' : 'left-8 md:left-1/2 -translate-x-1/2'
         } pointer-events-none z-10 overflow-visible`}>
           <motion.div
@@ -280,7 +270,7 @@ const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
                 className="relative flex flex-col md:flex-row items-start w-full"
               >
                 {/* ─── Central Spine Node & Horizontal Connector Arm ────── */}
-                <div className={`absolute top-7 ${
+                <div className={`absolute top-6 ${
                   isRtl ? 'right-8 md:right-1/2 translate-x-1/2' : 'left-8 md:left-1/2 -translate-x-1/2'
                 } z-20 flex items-center justify-center pointer-events-none`}>
                   {/* Central Node Circle */}
@@ -297,27 +287,25 @@ const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
 
                   {/* Horizontal Branching Stem Line (Desktop) */}
                   <div
-                    className={`hidden md:block absolute h-0.5 pointer-events-none transition-all duration-300 ${
+                    className={`hidden md:block absolute h-[2px] pointer-events-none transition-all duration-300 ${
                       stemGoesRight 
-                        ? 'left-2.5 w-10 bg-gradient-to-r' 
-                        : 'right-2.5 w-10 bg-gradient-to-l'
+                        ? 'left-2.5 w-12' 
+                        : 'right-2.5 w-12'
                     }`}
                     style={{
-                      backgroundImage: stemGoesRight
-                        ? `linear-gradient(to right, ${theme.accent}, ${theme.accent}60)`
-                        : `linear-gradient(to left, ${theme.accent}, ${theme.accent}60)`
+                      backgroundColor: theme.accent,
+                      boxShadow: `0 0 8px ${theme.accent}66`,
                     }}
                   />
 
                   {/* Horizontal Branching Stem Line (Mobile) */}
                   <div
-                    className={`md:hidden absolute w-7 h-0.5 pointer-events-none ${
+                    className={`md:hidden absolute w-8 h-[2px] pointer-events-none ${
                       isRtl ? 'right-2.5' : 'left-2.5'
                     }`}
                     style={{
-                      backgroundImage: isRtl
-                        ? `linear-gradient(to left, ${theme.accent}, ${theme.accent}60)`
-                        : `linear-gradient(to right, ${theme.accent}, ${theme.accent}60)`
+                      backgroundColor: theme.accent,
+                      boxShadow: `0 0 8px ${theme.accent}66`,
                     }}
                   />
                 </div>
@@ -355,11 +343,6 @@ const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
                               </span>
                             ) : null}
                           </div>
-                          {item.type && (
-                            <span className="text-[10px] font-mono tracking-widest uppercase font-semibold text-muted-foreground mt-0.5">
-                              {getTypeLabel(item.type)}
-                            </span>
-                          )}
                         </div>
                       </div>
 
@@ -434,11 +417,6 @@ const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
                               </span>
                             ) : null}
                           </div>
-                          {item.type && (
-                            <span className="text-[10px] font-mono tracking-widest uppercase font-semibold text-muted-foreground mt-0.5">
-                              {getTypeLabel(item.type)}
-                            </span>
-                          )}
                         </div>
                       </div>
 

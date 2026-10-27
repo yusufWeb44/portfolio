@@ -13,13 +13,6 @@ interface Skill {
   categoryAr?: string;
   description?: string;
   descriptionAr?: string;
-  positionX?: number;
-  positionY?: number;
-  depth?: number;
-  weight?: number;
-  size?: number;
-  x?: number;
-  y?: number;
   order: number;
   isEnabled: boolean;
 }
@@ -84,7 +77,7 @@ const Skills = () => {
 
       if (skillsRes.status === 'fulfilled') {
         const raw = skillsRes.value.data?.data || [];
-        raw.sort((a: Skill, b: Skill) => a.order - b.order);
+        raw.sort((a: Skill, b: Skill) => (a.order || 0) - (b.order || 0));
         setSkills(raw);
       }
 
@@ -109,7 +102,7 @@ const Skills = () => {
           skillsPoint2TextAr: d.skillsPoint2TextAr || prev.skillsPoint2TextAr,
         }));
       }
-    } catch (error) {
+    } catch {
       showToast("Failed to fetch skills data", "error");
     } finally {
       setLoading(false);
@@ -141,45 +134,22 @@ const Skills = () => {
         nameAr: 'مهارة جديدة',
         category: 'Frontend',
         categoryAr: 'الواجهة الأمامية',
-        description: 'Technology description for hover tooltip window in English...',
+        description: 'Technology description for hover tooltip in English...',
         descriptionAr: 'وصف تفاعلي يظهر عند التحويم بالماوس فوق المهارة...',
-        positionX: 50,
-        positionY: 50,
-        depth: 5,
-        weight: 3,
-        size: 18,
-        x: 50,
-        y: 50,
         order: skills.length + 1,
         isEnabled: true,
       });
       setSkills([res.data.data, ...skills]);
       showToast("Skill created successfully");
-    } catch (error) {
+    } catch {
       showToast("Failed to add skill", "error");
     }
   };
 
-  const weightSizes: Record<number, number> = { 1: 18, 2: 22, 3: 26, 4: 32, 5: 38 };
-
   const handleFieldChange = (id: string, field: keyof Skill, value: any) => {
     setSkills(prev => prev.map(s => {
       if (s.id !== id) return s;
-      const updated = { ...s, [field]: value };
-      if (field === 'weight') {
-        const w = parseInt(value) || 3;
-        updated.weight = w;
-        updated.size = weightSizes[w] || (w * 6);
-      }
-      if (field === 'positionX') {
-        updated.positionX = value;
-        updated.x = value;
-      }
-      if (field === 'positionY') {
-        updated.positionY = value;
-        updated.y = value;
-      }
-      return updated;
+      return { ...s, [field]: value };
     }));
   };
 
@@ -192,7 +162,7 @@ const Skills = () => {
       }
       window.dispatchEvent(new CustomEvent('portfolio_skills_updated'));
       showToast(`Saved skill "${skillToSave.name}" successfully!`);
-    } catch (error) {
+    } catch {
       showToast("Failed to save skill", "error");
     } finally {
       setSavingSkillId(null);
@@ -219,7 +189,7 @@ const Skills = () => {
       setSkills(skills.filter(s => s.id !== id));
       window.dispatchEvent(new CustomEvent('portfolio_skills_updated'));
       showToast("Skill removed");
-    } catch (error) {
+    } catch {
       showToast("Failed to remove skill", "error");
     }
   };
@@ -236,7 +206,7 @@ const Skills = () => {
 
   return (
     <div className="relative min-h-[80vh] space-y-8 pb-20">
-      <Helmet><title>Skills & Capabilities | Admin</title></Helmet>
+      <Helmet><title>Skills & Marquee | Admin</title></Helmet>
 
       {toast && (
         <div className={`fixed bottom-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg border flex items-center gap-2 animate-in slide-in-from-bottom-5 ${toast.type === 'success' ? 'bg-card border-green-500/50 text-foreground' : 'bg-destructive text-destructive-foreground'}`}>
@@ -248,9 +218,12 @@ const Skills = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Skills & Capabilities (إدارة المهارات ومحتوى الهوفر)</h1>
+          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2.5">
+            <span>Skills & Marquee</span>
+            <span className="text-base text-muted-foreground font-normal">(إدارة مهارات الشريط المتحرك)</span>
+          </h1>
           <p className="text-muted-foreground text-sm mt-1">
-            Manage 3D Tag Cloud sphere skills, categories, and bilingual interactive hover tooltips.
+            إدارة بويضات المهارات الأفقية المتحركة، الأيقونات البرمجية، التصنيفات، ونصوص نوافذ الهوفر التفاعلية.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -274,7 +247,7 @@ const Skills = () => {
           <div>
             <h2 className="text-lg font-bold text-foreground">Skills Section Narrative (العناوين والفقرات باللغتين)</h2>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Edit the badges, main titles, body paragraphs, and architectural metrics shown on the public page.
+              تعديل الشعار، العناوين الرئيسية، الفقرات، والنقاط البارزة المعروضة في الجانب الأيسر من قسم المهارات.
             </p>
           </div>
           <Button 
@@ -500,7 +473,7 @@ const Skills = () => {
         </div>
       </div>
 
-      {/* Skills List with Hover Description Tooltip Editor */}
+      {/* Skills List with Modern Capsule Preview & Clean Controls */}
       {loading ? (
         <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin w-8 h-8 text-muted-foreground" /></div>
       ) : (
@@ -511,7 +484,7 @@ const Skills = () => {
             </div>
           ) : (
             filteredSkills.map((skill) => (
-              <div key={skill.id} className="p-5 rounded-xl border border-border bg-card/70 hover:border-emerald-500/30 transition-all space-y-4">
+              <div key={skill.id} className="p-5 rounded-xl border border-border bg-card/70 hover:border-emerald-500/30 transition-all space-y-4 shadow-sm">
                 <div className="flex flex-wrap justify-between items-center gap-3 border-b border-border/60 pb-3">
                   <div className="flex items-center gap-3">
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
@@ -529,7 +502,7 @@ const Skills = () => {
                         }}
                         className="w-4 h-4 rounded border-border text-emerald-500 accent-emerald-500 cursor-pointer"
                       />
-                      <span>Active in Sphere</span>
+                      <span>Active in Marquee (تفعيل في الشريط)</span>
                     </label>
                     <Button 
                       onClick={() => handleSaveSkill(skill)}
@@ -551,8 +524,9 @@ const Skills = () => {
                   </div>
                 </div>
 
-                <div className="grid md:grid-cols-4 gap-4">
-                  <div>
+                {/* Skill Name, Category & Order */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+                  <div className="md:col-span-1">
                     <label className="text-[11px] font-semibold text-muted-foreground block mb-1">Name (EN)</label>
                     <Input 
                       value={skill.name} 
@@ -561,7 +535,7 @@ const Skills = () => {
                       className="h-8 text-xs font-semibold"
                     />
                   </div>
-                  <div>
+                  <div className="md:col-span-1">
                     <label className="text-[11px] font-semibold text-muted-foreground block mb-1">اسم المهارة (AR)</label>
                     <Input 
                       value={skill.nameAr || ''} 
@@ -571,7 +545,7 @@ const Skills = () => {
                       dir="rtl"
                     />
                   </div>
-                  <div>
+                  <div className="md:col-span-1">
                     <label className="text-[11px] font-semibold text-muted-foreground block mb-1">Category (EN)</label>
                     <Input 
                       value={skill.category} 
@@ -580,7 +554,7 @@ const Skills = () => {
                       className="h-8 text-xs"
                     />
                   </div>
-                  <div>
+                  <div className="md:col-span-1">
                     <label className="text-[11px] font-semibold text-muted-foreground block mb-1">التصنيف (AR)</label>
                     <Input 
                       value={skill.categoryAr || ''} 
@@ -590,144 +564,15 @@ const Skills = () => {
                       dir="rtl"
                     />
                   </div>
-                </div>
-
-                {/* 3D Spatial & Visual Prominence Controls (X, Y, Depth, Weight) */}
-                <div className="bg-background/40 border border-border/70 rounded-xl p-3.5 space-y-3">
-                  <div className="flex flex-wrap items-center justify-between border-b border-border/50 pb-2 gap-2">
-                    <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                      <span className="text-xs font-bold text-foreground font-mono uppercase tracking-wider">
-                        3D Spatial Coordinates & Typography Weight (الأبعاد والموضع ثلاثي الأبعاد)
-                      </span>
-                    </div>
-                    <div className="text-[11px] font-mono text-muted-foreground flex items-center gap-3">
-                      <span>X: <strong className="text-emerald-400">{skill.positionX ?? skill.x ?? 50}%</strong></span>
-                      <span>Y: <strong className="text-emerald-400">{skill.positionY ?? skill.y ?? 50}%</strong></span>
-                      <span>Depth: <strong className="text-emerald-400">{skill.depth ?? 5}</strong></span>
-                      <span>Weight: <strong className="text-emerald-400">Lv.{skill.weight ?? 3}</strong></span>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {/* X Position */}
-                    <div className="space-y-1.5">
-                      <div className="flex justify-between items-center text-[11px]">
-                        <label className="font-semibold text-muted-foreground">X Position (Horizontal)</label>
-                        <span className="font-mono font-bold text-emerald-400">{skill.positionX ?? skill.x ?? 50}%</span>
-                      </div>
-                      <input
-                        type="range"
-                        min={0}
-                        max={100}
-                        step={1}
-                        value={skill.positionX ?? skill.x ?? 50}
-                        onChange={e => handleFieldChange(skill.id, 'positionX', parseFloat(e.target.value))}
-                        onPointerUp={() => handleSaveSkill(skill)}
-                        className="w-full h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-emerald-500"
-                      />
-                      <div className="flex justify-between text-[9px] font-mono text-muted-foreground/60">
-                        <span>0% (Left)</span>
-                        <span>50%</span>
-                        <span>100% (Right)</span>
-                      </div>
-                    </div>
-
-                    {/* Y Position */}
-                    <div className="space-y-1.5">
-                      <div className="flex justify-between items-center text-[11px]">
-                        <label className="font-semibold text-muted-foreground">Y Position (Vertical)</label>
-                        <span className="font-mono font-bold text-emerald-400">{skill.positionY ?? skill.y ?? 50}%</span>
-                      </div>
-                      <input
-                        type="range"
-                        min={0}
-                        max={100}
-                        step={1}
-                        value={skill.positionY ?? skill.y ?? 50}
-                        onChange={e => handleFieldChange(skill.id, 'positionY', parseFloat(e.target.value))}
-                        onPointerUp={() => handleSaveSkill(skill)}
-                        className="w-full h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-emerald-500"
-                      />
-                      <div className="flex justify-between text-[9px] font-mono text-muted-foreground/60">
-                        <span>0% (Top)</span>
-                        <span>50%</span>
-                        <span>100% (Bottom)</span>
-                      </div>
-                    </div>
-
-                    {/* Depth Level */}
-                    <div className="space-y-1.5">
-                      <div className="flex justify-between items-center text-[11px]">
-                        <label className="font-semibold text-muted-foreground">3D Depth / Z-Index</label>
-                        <span className="font-mono font-bold text-emerald-400">{skill.depth ?? 5} / 10</span>
-                      </div>
-                      <input
-                        type="range"
-                        min={1}
-                        max={10}
-                        step={0.5}
-                        value={skill.depth ?? 5}
-                        onChange={e => handleFieldChange(skill.id, 'depth', parseFloat(e.target.value))}
-                        onPointerUp={() => handleSaveSkill(skill)}
-                        className="w-full h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-emerald-500"
-                      />
-                      <div className="flex justify-between text-[9px] font-mono text-muted-foreground/60">
-                        <span>1 (Background/Blur)</span>
-                        <span>5</span>
-                        <span>10 (Foreground)</span>
-                      </div>
-                    </div>
-
-                    {/* Weight / Prominence */}
-                    <div className="space-y-1.5">
-                      <div className="flex justify-between items-center text-[11px]">
-                        <label className="font-semibold text-muted-foreground">Weight & Prominence</label>
-                        <span className="font-mono font-bold text-emerald-400">Level {skill.weight ?? 3}</span>
-                      </div>
-                      <select
-                        value={skill.weight ?? 3}
-                        onChange={e => {
-                          const w = parseInt(e.target.value);
-                          handleFieldChange(skill.id, 'weight', w);
-                          handleSaveSkill({ ...skill, weight: w, size: weightSizes[w] || (w * 6) });
-                        }}
-                        className="w-full h-8 text-xs font-semibold px-2.5 rounded-lg bg-background border border-border/80 text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                      >
-                        <option value={1}>Level 1 — Sub-tier (18px / Medium)</option>
-                        <option value={2}>Level 2 — Compact (22px / Semibold)</option>
-                        <option value={3}>Level 3 — Standard (26px / Bold)</option>
-                        <option value={4}>Level 4 — Prominent (32px / Extrabold)</option>
-                        <option value={5}>Level 5 — Primary Hero (38px / Black)</option>
-                      </select>
-                      <div className="flex justify-between text-[9px] font-mono text-muted-foreground/60">
-                        <span>18px</span>
-                        <span>26px</span>
-                        <span>38px</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Live Badge Preview */}
-                  <div className="pt-2 flex flex-wrap items-center justify-between border-t border-border/40 text-xs gap-2">
-                    <span className="text-[11px] text-muted-foreground font-medium">Live Visual Appearance Preview:</span>
-                    <div className="flex items-center gap-3 px-3 py-1.5 rounded-lg bg-black/20 dark:bg-white/[0.03] border border-border/50">
-                      <span
-                        className="font-extrabold tracking-tight transition-all duration-200"
-                        style={{
-                          fontSize: `${14 + ((skill.weight ?? 3) * 5)}px`,
-                          fontWeight: (skill.weight ?? 3) >= 4 ? 900 : (skill.weight ?? 3) >= 3 ? 700 : 600,
-                          color: 'hsl(var(--emerald-500))',
-                          filter: (skill.depth ?? 5) < 3 ? 'blur(1px)' : 'none',
-                          opacity: 0.5 + ((skill.depth ?? 5) / 10) * 0.5,
-                        }}
-                      >
-                        {skill.name || 'Preview'}
-                      </span>
-                      <span className="text-[10px] font-mono text-muted-foreground">
-                        ({14 + ((skill.weight ?? 3) * 5)}px • {(skill.weight ?? 3) >= 5 ? 'Black' : (skill.weight ?? 3) >= 4 ? 'Extrabold' : (skill.weight ?? 3) >= 3 ? 'Bold' : 'Semibold'})
-                      </span>
-                    </div>
+                  <div className="md:col-span-1">
+                    <label className="text-[11px] font-semibold text-muted-foreground block mb-1">Order (الترتيب)</label>
+                    <Input 
+                      type="number"
+                      value={skill.order ?? 0} 
+                      onChange={e => handleFieldChange(skill.id, 'order', parseInt(e.target.value) || 0)}
+                      onBlur={() => handleSaveSkill(skill)}
+                      className="h-8 text-xs text-center font-mono font-bold text-emerald-500"
+                    />
                   </div>
                 </div>
 
@@ -742,8 +587,8 @@ const Skills = () => {
                       onChange={e => handleFieldChange(skill.id, 'description', e.target.value)}
                       onBlur={() => handleSaveSkill(skill)}
                       rows={2}
-                      placeholder="Interactive hover description shown when hovering over the 3D sphere node..."
-                      className="w-full text-xs p-2.5 rounded-lg bg-background/50 border border-border/60 text-muted-foreground focus:text-foreground focus:outline-none focus:ring-1 focus:ring-emerald-500/50 resize-none"
+                      placeholder="Interactive hover description shown when hovering over the skill pill..."
+                      className="w-full text-xs p-2.5 rounded-lg bg-background/50 border border-border/60 text-muted-foreground focus:text-foreground focus:outline-none focus:ring-1 focus:ring-emerald-500/50 resize-none leading-relaxed"
                     />
                   </div>
                   <div>
@@ -755,20 +600,20 @@ const Skills = () => {
                       onChange={e => handleFieldChange(skill.id, 'descriptionAr', e.target.value)}
                       onBlur={() => handleSaveSkill(skill)}
                       rows={2}
-                      placeholder="نص وصفي غني يظهر في نافذة الهوفر عند مرور مؤشر الماوس فوق المهارة..."
-                      className="w-full text-xs p-2.5 rounded-lg bg-background/50 border border-border/60 text-muted-foreground focus:text-foreground focus:outline-none focus:ring-1 focus:ring-emerald-500/50 resize-none"
+                      placeholder="نص وصفي يظهر في نافذة الهوفر عند مرور مؤشر الماوس فوق البويضة..."
+                      className="w-full text-xs p-2.5 rounded-lg bg-background/50 border border-border/60 text-muted-foreground focus:text-foreground focus:outline-none focus:ring-1 focus:ring-emerald-500/50 resize-none leading-relaxed"
                       dir="rtl"
                     />
                   </div>
                 </div>
 
-                {/* Action Footer with Save Button */}
+                {/* Action Footer */}
                 <div className="flex justify-between items-center pt-2 border-t border-border/40">
                   <span className="text-[11px] text-muted-foreground">
                     {savingSkillId === skill.id ? (
                       <span className="text-emerald-400 flex items-center gap-1.5"><Loader2 size={12} className="animate-spin" /> جاري حفظ التعديلات...</span>
                     ) : (
-                      <span>يتم الحفظ تلقائياً عند تغيير المؤشرات أو الضغط على زر الحفظ</span>
+                      <span>يتم حفظ الحقول تلقائياً عند مغادرة الحقل أو الضغط على زر الحفظ</span>
                     )}
                   </span>
                   <Button 

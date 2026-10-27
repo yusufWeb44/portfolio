@@ -275,6 +275,25 @@ export const RestApiIcon: React.FC<TechIconProps> = ({ size = 20, className = ''
   </svg>
 );
 
+// ── Drizzle ORM Official Neon Slash Logo ─────────────────────────────
+export const DrizzleIcon: React.FC<TechIconProps> = ({ size = 20, className = '' }) => (
+  <svg
+    viewBox="0 0 100 100"
+    width={size}
+    height={size}
+    className={className}
+    style={{ display: 'inline-block', verticalAlign: 'middle' }}
+  >
+    <rect width="100" height="100" rx="20" fill="#000000" />
+    <path
+      d="M30 74L46 26M48 74L64 26M66 74L82 26"
+      stroke="#C5F74F"
+      strokeWidth="9"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
 // ── Docker Official Whale ─────────────────────────────────────────────
 export const DockerIcon: React.FC<TechIconProps> = ({ size = 20, className = '' }) => (
   <svg
@@ -701,6 +720,7 @@ export function getTechBrandIcon(techName: string, size: number = 20) {
   if (clean.includes('kotlin')) return <KotlinIcon size={size} />;
   if (clean.includes('prisma')) return <PrismaIcon size={size} />;
   if (clean.includes('graphql')) return <GraphQLIcon size={size} />;
+  if (clean.includes('drizzle')) return <DrizzleIcon size={size} />;
   if (clean.includes('express')) return <ExpressIcon size={size} />;
   if (clean.includes('rest') || clean.includes('api')) return <RestApiIcon size={size} />;
   if (clean.includes('docker')) return <DockerIcon size={size} />;

@@ -1,8 +1,8 @@
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
-import { 
-  Menu, X, Mail, Sun, Moon, 
-  ChevronRight, User, FolderKanban, Terminal, Briefcase, Wrench, HelpCircle 
+import {
+  Menu, X, Mail, Sun, Moon,
+  ChevronRight, User, FolderKanban, Terminal, Briefcase, Wrench, HelpCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../components/ui/Button';
@@ -123,7 +123,7 @@ const PublicLayout = () => {
       if (window.location.hash) {
         try {
           window.history.replaceState(null, '', window.location.pathname);
-        } catch {}
+        } catch { }
       }
       return;
     }
@@ -332,305 +332,303 @@ const PublicLayout = () => {
 
   return (
     <SmoothScrollProvider>
-      <div className="min-h-screen flex flex-col relative bg-background text-foreground font-sans selection:bg-foreground selection:text-background overflow-x-clip">
+      <div className="min-h-screen flex flex-col relative bg-background text-foreground font-sans selection:bg-foreground selection:text-background">
 
-      {/* ── First-Time Session Splash Screen (Architecture Boot) ── */}
-      <AnimatePresence>
-        {showSplash && (
-          <SplashScreen
-            onComplete={() => setShowSplash(false)}
-            isAr={isAr}
-          />
-        )}
-      </AnimatePresence>
-
-      {/* ── Continuous Ambient Glassmorphic Background System (GPU Composited Layer) ── */}
-      <div
-        className="fixed inset-0 pointer-events-none -z-10 overflow-hidden transform-gpu"
-        style={{ contain: 'paint layout', transform: 'translateZ(0)' }}
-        aria-hidden="true"
-      >
-        {bgPatternClass && (
-          <div className={`absolute inset-0 ${bgPatternClass} opacity-[0.10] dark:opacity-[0.25]`} />
-        )}
-
-        {enableGlow && (
-          <div 
-            className="absolute inset-0 overflow-hidden opacity-35 dark:opacity-40 pointer-events-none select-none"
-            style={{ contain: 'strict', transform: 'translateZ(0)' }}
-          >
-            <div className={`absolute -top-[5%] -right-[5%] w-[460px] h-[460px] rounded-full bg-gradient-to-br ${auras.orb1} blur-2xl transform-gpu`} />
-            <div className={`absolute top-[35%] -left-[10%] w-[420px] h-[420px] rounded-full bg-gradient-to-tr ${auras.orb2} blur-2xl transform-gpu`} />
-            <div className={`absolute top-[70%] -right-[5%] w-[460px] h-[460px] rounded-full bg-gradient-to-tl ${auras.orb3} blur-2xl transform-gpu`} />
-            <div className={`absolute -bottom-[5%] left-1/2 -translate-x-1/2 w-[520px] h-[300px] rounded-full ${auras.orb4} blur-2xl transform-gpu`} />
-          </div>
-        )}
-      </div>
-
-      {/* ── Floating Glassmorphic Header (Island Architecture) ── */}
-      <header className="fixed top-0 inset-x-0 z-50 py-0 md:py-3 pointer-events-none transition-all duration-300">
-        <div className="w-full md:max-w-[1380px] 2xl:max-w-[1440px] md:mx-auto px-0 md:px-6 lg:px-8 pointer-events-auto">
-          <div
-            className={cn(
-              "flex items-center justify-between px-4 sm:px-6 py-2.5 md:py-3 min-h-[64px] sm:min-h-[68px] md:min-h-[72px]",
-              "rounded-none md:rounded-xl border-b md:border",
-              "border-slate-900/[0.07] dark:border-white/[0.09]",
-              "bg-white/45 dark:bg-zinc-900/35",
-              "backdrop-blur-xl backdrop-saturate-150",
-              "shadow-[0_2px_12px_rgba(0,0,0,0.03)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_4px_16px_rgba(0,0,0,0.20)]",
-              "transition-all duration-300",
-              scrolled
-                ? "bg-white/70 dark:bg-zinc-900/55 border-slate-900/[0.09] dark:border-white/[0.13] shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_6px_24px_rgba(0,0,0,0.30)]"
-                : ""
-            )}
-          >
-            {/* Start: Brand Logo Only (Frameless, clean, responsive) */}
-            <button
-              onClick={() => scrollToSection('hero')}
-              className="group flex items-center transition-transform duration-200 hover:opacity-90 cursor-pointer bg-transparent border-none p-0 focus:outline-none shrink-0"
-              aria-label="Home"
-            >
-              <img
-                src="/logo.webp"
-                alt="Logo"
-                className="h-8 sm:h-9 md:h-10 w-auto max-w-[95px] sm:max-w-[115px] md:max-w-[130px] object-contain filter invert contrast-125 dark:filter-none select-none shrink-0 transition-transform duration-200 group-hover:scale-105"
-              />
-            </button>
-
-            {/* Center: Desktop Navigation Links (No rectangular container on hover, text color only) */}
-            <nav
-              className="hidden md:flex items-center gap-1 sm:gap-2"
-              aria-label="Main Navigation"
-            >
-              {navLinks.map((link) => {
-                const isActive = activeSection === link.id;
-                return (
-                  <button
-                    key={link.id}
-                    onClick={() => scrollToSection(link.id)}
-                    className={cn(
-                      "px-3 sm:px-3.5 py-1.5 text-sm sm:text-[15px] font-semibold transition-colors duration-200 flex items-center justify-center cursor-pointer bg-transparent border-none select-none",
-                      isActive
-                        ? "text-emerald-500 dark:text-emerald-400 font-bold"
-                        : "text-muted-foreground hover:text-black dark:hover:text-white"
-                    )}
-                  >
-                    <span>{link.name}</span>
-                  </button>
-                );
-              })}
-            </nav>
-
-            {/* End: Desktop Action Controls (Theme Toggle, Language) */}
-            <div className="hidden md:flex items-center gap-2.5 sm:gap-3">
-              {/* 1. Theme Toggle (Sun / Moon) */}
-              <button
-                type="button"
-                onClick={toggleTheme}
-                className="p-2 sm:p-2.5 rounded-lg bg-white/50 hover:bg-white/80 dark:bg-white/[0.08] dark:hover:bg-white/[0.14] border border-slate-900/[0.07] hover:border-slate-900/[0.15] dark:border-white/[0.12] dark:hover:border-white/[0.22] text-slate-700 dark:text-slate-100 hover:text-emerald-500 dark:hover:text-emerald-400 transition-all cursor-pointer group shadow-xs dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.10)] backdrop-blur-md flex items-center justify-center shrink-0"
-                title={isDark ? (isAr ? 'تفعيل الوضع الفاتح' : 'Switch to Light Mode') : (isAr ? 'تفعيل الوضع الداكن' : 'Switch to Dark Mode')}
-                aria-label="Toggle Theme"
-              >
-                {isDark ? (
-                  <Sun className="w-4 h-4 text-amber-400 group-hover:rotate-45 transition-transform duration-300" />
-                ) : (
-                  <Moon className="w-4 h-4 text-emerald-500 group-hover:-rotate-12 transition-transform duration-300" />
-                )}
-              </button>
-
-              {/* 2. Language Selector Dropdown */}
-              <LanguageSwitcher />
-            </div>
-
-            {/* Mobile Controls: Language + Theme + Hamburger Button */}
-            <div className="flex md:hidden items-center gap-2">
-              <LanguageSwitcher />
-              
-              <button
-                type="button"
-                onClick={toggleTheme}
-                className="p-2 rounded-lg bg-white/50 hover:bg-white/80 dark:bg-white/[0.08] dark:hover:bg-white/[0.14] border border-slate-900/[0.07] dark:border-white/[0.12] text-foreground transition-all cursor-pointer shadow-xs dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.10)] flex items-center justify-center shrink-0 backdrop-blur-md"
-                aria-label="Toggle Theme"
-              >
-                {isDark ? (
-                  <Sun className="w-4 h-4 text-amber-400" />
-                ) : (
-                  <Moon className="w-4 h-4 text-emerald-500" />
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setMobileMenuOpen(true)}
-                className="w-10 h-10 rounded-lg bg-white/50 hover:bg-white/80 dark:bg-white/[0.08] dark:hover:bg-white/[0.14] border border-slate-900/[0.07] dark:border-white/[0.12] text-foreground transition-all cursor-pointer shadow-xs active:scale-95 flex items-center justify-center shrink-0 backdrop-blur-md"
-                aria-label="Open menu"
-                aria-expanded={mobileMenuOpen}
-              >
-                <Menu className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* ── Mobile Sidebar Drawer (Backdrop + Sliding Panel) ── */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.25 }}
-              className="fixed inset-0 z-[9998] bg-black/70 backdrop-blur-sm md:hidden"
-              onClick={() => setMobileMenuOpen(false)}
-              aria-hidden="true"
+        {/* ── First-Time Session Splash Screen (Architecture Boot) ── */}
+        <AnimatePresence>
+          {showSplash && (
+            <SplashScreen
+              onComplete={() => setShowSplash(false)}
+              isAr={isAr}
             />
+          )}
+        </AnimatePresence>
 
-            {/* Sliding Panel */}
-            <motion.aside
-              initial={{ x: currentDirection === 'rtl' ? '100%' : '-100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: currentDirection === 'rtl' ? '100%' : '-100%' }}
-              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className={cn(
-                "fixed inset-y-0 top-0 bottom-0 z-[9999] w-[80vw] max-w-[320px] sm:max-w-[340px] h-screen bg-background dark:bg-slate-950 text-foreground shadow-2xl flex flex-col md:hidden",
-                currentDirection === 'rtl'
-                  ? "right-0 border-s border-border/70 dark:border-white/10"
-                  : "left-0 border-e border-border/70 dark:border-white/10"
-              )}
-              role="dialog"
-              aria-modal="true"
-              aria-label="Navigation Drawer"
+        {/* ── Continuous Ambient Glassmorphic Background System (GPU Composited Layer) ── */}
+        <div
+          className="fixed inset-0 pointer-events-none -z-10 overflow-hidden transform-gpu"
+          style={{ contain: 'paint layout', transform: 'translateZ(0)' }}
+          aria-hidden="true"
+        >
+          {bgPatternClass && (
+            <div className={`absolute inset-0 ${bgPatternClass} opacity-[0.10] dark:opacity-[0.25]`} />
+          )}
+
+          {enableGlow && (
+            <div
+              className="absolute inset-0 overflow-hidden opacity-35 dark:opacity-40 pointer-events-none select-none"
+              style={{ contain: 'strict', transform: 'translateZ(0)' }}
             >
-              {/* Drawer Header */}
-              <div className="flex items-center justify-between p-4 border-b border-border/70 dark:border-white/10 shrink-0">
+              <div className={`absolute -top-[5%] -right-[5%] w-[460px] h-[460px] rounded-full bg-gradient-to-br ${auras.orb1} blur-2xl transform-gpu`} />
+              <div className={`absolute top-[35%] -left-[10%] w-[420px] h-[420px] rounded-full bg-gradient-to-tr ${auras.orb2} blur-2xl transform-gpu`} />
+              <div className={`absolute top-[70%] -right-[5%] w-[460px] h-[460px] rounded-full bg-gradient-to-tl ${auras.orb3} blur-2xl transform-gpu`} />
+              <div className={`absolute -bottom-[5%] left-1/2 -translate-x-1/2 w-[520px] h-[300px] rounded-full ${auras.orb4} blur-2xl transform-gpu`} />
+            </div>
+          )}
+        </div>
+
+        {/* ── Full-Width Glassmorphic Header (Attached to Top) ── */}
+        <header
+          className={cn(
+            "fixed top-0 inset-x-0 z-50 w-full transition-all duration-300 border-b",
+            "border-slate-900/[0.07] dark:border-white/[0.09]",
+            "bg-white/70 dark:bg-zinc-950/65",
+            "backdrop-blur-xl backdrop-saturate-150",
+            "shadow-[0_1px_12px_rgba(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.35)]",
+            scrolled
+              ? "bg-white/85 dark:bg-zinc-950/85 border-slate-900/[0.10] dark:border-white/[0.12] shadow-sm dark:shadow-[0_8px_30px_rgba(0,0,0,0.5)]"
+              : ""
+          )}
+        >
+          <div className="w-full max-w-7xl 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between min-h-[62px] sm:min-h-[66px] py-2 sm:py-2.5">
+              {/* Start: Brand Logo */}
+              <button
+                onClick={() => scrollToSection('hero')}
+                className="group flex items-center transition-transform duration-200 hover:opacity-90 cursor-pointer bg-transparent border-none p-0 focus:outline-none shrink-0"
+                aria-label="Home"
+              >
+                <img
+                  src="/logo.webp"
+                  alt="Logo"
+                  className="h-8 sm:h-9 md:h-9.5 w-auto max-w-[95px] sm:max-w-[115px] md:max-w-[125px] object-contain filter invert contrast-125 dark:filter-none select-none shrink-0 transition-transform duration-200 group-hover:scale-105"
+                />
+              </button>
+
+              {/* Center: Desktop Navigation Links */}
+              <nav
+                className="hidden md:flex items-center gap-1 sm:gap-2"
+                aria-label="Main Navigation"
+              >
+                {navLinks.map((link) => {
+                  const isActive = activeSection === link.id;
+                  return (
+                    <button
+                      key={link.id}
+                      onClick={() => scrollToSection(link.id)}
+                      className={cn(
+                        "px-3 sm:px-3.5 py-1.5 text-sm sm:text-[14.5px] font-semibold transition-colors duration-200 flex items-center justify-center cursor-pointer bg-transparent border-none select-none",
+                        isActive
+                          ? "text-emerald-500 dark:text-emerald-400 font-bold"
+                          : "text-muted-foreground hover:text-black dark:hover:text-white"
+                      )}
+                    >
+                      <span>{link.name}</span>
+                    </button>
+                  );
+                })}
+              </nav>
+
+              {/* End: Desktop Action Controls (Theme Toggle, Language) */}
+              <div className="hidden md:flex items-center gap-2.5 sm:gap-3">
+                {/* 1. Theme Toggle (Sun / Moon) */}
                 <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    scrollToSection('hero');
-                  }}
-                  className="flex items-center cursor-pointer bg-transparent border-none p-0 focus:outline-none"
+                  type="button"
+                  onClick={toggleTheme}
+                  className="p-2 sm:p-2.5 rounded-lg bg-white/50 hover:bg-white/80 dark:bg-white/[0.08] dark:hover:bg-white/[0.14] border border-slate-900/[0.07] hover:border-slate-900/[0.15] dark:border-white/[0.12] dark:hover:border-white/[0.22] text-slate-700 dark:text-slate-100 hover:text-emerald-500 dark:hover:text-emerald-400 transition-all cursor-pointer group shadow-xs dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.10)] backdrop-blur-md flex items-center justify-center shrink-0"
+                  title={isDark ? (isAr ? 'تفعيل الوضع الفاتح' : 'Switch to Light Mode') : (isAr ? 'تفعيل الوضع الداكن' : 'Switch to Dark Mode')}
+                  aria-label="Toggle Theme"
                 >
-                  <img
-                    src="/logo.webp"
-                    alt="Logo"
-                    className="h-8 w-auto max-w-[90px] object-contain filter invert contrast-125 dark:filter-none select-none shrink-0"
-                  />
+                  {isDark ? (
+                    <Sun className="w-4 h-4 text-amber-400 group-hover:rotate-45 transition-transform duration-300" />
+                  ) : (
+                    <Moon className="w-4 h-4 text-emerald-500 group-hover:-rotate-12 transition-transform duration-300" />
+                  )}
+                </button>
+
+                {/* 2. Language Selector Dropdown */}
+                <LanguageSwitcher />
+              </div>
+
+              {/* Mobile Controls: Language + Theme + Hamburger Button */}
+              <div className="flex md:hidden items-center gap-2">
+                <LanguageSwitcher />
+
+                <button
+                  type="button"
+                  onClick={toggleTheme}
+                  className="p-2 rounded-lg bg-white/50 hover:bg-white/80 dark:bg-white/[0.08] dark:hover:bg-white/[0.14] border border-slate-900/[0.07] dark:border-white/[0.12] text-foreground transition-all cursor-pointer shadow-xs dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.10)] flex items-center justify-center shrink-0 backdrop-blur-md"
+                  aria-label="Toggle Theme"
+                >
+                  {isDark ? (
+                    <Sun className="w-4 h-4 text-amber-400" />
+                  ) : (
+                    <Moon className="w-4 h-4 text-emerald-500" />
+                  )}
                 </button>
 
                 <button
                   type="button"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 border border-transparent hover:border-border text-muted-foreground hover:text-emerald-500 transition-all cursor-pointer active:scale-95"
-                  aria-label="Close menu"
+                  onClick={() => setMobileMenuOpen(true)}
+                  className="w-10 h-10 rounded-lg bg-white/50 hover:bg-white/80 dark:bg-white/[0.08] dark:hover:bg-white/[0.14] border border-slate-900/[0.07] dark:border-white/[0.12] text-foreground transition-all cursor-pointer shadow-xs active:scale-95 flex items-center justify-center shrink-0 backdrop-blur-md"
+                  aria-label="Open menu"
+                  aria-expanded={mobileMenuOpen}
                 >
-                  <X className="w-5 h-5" />
+                  <Menu className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
                 </button>
               </div>
+            </div>
+          </div>
+        </header>
 
-              {/* Scrollable Body */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar overscroll-contain">
+        {/* ── Mobile Sidebar Drawer (Backdrop + Sliding Panel) ── */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <>
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.25 }}
+                className="fixed inset-0 z-[9998] bg-black/70 backdrop-blur-sm md:hidden"
+                onClick={() => setMobileMenuOpen(false)}
+                aria-hidden="true"
+              />
 
-
-                {/* Theme Toggle - Clean Row */}
-                <div className="flex items-center justify-between py-1 text-xs font-medium text-muted-foreground border-b border-border/70 dark:border-white/10 pb-3">
-                  <span className="flex items-center gap-2">
-                    {isDark ? (
-                      <Moon className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
-                    ) : (
-                      <Sun className="w-4 h-4 text-amber-500" />
-                    )}
-                    <span>{isAr ? (isDark ? 'المظهر الداكن' : 'المظهر الفاتح') : (isDark ? 'Dark Theme' : 'Light Theme')}</span>
-                  </span>
+              {/* Sliding Panel */}
+              <motion.aside
+                initial={{ x: currentDirection === 'rtl' ? '100%' : '-100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: currentDirection === 'rtl' ? '100%' : '-100%' }}
+                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                className={cn(
+                  "fixed inset-y-0 top-0 bottom-0 z-[9999] w-[80vw] max-w-[320px] sm:max-w-[340px] h-screen bg-background dark:bg-slate-950 text-foreground shadow-2xl flex flex-col md:hidden",
+                  currentDirection === 'rtl'
+                    ? "right-0 border-s border-border/70 dark:border-white/10"
+                    : "left-0 border-e border-border/70 dark:border-white/10"
+                )}
+                role="dialog"
+                aria-modal="true"
+                aria-label="Navigation Drawer"
+              >
+                {/* Drawer Header */}
+                <div className="flex items-center justify-between p-4 border-b border-border/70 dark:border-white/10 shrink-0">
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      scrollToSection('hero');
+                    }}
+                    className="flex items-center cursor-pointer bg-transparent border-none p-0 focus:outline-none"
+                  >
+                    <img
+                      src="/logo.webp"
+                      alt="Logo"
+                      className="h-8 w-auto max-w-[90px] object-contain filter invert contrast-125 dark:filter-none select-none shrink-0"
+                    />
+                  </button>
 
                   <button
                     type="button"
-                    onClick={toggleTheme}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/70 hover:border-emerald-500/50 text-xs font-semibold text-foreground transition-all cursor-pointer"
-                    title="Toggle theme"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 border border-transparent hover:border-border text-muted-foreground hover:text-emerald-500 transition-all cursor-pointer active:scale-95"
+                    aria-label="Close menu"
                   >
-                    <span>{isDark ? (isAr ? 'تفعيل الفاتح' : 'Light') : (isAr ? 'تفعيل الداكن' : 'Dark')}</span>
-                    {isDark ? (
-                      <Sun className="w-3.5 h-3.5 text-amber-400" />
-                    ) : (
-                      <Moon className="w-3.5 h-3.5 text-emerald-500" />
-                    )}
+                    <X className="w-5 h-5" />
                   </button>
                 </div>
 
-                {/* Navigation Links - Clean list with active highlight */}
-                <nav className="space-y-1 pt-1" aria-label="Sidebar Navigation">
-                  {navLinks.map((item) => {
-                    const isActive = activeSection === item.id;
-                    const Icon = item.icon;
+                {/* Scrollable Body */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar overscroll-contain">
 
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => {
-                          setMobileMenuOpen(false);
-                          scrollToSection(item.id);
-                        }}
-                        className={cn(
-                          "w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer bg-transparent border-none text-start",
-                          isActive
-                            ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 dark:bg-emerald-500/20 font-bold border border-emerald-500/30 dark:shadow-[0_0_12px_rgba(16,185,129,0.15)]"
-                            : "text-muted-foreground hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.06]"
-                        )}
-                      >
-                        <div className="flex items-center gap-3">
-                          <Icon
+
+                  {/* Theme Toggle - Clean Row */}
+                  <div className="flex items-center justify-between py-1 text-xs font-medium text-muted-foreground border-b border-border/70 dark:border-white/10 pb-3">
+                    <span className="flex items-center gap-2">
+                      {isDark ? (
+                        <Moon className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
+                      ) : (
+                        <Sun className="w-4 h-4 text-amber-500" />
+                      )}
+                      <span>{isAr ? (isDark ? 'المظهر الداكن' : 'المظهر الفاتح') : (isDark ? 'Dark Theme' : 'Light Theme')}</span>
+                    </span>
+
+                    <button
+                      type="button"
+                      onClick={toggleTheme}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/70 hover:border-emerald-500/50 text-xs font-semibold text-foreground transition-all cursor-pointer"
+                      title="Toggle theme"
+                    >
+                      <span>{isDark ? (isAr ? 'تفعيل الفاتح' : 'Light') : (isAr ? 'تفعيل الداكن' : 'Dark')}</span>
+                      {isDark ? (
+                        <Sun className="w-3.5 h-3.5 text-amber-400" />
+                      ) : (
+                        <Moon className="w-3.5 h-3.5 text-emerald-500" />
+                      )}
+                    </button>
+                  </div>
+
+                  {/* Navigation Links - Clean list with active highlight */}
+                  <nav className="space-y-1 pt-1" aria-label="Sidebar Navigation">
+                    {navLinks.map((item) => {
+                      const isActive = activeSection === item.id;
+                      const Icon = item.icon;
+
+                      return (
+                        <button
+                          key={item.id}
+                          onClick={() => {
+                            setMobileMenuOpen(false);
+                            scrollToSection(item.id);
+                          }}
+                          className={cn(
+                            "w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer bg-transparent border-none text-start",
+                            isActive
+                              ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 dark:bg-emerald-500/20 font-bold border border-emerald-500/30 dark:shadow-[0_0_12px_rgba(16,185,129,0.15)]"
+                              : "text-muted-foreground hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.06]"
+                          )}
+                        >
+                          <div className="flex items-center gap-3">
+                            <Icon
+                              className={cn(
+                                "w-4 h-4",
+                                isActive ? "text-emerald-500 dark:text-emerald-400" : "text-muted-foreground"
+                              )}
+                            />
+                            <span>{item.name}</span>
+                          </div>
+
+                          <ChevronRight
                             className={cn(
-                              "w-4 h-4",
-                              isActive ? "text-emerald-500 dark:text-emerald-400" : "text-muted-foreground"
+                              "w-3.5 h-3.5 rtl:rotate-180 transition-transform",
+                              isActive ? "text-emerald-500 dark:text-emerald-400" : "text-muted-foreground/60"
                             )}
                           />
-                          <span>{item.name}</span>
-                        </div>
+                        </button>
+                      );
+                    })}
+                  </nav>
+                </div>
 
-                        <ChevronRight
-                          className={cn(
-                            "w-3.5 h-3.5 rtl:rotate-180 transition-transform",
-                            isActive ? "text-emerald-500 dark:text-emerald-400" : "text-muted-foreground/60"
-                          )}
-                        />
-                      </button>
-                    );
-                  })}
-                </nav>
-              </div>
+                {/* Drawer Footer */}
+                <div className="p-3.5 border-t border-border/70 dark:border-white/10 text-center text-[11px] text-muted-foreground space-y-1 shrink-0">
+                  {settings?.email && (
+                    <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+                      <Mail className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
+                      <a href={`mailto:${settings.email}`} className="hover:text-foreground transition-colors" dir="ltr">
+                        {settings.email}
+                      </a>
+                    </div>
+                  )}
+                  <p className="text-[10px] text-muted-foreground/75">
+                    © {new Date().getFullYear()} {brandName}. {isAr ? 'جميع الحقوق محفوظة' : 'All rights reserved'}
+                  </p>
+                </div>
+              </motion.aside>
+            </>
+          )}
+        </AnimatePresence>
 
-              {/* Drawer Footer */}
-              <div className="p-3.5 border-t border-border/70 dark:border-white/10 text-center text-[11px] text-muted-foreground space-y-1 shrink-0">
-                {settings?.email && (
-                  <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
-                    <Mail className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
-                    <a href={`mailto:${settings.email}`} className="hover:text-foreground transition-colors" dir="ltr">
-                      {settings.email}
-                    </a>
-                  </div>
-                )}
-                <p className="text-[10px] text-muted-foreground/75">
-                  © {new Date().getFullYear()} {brandName}. {isAr ? 'جميع الحقوق محفوظة' : 'All rights reserved'}
-                </p>
-              </div>
-            </motion.aside>
-          </>
-        )}
-      </AnimatePresence>
+        <main className="flex-1 w-full">
+          <Outlet />
+        </main>
 
-      <main className="flex-1 w-full">
-        <Outlet />
-      </main>
-
-      <Footer
-        settings={settings}
-        socialLinks={socialLinks}
-        scrollToSection={scrollToSection}
-      />
-    </div>
+        <Footer
+          settings={settings}
+          socialLinks={socialLinks}
+          scrollToSection={scrollToSection}
+        />
+      </div>
     </SmoothScrollProvider>
   );
 };

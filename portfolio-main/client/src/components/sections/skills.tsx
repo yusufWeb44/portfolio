@@ -1,46 +1,295 @@
-import { useState, useRef, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence, useInView } from 'framer-motion';
+import { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
+import {
+  motion,
+  AnimatePresence,
+  useScroll,
+  useVelocity,
+  useSpring,
+  useTransform,
+  useMotionValue,
+  useAnimationFrame,
+  wrap,
+} from 'framer-motion';
 import api from '../../services/api';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { SkillPill, SkillBrandIcon } from '../../components/ui/SkillBrandIcon';
 
 /* ─── Technology Data Types ───────────────────────────────────────── */
 export interface TechItem {
   label: string;
+  originalName?: string;
   description: string;
-  size: number;
-  x: number;
-  y: number;
-  depth: number;
+  size?: number;
+  x?: number;
+  y?: number;
+  depth?: number;
 }
 
-const FALLBACK_POSITIONS: Array<{ x: number; y: number; depth: number }> = [
-  { x: 10, y: 10, depth: 1 },
-  { x: 55, y: 5, depth: 0.7 },
-  { x: 56, y: 56, depth: 1 },
-  { x: 8, y: 45, depth: 0.85 },
-  { x: 60, y: 78, depth: 1 },
-  { x: 28, y: 68, depth: 0.55 },
-  { x: 42, y: 38, depth: 0.5 },
-  { x: 12, y: 30, depth: 0.9 },
-  { x: 35, y: 25, depth: 0.5 },
-  { x: 18, y: 85, depth: 0.9 },
-  { x: 66, y: 32, depth: 0.5 },
-  { x: 30, y: 48, depth: 1 },
-  { x: 70, y: 20, depth: 0.95 },
-  { x: 72, y: 65, depth: 0.5 },
-  { x: 46, y: 85, depth: 0.55 },
-  { x: 65, y: 40, depth: 1 },
-  { x: 56, y: 70, depth: 0.55 },
-  { x: 15, y: 60, depth: 0.5 },
-  { x: 35, y: 10, depth: 0.8 },
-  { x: 15, y: 40, depth: 0.5 },
-  { x: 10, y: 70, depth: 0.5 },
-  { x: 45, y: 15, depth: 0.8 },
-  { x: 70, y: 10, depth: 0.5 },
-  { x: 20, y: 20, depth: 0.4 },
-  { x: 40, y: 58, depth: 0.5 },
-  { x: 8, y: 78, depth: 0.9 },
+interface HoveredSkillData {
+  label: string;
+  originalName?: string;
+  description: string;
+  rect: DOMRect;
+}
+
+/* ─── Default Fallback Skills ────────────────────────────────────── */
+const DEFAULT_SKILLS = [
+  { name: 'JavaScript', nameAr: 'جافاسكريبت', description: 'Modern ES6+ web development and dynamic interactivity.' },
+  { name: 'TypeScript', nameAr: 'تايب سكريبت', description: 'Type-safe enterprise software design and maintainable architectures.' },
+  { name: 'React', nameAr: 'رياكت', description: 'Component-driven front-end UI architecture and state management.' },
+  { name: 'Next.js', nameAr: 'نكست جي اس', description: 'Server-side rendering, static site generation, and full-stack React apps.' },
+  { name: 'Drizzle ORM', nameAr: 'دريزل او ار ام', description: 'Type-safe TypeScript ORM with fast SQL query execution.' },
+  { name: 'GraphQL', nameAr: 'جراف كيو ال', description: 'Schema-first API design and optimized flexible data fetching.' },
+  { name: 'CSS', nameAr: 'سي اس اس', description: 'Modern layout design with CSS Grid, Flexbox, and micro-animations.' },
+  { name: 'Tailwind CSS', nameAr: 'تيلويند سي اس اس', description: 'Utility-first modern responsive design system.' },
+  { name: 'PostgreSQL', nameAr: 'بوستجريسكيول', description: 'Robust relational database architecture and query optimization.' },
+  { name: 'Node.js', nameAr: 'نود جي اس', description: 'High-performance scalable backend services and microservices.' },
+  { name: 'Express', nameAr: 'اكسبرس', description: 'Fast, minimalist Node.js web and API framework.' },
+  { name: 'MongoDB', nameAr: 'مونجو دي بي', description: 'Document-oriented NoSQL database for flexible data schemas.' },
+  { name: 'MySQL', nameAr: 'ماي اس كيو ال', description: 'Relational data management and ACID-compliant storage.' },
+  { name: 'HTML', nameAr: 'اتش تي ام ال', description: 'Semantic, accessible, and SEO-friendly document structuring.' },
+  { name: 'Docker', nameAr: 'دوكر', description: 'Containerization, reproducible environments, and cloud deployment.' },
+  { name: 'Git & GitHub', nameAr: 'جيت وجيتهاب', description: 'Version control, collaborative workflows, and CI/CD pipelines.' },
+  { name: 'prisma ORM', nameAr: 'بريزما', description: 'Next-generation ORM for Node.js and TypeScript.' },
+  { name: 'Flutter', nameAr: 'فلاتر', description: 'Cross-platform mobile applications for iOS and Android.' },
+  { name: 'Dart', nameAr: 'دارت', description: 'Client-optimized object-oriented language for mobile apps.' },
+  { name: 'Figma', nameAr: 'فيجما', description: 'UI/UX prototyping, design systems, and wireframing.' },
+  { name: 'ASP.NET', nameAr: 'ايه اس بي دوت نت', description: 'Enterprise backend solutions and C# Web APIs.' },
+  { name: 'java', nameAr: 'جافا', description: 'Object-oriented backend software and enterprise applications.' },
+  { name: 'REST APIs', nameAr: 'واجهات برمجة التطبيقات', description: 'Standardized RESTful microservices and secure JSON endpoints.' },
+  { name: 'database design', nameAr: 'تصميم قواعد البيانات', description: 'Normalized database schema design and performance tuning.' },
+  { name: 'OOP', nameAr: 'البرمجة كائنية التوجه', description: 'SOLID design principles and object-oriented software patterns.' },
+  { name: 'Data Structure & Algorithm', nameAr: 'هياكل البيانات والخوارزميات', description: 'Efficient algorithmic problem solving and time-complexity optimization.' },
+  { name: 'prompt engineering', nameAr: 'هندسة الأوامر', description: 'LLM agent workflows, prompt optimization, and AI tool integration.' },
+  { name: 'SEO', nameAr: 'تحسين محركات البحث', description: 'Search engine optimization, metadata tuning, and Core Web Vitals.' },
 ];
+
+/* ─── Floating Tooltip Window (Above the skill with pointed arrow) ── */
+const FloatingTooltip = ({ skill }: { skill: HoveredSkillData }) => {
+  // Compact, sleeker tooltip width
+  const tooltipWidth = 230;
+  const halfW = tooltipWidth / 2;
+
+  // Float directly above the skill capsule with 6px clearance
+  const topPos = skill.rect.top - 6;
+
+  // X-position clamped inside screen margins
+  const pillCenterX = skill.rect.left + skill.rect.width / 2;
+  const clampedX = Math.max(
+    halfW + 12,
+    Math.min(window.innerWidth - halfW - 12, pillCenterX)
+  );
+
+  // Arrow offset relative to tooltip center, safely clamped within tooltip bounds
+  const rawOffset = pillCenterX - clampedX;
+  const arrowOffset = Math.max(-halfW + 18, Math.min(halfW - 18, rawOffset));
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.94, x: '-50%', y: '-100%' }}
+      animate={{ opacity: 1, scale: 1, x: '-50%', y: '-100%' }}
+      exit={{ opacity: 0, scale: 0.94, x: '-50%', y: '-100%' }}
+      transition={{ duration: 0.14, ease: 'easeOut' }}
+      className="fixed pointer-events-none z-[99999]"
+      style={{
+        top: `${topPos}px`,
+        left: `${clampedX}px`,
+        width: `${tooltipWidth}px`,
+      }}
+    >
+      <div className="bg-white dark:bg-[#0c100e] border border-emerald-500/50 p-2.5 sm:p-3 rounded-xl shadow-[0_12px_28px_rgba(15,23,42,0.16)] dark:shadow-[0_16px_32px_rgba(0,0,0,0.95)] text-start relative select-none">
+        {/* Tooltip Header: Skill Name & Brand Icon directly adjacent */}
+        <div className="flex items-center gap-2 mb-1.5 pb-1.5 border-b border-border/40">
+          <span className="text-xs font-bold text-foreground font-sans">
+            {skill.label}
+          </span>
+          <div className="scale-90 origin-left rtl:origin-right">
+            <SkillBrandIcon name={skill.originalName || skill.label} />
+          </div>
+        </div>
+
+        {/* Skill Description */}
+        <p className="text-[11px] text-foreground/85 leading-relaxed font-normal whitespace-normal">
+          {skill.description}
+        </p>
+
+        {/* Sharp Pointed / Tapered Arrow at bottom (سهم مدبب يلامس البويضة) */}
+        <div
+          className="absolute top-full -mt-[1px] pointer-events-none"
+          style={{
+            left: `calc(50% + ${arrowOffset}px)`,
+            transform: 'translateX(-50%)',
+          }}
+        >
+          <svg width="16" height="8" viewBox="0 0 16 8" className="block overflow-visible">
+            <polygon
+              points="0,0 8,8 16,0"
+              className="fill-white dark:fill-[#0c100e] stroke-emerald-500/50"
+              strokeWidth="1.5"
+              strokeLinejoin="round"
+            />
+            <line
+              x1="0.5"
+              y1="0"
+              x2="15.5"
+              y2="0"
+              className="stroke-white dark:stroke-[#0c100e]"
+              strokeWidth="2"
+            />
+          </svg>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+/* ─── Infinite Marquee Row with Scroll Acceleration ──────────────── */
+interface MarqueeRowProps {
+  skills: TechItem[];
+  direction: 1 | -1;
+  baseSpeed: number;
+  velocityFactor: any;
+  isPaused: boolean;
+  onHover: (data: HoveredSkillData) => void;
+  onLeave: () => void;
+}
+
+const SkillMarqueeRow = ({
+  skills,
+  direction,
+  baseSpeed,
+  velocityFactor,
+  isPaused,
+  onHover,
+  onLeave,
+}: MarqueeRowProps) => {
+  const baseX = useMotionValue(0);
+  const x = useTransform(baseX, (v) => `${wrap(-25, 0, v)}%`);
+
+  useAnimationFrame((_t, delta) => {
+    // When hovering over any skill, row pauses so user can read tooltip comfortably
+    if (isPaused) return;
+
+    // delta is time in ms (~16.6ms at 60fps)
+    const extraVelocity = Math.abs(velocityFactor.get());
+    // Smooth dynamic scroll acceleration
+    const speedMultiplier = 1 + Math.min(extraVelocity, 15) * 1.6;
+    const moveBy = direction * baseSpeed * speedMultiplier * (delta / 1000);
+    baseX.set(baseX.get() + moveBy);
+  });
+
+  if (skills.length === 0) return null;
+
+  return (
+    <div className="flex overflow-hidden select-none py-1">
+      <motion.div className="flex shrink-0 will-change-transform" style={{ x }}>
+        {[0, 1, 2, 3].map((copyIndex) => (
+          <div
+            key={copyIndex}
+            className="flex shrink-0 items-center gap-3 sm:gap-4 pr-3 sm:pr-4"
+          >
+            {skills.map((skill, sIdx) => (
+              <SkillPill
+                key={`${skill.originalName || skill.label}-${copyIndex}-${sIdx}`}
+                skill={skill}
+                onMouseEnter={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  onHover({
+                    label: skill.label,
+                    originalName: skill.originalName,
+                    description: skill.description,
+                    rect,
+                  });
+                }}
+                onMouseLeave={onLeave}
+              />
+            ))}
+          </div>
+        ))}
+      </motion.div>
+    </div>
+  );
+};
+
+/* ─── Full Marquee System (Right Column) ─────────────────────────── */
+const InfiniteSkillsMarquee = ({ items }: { items: TechItem[] }) => {
+  const { scrollY } = useScroll();
+  const scrollVelocity = useVelocity(scrollY);
+  const smoothVelocity = useSpring(scrollVelocity, {
+    damping: 50,
+    stiffness: 400,
+  });
+  const velocityFactor = useTransform(smoothVelocity, [0, 1000], [0, 5], {
+    clamp: false,
+  });
+
+  const [activeHover, setActiveHover] = useState<HoveredSkillData | null>(null);
+
+  // Close tooltip on page scroll so marquee accelerates cleanly
+  useEffect(() => {
+    const handleScroll = () => {
+      if (activeHover) setActiveHover(null);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [activeHover]);
+
+  // Stagger items into 5 rows (or 4 if few items)
+  const rows = useMemo(() => {
+    const numRows = items.length >= 15 ? 5 : 4;
+    const result: TechItem[][] = Array.from({ length: numRows }, () => []);
+    if (items.length === 0) return result;
+
+    items.forEach((item, index) => {
+      result[index % numRows].push(item);
+    });
+
+    return result;
+  }, [items]);
+
+  // Alternating directions and organic base speeds for natural depth
+  const rowConfigs: Array<{ direction: 1 | -1; baseSpeed: number }> = [
+    { direction: -1, baseSpeed: 1.6 },
+    { direction: 1, baseSpeed: 1.2 },
+    { direction: -1, baseSpeed: 1.8 },
+    { direction: 1, baseSpeed: 1.3 },
+    { direction: -1, baseSpeed: 1.5 },
+  ];
+
+  return (
+    <div className="w-full relative overflow-hidden flex flex-col gap-2.5 sm:gap-3 py-2 [mask-image:linear-gradient(to_right,transparent_0%,black_3%,black_97%,transparent_100%)]">
+      {rows.map((rowSkills, rIdx) => {
+        const config = rowConfigs[rIdx % rowConfigs.length];
+        return (
+          <SkillMarqueeRow
+            key={rIdx}
+            skills={rowSkills}
+            direction={config.direction}
+            baseSpeed={config.baseSpeed}
+            velocityFactor={velocityFactor}
+            isPaused={activeHover !== null}
+            onHover={setActiveHover}
+            onLeave={() => setActiveHover(null)}
+          />
+        );
+      })}
+
+      {/* Floating Interactive Tooltip Window */}
+      {typeof document !== 'undefined' && createPortal(
+        <AnimatePresence>
+          {activeHover && (
+            <FloatingTooltip
+              key={activeHover.label}
+              skill={activeHover}
+            />
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
+    </div>
+  );
+};
 
 /* ─── Animation Variants ─────────────────────────────────────────── */
 const containerVariants = {
@@ -57,123 +306,12 @@ const fadeUpVariants = {
   },
 };
 
-/* ─── Scatter Cloud (Desktop) ────────────────────────────────────── */
-const ScatterCloud = ({ items }: { items: TechItem[] }) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: '-60px' });
-  const [hovered, setHovered] = useState<number | null>(null);
-
-  return (
-    <div ref={ref} className="relative w-full h-[550px] lg:h-[600px] select-none">
-      {items.map((tech, i) => {
-        const isActive = hovered === i;
-        const isNearTop = tech.y < 22;
-        const isNearLeft = tech.x < 18;
-        const isNearRight = tech.x > 82;
-
-        const initialX = isNearLeft ? '0%' : isNearRight ? '0%' : '-50%';
-
-        return (
-          <div
-            key={tech.label + i}
-            className="absolute inline-block group"
-            style={{
-              left: `${tech.x}%`,
-              top: `${tech.y}%`,
-              zIndex: isActive ? 9999 : Math.floor(tech.depth > 1 ? tech.depth * 10 : tech.depth * 100),
-            }}
-            onMouseEnter={() => setHovered(i)}
-            onMouseLeave={() => setHovered(null)}
-          >
-            <motion.span
-              className="inline-block cursor-default whitespace-nowrap font-extrabold tracking-tight transition-colors duration-150"
-              style={{
-                fontFamily: 'var(--font-en), var(--font-ar), system-ui, sans-serif',
-                fontSize: `${tech.size}px`,
-                lineHeight: 1.2,
-                color: isActive 
-                  ? 'hsl(var(--emerald-600))' 
-                  : `hsl(var(--emerald-500) / ${Math.max(0.65, tech.depth > 1 ? tech.depth / 10 : tech.depth)})`,
-                textShadow: isActive
-                  ? '0 0 16px hsl(var(--emerald-500) / 0.25)'
-                  : 'none',
-              }}
-              initial={{
-                x: (50 - tech.x) * 5,
-                y: (50 - tech.y) * 4.5,
-                opacity: 0,
-                scale: 0.3,
-              }}
-              animate={
-                isInView
-                  ? { x: 0, y: 0, opacity: 1, scale: 1 }
-                  : undefined
-              }
-              transition={{
-                type: 'spring',
-                stiffness: 55,
-                damping: 13,
-                delay: i * 0.035,
-                opacity: { duration: 0.5, delay: i * 0.035 },
-              }}
-              whileHover={{ scale: 1.12 }}
-            >
-              {tech.label}
-            </motion.span>
-
-            {/* Floating Tooltip Window - Mode adaptive with solid contrast */}
-            <AnimatePresence>
-              {isActive && (
-                <motion.div
-                  initial={{ opacity: 0, y: isNearTop ? -6 : 6, x: initialX, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, x: initialX, scale: 1 }}
-                  exit={{ opacity: 0, y: isNearTop ? -4 : 4, x: initialX, scale: 0.95 }}
-                  transition={{ duration: 0.15, ease: 'easeOut' }}
-                  className={`absolute pointer-events-none w-64 z-[9999] ${
-                    isNearTop ? 'top-full mt-3' : 'bottom-full mb-3'
-                  } ${
-                    isNearLeft ? 'left-0' : isNearRight ? 'right-0' : 'left-1/2'
-                  }`}
-                >
-                  <div className="bg-white dark:bg-[#0c100e] border border-emerald-500/40 p-3.5 rounded-xl shadow-[0_12px_30px_rgba(15,23,42,0.12)] dark:shadow-[0_16px_36px_rgba(0,0,0,0.85)] text-start relative select-none">
-                    <p className="text-xs font-bold mb-1 text-emerald-600 dark:text-emerald-400">
-                      {tech.label}
-                    </p>
-                    <p className="text-[11px] text-foreground/90 leading-relaxed font-medium whitespace-normal">
-                      {tech.description}
-                    </p>
-                    {/* Centered / Clamped Tooltip Arrow */}
-                    <div
-                      className={`absolute border-8 border-transparent ${
-                        isNearTop
-                          ? 'bottom-full -mb-[1px] border-b-white dark:border-b-[#0c100e]'
-                          : 'top-full -mt-[1px] border-t-white dark:border-t-[#0c100e]'
-                      } ${
-                        isNearLeft
-                          ? 'left-6'
-                          : isNearRight
-                          ? 'right-6'
-                          : 'left-1/2 -translate-x-1/2'
-                      }`}
-                    />
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        );
-      })}
-    </div>
-  );
-};
-
-/* ─── Main Section ───────────────────────────────────────────────── */
+/* ─── Main Skills Section ────────────────────────────────────────── */
 const SkillsSection = () => {
   const { t, currentLang } = useLanguage();
   const isAr = currentLang === 'ar';
   const [rawSkillsData, setRawSkillsData] = useState<any[]>([]);
   const [settings, setSettings] = useState<any>(null);
-  const [selectedMobile, setSelectedMobile] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchData = () => {
@@ -208,34 +346,21 @@ const SkillsSection = () => {
   }, []);
 
   const skillsItems: TechItem[] = useMemo(() => {
-    return rawSkillsData.map((s: any, idx: number) => {
-      const fallback = FALLBACK_POSITIONS[idx % FALLBACK_POSITIONS.length];
+    const dataSource = rawSkillsData.length > 0 ? rawSkillsData : DEFAULT_SKILLS;
+
+    return dataSource.map((s: any) => {
       const label = isAr ? (s.nameAr || s.name) : s.name;
       const description = isAr 
         ? (s.descriptionAr || s.description || `${label} - تطوير وبرمجة متقدمة.`)
         : (s.description || `${s.name} development & integration.`);
 
-      const posX = typeof s.positionX === 'number' ? s.positionX : (typeof s.x === 'number' ? s.x : fallback.x);
-      const posY = typeof s.positionY === 'number' ? s.positionY : (typeof s.y === 'number' ? s.y : fallback.y);
-      const depthVal = typeof s.depth === 'number' ? s.depth : fallback.depth;
-
-      const weightSizes: Record<number, number> = { 1: 18, 2: 22, 3: 26, 4: 32, 5: 38 };
-      const size = typeof s.size === 'number' && s.size > 0 
-        ? s.size 
-        : (typeof s.weight === 'number' ? (weightSizes[s.weight] || s.weight * 6) : 20);
-
       return {
         label,
+        originalName: s.name,
         description,
-        size,
-        x: posX,
-        y: posY,
-        depth: depthVal,
       };
     });
   }, [rawSkillsData, isAr]);
-
-
 
   const mainTitle = isAr 
     ? (settings?.skillsTitleAr || t('skills.title', 'القدرات الهندسية الأساسية')) 
@@ -263,7 +388,7 @@ const SkillsSection = () => {
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-start">
 
-          {/* ── Left Column (5 cols) ── */}
+          {/* ── Left Column (5 cols) - Preserved exactly as requested ── */}
           <motion.div
             className="lg:col-span-5 flex flex-col gap-7"
             variants={containerVariants}
@@ -271,7 +396,6 @@ const SkillsSection = () => {
             whileInView="visible"
             viewport={{ once: true, margin: '-100px' }}
           >
-
             {/* Headline */}
             <motion.div variants={fadeUpVariants}>
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-foreground tracking-tight leading-[1.15]">
@@ -335,82 +459,16 @@ const SkillsSection = () => {
             )}
           </motion.div>
 
-          {/* ── Right Column (7 cols): Scatter Cloud — desktop ── */}
-          <div className="hidden md:block lg:col-span-7 lg:translate-x-24 rtl:lg:translate-x-0 rtl:translate-x-0 -mt-5 lg:-mt-5">
+          {/* ── Right Column (7 cols): Infinite Horizontal Scroll Marquee ── */}
+          <div className="w-full lg:col-span-7 lg:translate-x-6 rtl:lg:-translate-x-6 -mt-2 lg:-mt-3 overflow-hidden">
             {skillsItems.length > 0 ? (
-              <ScatterCloud items={skillsItems} />
+              <InfiniteSkillsMarquee items={skillsItems} />
             ) : (
               <div className="h-[240px] flex items-center justify-center border border-dashed border-border/70 rounded-3xl bg-card/20 text-muted-foreground text-sm">
                 {isAr ? 'لا توجد مهارات معروضة حالياً.' : 'No skills available yet.'}
               </div>
             )}
           </div>
-
-          {/* ── Mobile: Text badge grid ── */}
-          {skillsItems.length > 0 && (
-            <div className="md:hidden lg:col-span-7 space-y-4">
-              <motion.div
-                className="flex flex-wrap gap-2.5 justify-center"
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, margin: '-50px' }}
-                variants={{
-                  hidden: {},
-                  visible: { transition: { staggerChildren: 0.04 } },
-                }}
-              >
-                {skillsItems.map((tech, i) => {
-                  const isSelected = selectedMobile === i;
-                  return (
-                    <motion.button
-                      key={tech.label + i}
-                      variants={{
-                        hidden: { opacity: 0, scale: 0.8 },
-                        visible: { opacity: 1, scale: 1, transition: { duration: 0.3 } },
-                      }}
-                      whileTap={{ scale: 0.93 }}
-                      onClick={() =>
-                        setSelectedMobile(isSelected ? null : i)
-                      }
-                      className={[
-                        'px-3.5 py-1.5 rounded-full text-xs font-bold tracking-tight border cursor-pointer transition-all duration-200',
-                        isSelected
-                          ? 'border-emerald-500/50 text-emerald-400 bg-emerald-500/10'
-                          : 'border-border/60 text-muted-foreground hover:text-emerald-400 hover:border-emerald-500/30 bg-card/40 backdrop-blur-sm',
-                      ].join(' ')}
-                      style={{ fontFamily: 'var(--font-en), var(--font-ar), system-ui, sans-serif' }}
-                    >
-                      {tech.label}
-                    </motion.button>
-                  );
-                })}
-              </motion.div>
-
-            {/* Mobile: description drawer */}
-            <AnimatePresence mode="wait">
-              {selectedMobile !== null && skillsItems[selectedMobile] && (
-                <motion.div
-                  key={selectedMobile}
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                  className="overflow-hidden"
-                >
-                  <div className="border border-border/60 bg-card/40 dark:bg-white/[0.03] backdrop-blur-xl rounded-xl p-4">
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      <span className="text-emerald-400 font-semibold">
-                        {skillsItems[selectedMobile].label}
-                      </span>
-                      {' — '}
-                      {skillsItems[selectedMobile].description}
-                    </p>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        )}
 
         </div>
       </div>

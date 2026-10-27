@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, useScroll, useTransform, MotionValue } from 'framer-motion';
 import { ArrowRight, ArrowUpRight, ChevronDown, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -41,11 +41,9 @@ interface Project {
 const ProjectMediaVisual = ({
   project,
   cardIndex,
-  imageScale,
 }: {
   project: Project;
   cardIndex: number;
-  imageScale?: MotionValue<number>;
 }) => {
   const coverImage =
     project.images?.find((img) => img.isCover)?.url ||
@@ -54,13 +52,12 @@ const ProjectMediaVisual = ({
   if (coverImage) {
     return (
       <div className="w-full h-full relative overflow-hidden group">
-        <motion.img
+        <img
           src={getMediaUrl(coverImage)}
           alt={project.title}
           width={700}
           height={450}
-          style={imageScale ? { scale: imageScale } : undefined}
-          className="w-full h-full object-cover select-none"
+          className="w-full h-full object-cover select-none transition-transform duration-700 group-hover:scale-105"
           loading="lazy"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60" />
@@ -85,14 +82,11 @@ const ProjectMediaVisual = ({
       <div className="absolute inset-0 bg-radial from-transparent to-black/40 pointer-events-none" />
 
       {/* Iconic Geometric Shapes Logo */}
-      <motion.div
-        style={imageScale ? { scale: imageScale } : undefined}
-        className="relative z-10 flex items-center gap-3.5 sm:gap-4 drop-shadow-[0_6px_20px_rgba(0,0,0,0.6)]"
-      >
+      <div className="relative z-10 flex items-center gap-3.5 sm:gap-4 drop-shadow-[0_6px_20px_rgba(0,0,0,0.6)]">
         <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-[8px] bg-white shadow-md" />
         <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-white shadow-md" />
         <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-white shadow-md" />
-      </motion.div>
+      </div>
 
       {/* Minimalistic corner branding tag */}
       <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 text-[10px] font-mono tracking-widest uppercase text-white/30 font-medium">
@@ -102,12 +96,13 @@ const ProjectMediaVisual = ({
   );
 };
 
-/* ─── Stacked Card Item Component ────────────────────────────────── */
+/* ─── Stacked Card Item Component (Framer Motion Scroll-Driven) ──── */
 interface StackedCardProps {
   project: Project;
   i: number;
   total: number;
   isAr: boolean;
+  scrollYProgress: MotionValue<number>;
 }
 
 const StackedCard = ({
@@ -115,15 +110,63 @@ const StackedCard = ({
   i,
   total,
   isAr,
+  scrollYProgress,
 }: StackedCardProps) => {
-  const cardContainerRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: cardContainerRef,
-    offset: ['start end', 'start start'],
+  const isFirst = i === 0;
+
+  // Segment allocations for incoming cards:
+  // Card 0: static at y: 0, opacity: 1, visibility: 'visible'.
+  // Incoming cards (i > 0): completely hidden and off-screen (y: 900, opacity: 0, visibility: 'hidden')
+  // until their precise scroll segment begins.
+  const numIncoming = Math.max(1, total - 1);
+  const cardSpan = 0.88 / numIncoming;
+  const start = 0.06 + (i - 1) * cardSpan;
+  const end = start + cardSpan * 0.85; // 85% travel for smooth glide, 15% rest pause
+
+  // y: Starts 900px below (well off-screen), glides up with cubic ease-out, settles at 0
+  const y = useTransform(scrollYProgress, (progress) => {
+    if (isFirst) return 0;
+    if (typeof progress !== 'number' || isNaN(progress) || progress <= start) {
+      return 900;
+    }
+    if (progress >= end) {
+      return 0;
+    }
+    const t = (progress - start) / (end - start);
+    const ease = 1 - Math.pow(1 - t, 3);
+    return Math.round((1 - ease) * 900);
   });
 
-  // Parallax scale on media preview while scrolling into view
-  const imageScale = useTransform(scrollYProgress, [0, 1], [1.5, 1]);
+  // opacity: Strictly 0 until start, fades in smoothly during the first 35% of travel, reaches 1
+  const opacity = useTransform(scrollYProgress, (progress) => {
+    if (isFirst) return 1;
+    if (typeof progress !== 'number' || isNaN(progress) || progress <= start) {
+      return 0;
+    }
+    if (progress >= end) {
+      return 1;
+    }
+    const t = (progress - start) / (end - start);
+    return Math.min(1, t / 0.35);
+  });
+
+  // visibility: Strictly 'hidden' before start so upcoming cards never peek or render on screen prematurely
+  const visibility = useTransform(scrollYProgress, (progress) => {
+    if (isFirst) return 'visible' as const;
+    if (typeof progress !== 'number' || isNaN(progress) || progress <= start) {
+      return 'hidden' as const;
+    }
+    return 'visible' as const;
+  });
+
+  // pointerEvents: Non-interactive until card is settled
+  const pointerEvents = useTransform(scrollYProgress, (progress) => {
+    if (isFirst) return 'auto' as const;
+    if (typeof progress !== 'number' || isNaN(progress) || progress < end * 0.9) {
+      return 'none' as const;
+    }
+    return 'auto' as const;
+  });
 
   // Dynamic Content Overrides
   const displayTitle = isAr ? project.titleAr || project.title : project.title;
@@ -133,63 +176,73 @@ const StackedCard = ({
   const diff = Math.max(0, total - 1 - i);
 
   return (
-    <div
-      ref={cardContainerRef}
+    <motion.div
       style={{
-        top: `calc(5.5rem + ${i * 44}px)`,
+        top: `calc(${i} * var(--cards-step))`,
         zIndex: i + 10,
+        y,
+        opacity,
+        visibility,
+        pointerEvents,
       }}
-      className="sticky flex justify-center px-4 sm:px-6 mb-[15vh] sm:mb-[20vh] pointer-events-auto"
+      className="absolute inset-x-0 mx-auto flex justify-center will-change-transform"
     >
-      <motion.div
+      <div
         style={{
-          maxWidth: `calc(1020px - ${diff * 28}px)`,
-          width: `calc(100% - ${diff * 14}px)`,
+          maxWidth: `calc(980px - ${diff * 20}px)`,
+          width: `calc(100% - ${diff * 10}px)`,
           transformOrigin: 'top center',
         }}
-        className="rounded-xl sm:rounded-2xl border border-transparent dark:border-white/[0.14] bg-background dark:bg-background shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_4px_16px_-2px_rgba(0,0,0,0.10),0_12px_32px_-4px_rgba(0,0,0,0.14),0_24px_60px_-12px_rgba(0,0,0,0.18)] dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.95)] overflow-hidden relative"
+        className="rounded-xl sm:rounded-2xl border border-slate-200/90 dark:border-white/[0.14] bg-background dark:bg-background shadow-[0_4px_20px_-2px_rgba(0,0,0,0.12),0_12px_36px_-4px_rgba(0,0,0,0.18)] dark:shadow-[0_20px_50px_-10px_rgba(0,0,0,0.9)] overflow-hidden relative w-full"
       >
-        {/* ── Main Card Body Grid: Balanced layout with wider media preview (5:7 ratio) ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6 p-4 sm:p-5 lg:p-6 pt-3.5 sm:pt-4 items-stretch min-h-[350px] sm:min-h-[380px] lg:min-h-[400px]">
+        {/* ── Main Card Body Grid: Beautifully balanced aspect ratio with exposed numbering strip ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 px-4 sm:px-5 lg:px-6 pt-2.5 sm:pt-3 lg:pt-3.5 pb-4 sm:pb-5 lg:pb-6 items-stretch min-h-[315px] sm:min-h-[335px] lg:min-h-[355px]">
 
           {/* Details Column (5 cols of 12) */}
           <div
-            className={`lg:col-span-5 flex flex-col justify-between ${isAr ? 'text-right lg:order-2' : 'text-left lg:order-1'
-              }`}
+            className={`lg:col-span-5 flex flex-col justify-between ${
+              isAr ? 'text-right lg:order-2' : 'text-left lg:order-1'
+            }`}
           >
             <div>
-              {/* 1. Large Order Number without background */}
-              <div className={`flex items-baseline gap-3 sm:gap-3.5 mb-2 sm:mb-2.5 ${isAr ? 'justify-end flex-row-reverse' : 'justify-start'}`}>
-                <span className="text-3xl sm:text-4xl lg:text-[2.65rem] font-black font-sans tracking-tighter text-foreground dark:text-white leading-none select-none">
+              {/* 1. Large Order Number: positioned in the top strip to peek out when stacked */}
+              <div
+                className={`flex items-baseline gap-2.5 sm:gap-3 mb-1 sm:mb-1.5 ${
+                  isAr ? 'justify-end flex-row-reverse' : 'justify-start'
+                }`}
+              >
+                <span className="text-xl sm:text-2xl lg:text-[2rem] font-black font-sans tracking-tight text-foreground dark:text-white leading-none select-none">
                   {formattedNumber}
                 </span>
                 {(project.year || displayCategory) && (
-                  <span className="text-[10.5px] sm:text-xs font-mono font-bold uppercase tracking-wider text-muted-foreground dark:text-zinc-400">
-                    {displayCategory ? displayCategory : ''}{project.year ? ` • ${project.year}` : ''}
+                  <span className="text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-wider text-muted-foreground/80 dark:text-zinc-400">
+                    {displayCategory ? displayCategory : ''}
+                    {project.year ? ` • ${project.year}` : ''}
                   </span>
                 )}
               </div>
 
               {/* 3. Project Title */}
-              <h3 className="text-xl sm:text-2xl lg:text-[1.8rem] font-bold tracking-tight text-foreground dark:text-white mb-2 leading-snug">
+              <h3 className="text-lg sm:text-xl lg:text-[1.45rem] font-bold tracking-tight text-foreground dark:text-white mb-1.5 leading-snug">
                 {displayTitle}
               </h3>
 
               {/* 4. Project Description */}
-              <p className="text-xs sm:text-[13px] lg:text-[13.5px] text-muted-foreground dark:text-zinc-300 leading-relaxed line-clamp-3 sm:line-clamp-4 mb-3.5 sm:mb-4 w-full">
+              <p className="text-xs sm:text-[12.5px] lg:text-[13px] text-muted-foreground dark:text-zinc-300 leading-relaxed line-clamp-2 sm:line-clamp-3 mb-2.5 sm:mb-3 w-full">
                 {displayDescription}
               </p>
 
               {/* 5. Technologies Badges */}
               {project.technologies && project.technologies.length > 0 && (
                 <div
-                  className={`flex flex-wrap items-center gap-1.5 sm:gap-2 mb-3.5 sm:mb-4 ${isAr ? 'justify-end' : 'justify-start'
-                    }`}
+                  className={`flex flex-wrap items-center gap-1.5 mb-2.5 sm:mb-3 ${
+                    isAr ? 'justify-end' : 'justify-start'
+                  }`}
                 >
-                  {project.technologies.map((tech, tIdx) => (
+                  {project.technologies.slice(0, 5).map((tech, tIdx) => (
                     <span
                       key={tech.id || tech.name || tIdx}
-                      className="inline-flex items-center px-2.5 sm:px-3 py-1 rounded-full text-[11px] font-mono font-medium border border-border/70 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-foreground dark:text-zinc-300"
+                      className="inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] font-mono font-medium border border-border/70 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-foreground dark:text-zinc-300"
                     >
                       {tech.name}
                     </span>
@@ -199,15 +252,15 @@ const StackedCard = ({
             </div>
 
             {/* 6. Action Button */}
-            <div className={`pt-2 flex items-center ${isAr ? 'justify-end' : 'justify-start'}`}>
+            <div className={`pt-1 flex items-center ${isAr ? 'justify-end' : 'justify-start'}`}>
               <Link
                 to={`/projects#${project.slug}`}
-                className="group inline-flex items-center gap-3 h-11 px-7 rounded-full bg-emerald-500/10 hover:bg-emerald-500 text-emerald-500 dark:text-emerald-400 hover:text-slate-950 dark:hover:text-slate-950 border border-emerald-500/35 hover:border-emerald-500 font-mono font-bold text-xs uppercase tracking-wider transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-sm hover:shadow-lg hover:shadow-emerald-500/25 cursor-pointer"
+                className="group inline-flex items-center gap-2 h-9 sm:h-10 px-5 sm:px-6 rounded-full bg-emerald-500/10 hover:bg-emerald-500 text-emerald-500 dark:text-emerald-400 hover:text-slate-950 dark:hover:text-slate-950 border border-emerald-500/35 hover:border-emerald-500 font-mono font-bold text-[11px] sm:text-xs uppercase tracking-wider transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xs hover:shadow-md hover:shadow-emerald-500/25 cursor-pointer"
               >
                 <span>{isAr ? 'عرض دراسة الحالة' : 'VIEW CASE STUDY'}</span>
                 <ArrowRight
-                  size={15}
-                  className="transition-transform duration-300 group-hover:translate-x-1.5 rtl:group-hover:-translate-x-1.5 rtl:rotate-180 text-emerald-500 dark:text-emerald-400 group-hover:text-slate-950 dark:group-hover:text-slate-950"
+                  size={14}
+                  className="transition-transform duration-300 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 rtl:rotate-180 text-emerald-500 dark:text-emerald-400 group-hover:text-slate-950 dark:group-hover:text-slate-950"
                 />
               </Link>
             </div>
@@ -215,14 +268,14 @@ const StackedCard = ({
 
           {/* Media Column (7 cols of 12) */}
           <div className={`lg:col-span-7 flex items-stretch ${isAr ? 'lg:order-1' : 'lg:order-2'}`}>
-            <div className="w-full h-full min-h-[220px] sm:min-h-[260px] md:min-h-[290px] lg:min-h-[320px] rounded-lg sm:rounded-xl overflow-hidden border border-foreground/15 dark:border-white/10 bg-muted/20 shadow-inner group">
-              <ProjectMediaVisual project={project} cardIndex={i} imageScale={imageScale} />
+            <div className="w-full h-full min-h-[210px] sm:min-h-[240px] md:min-h-[270px] lg:min-h-[295px] max-h-[325px] rounded-lg sm:rounded-xl overflow-hidden border border-foreground/15 dark:border-white/10 bg-muted/20 shadow-inner group">
+              <ProjectMediaVisual project={project} cardIndex={i} />
             </div>
           </div>
 
         </div>
-      </motion.div>
-    </div>
+      </div>
+    </motion.div>
   );
 };
 
@@ -236,6 +289,11 @@ const ProjectsSection = () => {
   const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
+  const trackRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: trackRef,
+    offset: ['start start', 'end end'],
+  });
 
   // Load Settings & Projects directly from Backend API (Dashboard Driven)
   useEffect(() => {
@@ -279,36 +337,44 @@ const ProjectsSection = () => {
   );
 
   const totalCount = projects.length;
+  const numCards = deckProjects.length;
+
+  // Track height: 70vh per incoming card for a tight, natural scroll
+  const trackHeight = numCards <= 1 ? 'auto' : `${100 + (numCards - 1) * 70}vh`;
 
   return (
-    <section id="projects" className="scroll-mt-24 relative bg-transparent">
-      {/* ── 1. Section Header ── */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-10 pb-3 sm:pb-4">
-        <div className="max-w-3xl">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight leading-[1.15] text-foreground mb-2 sm:mb-3">
-            {displayTitle}
-          </h2>
-          {displaySubtitle && (
-            <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
-              {displaySubtitle}
-            </p>
-          )}
-        </div>
-      </div>
+    <section id="projects" className="scroll-mt-24 relative bg-transparent [--cards-step:36px] sm:[--cards-step:40px] lg:[--cards-step:44px]">
+      {/* ── Outer Scroll Track ── */}
+      <div ref={trackRef} className="relative w-full" style={{ height: trackHeight }}>
+        {/* ── Single Unified Sticky Container: Locks title + cards together with proper navbar clearance ── */}
+        <div className="sticky top-0 h-screen w-full flex flex-col justify-start pt-16 sm:pt-20 lg:pt-16 pb-4 overflow-x-clip pointer-events-none">
 
-      {/* ── 2. Scrollable Stacking Cards Track ── */}
-      <div className="relative mt-2 sm:mt-4">
-        {/* Fixed Sticky Scroll Indicator (Rendered ONLY when projects exist) */}
-        {!loading && deckProjects.length > 0 && (
-          <div className="sticky top-32 h-0 w-full pointer-events-none z-30 flex justify-center">
-            <div className="relative w-full max-w-[920px] lg:max-w-[1020px] flex items-center px-4 sm:px-6">
+          {/* ── 1. Section Header: Clear margin below floating navbar ── */}
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-2 sm:pb-3 w-full pointer-events-auto">
+            <div className="max-w-3xl">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight leading-[1.15] text-foreground mb-1">
+                {displayTitle}
+              </h2>
+              {displaySubtitle && (
+                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed line-clamp-1 sm:line-clamp-2">
+                  {displaySubtitle}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* ── 2. Cards Deck Container: Beautifully proportioned with comfortable height ── */}
+          <div className="relative mt-1 sm:mt-2 w-full max-w-[980px] mx-auto px-4 sm:px-6 flex-1 flex flex-col justify-start">
+            {/* Scroll Indicator */}
+            {!loading && numCards > 1 && (
               <div
-                className={`hidden xl:flex flex-col items-center gap-2.5 absolute ${isAr ? '-left-14' : '-right-14'
-                  } top-0 select-none`}
+                className={`hidden xl:flex flex-col items-center gap-2 absolute ${
+                  isAr ? '-left-14' : '-right-14'
+                } top-16 select-none pointer-events-none z-30`}
               >
-                <div className="w-5 h-9 rounded-full border border-emerald-500/40 dark:border-emerald-400/30 flex justify-center pt-1.5 bg-card/40 dark:bg-black/40 backdrop-blur-xs shadow-xs">
+                <div className="w-5 h-8 rounded-full border border-emerald-500/40 dark:border-emerald-400/30 flex justify-center pt-1 bg-card/40 dark:bg-black/40 backdrop-blur-xs shadow-xs">
                   <motion.div
-                    animate={{ y: [0, 10, 0], opacity: [0.3, 1, 0.3] }}
+                    animate={{ y: [0, 8, 0], opacity: [0.3, 1, 0.3] }}
                     transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
                     className="w-1.5 h-1.5 rounded-full bg-emerald-500"
                   />
@@ -316,47 +382,47 @@ const ProjectsSection = () => {
                 <span className="text-[9px] font-mono font-semibold tracking-[0.25em] uppercase text-muted-foreground/60 [writing-mode:vertical-lr] rotate-180">
                   {isAr ? 'تمرير' : 'SCROLL'}
                 </span>
-                <ChevronDown size={14} className="text-emerald-500/70 animate-bounce -mt-1" />
+                <ChevronDown size={13} className="text-emerald-500/70 animate-bounce -mt-0.5" />
               </div>
-            </div>
-          </div>
-        )}
+            )}
 
-        {loading ? (
-          <div className="h-[400px] flex items-center justify-center px-4">
-            <div className="w-full max-w-[920px] h-[350px] rounded-xl bg-card/40 dark:bg-white/[0.02] border border-border/50 animate-pulse flex items-center justify-center">
-              <Sparkles className="w-8 h-8 text-emerald-500 animate-spin" />
-            </div>
+            {loading ? (
+              <div className="h-[320px] flex items-center justify-center px-4">
+                <div className="w-full max-w-[920px] h-[280px] rounded-xl bg-card/40 dark:bg-white/[0.02] border border-border/50 animate-pulse flex items-center justify-center">
+                  <Sparkles className="w-8 h-8 text-emerald-500 animate-spin" />
+                </div>
+              </div>
+            ) : numCards === 0 ? (
+              <div className="max-w-4xl mx-auto my-8 py-16 px-4 text-center border border-dashed border-border/70 rounded-xl bg-card/30 backdrop-blur-md pointer-events-auto">
+                <p className="text-muted-foreground text-base">
+                  {isAr ? 'لا توجد مشاريع منشورة حالياً.' : 'No projects published yet.'}
+                </p>
+              </div>
+            ) : (
+              <div className="relative w-full h-full">
+                {deckProjects.map((project, i) => (
+                  <StackedCard
+                    key={project.id || `p_${i}`}
+                    project={project}
+                    i={i}
+                    total={numCards}
+                    isAr={isAr}
+                    scrollYProgress={scrollYProgress}
+                  />
+                ))}
+              </div>
+            )}
           </div>
-        ) : deckProjects.length === 0 ? (
-          <div className="max-w-4xl mx-auto my-8 py-16 px-4 text-center border border-dashed border-border/70 rounded-xl bg-card/30 backdrop-blur-md">
-            <p className="text-muted-foreground text-base">
-              {isAr ? 'لا توجد مشاريع منشورة حالياً.' : 'No projects published yet.'}
-            </p>
-          </div>
-        ) : (
-          <>
-            {deckProjects.map((project, i) => (
-              <StackedCard
-                key={project.id || `p_${i}`}
-                project={project}
-                i={i}
-                total={deckProjects.length}
-                isAr={isAr}
-              />
-            ))}
-            {/* In-flow scroll track spacer to give the final card sticking travel room */}
-            <div className="h-[60vh] sm:h-[75vh] pointer-events-none" aria-hidden="true" />
-          </>
-        )}
+
+        </div>
       </div>
 
-      {/* ── 3. Bottom Section: Explore All Projects Button ── */}
+      {/* ── 3. Bottom Section: Explore All Projects Button (Standard in-flow section button) ── */}
       {totalCount > 0 && (
-        <div className="pt-4 sm:pt-6 pb-12 sm:pb-16 flex justify-center px-4">
+        <div className="pt-6 sm:pt-8 pb-16 flex justify-center px-4 relative z-20">
           <Link
             to="/projects"
-            className="group relative inline-flex items-center gap-3 h-12 px-8 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-mono font-bold text-xs sm:text-sm uppercase tracking-wider transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] shadow-md hover:shadow-xl hover:shadow-emerald-500/30 cursor-pointer overflow-hidden"
+            className="group relative inline-flex items-center gap-3 h-11 sm:h-12 px-7 sm:px-8 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-mono font-bold text-xs sm:text-sm uppercase tracking-wider transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] shadow-md hover:shadow-xl hover:shadow-emerald-500/30 cursor-pointer overflow-hidden"
           >
             <span className="relative z-10">{isAr ? `استكشاف جميع المشاريع (${totalCount})` : `EXPLORE ALL PROJECTS (${totalCount})`}</span>
             <ArrowUpRight

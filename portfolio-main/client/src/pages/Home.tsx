@@ -365,7 +365,7 @@ const Home = () => {
   }, [isAr, settings?.heroStatsAr, settings?.heroStats]);
 
   return (
-    <div className="w-full bg-transparent overflow-x-clip">
+    <div className="w-full bg-transparent">
       <SEO
         pageKey="home"
         title={`${name} | Software Developer & Engineer`}
@@ -413,7 +413,7 @@ const Home = () => {
       </Suspense>
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 3: SKILLS (3D Tag Cloud Sphere)
+          SECTION 3: SKILLS (Horizontal Marquee Pills)
       ═══════════════════════════════════════════════════════════════ */}
       <Suspense fallback={<div className="min-h-[200px]" />}>
         <SkillsSection />

@@ -74,11 +74,10 @@ export const LanguageSwitcher = () => {
                     setLanguage(code);
                     setIsOpen(false);
                   }}
-                  className={`flex items-center justify-between w-full px-2.5 py-2 rounded-md text-xs font-medium transition-all cursor-pointer ${
-                    isSelected
+                  className={`flex items-center justify-between w-full px-2.5 py-2 rounded-md text-xs font-medium transition-all cursor-pointer ${isSelected
                       ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 dark:bg-emerald-500/20 dark:border dark:border-emerald-500/30 dark:shadow-[0_0_12px_rgba(16,185,129,0.2)] font-bold'
                       : 'text-foreground/80 hover:bg-muted/60 dark:hover:bg-white/[0.08] hover:text-foreground dark:hover:text-white'
-                  }`}
+                    }`}
                 >
                   <span className="flex items-center gap-2">
                     <span>{flag}</span>
@@ -100,11 +99,10 @@ export const LanguageSwitcher = () => {
                     setLanguage(lang.languageCode);
                     setIsOpen(false);
                   }}
-                  className={`flex items-center justify-between w-full px-2.5 py-2 rounded-md text-xs font-medium transition-all cursor-pointer ${
-                    isSelected
+                  className={`flex items-center justify-between w-full px-2.5 py-2 rounded-md text-xs font-medium transition-all cursor-pointer ${isSelected
                       ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 dark:bg-emerald-500/20 dark:border dark:border-emerald-500/30 dark:shadow-[0_0_12px_rgba(16,185,129,0.2)] font-bold'
                       : 'text-foreground/80 hover:bg-muted/60 dark:hover:bg-white/[0.08] hover:text-foreground dark:hover:text-white'
-                  }`}
+                    }`}
                 >
                   <span className="flex items-center gap-2">
                     <span>{flag}</span>
