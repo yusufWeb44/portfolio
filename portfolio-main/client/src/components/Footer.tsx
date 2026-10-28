@@ -13,6 +13,7 @@ import {
   WhatsappIcon,
   TelegramIcon
 } from './ui/BrandIcons';
+import { SocialButton } from './ui/SocialButton';
 
 interface QuickLinkItem {
   id: string;
@@ -264,17 +265,13 @@ export const Footer: React.FC<FooterProps> = ({ settings, socialLinks = [], scro
             {showSocialLinks && socialItems.length > 0 && (
               <div className="flex items-center gap-2 pt-1 flex-wrap">
                 {socialItems.map((sl) => (
-                  <a
+                  <SocialButton
                     key={sl.platform}
                     href={sl.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label={sl.platform}
-                    title={sl.platform}
-                    className="relative w-8 h-8 rounded-lg border border-border/60 bg-card/40 hover:border-emerald-500/50 hover:bg-emerald-500/10 hover:text-emerald-500 dark:hover:text-emerald-400 text-muted-foreground flex items-center justify-center transition-colors transition-transform duration-200 cursor-pointer shadow-xs hover:shadow-sm hover:-translate-y-0.5 transform-gpu will-change-transform [backface-visibility:hidden] [transform:translateZ(0)] isolate after:absolute after:-bottom-1 after:inset-x-0 after:h-2 after:content-['']"
-                  >
-                    {getPlatformIcon(sl.platform)}
-                  </a>
+                    label={sl.platform}
+                    icon={getPlatformIcon(sl.platform)}
+                    size="sm"
+                  />
                 ))}
               </div>
             )}

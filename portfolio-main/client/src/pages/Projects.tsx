@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
+import { buttonVariants } from '../components/ui/Button';
 import { useLocation, Link } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -207,7 +208,7 @@ const ProjectShowcaseItem = ({
                   href={project.liveDemo}
                   target="_blank"
                   rel="noreferrer"
-                  className="group h-10 px-5 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs uppercase tracking-wider inline-flex items-center gap-2 transition-colors duration-200 shadow-sm hover:shadow-md hover:shadow-emerald-500/15 cursor-pointer"
+                  className={buttonVariants({ variant: 'primary', size: 'default' })}
                 >
                   <span>{t('projects.liveDemo', 'Live Demo')}</span>
                   <ExternalLink size={14} />
@@ -219,7 +220,7 @@ const ProjectShowcaseItem = ({
                   href={project.github}
                   target="_blank"
                   rel="noreferrer"
-                  className="group h-10 px-5 rounded-full bg-card/60 dark:bg-white/[0.04] hover:bg-card/90 border border-border/70 hover:border-emerald-500/50 hover:text-emerald-400 backdrop-blur-md text-foreground font-bold text-xs uppercase tracking-wider inline-flex items-center gap-2 transition-colors duration-200 cursor-pointer"
+                  className={buttonVariants({ variant: 'secondary', size: 'default' })}
                 >
                   <Code2 size={14} />
                   <span>{t('projects.sourceCode', 'Source Code')}</span>

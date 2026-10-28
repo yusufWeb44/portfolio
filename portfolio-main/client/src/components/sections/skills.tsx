@@ -14,6 +14,7 @@ import {
 import api from '../../services/api';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { SkillPill, SkillBrandIcon } from '../../components/ui/SkillBrandIcon';
+import { SplitText, FadeContent } from '../react-bits';
 
 /* ─── Technology Data Types ───────────────────────────────────────── */
 export interface TechItem {
@@ -397,21 +398,23 @@ const SkillsSection = () => {
             viewport={{ once: true, margin: '-100px' }}
           >
             {/* Headline */}
-            <motion.div variants={fadeUpVariants}>
+            <div>
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-foreground tracking-tight leading-[1.15]">
                 {mainTitle === 'Engineered Core Capabilities' ? (
                   <>
-                    Engineered Core{' '}
-                    <span className="text-emerald-400">Capabilities</span>
+                    <SplitText text="Engineered Core" delay={30} duration={0.45} />{' '}
+                    <span className="text-emerald-400">
+                      <SplitText text="Capabilities" delay={30} duration={0.45} />
+                    </span>
                   </>
                 ) : (
-                  mainTitle
+                  <SplitText text={String(mainTitle)} delay={30} duration={0.45} />
                 )}
               </h2>
-            </motion.div>
+            </div>
 
             {/* Body Paragraphs */}
-            <motion.div variants={fadeUpVariants} className="space-y-4">
+            <FadeContent delay={0.15} blur={true} distance={20} className="space-y-4">
               {p1 ? (
                 <>
                   <p className="text-base md:text-lg text-muted-foreground leading-relaxed whitespace-pre-line">
@@ -428,7 +431,7 @@ const SkillsSection = () => {
                   {isAr ? 'يتم تحديث المهارات والتقنيات حالياً.' : 'Skills and technical capabilities are being updated.'}
                 </p>
               )}
-            </motion.div>
+            </FadeContent>
 
             {/* Key Metrics / Highlights */}
             {(point1Title || point2Title) && (

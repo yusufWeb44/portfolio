@@ -206,7 +206,8 @@ const Contact = () => {
                     type="submit"
                     disabled={loading}
                     variant="brand"
-                    className="w-full gap-2 h-10 text-xs font-semibold rounded-xl cursor-pointer"
+                    size="default"
+                    className="w-full"
                   >
                     {loading ? (
                       <><Loader2 className="animate-spin h-4 w-4" /> {t('contact.sending', 'Sending message...')}</>

@@ -5,6 +5,8 @@ import { Link } from 'react-router-dom';
 import api from '../../services/api';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { getMediaUrl } from '../../utils/mediaUrl';
+import { buttonVariants, cn } from '../ui/Button';
+import { SplitText, BlurText, SpotlightCard } from '../react-bits';
 
 /* ─── Data Interfaces ─────────────────────────────────────────────── */
 interface ProjectImage {
@@ -187,7 +189,9 @@ const StackedCard = ({
       }}
       className="absolute inset-x-0 mx-auto flex justify-center will-change-transform"
     >
-      <div
+      <SpotlightCard
+        spotlightColor="rgba(16, 185, 129, 0.08)"
+        size={500}
         style={{
           maxWidth: `calc(980px - ${diff * 20}px)`,
           width: `calc(100% - ${diff * 10}px)`,
@@ -252,15 +256,17 @@ const StackedCard = ({
             </div>
 
             {/* 6. Action Button */}
-            <div className={`pt-1 flex items-center ${isAr ? 'justify-end' : 'justify-start'}`}>
+            <div className={`pt-2 flex items-center ${isAr ? 'justify-end' : 'justify-start'}`}>
               <Link
                 to={`/projects#${project.slug}`}
-                className="group inline-flex items-center gap-2 h-9 sm:h-10 px-5 sm:px-6 rounded-full bg-emerald-500/10 hover:bg-emerald-500 text-emerald-500 dark:text-emerald-400 hover:text-slate-950 dark:hover:text-slate-950 border border-emerald-500/35 hover:border-emerald-500 font-mono font-bold text-[11px] sm:text-xs uppercase tracking-wider transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xs hover:shadow-md hover:shadow-emerald-500/25 cursor-pointer"
+                className={cn(
+                  buttonVariants({ variant: 'primary', size: 'default' }),
+                  "font-bold text-xs sm:text-[13px] tracking-wide shadow-sm hover:shadow-[0_8px_24px_rgba(16,185,129,0.35)]"
+                )}
               >
                 <span>{isAr ? 'عرض دراسة الحالة' : 'VIEW CASE STUDY'}</span>
                 <ArrowRight
-                  size={14}
-                  className="transition-transform duration-300 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 rtl:rotate-180 text-emerald-500 dark:text-emerald-400 group-hover:text-slate-950 dark:group-hover:text-slate-950"
+                  className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 rtl:rotate-180 text-slate-950"
                 />
               </Link>
             </div>
@@ -274,7 +280,7 @@ const StackedCard = ({
           </div>
 
         </div>
-      </div>
+      </SpotlightCard>
     </motion.div>
   );
 };
@@ -353,12 +359,18 @@ const ProjectsSection = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-2 sm:pb-3 w-full pointer-events-auto">
             <div className="max-w-3xl">
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight leading-[1.15] text-foreground mb-1">
-                {displayTitle}
+                <SplitText
+                  text={displayTitle}
+                  delay={35}
+                  duration={0.45}
+                />
               </h2>
               {displaySubtitle && (
-                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed line-clamp-1 sm:line-clamp-2">
-                  {displaySubtitle}
-                </p>
+                <BlurText
+                  text={displaySubtitle}
+                  delay={20}
+                  className="text-xs sm:text-sm text-muted-foreground leading-relaxed line-clamp-1 sm:line-clamp-2"
+                />
               )}
             </div>
           </div>
@@ -422,7 +434,10 @@ const ProjectsSection = () => {
         <div className="pt-6 sm:pt-8 pb-16 flex justify-center px-4 relative z-20">
           <Link
             to="/projects"
-            className="group relative inline-flex items-center gap-3 h-11 sm:h-12 px-7 sm:px-8 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-mono font-bold text-xs sm:text-sm uppercase tracking-wider transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] shadow-md hover:shadow-xl hover:shadow-emerald-500/30 cursor-pointer overflow-hidden"
+            className={cn(
+              buttonVariants({ variant: 'primary', size: 'lg' }),
+              "font-mono uppercase tracking-wider"
+            )}
           >
             <span className="relative z-10">{isAr ? `استكشاف جميع المشاريع (${totalCount})` : `EXPLORE ALL PROJECTS (${totalCount})`}</span>
             <ArrowUpRight

@@ -1,40 +1,75 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
-
 import { cn } from "@/lib/utils";
 
+/**
+ * Unified, responsive button system with polished hover, transitions, and glow effects.
+ */
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-lg text-xs font-semibold ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]",
+  [
+    "group relative inline-flex items-center justify-center whitespace-nowrap rounded-full font-bold cursor-pointer select-none overflow-hidden",
+    "transition-all duration-200 ease-out",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2",
+    "disabled:pointer-events-none disabled:opacity-50",
+    "active:scale-[0.98] active:translate-y-0",
+    // Interactive gloss light sweep on hover
+    "before:absolute before:inset-0 before:-translate-x-full hover:before:translate-x-full before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent before:transition-transform before:duration-700 before:pointer-events-none",
+  ].join(" "),
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm",
+        // Primary brand button (Solid Emerald with ambient glow and lift)
+        primary:
+          "bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold shadow-sm hover:shadow-[0_8px_24px_rgba(16,185,129,0.32)] hover:-translate-y-0.5",
         brand:
-          "bg-emerald-500 text-slate-950 hover:bg-emerald-400 font-semibold shadow-sm hover:shadow-md hover:shadow-emerald-500/15",
-        "brand-outline":
-          "border border-emerald-500/30 text-emerald-500 dark:text-emerald-400 bg-emerald-500/5 hover:bg-emerald-500/10 hover:border-emerald-500/60",
-        destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-sm",
-        outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+          "bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold shadow-sm hover:shadow-[0_8px_24px_rgba(16,185,129,0.32)] hover:-translate-y-0.5",
+        
+        // Secondary glass button (Frosted card background with responsive border)
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-emerald-500 underline-offset-4 hover:underline",
+          "bg-card/70 dark:bg-white/[0.04] hover:bg-card/95 dark:hover:bg-white/[0.08] backdrop-blur-md border border-border/80 dark:border-white/10 hover:border-emerald-500/60 dark:hover:border-emerald-500/60 text-foreground hover:text-emerald-500 dark:hover:text-emerald-400 shadow-sm hover:shadow-[0_6px_20px_rgba(16,185,129,0.15)] hover:-translate-y-0.5",
+        
+        // Brand outline (Tinted emerald with full emerald fill on hover)
+        "brand-outline":
+          "bg-emerald-500/10 hover:bg-emerald-500 text-emerald-500 dark:text-emerald-400 hover:text-slate-950 dark:hover:text-slate-950 border border-emerald-500/35 hover:border-emerald-500 shadow-xs hover:shadow-[0_6px_20px_rgba(16,185,129,0.25)] hover:-translate-y-0.5",
+        
+        // Subtle outline
+        outline:
+          "border border-border/80 dark:border-white/15 bg-transparent hover:bg-card/60 hover:border-emerald-500/50 hover:text-emerald-500 dark:hover:text-emerald-400 text-muted-foreground hover:-translate-y-0.5",
+        
+        // Ghost button
+        ghost:
+          "bg-transparent hover:bg-emerald-500/10 text-muted-foreground hover:text-emerald-500 dark:hover:text-emerald-400 before:hidden",
+        
+        // Link style
+        link:
+          "bg-transparent text-emerald-500 hover:text-emerald-400 underline-offset-4 hover:underline p-0 h-auto before:hidden",
+        
+        destructive:
+          "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-sm hover:-translate-y-0.5",
+        default:
+          "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm hover:-translate-y-0.5",
       },
       size: {
-        default: "h-9 px-4 py-2",
-        sm: "h-8 rounded-md px-3 text-xs",
-        lg: "h-10 rounded-xl px-5 text-sm",
-        icon: "h-9 w-9 rounded-lg",
+        // Standard action button (Hero CTA, Contact, etc.) - responsive mobile to desktop
+        default: "h-10 sm:h-11 md:h-11.5 px-5 sm:px-6 md:px-7 text-xs sm:text-sm gap-2 sm:gap-2.5",
+        md: "h-10 sm:h-11 md:h-11.5 px-5 sm:px-6 md:px-7 text-xs sm:text-sm gap-2 sm:gap-2.5",
+        
+        // Large action button (Primary bottom CTAs, Explore all)
+        lg: "h-11 sm:h-12 md:h-12.5 px-6 sm:px-7 md:px-8 text-xs sm:text-sm md:text-base gap-2.5 sm:gap-3",
+        
+        // Compact action button (Cards, filters, table buttons)
+        sm: "h-9.5 sm:h-10 px-4.5 sm:px-5 text-xs gap-2",
+        
+        // Circular Icon button (Theme toggle, social icons)
+        icon: "h-9 w-9 sm:h-10 sm:w-10 p-0 rounded-full shrink-0 flex items-center justify-center",
       },
     },
     defaultVariants: {
-      variant: "default",
+      variant: "primary",
       size: "default",
     },
-  },
+  }
 );
 
 export interface ButtonProps
@@ -53,7 +88,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       />
     );
-  },
+  }
 );
 Button.displayName = "Button";
 

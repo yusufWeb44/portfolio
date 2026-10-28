@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import api from '../services/api';
 import { getMediaUrl } from '../utils/mediaUrl';
 import { useLanguage } from '../contexts/LanguageContext';
+import { buttonVariants } from '../components/ui/Button';
 
 interface Settings {
   name: string;
@@ -102,16 +103,16 @@ const About = () => {
               <div className="flex gap-4">
                 <a
                   href={`mailto:${email}`}
-                  className="h-10 px-5 inline-flex items-center gap-2 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-semibold shadow-sm hover:shadow-md hover:shadow-emerald-500/15 transition-colors duration-200 cursor-pointer"
+                  className={buttonVariants({ variant: 'primary', size: 'default' })}
                 >
                   <span>{t('about.sayHello', 'Say hello')}</span>
-                  <ArrowUpRight size={14} className="rtl:rotate-[-90deg]" />
+                  <ArrowUpRight size={14} className="rtl:rotate-[-90deg] transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                 </a>
                 <a
                   href="/contact"
-                  className="h-10 px-5 inline-flex items-center gap-2 rounded-full border border-border/70 hover:border-emerald-500/50 hover:text-emerald-400 bg-card/60 dark:bg-white/[0.04] text-foreground text-xs font-semibold transition-colors duration-200 cursor-pointer"
+                  className={buttonVariants({ variant: 'secondary', size: 'default' })}
                 >
-                  <Download size={13} />
+                  <Download size={14} />
                   <span>{t('about.downloadCv', 'Resume')}</span>
                 </a>
               </div>

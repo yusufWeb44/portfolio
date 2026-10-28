@@ -31,6 +31,9 @@ import { FAQ } from '../components/ui/faq-tabs';
 import { ServiceCarousel } from '../components/ui/services-card';
 import ExperienceTimeline from '../components/ExperienceTimeline';
 import CertificatesCarousel from '../components/CertificatesCarousel';
+import { buttonVariants, cn } from '../components/ui/Button';
+import { SocialButton } from '../components/ui/SocialButton';
+import { SplitText, BlurText, FadeContent, SpotlightCard } from '../components/react-bits';
 
 /* ─── Types ──────────────────────────────────────────────────────── */
 
@@ -125,15 +128,14 @@ const FadeIn = ({
   delay?: number;
   className?: string;
 }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 24 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true, margin: '-80px' }}
-    transition={{ duration: 0.7, delay, ease: [0.16, 1, 0.3, 1] }}
+  <FadeContent
+    delay={delay}
+    blur={true}
+    distance={24}
     className={className}
   >
     {children}
-  </motion.div>
+  </FadeContent>
 );
 
 const Home = () => {
@@ -282,15 +284,15 @@ const Home = () => {
   /* ─── Social Icon Map ────────────────────────────────────────────── */
   const getSocialIcon = (platform: string) => {
     const p = platform.toLowerCase();
-    if (p === 'github') return <GithubIcon size={16} />;
-    if (p === 'linkedin') return <LinkedinIcon size={16} />;
-    if (p === 'instagram') return <InstagramIcon size={16} />;
-    if (p === 'facebook') return <FacebookIcon size={16} />;
-    if (p === 'twitter' || p === 'x') return <TwitterXIcon size={16} />;
-    if (p === 'whatsapp') return <WhatsappIcon size={16} />;
-    if (p === 'telegram') return <TelegramIcon size={16} />;
-    if (p === 'email') return <Mail size={16} />;
-    return <Globe size={16} />;
+    if (p === 'github') return <GithubIcon size={18} />;
+    if (p === 'linkedin') return <LinkedinIcon size={18} />;
+    if (p === 'instagram') return <InstagramIcon size={18} />;
+    if (p === 'facebook') return <FacebookIcon size={18} />;
+    if (p === 'twitter' || p === 'x') return <TwitterXIcon size={18} />;
+    if (p === 'whatsapp') return <WhatsappIcon size={18} />;
+    if (p === 'telegram') return <TelegramIcon size={18} />;
+    if (p === 'email') return <Mail size={18} />;
+    return <Globe size={18} />;
   };
 
   const resolveField = (key: string, arSetting?: string, enSetting?: string, fallback?: string) => {
@@ -426,11 +428,19 @@ const Home = () => {
         <div className="max-w-7xl mx-auto space-y-8 sm:space-y-10 px-4 sm:px-6 lg:px-8 mb-6 sm:mb-8">
           <FadeIn>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-foreground leading-[1.15] mb-4">
-              {resolveField('experience.title', settings?.experienceTitleAr, settings?.experienceTitle, 'Experience.')}
+              <SplitText
+                text={resolveField('experience.title', settings?.experienceTitleAr, settings?.experienceTitle, 'Experience.')}
+                delay={35}
+                duration={0.45}
+              />
             </h2>
-            <p className="text-base md:text-lg text-muted-foreground max-w-2xl leading-relaxed">
-              {resolveField('experience.subtitle', settings?.experienceSubtitleAr, settings?.experienceSubtitle, 'An interactive roadmap of academic foundations, professional roles, and specialized technical credentials.')}
-            </p>
+            <div className="max-w-2xl">
+              <BlurText
+                text={resolveField('experience.subtitle', settings?.experienceSubtitleAr, settings?.experienceSubtitle, 'An interactive roadmap of academic foundations, professional roles, and specialized technical credentials.')}
+                delay={20}
+                className="text-base md:text-lg text-muted-foreground leading-relaxed"
+              />
+            </div>
           </FadeIn>
 
           {/* Vertical Timeline with Scroll Effects */}
@@ -461,11 +471,19 @@ const Home = () => {
           <FadeIn>
             <div className="grid md:grid-cols-2 gap-6 lg:gap-8 items-end justify-between">
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-foreground leading-[1.15]">
-                {resolveField('services.title', settings?.servicesTitleAr, settings?.servicesTitle, 'Services.')}
+                <SplitText
+                  text={resolveField('services.title', settings?.servicesTitleAr, settings?.servicesTitle, 'Services.')}
+                  delay={35}
+                  duration={0.45}
+                />
               </h2>
-              <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-xl">
-                {resolveField('services.subtitle', settings?.servicesSubtitleAr, settings?.servicesSubtitle, 'End-to-end software development services tailored to help you launch faster, eliminate technical debt, and scale reliably.')}
-              </p>
+              <div className="max-w-xl">
+                <BlurText
+                  text={resolveField('services.subtitle', settings?.servicesSubtitleAr, settings?.servicesSubtitle, 'End-to-end software development services tailored to help you launch faster, eliminate technical debt, and scale reliably.')}
+                  delay={20}
+                  className="text-base md:text-lg text-muted-foreground leading-relaxed"
+                />
+              </div>
             </div>
           </FadeIn>
 
@@ -548,35 +566,47 @@ const Home = () => {
               </h2>
 
               <p className="text-muted-foreground text-base md:text-lg leading-relaxed max-w-md mb-8">
-                {resolveField('contact.subtitle', settings?.contactSubtitleAr, settings?.contactSubtitle, "Whether you need a full-stack application, a custom API, or a mobile app — I'm ready to bring your vision to life.")}
+                <BlurText
+                  text={resolveField('contact.subtitle', settings?.contactSubtitleAr, settings?.contactSubtitle, "Whether you need a full-stack application, a custom API, or a mobile app — I'm ready to bring your vision to life.")}
+                  delay={20}
+                  className="text-muted-foreground text-base md:text-lg leading-relaxed max-w-md"
+                />
               </p>
 
               {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-3">
-                {/* WhatsApp — primary */}
-                <a
-                  href={
-                    settings?.whatsappNumber
-                      ? `https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, '')}`
-                      : (socialLinks.find(s => s.platform.toLowerCase() === 'whatsapp')?.url || `mailto:${email}`)
-                  }
-                  target="_blank"
-                  rel="noreferrer"
-                  className="group h-11 px-6 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-2.5 transition-colors duration-200 shadow-sm hover:shadow-md hover:shadow-emerald-500/15 cursor-pointer"
-                >
-                  <WhatsappIcon size={16} />
-                  <span>{isAr ? t('contact.chatWhatsapp', 'تواصل عبر واتساب') : 'Chat on WhatsApp'}</span>
-                </a>
+              <FadeContent delay={0.2} blur={true} distance={15}>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  {/* WhatsApp — primary */}
+                  <a
+                    href={
+                      settings?.whatsappNumber
+                        ? `https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, '')}`
+                        : (socialLinks.find(s => s.platform.toLowerCase() === 'whatsapp')?.url || `mailto:${email}`)
+                    }
+                    target="_blank"
+                    rel="noreferrer"
+                    className={cn(
+                      buttonVariants({ variant: 'primary', size: 'default' }),
+                      "w-full sm:w-auto"
+                    )}
+                  >
+                    <WhatsappIcon size={16} />
+                    <span>{isAr ? t('contact.chatWhatsapp', 'تواصل عبر واتساب') : 'Chat on WhatsApp'}</span>
+                  </a>
 
-                {/* Email — secondary */}
-                <a
-                  href={`mailto:${email}`}
-                  className="group h-11 px-6 rounded-full bg-card/40 dark:bg-white/[0.04] hover:bg-card/70 backdrop-blur-md border border-border/70 hover:border-emerald-500/50 hover:text-emerald-400 text-foreground font-bold text-xs flex items-center justify-center gap-2.5 transition-colors duration-200 cursor-pointer"
-                >
-                  <Mail size={16} />
-                  <span>{isAr ? t('contact.sendEmail', 'إرسال بريد إلكتروني') : 'Send an Email'}</span>
-                </a>
-              </div>
+                  {/* Email — secondary */}
+                  <a
+                    href={`mailto:${email}`}
+                    className={cn(
+                      buttonVariants({ variant: 'secondary', size: 'default' }),
+                      "w-full sm:w-auto"
+                    )}
+                  >
+                    <Mail size={16} />
+                    <span>{isAr ? t('contact.sendEmail', 'إرسال بريد إلكتروني') : 'Send an Email'}</span>
+                  </a>
+                </div>
+              </FadeContent>
             </motion.div>
 
             {/* ── Right Column: Info Card ── */}
@@ -586,7 +616,11 @@ const Home = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
             >
-              <div className="bg-card/40 dark:bg-white/[0.03] backdrop-blur-xl border border-border/60 rounded-xl sm:rounded-2xl p-6 sm:p-8 md:p-10 space-y-6 sm:space-y-8 shadow-sm">
+              <SpotlightCard
+                spotlightColor="rgba(16, 185, 129, 0.12)"
+                size={420}
+                className="bg-card/40 dark:bg-white/[0.03] backdrop-blur-xl border border-border/60 rounded-xl sm:rounded-2xl p-6 sm:p-8 md:p-10 space-y-6 sm:space-y-8 shadow-sm"
+              >
 
                 {/* Email row */}
                 <a
@@ -633,20 +667,16 @@ const Home = () => {
                   <p className="text-[11px] font-mono text-muted-foreground tracking-wider uppercase mb-4">Find me on</p>
                   <div className="flex items-center gap-2 flex-wrap">
                     {socialLinks.map(link => (
-                      <a
+                      <SocialButton
                         key={link.platform}
                         href={link.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        aria-label={link.platform}
-                        className="w-9 h-9 rounded-full bg-card/60 dark:bg-white/[0.04] hover:bg-card/90 border border-border/70 hover:border-emerald-500/50 hover:text-emerald-400 flex items-center justify-center text-muted-foreground transition-colors duration-200 shadow-sm"
-                      >
-                        {getSocialIcon(link.platform)}
-                      </a>
+                        label={link.platform}
+                        icon={getSocialIcon(link.platform)}
+                      />
                     ))}
                   </div>
                 </div>
-              </div>
+              </SpotlightCard>
             </motion.div>
 
           </div>

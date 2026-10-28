@@ -8,6 +8,20 @@
   50% { opacity: 0; }
 }
 
+/* React Bits ShinyText shimmer animation */
+@keyframes shiny {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.animate-shiny {
+  animation: shiny 5s linear infinite;
+}
+
 
 @layer base {
   :root {

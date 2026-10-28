@@ -24,8 +24,9 @@ import { cn } from "@/lib/utils";
 
 // Shadcn UI Carousel Imports
 import useEmblaCarousel from "embla-carousel-react";
-import { Button } from "@/components/ui/Button";
+import { Button, buttonVariants } from "@/components/ui/Button";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { SpotlightCard } from "../react-bits";
 
 // --- Dynamic Icon Resolver ---
 export const getServiceIcon = (title?: string): LucideIcon => {
@@ -219,17 +220,14 @@ CarouselItem.displayName = "CarouselItem";
 export const CarouselPrevious = React.forwardRef<
   HTMLButtonElement,
   React.ComponentProps<typeof Button>
->(({ className, variant = "outline", size = "icon", ...props }, ref) => {
+>(({ className, variant = "secondary", size = "icon", ...props }, ref) => {
   const { scrollPrev, canScrollPrev } = useCarousel();
   return (
     <Button
       ref={ref}
       variant={variant}
       size={size}
-      className={cn(
-        "h-9 w-9 rounded-full border border-border/70 bg-card/60 hover:bg-card/90 hover:border-emerald-500/50 hover:text-emerald-400 cursor-pointer transition-colors duration-200",
-        className,
-      )}
+      className={cn(className)}
       onClick={scrollPrev}
       disabled={!canScrollPrev}
       {...props}
@@ -244,17 +242,14 @@ CarouselPrevious.displayName = "CarouselPrevious";
 export const CarouselNext = React.forwardRef<
   HTMLButtonElement,
   React.ComponentProps<typeof Button>
->(({ className, variant = "outline", size = "icon", ...props }, ref) => {
+>(({ className, variant = "secondary", size = "icon", ...props }, ref) => {
   const { scrollNext, canScrollNext } = useCarousel();
   return (
     <Button
       ref={ref}
       variant={variant}
       size={size}
-      className={cn(
-        "h-9 w-9 rounded-full border border-border/70 bg-card/60 hover:bg-card/90 hover:border-emerald-500/50 hover:text-emerald-400 cursor-pointer transition-colors duration-200",
-        className,
-      )}
+      className={cn(className)}
       onClick={scrollNext}
       disabled={!canScrollNext}
       {...props}
@@ -332,56 +327,65 @@ export const ServiceCard = ({
   return (
     <motion.div
       variants={cardVariants}
-      className={cn(
-        "group relative flex min-h-[440px] sm:h-[460px] w-full flex-col justify-between overflow-hidden rounded-xl sm:rounded-2xl p-6 sm:p-8 border border-border/70 bg-gradient-to-b backdrop-blur-xl shadow-lg hover:border-emerald-500/50 hover:shadow-xl hover:shadow-emerald-500/10 transition-all duration-300 select-none",
-        activeGradient
-      )}
+      className="h-full"
     >
-      {/* Top Ambient Glow on Hover */}
-      <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl group-hover:bg-emerald-500/20 transition-all duration-700 pointer-events-none" />
+      <SpotlightCard
+        spotlightColor="rgba(16, 185, 129, 0.12)"
+        size={380}
+        className={cn(
+          "group relative flex min-h-[440px] sm:h-[460px] w-full flex-col justify-between overflow-hidden rounded-xl sm:rounded-2xl p-6 sm:p-8 border border-border/70 bg-gradient-to-b backdrop-blur-xl shadow-lg hover:border-emerald-500/50 hover:shadow-xl hover:shadow-emerald-500/10 transition-all duration-300 select-none",
+          activeGradient
+        )}
+      >
+        {/* Top Ambient Glow on Hover */}
+        <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl group-hover:bg-emerald-500/20 transition-all duration-700 pointer-events-none" />
 
-      {/* Card Top: Number & Icon */}
-      <div className="z-10 flex flex-col items-start text-start w-full">
-        <div className="w-full flex items-center justify-between mb-8">
-          <span className="text-xs font-mono font-bold tracking-widest text-emerald-500 uppercase px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 shadow-sm">
-            ( {service.number} )
-          </span>
-          <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/40 group-hover:bg-emerald-400 group-hover:scale-125 transition-all duration-300" />
+        {/* Card Top: Number & Icon */}
+        <div className="z-10 flex flex-col items-start text-start w-full">
+          <div className="w-full flex items-center justify-between mb-8">
+            <span className="text-xs font-mono font-bold tracking-widest text-emerald-500 uppercase px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 shadow-sm">
+              ( {service.number} )
+            </span>
+            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/40 group-hover:bg-emerald-400 group-hover:scale-125 transition-all duration-300" />
+          </div>
+
+          <div className="w-12 h-12 rounded-xl bg-card/80 dark:bg-white/[0.06] border border-border/80 flex items-center justify-center text-foreground group-hover:text-emerald-400 group-hover:border-emerald-500/40 transition-colors duration-200 shadow-inner">
+            <IconComp className="h-6 w-6" />
+          </div>
         </div>
 
-        <div className="w-12 h-12 rounded-xl bg-card/80 dark:bg-white/[0.06] border border-border/80 flex items-center justify-center text-foreground group-hover:text-emerald-400 group-hover:border-emerald-500/40 transition-colors duration-200 shadow-inner">
-          <IconComp className="h-6 w-6" />
+        {/* Card Bottom: Title, Description & WhatsApp Inquiry CTA */}
+        <div className="z-10 flex flex-col gap-4 mt-auto">
+          <div>
+            <h3 className="mb-2 text-xl font-bold tracking-tight text-foreground group-hover:text-emerald-400 transition-colors duration-200 leading-snug">
+              {title}
+            </h3>
+            <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
+              {description}
+            </p>
+          </div>
+
+          {/* WhatsApp Inquiry Button */}
+          <a
+            href={waLink}
+            target="_blank"
+            rel="noreferrer"
+            className={cn(
+              buttonVariants({ variant: 'secondary', size: 'default' }),
+              "mt-2 w-full justify-between"
+            )}
+          >
+            <span className="flex items-center gap-2.5">
+              <WhatsappIcon size={17} className="text-emerald-500 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors" />
+              <span>{isAr ? 'استفسار واتساب' : 'WhatsApp Inquiry'}</span>
+            </span>
+            <ArrowRight size={14} className="rtl:rotate-180 transition-transform duration-200 group-hover:translate-x-1 rtl:group-hover:-translate-x-1" />
+          </a>
         </div>
-      </div>
 
-      {/* Card Bottom: Title, Description & WhatsApp Inquiry CTA */}
-      <div className="z-10 flex flex-col gap-4 mt-auto">
-        <div>
-          <h3 className="mb-2 text-xl font-bold tracking-tight text-foreground group-hover:text-emerald-400 transition-colors duration-200 leading-snug">
-            {title}
-          </h3>
-          <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
-            {description}
-          </p>
-        </div>
-
-        {/* WhatsApp Inquiry Button */}
-        <a
-          href={waLink}
-          target="_blank"
-          rel="noreferrer"
-          className="mt-2 h-11 px-6 rounded-full bg-card/80 dark:bg-white/[0.04] hover:bg-emerald-500 hover:text-slate-950 border border-border/70 hover:border-emerald-500/50 backdrop-blur-md text-foreground text-xs uppercase tracking-wider font-bold inline-flex items-center justify-between transition-colors duration-200 shadow-sm hover:shadow-md hover:shadow-emerald-500/15 cursor-pointer group/btn"
-        >
-          <span className="flex items-center gap-2.5">
-            <WhatsappIcon size={17} className="text-emerald-500 group-hover/btn:text-slate-950 transition-colors" />
-            <span>{isAr ? 'استفسار واتساب' : 'WhatsApp Inquiry'}</span>
-          </span>
-          <ArrowRight size={14} className="rtl:rotate-180 text-muted-foreground group-hover/btn:text-slate-950 transition-colors" />
-        </a>
-      </div>
-
-      {/* Subtle bottom emerald line */}
-      <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-500/0 to-transparent group-hover:via-emerald-500/60 transition-all duration-500" />
+        {/* Subtle bottom emerald line */}
+        <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-500/0 to-transparent group-hover:via-emerald-500/60 transition-all duration-500" />
+      </SpotlightCard>
     </motion.div>
   );
 };

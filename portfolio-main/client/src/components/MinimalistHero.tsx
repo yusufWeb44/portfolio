@@ -3,6 +3,9 @@ import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { Typewriter } from '@/components/ui/typewriter';
 import { GithubIcon, LinkedinIcon, InstagramIcon, FacebookIcon } from './ui/BrandIcons';
+import { buttonVariants } from './ui/Button';
+import { SocialButton } from './ui/SocialButton';
+import { SplitText, BlurText, FadeContent } from './react-bits';
 
 /* ─── Animated Count-up for Hero Stats ────────────────────────────── */
 const AnimatedStatValue: React.FC<{ value: string }> = ({ value }) => {
@@ -172,76 +175,70 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
               {/* Headline + Bio */}
               <div>
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-foreground tracking-tight leading-tight mb-3">
-                  {headlineContent}
+                  <SplitText
+                    text={headlineContent}
+                    delay={30}
+                    duration={0.45}
+                  />
                 </h1>
                 {bioText ? (
-                  <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-xl">
-                    {bioText}
-                  </p>
+                  <BlurText
+                    text={bioText}
+                    delay={20}
+                    className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-xl"
+                  />
                 ) : null}
               </div>
 
               {/* CTA Button */}
-              <div>
-                <motion.a
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+              <FadeContent delay={0.2} blur={true} distance={15}>
+                <a
                   href={ctaHref}
-                  className="inline-flex items-center gap-2 h-10 px-5 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-xs transition-colors duration-200 shadow-sm hover:shadow-md hover:shadow-emerald-500/15 cursor-pointer"
+                  className={buttonVariants({ variant: 'primary', size: 'default' })}
                 >
                   <span>{ctaText}</span>
-                  <ArrowRight size={14} className="rtl:rotate-180" />
-                </motion.a>
-              </div>
+                  <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-200 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 rtl:rotate-180" />
+                </a>
+              </FadeContent>
 
-              {/* Social Icons */}
+              {/* Social Icons — Balanced White / Obsidian glass with luminous emerald hover */}
               {resolvedLinks.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.06 }}
-                  className="flex items-center gap-2.5 pt-1"
-                >
-                  {resolvedLinks.map((s, i) => (
-                    <motion.a
-                      key={s.label}
-                      href={s.href}
-                      target="_blank"
-                      rel="noreferrer"
-                      aria-label={s.label}
-                      title={s.label}
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.08 + i * 0.03, duration: 0.2 }}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="w-9 h-9 rounded-full flex items-center justify-center border border-border/70 bg-card/60 dark:bg-white/[0.04] backdrop-blur-sm text-muted-foreground hover:text-emerald-400 hover:border-emerald-500/50 hover:bg-emerald-500/10 transition-colors duration-200 cursor-pointer shadow-sm"
-                    >
-                      <s.Icon size={16} />
-                    </motion.a>
-                  ))}
-                </motion.div>
+                <FadeContent delay={0.3} blur={true} distance={12}>
+                  <div className="flex items-center gap-2.5 sm:gap-3 pt-1">
+                    {resolvedLinks.map((s, i) => (
+                      <motion.div
+                        key={s.label}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.08 + i * 0.03, duration: 0.2 }}
+                      >
+                        <SocialButton
+                          href={s.href}
+                          label={s.label}
+                          icon={<s.Icon size={18} />}
+                        />
+                      </motion.div>
+                    ))}
+                  </div>
+                </FadeContent>
               )}
 
               {/* Stats Bar */}
               {activeStats.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.1 }}
-                  className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6 border-t border-border/40 mt-6 w-full"
-                >
-                  {activeStats.map((stat, idx) => (
-                    <div key={idx} className="flex flex-col group">
-                      <span className="text-xl sm:text-2xl font-extrabold text-foreground font-mono transition-colors group-hover:text-emerald-400">
-                        <AnimatedStatValue value={stat.value} />
-                      </span>
-                      <span className="text-xs text-muted-foreground uppercase tracking-wider mt-1.5 leading-snug">
-                        {formatStatLabel(stat.label)}
-                      </span>
-                    </div>
-                  ))}
-                </motion.div>
+                <FadeContent delay={0.4} blur={true} distance={15}>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6 border-t border-border/40 mt-6 w-full">
+                    {activeStats.map((stat, idx) => (
+                      <div key={idx} className="flex flex-col group">
+                        <span className="text-xl sm:text-2xl font-extrabold text-foreground font-mono transition-colors group-hover:text-emerald-400">
+                          <AnimatedStatValue value={stat.value} />
+                        </span>
+                        <span className="text-xs text-muted-foreground uppercase tracking-wider mt-1.5 leading-snug">
+                          {formatStatLabel(stat.label)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </FadeContent>
               )}
             </motion.div>
           </div>

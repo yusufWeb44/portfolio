@@ -16,6 +16,7 @@ import {
   MapPin,
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { SpotlightCard } from './react-bits';
 
 export interface ExperienceItem {
   id: string;
@@ -91,12 +92,13 @@ export const getThemeColors = (colorName?: string | null, index = 0) => {
       return {
         key: 'amber',
         accent: '#F59E0B',
-        badgeBg: 'bg-amber-500/10 dark:bg-amber-500/15',
-        badgeBorder: 'border-amber-500/40 dark:border-amber-500/60',
+        accentRgb: '245, 158, 11',
+        badgeBg: 'bg-amber-500/[0.08] dark:bg-amber-500/10',
+        badgeBorder: 'border-amber-500/35 dark:border-amber-500/45',
         text: 'text-amber-600 dark:text-amber-400',
-        glow: 'shadow-[0_0_20px_rgba(245,158,11,0.25)]',
-        cardBorder: 'hover:border-amber-500/40',
-        tagBg: 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20',
+        glow: 'shadow-sm',
+        cardBorder: 'group-hover/item:border-amber-500/30 dark:group-hover/item:border-amber-400/30',
+        tagBg: 'bg-amber-500/[0.08] text-amber-700 dark:text-amber-300 border-amber-500/20',
         lineColor: '#F59E0B',
       };
     case 'coral':
@@ -105,12 +107,13 @@ export const getThemeColors = (colorName?: string | null, index = 0) => {
       return {
         key: 'coral',
         accent: '#F43F5E',
-        badgeBg: 'bg-rose-500/10 dark:bg-rose-500/15',
-        badgeBorder: 'border-rose-500/40 dark:border-rose-500/60',
+        accentRgb: '244, 63, 94',
+        badgeBg: 'bg-rose-500/[0.08] dark:bg-rose-500/10',
+        badgeBorder: 'border-rose-500/35 dark:border-rose-500/45',
         text: 'text-rose-600 dark:text-rose-400',
-        glow: 'shadow-[0_0_20px_rgba(244,63,94,0.25)]',
-        cardBorder: 'hover:border-rose-500/40',
-        tagBg: 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/20',
+        glow: 'shadow-sm',
+        cardBorder: 'group-hover/item:border-rose-500/30 dark:group-hover/item:border-rose-400/30',
+        tagBg: 'bg-rose-500/[0.08] text-rose-700 dark:text-rose-300 border-rose-500/20',
         lineColor: '#F43F5E',
       };
     case 'teal':
@@ -118,12 +121,13 @@ export const getThemeColors = (colorName?: string | null, index = 0) => {
       return {
         key: 'teal',
         accent: '#14B8A6',
-        badgeBg: 'bg-teal-500/10 dark:bg-teal-500/15',
-        badgeBorder: 'border-teal-500/40 dark:border-teal-500/60',
+        accentRgb: '20, 184, 166',
+        badgeBg: 'bg-teal-500/[0.08] dark:bg-teal-500/10',
+        badgeBorder: 'border-teal-500/35 dark:border-teal-500/45',
         text: 'text-teal-600 dark:text-teal-400',
-        glow: 'shadow-[0_0_20px_rgba(20,184,166,0.25)]',
-        cardBorder: 'hover:border-teal-500/40',
-        tagBg: 'bg-teal-500/10 text-teal-700 dark:text-teal-300 border-teal-500/20',
+        glow: 'shadow-sm',
+        cardBorder: 'group-hover/item:border-teal-500/30 dark:group-hover/item:border-teal-400/30',
+        tagBg: 'bg-teal-500/[0.08] text-teal-700 dark:text-teal-300 border-teal-500/20',
         lineColor: '#14B8A6',
       };
     case 'blue':
@@ -132,12 +136,13 @@ export const getThemeColors = (colorName?: string | null, index = 0) => {
       return {
         key: 'blue',
         accent: '#3B82F6',
-        badgeBg: 'bg-blue-500/10 dark:bg-blue-500/15',
-        badgeBorder: 'border-blue-500/40 dark:border-blue-500/60',
+        accentRgb: '59, 130, 246',
+        badgeBg: 'bg-blue-500/[0.08] dark:bg-blue-500/10',
+        badgeBorder: 'border-blue-500/35 dark:border-blue-500/45',
         text: 'text-blue-600 dark:text-blue-400',
-        glow: 'shadow-[0_0_20px_rgba(59,130,246,0.25)]',
-        cardBorder: 'hover:border-blue-500/40',
-        tagBg: 'bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20',
+        glow: 'shadow-sm',
+        cardBorder: 'group-hover/item:border-blue-500/30 dark:group-hover/item:border-blue-400/30',
+        tagBg: 'bg-blue-500/[0.08] text-blue-700 dark:text-blue-300 border-blue-500/20',
         lineColor: '#3B82F6',
       };
     case 'purple':
@@ -145,12 +150,13 @@ export const getThemeColors = (colorName?: string | null, index = 0) => {
       return {
         key: 'purple',
         accent: '#8B5CF6',
-        badgeBg: 'bg-purple-500/10 dark:bg-purple-500/15',
-        badgeBorder: 'border-purple-500/40 dark:border-purple-500/60',
+        accentRgb: '139, 92, 246',
+        badgeBg: 'bg-purple-500/[0.08] dark:bg-purple-500/10',
+        badgeBorder: 'border-purple-500/35 dark:border-purple-500/45',
         text: 'text-purple-600 dark:text-purple-400',
-        glow: 'shadow-[0_0_20px_rgba(139,92,246,0.25)]',
-        cardBorder: 'hover:border-purple-500/40',
-        tagBg: 'bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/20',
+        glow: 'shadow-sm',
+        cardBorder: 'group-hover/item:border-purple-500/30 dark:group-hover/item:border-purple-400/30',
+        tagBg: 'bg-purple-500/[0.08] text-purple-700 dark:text-purple-300 border-purple-500/20',
         lineColor: '#8B5CF6',
       };
     case 'emerald':
@@ -159,12 +165,13 @@ export const getThemeColors = (colorName?: string | null, index = 0) => {
       return {
         key: 'emerald',
         accent: '#10B981',
-        badgeBg: 'bg-emerald-500/10 dark:bg-emerald-500/15',
-        badgeBorder: 'border-emerald-500/40 dark:border-emerald-500/60',
+        accentRgb: '16, 185, 129',
+        badgeBg: 'bg-emerald-500/[0.08] dark:bg-emerald-500/10',
+        badgeBorder: 'border-emerald-500/35 dark:border-emerald-500/45',
         text: 'text-emerald-600 dark:text-emerald-400',
-        glow: 'shadow-[0_0_20px_rgba(16,185,129,0.25)]',
-        cardBorder: 'hover:border-emerald-500/40',
-        tagBg: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20',
+        glow: 'shadow-sm',
+        cardBorder: 'group-hover/item:border-emerald-500/30 dark:group-hover/item:border-emerald-400/30',
+        tagBg: 'bg-emerald-500/[0.08] text-emerald-700 dark:text-emerald-300 border-emerald-500/20',
         lineColor: '#10B981',
       };
   }
@@ -185,6 +192,122 @@ export const ExperienceTimeline = ({ experiences }: ExperienceTimelineProps) => 
   }
 
   return <ExperienceTimelineInner key={experiences.map(e => e.id).join('-')} experiences={experiences} />;
+};
+
+interface TimelineNodeCardProps {
+  item: ExperienceItem;
+  theme: ReturnType<typeof getThemeColors>;
+  isRtl: boolean;
+  alignToSpineEnd: boolean;
+}
+
+const TimelineNodeCard = ({ item, theme, isRtl, alignToSpineEnd }: TimelineNodeCardProps) => {
+  const positionTitle = isRtl ? (item.positionAr || item.position) : item.position;
+  const companyName = isRtl ? (item.companyAr || item.company) : item.company;
+  const locationName = isRtl ? (item.locationAr || item.location) : item.location;
+  const descriptionText = isRtl ? (item.descriptionAr || item.description) : item.description;
+
+  const badgeElement = (
+    <div
+      className={`relative flex-shrink-0 w-12 h-12 rounded-full border-2 ${theme.badgeBorder} ${theme.badgeBg} flex items-center justify-center transition-all duration-300 group-hover/item:scale-105 bg-background backdrop-blur-md shadow-sm`}
+    >
+      <div
+        className="absolute inset-1 rounded-full border border-dashed opacity-45 group-hover/item:opacity-75 group-hover/item:rotate-45 transition-all duration-700 ease-out"
+        style={{ borderColor: theme.accent }}
+      />
+      <span className={`${theme.text} transition-transform duration-300 group-hover/item:scale-105`}>
+        {getTimelineIcon(item.icon, item.type, 20)}
+      </span>
+    </div>
+  );
+
+  const yearElement = (
+    <div className={`flex flex-col ${alignToSpineEnd ? 'items-end' : 'items-start'}`}>
+      <div
+        className="text-2xl md:text-3xl font-extrabold tracking-tight font-mono leading-none"
+        style={{ color: theme.accent }}
+      >
+        {item.startDate}
+        {item.endDate && item.endDate !== item.startDate ? (
+          <span className="text-muted-foreground/60 text-sm font-normal ms-1.5">
+            — {item.endDate}
+          </span>
+        ) : null}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className={`w-full text-start flex flex-col ${alignToSpineEnd ? 'items-end' : 'items-start'}`}>
+      {/* Top Row: Circular Icon Badge (anchored next to the spine) & Year */}
+      <div
+        className={`flex items-center gap-3.5 mb-3 ${
+          alignToSpineEnd ? 'justify-end' : 'justify-start'
+        }`}
+      >
+        {alignToSpineEnd ? (
+          <>
+            {yearElement}
+            {badgeElement}
+          </>
+        ) : (
+          <>
+            {badgeElement}
+            {yearElement}
+          </>
+        )}
+      </div>
+
+      {/* Experience Content Card */}
+      <SpotlightCard
+        spotlightColor={`rgba(${theme.accentRgb}, 0.05)`}
+        size={320}
+        className={`relative w-full p-5 sm:p-6 rounded-xl bg-card/70 dark:bg-white/[0.03] backdrop-blur-xl border border-border/70 ${theme.cardBorder} transition-all duration-300 ease-out shadow-sm group-hover/item:-translate-y-0.5 group-hover/item:shadow-md text-start`}
+      >
+        {/* Role / Position Title */}
+        <h3 className="text-lg md:text-xl font-bold tracking-tight text-foreground relative z-10">
+          {positionTitle}
+        </h3>
+
+        {/* Company & Location Metadata Row (Natural plain layout) */}
+        <div className="flex items-center flex-wrap gap-2 text-xs font-medium text-muted-foreground mt-1 relative z-10">
+          <span className="font-semibold text-foreground/90">
+            {companyName}
+          </span>
+
+          {locationName && (
+            <>
+              <span>•</span>
+              <span className="inline-flex items-center gap-1">
+                <MapPin size={11} /> {locationName}
+              </span>
+            </>
+          )}
+        </div>
+
+        {/* Description (Clean, without side border) */}
+        {descriptionText && (
+          <p className="text-xs md:text-sm text-muted-foreground/90 leading-relaxed pt-2.5 whitespace-pre-line relative z-10">
+            {descriptionText}
+          </p>
+        )}
+
+        {/* Technologies Tags */}
+        {item.technologies && item.technologies.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 pt-3.5 relative z-10">
+            {item.technologies.map(tech => (
+              <span
+                key={tech.name}
+                className={`text-[10px] font-mono font-medium px-2.5 py-0.5 rounded border transition-colors duration-200 ${theme.tagBg}`}
+              >
+                {tech.name}
+              </span>
+            ))}
+          </div>
+        )}
+      </SpotlightCard>
+    </div>
+  );
 };
 
 const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
@@ -208,41 +331,39 @@ const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
   const beamClip = useTransform(smoothProgress, (val) => `inset(0 0 ${(1 - Math.max(0, Math.min(1, val))) * 100}% 0)`);
   const particleTop = useTransform(smoothProgress, (val) => `${Math.max(0, Math.min(1, val)) * 100}%`);
 
+  const spinePositionClass = isRtl
+    ? 'right-6 sm:right-8 md:right-1/2 translate-x-1/2'
+    : 'left-6 sm:left-8 md:left-1/2 -translate-x-1/2';
+
   return (
     <div ref={containerRef} className="relative w-full py-4 max-w-5xl mx-auto">
       {/* ─── Timeline Container with Centered Continuous Spine ────────── */}
       <div className="relative pt-10 md:pt-12">
-        {/* Top Origin Green Chevron Indicator - Vertical line emerges directly from inside it */}
-        <div 
-          className={`absolute top-0 z-30 flex items-center justify-center ${
-            isRtl ? 'right-8 md:right-1/2 translate-x-1/2' : 'left-8 md:left-1/2 -translate-x-1/2'
-          }`}
-        >
+        {/* Top Origin Green Chevron Indicator */}
+        <div className={`absolute top-0 z-30 flex items-center justify-center ${spinePositionClass}`}>
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
             whileInView={{ scale: 1, opacity: 1 }}
             viewport={{ once: true }}
             transition={{ type: 'spring', stiffness: 260, damping: 20 }}
-            className="w-8 h-8 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.4)] ring-4 ring-emerald-500/20 z-30 pointer-events-none"
+            className="w-8 h-8 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center shadow-sm ring-4 ring-emerald-500/15 z-30 pointer-events-none"
           >
             <ChevronDown size={16} className="stroke-[2.5]" />
           </motion.div>
         </div>
 
-        {/* Base Inactive Vertical Spine Track: Starts from top-4 (inside the green circle) */}
-        <div 
-          className={`absolute top-4 bottom-6 w-[2px] bg-border/60 dark:bg-white/10 rounded-full ${
-            isRtl ? 'right-8 md:right-1/2 translate-x-1/2' : 'left-8 md:left-1/2 -translate-x-1/2'
-          }`}
+        {/* Base Inactive Vertical Spine Track */}
+        <div
+          className={`absolute top-4 bottom-6 w-[2px] bg-border/60 dark:bg-white/10 rounded-full ${spinePositionClass}`}
         />
 
-        {/* Active Scroll Beam: Starts from top-4 (inside the green circle) with traveling head */}
-        <div className={`absolute top-4 bottom-6 w-[2.5px] rounded-full ${
-          isRtl ? 'right-8 md:right-1/2 translate-x-1/2' : 'left-8 md:left-1/2 -translate-x-1/2'
-        } pointer-events-none z-10 overflow-visible`}>
+        {/* Active Scroll Beam with Traveling Light Particle */}
+        <div
+          className={`absolute top-4 bottom-6 w-[2px] rounded-full ${spinePositionClass} pointer-events-none z-10 overflow-visible`}
+        >
           <motion.div
             style={{ clipPath: beamClip }}
-            className="w-full h-full bg-gradient-to-b from-emerald-400 via-teal-400 to-emerald-500 rounded-full shadow-[0_0_12px_rgba(16,185,129,0.85)]"
+            className="w-full h-full bg-gradient-to-b from-emerald-400 via-teal-400 to-emerald-500 rounded-full"
           />
           {/* Traveling Light Particle at the beam's front tip */}
           <motion.div
@@ -263,199 +384,115 @@ const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
             return (
               <motion.div
                 key={item.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial={{
+                  opacity: 0,
+                  y: 24,
+                  x: stemGoesRight ? 14 : -14,
+                }}
+                whileInView={{
+                  opacity: 1,
+                  y: 0,
+                  x: 0,
+                }}
                 viewport={{ once: true, margin: '-50px' }}
-                transition={{ duration: 0.5, delay: 0.05 }}
-                className="relative flex flex-col md:flex-row items-start w-full"
+                transition={{
+                  duration: 0.55,
+                  delay: 0.05,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
+                className="group/item relative flex flex-col md:flex-row items-start w-full"
               >
-                {/* ─── Central Spine Node & Horizontal Connector Arm ────── */}
-                <div className={`absolute top-6 ${
-                  isRtl ? 'right-8 md:right-1/2 translate-x-1/2' : 'left-8 md:left-1/2 -translate-x-1/2'
-                } z-20 flex items-center justify-center pointer-events-none`}>
-                  {/* Central Node Circle */}
-                  <motion.div
-                    whileHover={{ scale: 1.25 }}
-                    className="w-5 h-5 rounded-full bg-background border-4 flex items-center justify-center shadow-md"
+                {/* ─── Central Spine Node & Clean Horizontal Connector Line ────── */}
+                <div
+                  className={`absolute top-6 ${spinePositionClass} z-20 flex items-center justify-center pointer-events-none`}
+                >
+                  {/* Clean Central Node Circle (No glow) */}
+                  <div
+                    className="relative w-4 h-4 rounded-full bg-background border-[3px] flex items-center justify-center transition-transform duration-300 group-hover/item:scale-110"
                     style={{ borderColor: theme.accent }}
                   >
-                    <div 
+                    <div
                       className="w-1.5 h-1.5 rounded-full"
                       style={{ backgroundColor: theme.accent }}
                     />
-                  </motion.div>
+                  </div>
 
-                  {/* Horizontal Branching Stem Line (Desktop) */}
+                  {/* ── Horizontal Branching Connector Line (Desktop) ── */}
                   <div
-                    className={`hidden md:block absolute h-[2px] pointer-events-none transition-all duration-300 ${
-                      stemGoesRight 
-                        ? 'left-2.5 w-12' 
-                        : 'right-2.5 w-12'
+                    className={`hidden md:flex items-center absolute top-1/2 -translate-y-1/2 h-[2px] pointer-events-none ${
+                      stemGoesRight
+                        ? 'left-full w-[40px] lg:w-[48px]'
+                        : 'right-full w-[40px] lg:w-[48px]'
                     }`}
-                    style={{
-                      backgroundColor: theme.accent,
-                      boxShadow: `0 0 8px ${theme.accent}66`,
-                    }}
-                  />
+                  >
+                    {/* Subtle base line */}
+                    <div className="absolute inset-x-0 h-[1.5px] bg-border/50 dark:bg-white/10 rounded-full" />
 
-                  {/* Horizontal Branching Stem Line (Mobile) */}
+                    {/* Smooth scroll-drawn colored line (clean, no square tip, no harsh glow) */}
+                    <motion.div
+                      initial={{ scaleX: 0 }}
+                      whileInView={{ scaleX: 1 }}
+                      viewport={{ once: true, margin: '-40px' }}
+                      transition={{
+                        duration: 0.55,
+                        delay: 0.12,
+                        ease: [0.22, 1, 0.36, 1],
+                      }}
+                      style={{
+                        transformOrigin: stemGoesRight ? 'left center' : 'right center',
+                        backgroundColor: theme.accent,
+                      }}
+                      className="relative w-full h-[1.5px] opacity-75 group-hover/item:opacity-100 rounded-full transition-opacity duration-300"
+                    />
+                  </div>
+
+                  {/* ── Horizontal Branching Connector Line (Mobile) ── */}
                   <div
-                    className={`md:hidden absolute w-8 h-[2px] pointer-events-none ${
-                      isRtl ? 'right-2.5' : 'left-2.5'
+                    className={`md:hidden flex items-center absolute top-1/2 -translate-y-1/2 h-[2px] w-[24px] pointer-events-none ${
+                      isRtl ? 'right-full' : 'left-full'
                     }`}
-                    style={{
-                      backgroundColor: theme.accent,
-                      boxShadow: `0 0 8px ${theme.accent}66`,
-                    }}
-                  />
+                  >
+                    <div className="absolute inset-x-0 h-[1.5px] bg-border/50 dark:bg-white/10 rounded-full" />
+                    <motion.div
+                      initial={{ scaleX: 0 }}
+                      whileInView={{ scaleX: 1 }}
+                      viewport={{ once: true }}
+                      transition={{
+                        duration: 0.45,
+                        delay: 0.1,
+                        ease: [0.22, 1, 0.36, 1],
+                      }}
+                      style={{
+                        transformOrigin: isRtl ? 'right center' : 'left center',
+                        backgroundColor: theme.accent,
+                      }}
+                      className="relative w-full h-[1.5px] opacity-75 group-hover/item:opacity-100 rounded-full"
+                    />
+                  </div>
                 </div>
 
-                {/* ─── Desktop First Column (LTR: Left / RTL: Right of spine) ── */}
-                <div className="hidden md:flex md:w-1/2 justify-end pe-14">
+                {/* ─── Desktop First Column (Inline-Start of Spine) ── */}
+                <div className="hidden md:flex md:w-1/2 justify-end md:pe-12 lg:pe-14">
                   {!isRightSide ? (
-                    <div className="w-full text-start flex flex-col items-start rtl:items-end">
-                      {/* Top Row: Year and Circular Icon Badge */}
-                      <div className={`flex items-center gap-3.5 mb-3 ${isRtl ? 'flex-row justify-end' : 'flex-row-reverse justify-start'}`}>
-                        {/* Circular Icon Badge */}
-                        <motion.div
-                          whileHover={{ scale: 1.04 }}
-                          className={`relative flex-shrink-0 w-12 h-12 rounded-full border-2 ${theme.badgeBorder} ${theme.badgeBg} flex items-center justify-center transition-colors duration-200 group cursor-pointer backdrop-blur-md shadow-sm`}
-                        >
-                          <div 
-                            className="absolute inset-1 rounded-full border border-dashed opacity-50"
-                            style={{ borderColor: theme.accent }}
-                          />
-                          <span className={`${theme.text} transition-colors duration-200`}>
-                            {getTimelineIcon(item.icon, item.type, 20)}
-                          </span>
-                        </motion.div>
-
-                        {/* Bold Year & Category */}
-                        <div className={`flex flex-col ${isRtl ? 'items-end' : 'items-end'}`}>
-                          <div 
-                            className="text-2xl md:text-3xl font-extrabold tracking-tight font-mono leading-none"
-                            style={{ color: theme.accent }}
-                          >
-                            {item.startDate}
-                            {item.endDate && item.endDate !== item.startDate ? (
-                              <span className="text-muted-foreground/60 text-sm font-normal ms-1.5">
-                                — {item.endDate}
-                              </span>
-                            ) : null}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Content Card */}
-                      <div className={`w-full p-5 rounded-xl bg-card/60 dark:bg-white/[0.03] backdrop-blur-xl border border-border/70 ${theme.cardBorder} transition-all duration-300 shadow-sm text-start`}>
-                        <h3 className="text-lg md:text-xl font-bold tracking-tight text-foreground">
-                          {isRtl ? (item.positionAr || item.position) : item.position}
-                        </h3>
-                        <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground mt-1">
-                          <span className="font-semibold text-foreground/90">{isRtl ? (item.companyAr || item.company) : item.company}</span>
-                          {(item.location || (isRtl && item.locationAr)) && (
-                            <>
-                              <span>•</span>
-                              <span className="inline-flex items-center gap-1">
-                                <MapPin size={11} /> {isRtl ? (item.locationAr || item.location) : item.location}
-                              </span>
-                            </>
-                          )}
-                        </div>
-                        {(item.description || (isRtl && item.descriptionAr)) && (
-                          <p className="text-xs md:text-sm text-muted-foreground/90 leading-relaxed pt-2.5 whitespace-pre-line">
-                            {isRtl ? (item.descriptionAr || item.description) : item.description}
-                          </p>
-                        )}
-                        {item.technologies && item.technologies.length > 0 && (
-                          <div className="flex flex-wrap gap-1.5 pt-3">
-                            {item.technologies.map(tech => (
-                              <span
-                                key={tech.name}
-                                className={`text-[10px] font-mono font-medium px-2 py-0.5 rounded border ${theme.tagBg}`}
-                              >
-                                {tech.name}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                    <TimelineNodeCard
+                      item={item}
+                      theme={theme}
+                      isRtl={isRtl}
+                      alignToSpineEnd={true}
+                    />
                   ) : null}
                 </div>
 
-                {/* ─── Second Column (LTR: Right / RTL: Left of spine, Mobile: single) ── */}
-                <div className="w-full ps-16 sm:ps-20 md:ps-14 md:w-1/2 flex justify-start">
-                  {(isRightSide || true) && (
-                    <div className={`w-full text-start flex flex-col items-start ${!isRightSide ? 'md:hidden' : ''}`}>
-                      {/* Top Row: Circular Icon Badge and Year */}
-                      <div className="flex items-center gap-3.5 mb-3 flex-row justify-start">
-                        {/* Circular Icon Badge */}
-                        <motion.div
-                          whileHover={{ scale: 1.04 }}
-                          className={`relative flex-shrink-0 w-12 h-12 rounded-full border-2 ${theme.badgeBorder} ${theme.badgeBg} flex items-center justify-center transition-colors duration-200 group cursor-pointer backdrop-blur-md shadow-sm`}
-                        >
-                          <div 
-                            className="absolute inset-1 rounded-full border border-dashed opacity-50"
-                            style={{ borderColor: theme.accent }}
-                          />
-                          <span className={`${theme.text} transition-colors duration-200`}>
-                            {getTimelineIcon(item.icon, item.type, 20)}
-                          </span>
-                        </motion.div>
-
-                        {/* Bold Year & Category */}
-                        <div className="flex flex-col items-start">
-                          <div 
-                            className="text-2xl md:text-3xl font-extrabold tracking-tight font-mono leading-none"
-                            style={{ color: theme.accent }}
-                          >
-                            {item.startDate}
-                            {item.endDate && item.endDate !== item.startDate ? (
-                              <span className="text-muted-foreground/60 text-sm font-normal ms-1.5">
-                                — {item.endDate}
-                              </span>
-                            ) : null}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Content Card */}
-                      <div className={`w-full p-5 rounded-xl bg-card/60 dark:bg-white/[0.03] backdrop-blur-xl border border-border/70 ${theme.cardBorder} transition-all duration-300 shadow-sm text-start`}>
-                        <h3 className="text-lg md:text-xl font-bold tracking-tight text-foreground">
-                          {isRtl ? (item.positionAr || item.position) : item.position}
-                        </h3>
-                        <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground mt-1">
-                          <span className="font-semibold text-foreground/90">{isRtl ? (item.companyAr || item.company) : item.company}</span>
-                          {(item.location || (isRtl && item.locationAr)) && (
-                            <>
-                              <span>•</span>
-                              <span className="inline-flex items-center gap-1">
-                                <MapPin size={11} /> {isRtl ? (item.locationAr || item.location) : item.location}
-                              </span>
-                            </>
-                          )}
-                        </div>
-                        {(item.description || (isRtl && item.descriptionAr)) && (
-                          <p className="text-xs md:text-sm text-muted-foreground/90 leading-relaxed pt-2.5 whitespace-pre-line">
-                            {isRtl ? (item.descriptionAr || item.description) : item.description}
-                          </p>
-                        )}
-                        {item.technologies && item.technologies.length > 0 && (
-                          <div className="flex flex-wrap gap-1.5 pt-3">
-                            {item.technologies.map(tech => (
-                              <span
-                                key={tech.name}
-                                className={`text-[10px] font-mono font-medium px-2 py-0.5 rounded border ${theme.tagBg}`}
-                              >
-                                {tech.name}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
+                {/* ─── Second Column (Inline-End of Spine, & All Items on Mobile) ── */}
+                <div className="w-full ps-14 sm:ps-16 md:ps-12 lg:ps-14 md:w-1/2 flex justify-start">
+                  <div className={`w-full ${!isRightSide ? 'md:hidden' : ''}`}>
+                    <TimelineNodeCard
+                      item={item}
+                      theme={theme}
+                      isRtl={isRtl}
+                      alignToSpineEnd={false}
+                    />
+                  </div>
                 </div>
               </motion.div>
             );
@@ -464,15 +501,11 @@ const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
 
         {/* ─── Bottom Continuous Evolution Terminal Anchor ───────────── */}
         <div className="relative pt-2">
-          <div className={`absolute top-0 ${
-            isRtl ? 'right-8 md:right-1/2 translate-x-1/2' : 'left-8 md:left-1/2 -translate-x-1/2'
-          } z-20 flex items-center justify-center`}>
-            <div className="w-8 h-8 rounded-full bg-gradient-to-b from-emerald-500 to-teal-600 text-slate-950 flex items-center justify-center shadow-lg shadow-emerald-500/25 ring-4 ring-emerald-500/20">
+          <div className={`absolute top-0 ${spinePositionClass} z-20 flex items-center justify-center`}>
+            <div className="w-8 h-8 rounded-full bg-gradient-to-b from-emerald-500 to-teal-600 text-slate-950 flex items-center justify-center shadow-md ring-4 ring-emerald-500/15">
               <ChevronDown size={18} className="stroke-[2.5]" />
             </div>
           </div>
-
-
         </div>
       </div>
     </div>

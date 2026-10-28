@@ -2,6 +2,7 @@ import { useRef, useEffect, useState, useCallback } from 'react';
 import { motion, useScroll, useSpring, useTransform, useMotionValueEvent } from 'framer-motion';
 import api from '../../services/api';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { SplitText, BlurText } from '../react-bits';
 
 /* ═══════════════════════════════════════════════════════════════════
    Pushpin SVG — 3D pinned head with punctured paper effect
@@ -581,11 +582,19 @@ const HowItWorks = () => {
         >
 
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-foreground tracking-tight leading-[1.15] mb-4">
-            {displayTitle}
+            <SplitText
+              text={displayTitle}
+              delay={30}
+              duration={0.5}
+            />
           </h2>
-          <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-            {displaySubtitle}
-          </p>
+          <div className="max-w-2xl mx-auto">
+            <BlurText
+              text={displaySubtitle}
+              delay={20}
+              className="text-base md:text-lg text-muted-foreground leading-relaxed"
+            />
+          </div>
         </motion.div>
 
         {/* Cards + connectors interleaved (unified zig-zag on all screens) */}

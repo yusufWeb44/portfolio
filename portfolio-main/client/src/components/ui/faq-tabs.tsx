@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Plus } from 'lucide-react';
 import { cn } from './Button';
+import { SplitText, BlurText, SpotlightCard } from '../react-bits';
 
 /* ─── Types ──────────────────────────────────────────────────────── */
 interface FAQItem {
@@ -26,11 +27,21 @@ interface FAQProps {
   [key: string]: any;
 }
 
-const FAQHeader = ({ title }: { title: string; subtitle?: string }) => (
+const FAQHeader = ({ title, subtitle }: { title: string; subtitle?: string }) => (
   <div className="relative z-10 flex flex-col items-start justify-start mb-10 sm:mb-12">
-
+    {subtitle && (
+      <BlurText
+        text={subtitle}
+        delay={25}
+        className="text-xs font-mono uppercase tracking-wider text-emerald-500 font-semibold mb-2"
+      />
+    )}
     <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight leading-[1.15] text-foreground">
-      {title}
+      <SplitText
+        text={title}
+        delay={35}
+        duration={0.45}
+      />
     </h2>
   </div>
 );
@@ -51,10 +62,10 @@ const FAQTabs = ({
         key={key}
         onClick={() => setSelected(key)}
         className={cn(
-          'relative overflow-hidden whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-300 cursor-pointer',
+          'relative overflow-hidden whitespace-nowrap rounded-full border px-3.5 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer select-none active:scale-[0.98]',
           selected === key
-            ? 'border-emerald-500/50 text-white font-semibold shadow-sm shadow-emerald-500/20'
-            : 'border-border bg-transparent text-muted-foreground hover:text-foreground hover:border-border/80'
+            ? 'border-emerald-500/60 text-white shadow-md shadow-emerald-500/25 -translate-y-0.5'
+            : 'border-border/80 dark:border-white/10 bg-card/40 dark:bg-white/[0.03] text-muted-foreground hover:text-foreground hover:border-emerald-500/40 hover:-translate-y-0.5'
         )}
       >
         <span className="relative z-10">{label}</span>
@@ -109,8 +120,9 @@ const FAQItemCard = ({ question, answer }: FAQItem) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <motion.div
-      animate={isOpen ? 'open' : 'closed'}
+    <SpotlightCard
+      spotlightColor="rgba(16, 185, 129, 0.08)"
+      size={350}
       className={cn(
         'rounded-xl border backdrop-blur-xl transition-all duration-300',
         isOpen
@@ -120,7 +132,7 @@ const FAQItemCard = ({ question, answer }: FAQItem) => {
     >
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center justify-between gap-6 p-6 text-start cursor-pointer"
+        className="flex w-full items-center justify-between gap-6 p-6 text-start cursor-pointer relative z-10"
       >
         <span
           className={cn(
@@ -131,10 +143,7 @@ const FAQItemCard = ({ question, answer }: FAQItem) => {
           {question}
         </span>
         <motion.span
-          variants={{
-            open: { rotate: '45deg' },
-            closed: { rotate: '0deg' },
-          }}
+          animate={{ rotate: isOpen ? 45 : 0 }}
           transition={{ duration: 0.2 }}
           className="shrink-0"
         >
@@ -153,11 +162,11 @@ const FAQItemCard = ({ question, answer }: FAQItem) => {
           marginBottom: isOpen ? '24px' : '0px',
         }}
         transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-        className="overflow-hidden px-6"
+        className="overflow-hidden px-6 relative z-10"
       >
         <p className="text-muted-foreground leading-relaxed text-sm md:text-base text-start">{answer}</p>
       </motion.div>
-    </motion.div>
+    </SpotlightCard>
   );
 };
 
