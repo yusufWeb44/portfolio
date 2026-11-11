@@ -94,7 +94,7 @@ export const SkillPill: React.FC<SkillPillProps> = ({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       onClick={onClick}
-      className={`group/pill inline-flex items-center gap-2.5 sm:gap-3 px-3.5 py-1.5 sm:px-4.5 sm:py-2 rounded-full border-2 border-neutral-900/90 dark:border-white/80 bg-white dark:bg-[#0c0d0e] shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_12px_rgba(255,255,255,0.05)] hover:border-emerald-500 dark:hover:border-emerald-400 hover:scale-105 transition-all duration-200 cursor-pointer select-none shrink-0 ${className}`}
+      className={`group/pill inline-flex items-center gap-2.5 sm:gap-3 px-3.5 py-1.5 sm:px-4.5 sm:py-2 rounded-full border-2 border-neutral-900/90 dark:border-white/80 bg-white dark:bg-[#0c0d0e] shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_12px_rgba(255,255,255,0.05)] hover:border-neutral-950 dark:hover:border-white hover:scale-105 transition-all duration-200 cursor-pointer select-none shrink-0 ${className}`}
     >
       <span
         style={{ fontFamily: "'Lora', Georgia, serif" }}

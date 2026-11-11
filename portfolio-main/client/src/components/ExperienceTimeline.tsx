@@ -93,12 +93,12 @@ export const getThemeColors = (colorName?: string | null, index = 0) => {
         key: 'amber',
         accent: '#F59E0B',
         accentRgb: '245, 158, 11',
-        badgeBg: 'bg-amber-500/[0.08] dark:bg-amber-500/10',
-        badgeBorder: 'border-amber-500/35 dark:border-amber-500/45',
+        badgeBg: 'bg-amber-500/[0.06] dark:bg-amber-500/[0.06]',
+        badgeBorder: 'border-amber-500/25 dark:border-amber-500/20',
         text: 'text-amber-600 dark:text-amber-400',
         glow: 'shadow-sm',
-        cardBorder: 'group-hover/item:border-amber-500/30 dark:group-hover/item:border-amber-400/30',
-        tagBg: 'bg-amber-500/[0.08] text-amber-700 dark:text-amber-300 border-amber-500/20',
+        cardBorder: 'group-hover/item:border-amber-500/20 dark:group-hover/item:border-amber-500/15',
+        tagBg: 'bg-amber-500/[0.06] text-amber-700 dark:text-amber-300 border-amber-500/15',
         lineColor: '#F59E0B',
       };
     case 'coral':
@@ -108,12 +108,12 @@ export const getThemeColors = (colorName?: string | null, index = 0) => {
         key: 'coral',
         accent: '#F43F5E',
         accentRgb: '244, 63, 94',
-        badgeBg: 'bg-rose-500/[0.08] dark:bg-rose-500/10',
-        badgeBorder: 'border-rose-500/35 dark:border-rose-500/45',
+        badgeBg: 'bg-rose-500/[0.06] dark:bg-rose-500/[0.06]',
+        badgeBorder: 'border-rose-500/25 dark:border-rose-500/20',
         text: 'text-rose-600 dark:text-rose-400',
         glow: 'shadow-sm',
-        cardBorder: 'group-hover/item:border-rose-500/30 dark:group-hover/item:border-rose-400/30',
-        tagBg: 'bg-rose-500/[0.08] text-rose-700 dark:text-rose-300 border-rose-500/20',
+        cardBorder: 'group-hover/item:border-rose-500/20 dark:group-hover/item:border-rose-500/15',
+        tagBg: 'bg-rose-500/[0.06] text-rose-700 dark:text-rose-300 border-rose-500/15',
         lineColor: '#F43F5E',
       };
     case 'teal':
@@ -122,12 +122,12 @@ export const getThemeColors = (colorName?: string | null, index = 0) => {
         key: 'teal',
         accent: '#14B8A6',
         accentRgb: '20, 184, 166',
-        badgeBg: 'bg-teal-500/[0.08] dark:bg-teal-500/10',
-        badgeBorder: 'border-teal-500/35 dark:border-teal-500/45',
+        badgeBg: 'bg-teal-500/[0.06] dark:bg-teal-500/[0.06]',
+        badgeBorder: 'border-teal-500/25 dark:border-teal-500/20',
         text: 'text-teal-600 dark:text-teal-400',
         glow: 'shadow-sm',
-        cardBorder: 'group-hover/item:border-teal-500/30 dark:group-hover/item:border-teal-400/30',
-        tagBg: 'bg-teal-500/[0.08] text-teal-700 dark:text-teal-300 border-teal-500/20',
+        cardBorder: 'group-hover/item:border-teal-500/20 dark:group-hover/item:border-teal-500/15',
+        tagBg: 'bg-teal-500/[0.06] text-teal-700 dark:text-teal-300 border-teal-500/15',
         lineColor: '#14B8A6',
       };
     case 'blue':
@@ -137,12 +137,12 @@ export const getThemeColors = (colorName?: string | null, index = 0) => {
         key: 'blue',
         accent: '#3B82F6',
         accentRgb: '59, 130, 246',
-        badgeBg: 'bg-blue-500/[0.08] dark:bg-blue-500/10',
-        badgeBorder: 'border-blue-500/35 dark:border-blue-500/45',
+        badgeBg: 'bg-blue-500/[0.06] dark:bg-blue-500/[0.06]',
+        badgeBorder: 'border-blue-500/25 dark:border-blue-500/20',
         text: 'text-blue-600 dark:text-blue-400',
         glow: 'shadow-sm',
-        cardBorder: 'group-hover/item:border-blue-500/30 dark:group-hover/item:border-blue-400/30',
-        tagBg: 'bg-blue-500/[0.08] text-blue-700 dark:text-blue-300 border-blue-500/20',
+        cardBorder: 'group-hover/item:border-blue-500/20 dark:group-hover/item:border-blue-500/15',
+        tagBg: 'bg-blue-500/[0.06] text-blue-700 dark:text-blue-300 border-blue-500/15',
         lineColor: '#3B82F6',
       };
     case 'purple':
@@ -151,12 +151,12 @@ export const getThemeColors = (colorName?: string | null, index = 0) => {
         key: 'purple',
         accent: '#8B5CF6',
         accentRgb: '139, 92, 246',
-        badgeBg: 'bg-purple-500/[0.08] dark:bg-purple-500/10',
-        badgeBorder: 'border-purple-500/35 dark:border-purple-500/45',
+        badgeBg: 'bg-purple-500/[0.06] dark:bg-purple-500/[0.06]',
+        badgeBorder: 'border-purple-500/25 dark:border-purple-500/20',
         text: 'text-purple-600 dark:text-purple-400',
         glow: 'shadow-sm',
-        cardBorder: 'group-hover/item:border-purple-500/30 dark:group-hover/item:border-purple-400/30',
-        tagBg: 'bg-purple-500/[0.08] text-purple-700 dark:text-purple-300 border-purple-500/20',
+        cardBorder: 'group-hover/item:border-purple-500/20 dark:group-hover/item:border-purple-500/15',
+        tagBg: 'bg-purple-500/[0.06] text-purple-700 dark:text-purple-300 border-purple-500/15',
         lineColor: '#8B5CF6',
       };
     case 'emerald':
@@ -166,12 +166,12 @@ export const getThemeColors = (colorName?: string | null, index = 0) => {
         key: 'emerald',
         accent: '#10B981',
         accentRgb: '16, 185, 129',
-        badgeBg: 'bg-emerald-500/[0.08] dark:bg-emerald-500/10',
-        badgeBorder: 'border-emerald-500/35 dark:border-emerald-500/45',
+        badgeBg: 'bg-emerald-500/[0.06] dark:bg-emerald-500/[0.06]',
+        badgeBorder: 'border-emerald-500/25 dark:border-emerald-500/20',
         text: 'text-emerald-600 dark:text-emerald-400',
         glow: 'shadow-sm',
-        cardBorder: 'group-hover/item:border-emerald-500/30 dark:group-hover/item:border-emerald-400/30',
-        tagBg: 'bg-emerald-500/[0.08] text-emerald-700 dark:text-emerald-300 border-emerald-500/20',
+        cardBorder: 'group-hover/item:border-emerald-500/20 dark:group-hover/item:border-emerald-500/15',
+        tagBg: 'bg-emerald-500/[0.06] text-emerald-700 dark:text-emerald-300 border-emerald-500/15',
         lineColor: '#10B981',
       };
   }
@@ -212,7 +212,7 @@ const TimelineNodeCard = ({ item, theme, isRtl, alignToSpineEnd }: TimelineNodeC
       className={`relative flex-shrink-0 w-12 h-12 rounded-full border-2 ${theme.badgeBorder} ${theme.badgeBg} flex items-center justify-center transition-all duration-300 group-hover/item:scale-105 bg-background backdrop-blur-md shadow-sm`}
     >
       <div
-        className="absolute inset-1 rounded-full border border-dashed opacity-45 group-hover/item:opacity-75 group-hover/item:rotate-45 transition-all duration-700 ease-out"
+        className="absolute inset-1 rounded-full border border-dashed opacity-30 group-hover/item:opacity-45 group-hover/item:rotate-45 transition-all duration-700 ease-out"
         style={{ borderColor: theme.accent }}
       />
       <span className={`${theme.text} transition-transform duration-300 group-hover/item:scale-105`}>
@@ -260,9 +260,11 @@ const TimelineNodeCard = ({ item, theme, isRtl, alignToSpineEnd }: TimelineNodeC
 
       {/* Experience Content Card */}
       <SpotlightCard
-        spotlightColor={`rgba(${theme.accentRgb}, 0.05)`}
-        size={320}
-        className={`relative w-full p-5 sm:p-6 rounded-xl bg-card/70 dark:bg-white/[0.03] backdrop-blur-xl border border-border/70 ${theme.cardBorder} transition-all duration-300 ease-out shadow-sm group-hover/item:-translate-y-0.5 group-hover/item:shadow-md text-start`}
+        spotlightColor={`rgba(${theme.accentRgb}, 0.03)`}
+        darkSpotlightColor={`rgba(${theme.accentRgb}, 0.01)`}
+        size={220}
+        darkSize={160}
+        className={`relative w-full p-5 sm:p-6 rounded-xl bg-card/70 dark:bg-white/[0.03] backdrop-blur-xl border border-border/70 ${theme.cardBorder} transition-all duration-300 ease-out shadow-sm group-hover/item:-translate-y-0.5 text-start`}
       >
         {/* Role / Position Title */}
         <h3 className="text-lg md:text-xl font-bold tracking-tight text-foreground relative z-10">
@@ -442,7 +444,7 @@ const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
                         transformOrigin: stemGoesRight ? 'left center' : 'right center',
                         backgroundColor: theme.accent,
                       }}
-                      className="relative w-full h-[1.5px] opacity-75 group-hover/item:opacity-100 rounded-full transition-opacity duration-300"
+                      className="relative w-full h-[1.5px] opacity-70 group-hover/item:opacity-85 rounded-full transition-opacity duration-300"
                     />
                   </div>
 
@@ -466,7 +468,7 @@ const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
                         transformOrigin: isRtl ? 'right center' : 'left center',
                         backgroundColor: theme.accent,
                       }}
-                      className="relative w-full h-[1.5px] opacity-75 group-hover/item:opacity-100 rounded-full"
+                      className="relative w-full h-[1.5px] opacity-70 group-hover/item:opacity-85 rounded-full"
                     />
                   </div>
                 </div>

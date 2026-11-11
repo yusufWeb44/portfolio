@@ -79,25 +79,20 @@ export const TechStackMarquee: React.FC<TechStackMarqueeProps> = ({
         </div>
       )}
 
-      {/* Marquee Wrapper with soft edge gradients */}
+      {/* Marquee Wrapper */}
       <div 
         className="relative w-full overflow-hidden py-3 sm:py-4"
         onMouseLeave={() => setIsItemHovered(false)}
       >
-        {/* Left Fade Gradient Mask */}
+        {/* Scrolling Track with smooth edge alpha fade (no colored overlays, zero primary color bleed) */}
         <div
-          aria-hidden="true"
-          className="pointer-events-none absolute left-0 top-0 bottom-0 w-16 sm:w-24 md:w-32 bg-gradient-to-r from-background via-background/90 to-transparent z-20"
-        />
-
-        {/* Right Fade Gradient Mask */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute right-0 top-0 bottom-0 w-16 sm:w-24 md:w-32 bg-gradient-to-l from-background via-background/90 to-transparent z-20"
-        />
-
-        {/* Scrolling Track (No maskImage to avoid disabling font smoothing / blurriness) */}
-        <div dir="ltr" className="relative w-full overflow-hidden">
+          dir="ltr"
+          className="relative w-full overflow-hidden"
+          style={{
+            maskImage: 'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
+          }}
+        >
           <div
             className={`animate-tech-marquee flex items-center ${isItemHovered ? 'marquee-paused' : ''}`}
             style={{

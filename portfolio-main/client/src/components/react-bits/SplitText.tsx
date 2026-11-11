@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
 
 export interface SplitTextProps {
@@ -18,25 +18,27 @@ export interface SplitTextProps {
 
 /**
  * React Bits - SplitText
- * Splits text into words or characters with staggered scroll-triggered entrance.
- * Smartly preserves Arabic cursive connectivity by defaulting Arabic text to word-level splitting.
+ * Clean, modern masked typographic text entrance.
+ * Smoothly lifts words from baseline with crisp opacity — zero fuzzy blur, zero layout jitter.
+ * Smartly preserves Arabic cursive typography by defaulting to word-level splits.
  */
 export const SplitText: React.FC<SplitTextProps> = ({
   text,
   className = '',
-  delay = 40,
-  duration = 0.5,
+  delay = 20,
+  duration = 0.45,
   splitBy = 'words',
   textAlign = 'initial',
-  animationFrom = { opacity: 0, y: 24, filter: 'blur(8px)' },
-  animationTo = { opacity: 1, y: 0, filter: 'blur(0px)' },
+  animationFrom = { opacity: 0, y: 18 },
+  animationTo = { opacity: 1, y: 0 },
   easing = [0.16, 1, 0.3, 1],
-  threshold = 0.15,
-  rootMargin = '-50px',
+  threshold = 0.1,
+  rootMargin = '-30px',
   onAnimationComplete,
 }) => {
   const ref = useRef<HTMLSpanElement>(null);
   const isInView = useInView(ref, { once: true, amount: threshold, margin: rootMargin as any });
+  const [isCompleted, setIsCompleted] = useState(false);
 
   // Detect Arabic characters to prevent breaking Arabic cursive letters
   const hasArabic = /[\u0600-\u06FF]/.test(text);
@@ -54,8 +56,7 @@ export const SplitText: React.FC<SplitTextProps> = ({
       {elements.map((segment, index) => (
         <span
           key={index}
-          className="inline-block overflow-visible whitespace-nowrap"
-          style={{ verticalAlign: 'top' }}
+          className={`inline-block ${isCompleted ? 'overflow-visible' : 'overflow-hidden'} pb-[0.35em] -mb-[0.35em] whitespace-nowrap align-top`}
         >
           <motion.span
             className="inline-block"
@@ -67,7 +68,12 @@ export const SplitText: React.FC<SplitTextProps> = ({
               ease: easing as any,
             }}
             onAnimationComplete={
-              index === elements.length - 1 ? onAnimationComplete : undefined
+              index === elements.length - 1
+                ? () => {
+                    setIsCompleted(true);
+                    onAnimationComplete?.();
+                  }
+                : undefined
             }
           >
             {segment}

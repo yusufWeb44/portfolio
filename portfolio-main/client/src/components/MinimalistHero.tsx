@@ -6,8 +6,9 @@ import { GithubIcon, LinkedinIcon, InstagramIcon, FacebookIcon } from './ui/Bran
 import { buttonVariants } from './ui/Button';
 import { SocialButton } from './ui/SocialButton';
 import { SplitText, BlurText, FadeContent } from './react-bits';
+import { useLanguage } from '../contexts/LanguageContext';
 
-/* ─── Animated Count-up for Hero Stats ────────────────────────────── */
+/* ─── Animated Count-up for Hero Stats (Zero VDOM Re-render, Direct GPU DOM update) ─── */
 const AnimatedStatValue: React.FC<{ value: string }> = ({ value }) => {
   const strVal = String(value ?? '');
   const match = strVal.match(/^([^0-9]*)(\d+)(.*)$/);
@@ -20,52 +21,60 @@ const AnimatedStatValue: React.FC<{ value: string }> = ({ value }) => {
   const targetNum = parseInt(match[2], 10);
   const suffix = match[3];
 
-  const [currentNum, setCurrentNum] = useState(0);
-  const [hasAnimated, setHasAnimated] = useState(false);
-  const ref = useRef<HTMLSpanElement>(null);
+  const spanRef = useRef<HTMLSpanElement>(null);
+  const hasAnimated = useRef(false);
 
-  // Only start animation when element is visible in viewport
   useEffect(() => {
-    if (hasAnimated || !ref.current) return;
+    if (!spanRef.current || hasAnimated.current) return;
+
+    const el = spanRef.current;
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          setHasAnimated(true);
+        if (entry.isIntersecting && !hasAnimated.current) {
+          hasAnimated.current = true;
           observer.disconnect();
+
+          // Defer count-up by 200ms to allow Hero entrance paint & transitions to finish first
+          let animationFrameId: number;
+          const timer = setTimeout(() => {
+            let startTimestamp: number | null = null;
+            const duration = 1300;
+
+            const step = (timestamp: number) => {
+              if (!startTimestamp) startTimestamp = timestamp;
+              const elapsed = timestamp - startTimestamp;
+              const progress = Math.min(elapsed / duration, 1);
+              const easeOut = 1 - Math.pow(1 - progress, 3);
+              const val = Math.round(easeOut * targetNum);
+
+              if (spanRef.current) {
+                spanRef.current.textContent = `${prefix}${val}${suffix}`;
+              }
+
+              if (progress < 1) {
+                animationFrameId = requestAnimationFrame(step);
+              }
+            };
+
+            animationFrameId = requestAnimationFrame(step);
+          }, 200);
+
+          return () => {
+            clearTimeout(timer);
+            cancelAnimationFrame(animationFrameId);
+          };
         }
       },
       { threshold: 0.1 }
     );
-    observer.observe(ref.current);
+
+    observer.observe(el);
     return () => observer.disconnect();
-  }, [hasAnimated]);
-
-  useEffect(() => {
-    if (!hasAnimated) return;
-    let startTimestamp: number | null = null;
-    const duration = 1600;
-    let animationFrameId: number;
-
-    const step = (timestamp: number) => {
-      if (!startTimestamp) startTimestamp = timestamp;
-      const elapsed = timestamp - startTimestamp;
-      const progress = Math.min(elapsed / duration, 1);
-      const easeOut = 1 - Math.pow(1 - progress, 3);
-      const val = Math.round(easeOut * targetNum);
-      setCurrentNum(val);
-
-      if (progress < 1) {
-        animationFrameId = requestAnimationFrame(step);
-      }
-    };
-
-    animationFrameId = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(animationFrameId);
-  }, [hasAnimated, targetNum]);
+  }, [targetNum, prefix, suffix]);
 
   return (
-    <span ref={ref} className="tabular-nums">
-      {prefix}{currentNum}{suffix}
+    <span ref={spanRef} className="tabular-nums">
+      {prefix}0{suffix}
     </span>
   );
 };
@@ -134,6 +143,8 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
   instagramUrl,
   facebookUrl,
 }) => {
+  const { currentLang, currentDirection } = useLanguage();
+  const isRtl = currentDirection === 'rtl' || currentLang === 'ar';
   const cubicEase = [0.22, 1, 0.36, 1] as any;
 
   const blobPath1 = 'M410.5,317.5Q372,385,299,419.5Q226,454,161.5,410Q97,366,66,298Q35,230,73.5,166Q112,102,181,71.5Q250,41,319,72Q388,103,418.5,176.5Q449,250,410.5,317.5Z';
@@ -158,7 +169,7 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
   ].filter(Boolean) as { label: string; href: string; Icon: any }[];
 
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] flex flex-col justify-between overflow-hidden bg-transparent select-none">
+    <div className="relative min-h-[calc(100vh-4rem)] flex flex-col justify-between overflow-hidden bg-transparent">
 
       {/* Main Hero Content */}
       <div className="flex-1 max-w-7xl mx-auto w-full px-6 pt-24 sm:pt-28 md:pt-32 pb-8 flex flex-col justify-center">
@@ -184,6 +195,7 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
                 {bioText ? (
                   <BlurText
                     text={bioText}
+                    animateBy="block"
                     delay={20}
                     className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-xl"
                   />
@@ -191,7 +203,7 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
               </div>
 
               {/* CTA Button */}
-              <FadeContent delay={0.2} blur={true} distance={15}>
+              <FadeContent delay={0.2} blur={false} distance={15}>
                 <a
                   href={ctaHref}
                   className={buttonVariants({ variant: 'primary', size: 'default' })}
@@ -203,7 +215,7 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
 
               {/* Social Icons — Balanced White / Obsidian glass with luminous emerald hover */}
               {resolvedLinks.length > 0 && (
-                <FadeContent delay={0.3} blur={true} distance={12}>
+                <FadeContent delay={0.3} blur={false} distance={12}>
                   <div className="flex items-center gap-2.5 sm:gap-3 pt-1">
                     {resolvedLinks.map((s, i) => (
                       <motion.div
@@ -225,11 +237,11 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
 
               {/* Stats Bar */}
               {activeStats.length > 0 && (
-                <FadeContent delay={0.4} blur={true} distance={15}>
+                <FadeContent delay={0.4} blur={false} distance={15}>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6 border-t border-border/40 mt-6 w-full">
                     {activeStats.map((stat, idx) => (
-                      <div key={idx} className="flex flex-col group">
-                        <span className="text-xl sm:text-2xl font-extrabold text-foreground font-mono transition-colors group-hover:text-emerald-400">
+                      <div key={idx} className="flex flex-col">
+                        <span className="text-xl sm:text-2xl font-extrabold text-foreground font-mono">
                           <AnimatedStatValue value={stat.value} />
                         </span>
                         <span className="text-xs text-muted-foreground uppercase tracking-wider mt-1.5 leading-snug">
@@ -290,20 +302,20 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
                   className="w-full h-full relative"
                 >
                   {/* Ambient glow behind blob without expensive filter */}
-                  <div className="absolute inset-6 rounded-full bg-emerald-500/15 dark:bg-emerald-500/25 blur-3xl -z-10" />
-                  <svg viewBox="0 0 500 500" className="w-full h-full">
+                  <div className="absolute inset-6 rounded-full bg-emerald-500/15 dark:bg-emerald-500/25 blur-3xl -z-10 transform-gpu pointer-events-none select-none" style={{ contain: 'strict', transform: 'translateZ(0)' }} />
+                  <svg viewBox="0 0 500 500" className="w-full h-full transform-gpu" style={{ willChange: 'transform' }}>
                     <defs>
                       {/* Dark Mode Gradient: Cyan into Primary Theme */}
                       <linearGradient id="fluid-gradient-dark" x1="0%" y1="0%" x2="100%" y2="100%">
                         <stop offset="0%" stopColor="#0EA5E9" />
                         <stop offset="50%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)' }} />
-                        <stop offset="100%" stopColor="var(--theme-primary-hex, #064E3B)" style={{ stopColor: 'var(--theme-primary-hex, #064E3B)', filter: 'brightness(0.5)' }} />
+                        <stop offset="100%" stopColor="#064E3B" style={{ stopColor: '#064E3B' }} />
                       </linearGradient>
                       {/* Light Mode Gradient: Luminous, eye-friendly theme gradient */}
                       <linearGradient id="fluid-gradient-light" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)', filter: 'brightness(1.15)' }} />
+                        <stop offset="0%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)' }} />
                         <stop offset="60%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)' }} />
-                        <stop offset="100%" stopColor="var(--theme-primary-hex, #064E3B)" style={{ stopColor: 'var(--theme-primary-hex, #064E3B)', filter: 'brightness(0.75)' }} />
+                        <stop offset="100%" stopColor="#064E3B" style={{ stopColor: '#064E3B' }} />
                       </linearGradient>
                       <radialGradient id="glow-gradient-dark" cx="50%" cy="50%" r="50%">
                         <stop offset="0%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)' }} stopOpacity="0.45" />
@@ -327,10 +339,11 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
 
               {/* Profile Image — Completely fluid, continuous feather-soft eased gradient with zero visible steps or lines */}
               <motion.div
-                initial={{ opacity: 0, scale: 0.96 }}
-                animate={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.35, ease: cubicEase }}
-                className="relative z-10 flex items-center justify-center pointer-events-none"
+                className="relative z-10 flex items-center justify-center pointer-events-none transform-gpu"
+                style={{ willChange: 'opacity, transform', transform: 'translateZ(0)' }}
               >
                 <img
                   src={imageSrc}
@@ -346,7 +359,7 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
                     maskImage: 'linear-gradient(to bottom, black 0%, black 76%, rgba(0, 0, 0, 0.99) 79%, rgba(0, 0, 0, 0.96) 82%, rgba(0, 0, 0, 0.91) 85%, rgba(0, 0, 0, 0.82) 88%, rgba(0, 0, 0, 0.69) 91%, rgba(0, 0, 0, 0.52) 94%, rgba(0, 0, 0, 0.33) 96.5%, rgba(0, 0, 0, 0.15) 98.2%, rgba(0, 0, 0, 0.04) 99.2%, transparent 100%)',
                     WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 76%, rgba(0, 0, 0, 0.99) 79%, rgba(0, 0, 0, 0.96) 82%, rgba(0, 0, 0, 0.91) 85%, rgba(0, 0, 0, 0.82) 88%, rgba(0, 0, 0, 0.69) 91%, rgba(0, 0, 0, 0.52) 94%, rgba(0, 0, 0, 0.33) 96.5%, rgba(0, 0, 0, 0.15) 98.2%, rgba(0, 0, 0, 0.04) 99.2%, transparent 100%)',
                   }}
-                  className="w-[240px] sm:w-[300px] lg:w-[420px] h-auto object-contain scale-[1.55] pointer-events-auto transition-transform duration-500 hover:scale-[1.6]"
+                  className="w-[240px] sm:w-[300px] lg:w-[420px] h-auto object-contain scale-[1.6] pointer-events-auto"
                 />
               </motion.div>
             </div>
@@ -371,14 +384,19 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
                       key={idx}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3, delay: 0.08 + idx * 0.05 }}
-                      className="flex items-center group cursor-default select-none"
+                      whileHover={{ x: isRtl ? -12 : 12 }}
+                      transition={{
+                        duration: 0.28,
+                        ease: cubicEase,
+                        delay: 0.05 + idx * 0.03,
+                      }}
+                      className="flex items-center cursor-pointer py-0.5"
                     >
-                      <span className="text-emerald-500 dark:text-emerald-400 font-extrabold text-lg lg:text-xl xl:text-2xl 2xl:text-3xl mr-2.5 rtl:mr-0 rtl:ml-2.5 select-none shrink-0 group-hover:text-emerald-400 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-all duration-200 leading-none">
+                      <span className="text-foreground/90 font-extrabold text-lg lg:text-xl xl:text-2xl 2xl:text-3xl mr-2.5 rtl:mr-0 rtl:ml-2.5 shrink-0 leading-none">
                         -
                       </span>
                       <span
-                        className="whitespace-nowrap text-base sm:text-lg lg:text-[1.15rem] xl:text-[1.4rem] 2xl:text-[1.65rem] font-extrabold tracking-tight rtl:tracking-normal uppercase rtl:normal-case text-foreground/90 group-hover:text-emerald-400 transition-colors duration-200 select-none leading-none"
+                        className="whitespace-nowrap text-base sm:text-lg lg:text-[1.15rem] xl:text-[1.4rem] 2xl:text-[1.65rem] font-extrabold tracking-tight rtl:tracking-normal uppercase rtl:normal-case text-foreground/90 leading-none"
                         dir="auto"
                       >
                         {cleanRole}

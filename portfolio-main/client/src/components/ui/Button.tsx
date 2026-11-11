@@ -21,17 +21,17 @@ const buttonVariants = cva(
       variant: {
         // Primary brand button (Solid Emerald with ambient glow and lift)
         primary:
-          "bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold shadow-sm hover:shadow-[0_8px_24px_rgba(16,185,129,0.32)] hover:-translate-y-0.5",
+          "bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold shadow-sm hover:shadow-[0_8px_20px_rgba(16,185,129,0.25)] dark:hover:shadow-[0_6px_18px_rgba(16,185,129,0.15)] hover:-translate-y-0.5",
         brand:
-          "bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold shadow-sm hover:shadow-[0_8px_24px_rgba(16,185,129,0.32)] hover:-translate-y-0.5",
+          "bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold shadow-sm hover:shadow-[0_8px_20px_rgba(16,185,129,0.25)] dark:hover:shadow-[0_6px_18px_rgba(16,185,129,0.15)] hover:-translate-y-0.5",
         
         // Secondary glass button (Frosted card background with responsive border)
         secondary:
-          "bg-card/70 dark:bg-white/[0.04] hover:bg-card/95 dark:hover:bg-white/[0.08] backdrop-blur-md border border-border/80 dark:border-white/10 hover:border-emerald-500/60 dark:hover:border-emerald-500/60 text-foreground hover:text-emerald-500 dark:hover:text-emerald-400 shadow-sm hover:shadow-[0_6px_20px_rgba(16,185,129,0.15)] hover:-translate-y-0.5",
+          "bg-card/70 dark:bg-white/[0.04] hover:bg-card/95 dark:hover:bg-white/[0.08] backdrop-blur-md border border-border/80 dark:border-white/10 hover:border-emerald-500/50 dark:hover:border-emerald-500/40 text-foreground hover:text-emerald-500 dark:hover:text-emerald-400 shadow-sm hover:shadow-[0_6px_16px_rgba(16,185,129,0.12)] dark:hover:shadow-none hover:-translate-y-0.5",
         
         // Brand outline (Tinted emerald with full emerald fill on hover)
         "brand-outline":
-          "bg-emerald-500/10 hover:bg-emerald-500 text-emerald-500 dark:text-emerald-400 hover:text-slate-950 dark:hover:text-slate-950 border border-emerald-500/35 hover:border-emerald-500 shadow-xs hover:shadow-[0_6px_20px_rgba(16,185,129,0.25)] hover:-translate-y-0.5",
+          "bg-emerald-500/10 hover:bg-emerald-500 text-emerald-500 dark:text-emerald-400 hover:text-slate-950 dark:hover:text-slate-950 border border-emerald-500/35 hover:border-emerald-500 shadow-xs hover:shadow-[0_6px_16px_rgba(16,185,129,0.20)] dark:hover:shadow-[0_4px_14px_rgba(16,185,129,0.12)] hover:-translate-y-0.5",
         
         // Subtle outline
         outline:

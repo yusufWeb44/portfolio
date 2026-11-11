@@ -330,26 +330,28 @@ export const ServiceCard = ({
       className="h-full"
     >
       <SpotlightCard
-        spotlightColor="rgba(16, 185, 129, 0.12)"
-        size={380}
+        spotlightColor="rgba(16, 185, 129, 0.05)"
+        darkSpotlightColor="rgba(16, 185, 129, 0.015)"
+        size={280}
+        darkSize={180}
         className={cn(
-          "group relative flex min-h-[440px] sm:h-[460px] w-full flex-col justify-between overflow-hidden rounded-xl sm:rounded-2xl p-6 sm:p-8 border border-border/70 bg-gradient-to-b backdrop-blur-xl shadow-lg hover:border-emerald-500/50 hover:shadow-xl hover:shadow-emerald-500/10 transition-all duration-300 select-none",
+          "group relative flex min-h-[440px] sm:h-[460px] w-full flex-col justify-between overflow-hidden rounded-xl sm:rounded-2xl p-6 sm:p-8 border border-border/70 bg-gradient-to-b backdrop-blur-xl shadow-md hover:border-emerald-500/35 dark:hover:border-emerald-500/20 hover:shadow-lg dark:hover:shadow-none transition-all duration-300 select-none",
           activeGradient
         )}
       >
-        {/* Top Ambient Glow on Hover */}
-        <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl group-hover:bg-emerald-500/20 transition-all duration-700 pointer-events-none" />
+        {/* Top Ambient Glow on Hover (Subdued in dark mode) */}
+        <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/[0.04] dark:bg-emerald-500/[0.02] rounded-full blur-3xl group-hover:bg-emerald-500/[0.08] dark:group-hover:bg-emerald-500/[0.03] transition-all duration-700 pointer-events-none" />
 
         {/* Card Top: Number & Icon */}
         <div className="z-10 flex flex-col items-start text-start w-full">
           <div className="w-full flex items-center justify-between mb-8">
-            <span className="text-xs font-mono font-bold tracking-widest text-emerald-500 uppercase px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 shadow-sm">
-              ( {service.number} )
+            <span className="text-xl sm:text-2xl font-black font-sans tracking-tight text-foreground dark:text-white leading-none select-none">
+              {service.number}
             </span>
             <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/40 group-hover:bg-emerald-400 group-hover:scale-125 transition-all duration-300" />
           </div>
 
-          <div className="w-12 h-12 rounded-xl bg-card/80 dark:bg-white/[0.06] border border-border/80 flex items-center justify-center text-foreground group-hover:text-emerald-400 group-hover:border-emerald-500/40 transition-colors duration-200 shadow-inner">
+          <div className="w-12 h-12 rounded-xl bg-card/80 dark:bg-white/[0.06] border border-border/80 flex items-center justify-center text-foreground group-hover:text-emerald-400 group-hover:border-emerald-500/30 dark:group-hover:border-emerald-500/20 transition-colors duration-200 shadow-inner">
             <IconComp className="h-6 w-6" />
           </div>
         </div>
@@ -384,7 +386,7 @@ export const ServiceCard = ({
         </div>
 
         {/* Subtle bottom emerald line */}
-        <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-500/0 to-transparent group-hover:via-emerald-500/60 transition-all duration-500" />
+        <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-500/0 to-transparent group-hover:via-emerald-500/30 dark:group-hover:via-emerald-500/15 transition-all duration-500" />
       </SpotlightCard>
     </motion.div>
   );

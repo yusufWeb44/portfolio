@@ -127,7 +127,7 @@ const Services = () => {
                 {i < 3 && (
                   <div className="hidden md:block absolute top-5 left-full w-full h-px bg-border -z-0" />
                 )}
-                <div className="text-4xl font-bold text-muted-foreground/15 tracking-tighter mb-6">{step.n}</div>
+                <div className="text-2xl sm:text-3xl font-black font-sans tracking-tight text-foreground dark:text-white leading-none select-none mb-4">{step.n}</div>
                 <h3 className="text-lg font-bold tracking-tight mb-3">{step.t}</h3>
                 <p className="text-muted-foreground text-sm leading-relaxed">{step.d}</p>
               </motion.div>

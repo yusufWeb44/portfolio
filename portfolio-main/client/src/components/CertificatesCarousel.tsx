@@ -325,7 +325,7 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({ cert
                       setSelectedCert(cert);
                     }
                   }}
-                  className="w-full h-full rounded-none bg-white dark:bg-zinc-900 border-[2px] border-white/80 dark:border-white/20 shadow-[0_16px_40px_rgba(0,0,0,0.55)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.9)] overflow-hidden cursor-pointer transition-transform duration-300 hover:scale-[1.02] hover:border-emerald-400/80 hover:shadow-[0_22px_50px_rgba(16,185,129,0.25)]"
+                  className="w-full h-full rounded-none bg-white dark:bg-zinc-900 border-[2px] border-white/80 dark:border-white/20 shadow-[0_16px_40px_rgba(0,0,0,0.55)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.9)] overflow-hidden cursor-pointer transition-transform duration-300 hover:scale-[1.02] hover:border-emerald-500/35 dark:hover:border-emerald-500/20 hover:shadow-md dark:hover:shadow-none"
                 >
                   {imgSrc ? (
                     <img

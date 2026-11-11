@@ -121,8 +121,8 @@ const StackedCard = ({
   // Incoming cards (i > 0): completely hidden and off-screen (y: 900, opacity: 0, visibility: 'hidden')
   // until their precise scroll segment begins.
   const numIncoming = Math.max(1, total - 1);
-  const cardSpan = 0.88 / numIncoming;
-  const start = 0.06 + (i - 1) * cardSpan;
+  const cardSpan = 0.86 / numIncoming;
+  const start = 0.08 + (i - 1) * cardSpan;
   const end = start + cardSpan * 0.85; // 85% travel for smooth glide, 15% rest pause
 
   // y: Starts 900px below (well off-screen), glides up with cubic ease-out, settles at 0
@@ -190,8 +190,10 @@ const StackedCard = ({
       className="absolute inset-x-0 mx-auto flex justify-center will-change-transform"
     >
       <SpotlightCard
-        spotlightColor="rgba(16, 185, 129, 0.08)"
-        size={500}
+        spotlightColor="rgba(16, 185, 129, 0.04)"
+        darkSpotlightColor="rgba(16, 185, 129, 0.012)"
+        size={320}
+        darkSize={200}
         style={{
           maxWidth: `calc(980px - ${diff * 20}px)`,
           width: `calc(100% - ${diff * 10}px)`,
@@ -232,7 +234,7 @@ const StackedCard = ({
               </h3>
 
               {/* 4. Project Description */}
-              <p className="text-xs sm:text-[12.5px] lg:text-[13px] text-muted-foreground dark:text-zinc-300 leading-relaxed line-clamp-2 sm:line-clamp-3 mb-2.5 sm:mb-3 w-full">
+              <p className="text-xs sm:text-[13px] lg:text-[13.5px] text-muted-foreground dark:text-zinc-300 leading-relaxed line-clamp-4 sm:line-clamp-5 lg:line-clamp-6 mb-3 sm:mb-3.5 w-full">
                 {displayDescription}
               </p>
 
@@ -261,7 +263,7 @@ const StackedCard = ({
                 to={`/projects#${project.slug}`}
                 className={cn(
                   buttonVariants({ variant: 'primary', size: 'default' }),
-                  "font-bold text-xs sm:text-[13px] tracking-wide shadow-sm hover:shadow-[0_8px_24px_rgba(16,185,129,0.35)]"
+                  "font-bold text-xs sm:text-[13px] tracking-wide shadow-sm hover:shadow-[0_8px_20px_rgba(16,185,129,0.22)] dark:hover:shadow-[0_6px_16px_rgba(16,185,129,0.14)]"
                 )}
               >
                 <span>{isAr ? 'عرض دراسة الحالة' : 'VIEW CASE STUDY'}</span>
@@ -353,10 +355,10 @@ const ProjectsSection = () => {
       {/* ── Outer Scroll Track ── */}
       <div ref={trackRef} className="relative w-full" style={{ height: trackHeight }}>
         {/* ── Single Unified Sticky Container: Locks title + cards together with proper navbar clearance ── */}
-        <div className="sticky top-0 h-screen w-full flex flex-col justify-start pt-16 sm:pt-20 lg:pt-16 pb-4 overflow-x-clip pointer-events-none">
+        <div className="sticky top-0 h-screen w-full flex flex-col justify-start pt-[80px] sm:pt-[84px] lg:pt-[84px] pb-4 overflow-x-clip pointer-events-none">
 
           {/* ── 1. Section Header: Clear margin below floating navbar ── */}
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-2 sm:pb-3 w-full pointer-events-auto">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-2 sm:pb-2.5 w-full pointer-events-auto">
             <div className="max-w-3xl">
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight leading-[1.15] text-foreground mb-1">
                 <SplitText
@@ -436,7 +438,7 @@ const ProjectsSection = () => {
             to="/projects"
             className={cn(
               buttonVariants({ variant: 'primary', size: 'lg' }),
-              "font-mono uppercase tracking-wider"
+              "font-bold tracking-wide"
             )}
           >
             <span className="relative z-10">{isAr ? `استكشاف جميع المشاريع (${totalCount})` : `EXPLORE ALL PROJECTS (${totalCount})`}</span>

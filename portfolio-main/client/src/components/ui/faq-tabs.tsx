@@ -121,13 +121,15 @@ const FAQItemCard = ({ question, answer }: FAQItem) => {
 
   return (
     <SpotlightCard
-      spotlightColor="rgba(16, 185, 129, 0.08)"
-      size={350}
+      spotlightColor="rgba(16, 185, 129, 0.04)"
+      darkSpotlightColor="rgba(16, 185, 129, 0.012)"
+      size={260}
+      darkSize={180}
       className={cn(
         'rounded-xl border backdrop-blur-xl transition-all duration-300',
         isOpen
-          ? 'bg-card/60 dark:bg-white/[0.04] border-emerald-500/30 shadow-lg shadow-emerald-500/5'
-          : 'bg-card/30 dark:bg-white/[0.02] border-border/50 hover:border-emerald-500/25'
+          ? 'bg-card/60 dark:bg-white/[0.04] border-emerald-500/25 dark:border-emerald-500/20 shadow-sm'
+          : 'bg-card/30 dark:bg-white/[0.02] border-border/50 hover:border-emerald-500/25 dark:hover:border-emerald-500/15'
       )}
     >
       <button

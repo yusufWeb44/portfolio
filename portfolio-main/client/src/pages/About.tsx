@@ -194,7 +194,7 @@ const About = () => {
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.08 }}
               >
-                <div className="text-xs font-mono text-muted-foreground mb-4">{String(i + 1).padStart(2, '0')}</div>
+                <div className="text-xl sm:text-2xl font-black font-sans tracking-tight text-foreground dark:text-white leading-none select-none mb-4">{String(i + 1).padStart(2, '0')}</div>
                 <h3 className="text-xl font-bold tracking-tight mb-3 group-hover:text-foreground transition-colors">{v.label}</h3>
                 <p className="text-muted-foreground leading-relaxed">{v.desc}</p>
               </motion.div>

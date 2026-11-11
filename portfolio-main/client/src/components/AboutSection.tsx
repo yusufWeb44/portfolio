@@ -131,7 +131,7 @@ const AboutSection = () => {
           >
             {/* Main Title */}
             <div>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-foreground tracking-tight leading-[1.15]">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-foreground tracking-tight leading-[1.22] pb-1">
                 <SplitText
                   text={displayHeadline}
                   delay={30}
@@ -141,7 +141,7 @@ const AboutSection = () => {
             </div>
 
             {/* Bio Text */}
-            <FadeContent delay={0.15} blur={true} distance={20} className="space-y-4">
+            <FadeContent delay={0.15} blur={false} distance={16} className="space-y-4">
               {displayBio1 ? (
                 <>
                   <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
@@ -178,30 +178,32 @@ const AboutSection = () => {
                   className={card.colSpan || (i === 2 && displayCards.length === 3 ? 'sm:col-span-2' : '')}
                 >
                   <SpotlightCard
-                    spotlightColor="rgba(16, 185, 129, 0.14)"
-                    size={380}
+                    spotlightColor="rgba(16, 185, 129, 0.05)"
+                    darkSpotlightColor="rgba(16, 185, 129, 0.015)"
+                    size={280}
+                    darkSize={180}
                     className={[
                       'group relative flex flex-col gap-5 rounded-xl sm:rounded-2xl p-6 sm:p-7 md:p-8 h-full',
                       'bg-card/40 dark:bg-white/[0.03] border border-border/60 backdrop-blur-xl',
-                      'hover:border-emerald-500/40 hover:-translate-y-1.5',
-                      'hover:shadow-[0_0_25px_rgba(16,185,129,0.1)]',
+                      'hover:border-emerald-500/35 dark:hover:border-emerald-500/20 hover:-translate-y-1',
+                      'shadow-sm dark:hover:shadow-none',
                       'transition-all duration-300 ease-out cursor-default',
                     ].join(' ')}
                   >
-                    {/* Subtle background glow on hover */}
-                    <div className="absolute inset-0 rounded-xl sm:rounded-2xl bg-gradient-to-br from-emerald-500/0 to-emerald-500/0 group-hover:from-emerald-500/[0.03] group-hover:to-transparent transition-all duration-500 pointer-events-none" />
+                    {/* Subtle background tint on hover */}
+                    <div className="absolute inset-0 rounded-xl sm:rounded-2xl bg-gradient-to-br from-emerald-500/0 to-emerald-500/0 group-hover:from-emerald-500/[0.02] group-hover:to-transparent transition-all duration-500 pointer-events-none" />
 
                     {/* Card Header */}
                     <div className="flex items-start justify-between gap-4 relative z-10">
-                      <div className="flex items-center gap-3">
-                        <span className="flex items-center justify-center w-8 h-8 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono text-xs font-bold shrink-0">
+                      <div className="flex items-baseline gap-2.5 sm:gap-3">
+                        <span className="text-xl sm:text-2xl font-black font-sans tracking-tight text-foreground dark:text-white leading-none select-none shrink-0">
                           {card.id || String(i + 1).padStart(2, '0')}
                         </span>
-                        <h3 className="text-base md:text-lg font-bold text-foreground tracking-tight group-hover:text-emerald-400 transition-colors duration-300">
+                        <h3 className="text-base md:text-lg font-bold text-foreground tracking-tight">
                           {card.title}
                         </h3>
                       </div>
-                      <span className="text-muted-foreground/40 group-hover:text-emerald-500/60 transition-colors duration-300 shrink-0 mt-0.5">
+                      <span className="text-muted-foreground/40 group-hover:text-muted-foreground/80 transition-colors duration-300 shrink-0 mt-0.5">
                         {getCardIcon(card.icon)}
                       </span>
                     </div>
@@ -211,8 +213,8 @@ const AboutSection = () => {
                       {card.description}
                     </p>
 
-                    {/* Bottom accent line */}
-                    <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-500/0 to-transparent group-hover:via-emerald-500/30 transition-all duration-500 pointer-events-none" />
+                    {/* Bottom subtle accent line */}
+                    <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-500/0 to-transparent group-hover:via-emerald-500/25 dark:group-hover:via-emerald-500/10 transition-all duration-500 pointer-events-none" />
                   </SpotlightCard>
                 </motion.div>
               ))}

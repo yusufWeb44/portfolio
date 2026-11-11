@@ -53,9 +53,9 @@ export const SocialButton: React.FC<SocialButtonProps> = ({
         "hover:-translate-y-1 hover:bg-emerald-50 hover:border-emerald-500 hover:text-emerald-600",
         "hover:shadow-[0_8px_20px_rgba(16,185,129,0.22)]",
 
-        // Dark Mode Hover: smooth micro-lift, luminous emerald glass, neon border & ambient aura
-        "dark:hover:bg-emerald-500/15 dark:hover:border-emerald-400 dark:hover:text-emerald-400",
-        "dark:hover:shadow-[0_8px_25px_rgba(16,185,129,0.35)]",
+        // Dark Mode Hover: smooth micro-lift, subtle emerald tint & delicate glow
+        "dark:hover:bg-emerald-500/10 dark:hover:border-emerald-500/40 dark:hover:text-emerald-400",
+        "dark:hover:shadow-[0_4px_16px_rgba(16,185,129,0.12)]",
 
         // Active state
         "active:translate-y-0 active:scale-95",

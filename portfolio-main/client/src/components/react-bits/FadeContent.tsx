@@ -21,16 +21,16 @@ export interface FadeContentProps {
  */
 export const FadeContent: React.FC<FadeContentProps> = ({
   children,
-  blur = true,
-  duration = 0.65,
+  blur = false,
+  duration = 0.5,
   easing = [0.16, 1, 0.3, 1],
   delay = 0,
-  threshold = 0.1,
+  threshold = 0.08,
   initialOpacity = 0,
   direction = 'up',
-  distance = 24,
+  distance = 18,
   className = '',
-  rootMargin = '-60px',
+  rootMargin = '-30px',
 }) => {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, amount: threshold, margin: rootMargin as any });

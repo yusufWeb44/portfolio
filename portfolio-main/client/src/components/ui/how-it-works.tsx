@@ -178,115 +178,219 @@ const StickyNoteCard = ({
     return () => observer.disconnect();
   }, [isFirst]);
 
-  // Relaxed entry kinematics for ultra-smooth, comfortable appearance
-  const entryRotate = tilt * 0.75;
-  const entryY = 16;
-  const entryScale = 0.96;
+  // Realistic tactile paper & pushpin kinematics (pivoting from the top pushpin hole)
+  const unpinnedSwing = tilt + (isVisualLeft ? -5.5 : 5.5);
+  const unpinnedRotateY = isVisualLeft ? 7 : -7;
+  // Relative fan-out angles inside the already-tilted card (pivoting from the pushpin at 50% 22px)
+  const stackBottomRotate = isRtl ? -1.8 : 1.8;
+  const stackMiddleRotate = isRtl ? 1.1 : -1.1;
 
   return (
-    <motion.div
+    <div
       ref={ref}
       className="relative"
-      initial={{ opacity: 0, y: entryY, scale: entryScale, rotate: entryRotate }}
-      animate={
-        isRevealed
-          ? { opacity: 1, y: 0, scale: 1, rotate: tilt }
-          : { opacity: 0, y: entryY, scale: entryScale, rotate: entryRotate }
-      }
-      transition={
-        isRevealed
-          ? {
-              duration: 0.72,
-              ease: [0.16, 1, 0.3, 1],
-              opacity: { duration: 0.55, ease: 'easeOut' },
-            }
-          : {
-              duration: 0.4,
-              ease: [0.25, 0.1, 0.25, 1],
-              opacity: { duration: 0.32, ease: 'easeIn' },
-            }
-      }
-      style={{ transformOrigin: isVisualLeft ? '60% 16%' : '40% 16%' }}
+      style={{ perspective: '1200px' }}
     >
-      {/* Paper stack behind */}
-      <div className="absolute -inset-0.5 rounded-[1px]"
-        style={{
-          background: step.paperEdge,
-          transform: `rotate(${tilt + (isRtl ? -1.2 : 1.2)}deg) translate(${isRtl ? -2 : 2}px, 3px)`,
-          opacity: 0.35,
-          boxShadow: '1px 2px 4px rgba(0,0,0,0.06)',
+      <motion.div
+        className="relative will-change-transform"
+        initial={{
+          opacity: 0,
+          y: -12,
+          scale: 1.035,
+          rotateX: 18,
+          rotateY: unpinnedRotateY,
+          rotate: unpinnedSwing,
         }}
-      />
-      <div className="absolute inset-0 rounded-[1px]"
+        animate={
+          isRevealed
+            ? {
+                opacity: 1,
+                y: 0,
+                scale: 1,
+                rotateX: 0,
+                rotateY: 0,
+                rotate: tilt,
+              }
+            : {
+                opacity: 0,
+                y: -10,
+                scale: 0.96,
+                rotateX: 16,
+                rotateY: -unpinnedRotateY * 0.8,
+                rotate: tilt + (isVisualLeft ? 4.5 : -4.5),
+              }
+        }
+        transition={
+          isRevealed
+            ? {
+                opacity: { duration: 0.28, ease: [0.16, 1, 0.3, 1] },
+                y: { type: 'spring', stiffness: 190, damping: 20, mass: 0.75 },
+                scale: { type: 'spring', stiffness: 180, damping: 20, mass: 0.8 },
+                rotateX: { type: 'spring', stiffness: 170, damping: 17, mass: 0.8 },
+                rotateY: { type: 'spring', stiffness: 170, damping: 18, mass: 0.8 },
+                rotate: { type: 'spring', stiffness: 145, damping: 13, mass: 0.8 },
+              }
+            : {
+                opacity: { duration: 0.26, delay: 0.06, ease: 'easeIn' },
+                y: { duration: 0.34, ease: [0.32, 0, 0.67, 0] },
+                scale: { duration: 0.34, ease: [0.32, 0, 0.67, 0] },
+                rotateX: { duration: 0.34, ease: [0.32, 0, 0.67, 0] },
+                rotateY: { duration: 0.34, ease: [0.32, 0, 0.67, 0] },
+                rotate: { duration: 0.34, ease: [0.32, 0, 0.67, 0] },
+              }
+        }
         style={{
-          background: step.paperEdge,
-          transform: `rotate(${tilt - (isRtl ? -0.5 : 0.5)}deg) translate(${isRtl ? -1 : 1}px, 1px)`,
-          opacity: 0.45,
-          boxShadow: '1px 1px 3px rgba(0,0,0,0.04)',
-        }}
-      />
-
-      {/* Main paper */}
-      <div
-        className="relative rounded-[1px] overflow-hidden"
-        style={{
-          background: step.paperBg,
-          boxShadow: `
-            0 1px 2px rgba(0,0,0,0.04),
-            0 2px 4px rgba(0,0,0,0.04),
-            0 4px 8px rgba(0,0,0,0.06),
-            0 8px 16px rgba(0,0,0,0.06),
-            0 16px 32px rgba(0,0,0,0.04),
-            inset 0 1px 0 rgba(255,255,255,0.8),
-            inset 0 -1px 0 rgba(0,0,0,0.03),
-            inset 1px 0 0 rgba(255,255,255,0.3),
-            inset -1px 0 0 rgba(0,0,0,0.02)
-          `,
+          transformOrigin: '50% 22px',
         }}
       >
-        {/* Paper texture — lightweight CSS pattern instead of expensive SVG feTurbulence filter */}
-        <div className="absolute inset-0 pointer-events-none mix-blend-multiply"
+        {/* ── Paper Stack Behind: 100% Opaque Physical Sheets (Zero Transparency Bleed) ── */}
+        {/* Deepest backing sheet (Sheet 3) */}
+        <motion.div
+          className="absolute inset-0 rounded-[1px] pointer-events-none overflow-hidden"
+          initial={{ rotate: 0, x: 0, y: 0 }}
+          animate={
+            isRevealed
+              ? { rotate: stackBottomRotate, x: isRtl ? -3 : 3, y: 5 }
+              : { rotate: 0, x: 0, y: 0 }
+          }
+          transition={
+            isRevealed
+              ? { type: 'spring', stiffness: 155, damping: 16, delay: 0.1 }
+              : { duration: 0.2, ease: 'easeIn' }
+          }
           style={{
-            opacity: 0.04,
-            backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px)',
-            backgroundSize: '8px 8px',
+            backgroundColor: step.paperEdge,
+            backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.03) 100%)`,
+            border: '1px solid rgba(0,0,0,0.10)',
+            boxShadow: `
+              0 6px 16px rgba(0,0,0,0.18),
+              0 2px 5px rgba(0,0,0,0.12),
+              inset 0 1px 0 rgba(255,255,255,0.45)
+            `,
+            transformOrigin: '50% 22px',
           }}
         />
-        {/* Ruled lines */}
-        <div className="absolute inset-0 pointer-events-none" style={{ opacity: 0.04 }}>
-          {Array.from({ length: 14 }).map((_, i) => (
-            <div key={i} className="absolute w-full"
-              style={{ top: `${72 + i * 22}px`, height: '0.8px', background: '#6b7280' }}
-            />
-          ))}
-        </div>
-        {/* Red margin (mirrored on right side for RTL Arabic writing) */}
-        <div className="absolute top-0 bottom-0 pointer-events-none"
-          style={{ [isRtl ? 'right' : 'left']: '36px', width: '1.2px', background: 'rgba(220,50,50,0.08)' }}
-        />
-        {/* Top adhesive */}
-        <div className="absolute top-0 left-0 right-0 pointer-events-none"
-          style={{ height: '6px', background: `linear-gradient(180deg, ${step.paperEdge}90, transparent)` }}
-        />
 
-        {/* Pushpin */}
-        <div className="flex justify-center pt-2 relative z-10">
-          <Pushpin color={step.pinColor} />
-        </div>
+        {/* Middle backing sheet (Sheet 2) */}
+        <motion.div
+          className="absolute inset-0 rounded-[1px] pointer-events-none overflow-hidden"
+          initial={{ rotate: 0, x: 0, y: 0 }}
+          animate={
+            isRevealed
+              ? { rotate: stackMiddleRotate, x: isRtl ? 2 : -2, y: 2.5 }
+              : { rotate: 0, x: 0, y: 0 }
+          }
+          transition={
+            isRevealed
+              ? { type: 'spring', stiffness: 170, damping: 18, delay: 0.05 }
+              : { duration: 0.22, ease: 'easeIn' }
+          }
+          style={{
+            backgroundColor: step.paperBg,
+            backgroundImage: `linear-gradient(180deg, ${step.paperEdge}88 0%, rgba(0,0,0,0.03) 100%)`,
+            border: '1px solid rgba(0,0,0,0.08)',
+            boxShadow: `
+              0 3px 8px rgba(0,0,0,0.13),
+              0 1px 3px rgba(0,0,0,0.09),
+              inset 0 1px 0 rgba(255,255,255,0.65)
+            `,
+            transformOrigin: '50% 22px',
+          }}
+        >
+          {/* Subtle ruled lines visible on the peeking edges of the middle sheet */}
+          <div className="absolute inset-0 pointer-events-none" style={{ opacity: 0.035 }}>
+            {Array.from({ length: 14 }).map((_, i) => (
+              <div
+                key={i}
+                className="absolute w-full"
+                style={{ top: `${72 + i * 22}px`, height: '0.8px', background: '#6b7280' }}
+              />
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Main paper (Top Sheet) */}
+        <div
+          className="relative rounded-[1px] overflow-hidden"
+          style={{
+            background: step.paperBg,
+            border: '1px solid rgba(0,0,0,0.06)',
+            boxShadow: `
+              0 1px 2px rgba(0,0,0,0.07),
+              0 3px 6px rgba(0,0,0,0.08),
+              0 6px 12px rgba(0,0,0,0.08),
+              0 12px 24px rgba(0,0,0,0.06),
+              inset 0 1px 0 rgba(255,255,255,0.85),
+              inset 0 -1px 0 rgba(0,0,0,0.04)
+            `,
+          }}
+        >
+          {/* Paper texture — lightweight CSS pattern instead of expensive SVG feTurbulence filter */}
+          <div className="absolute inset-0 pointer-events-none mix-blend-multiply"
+            style={{
+              opacity: 0.04,
+              backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px)',
+              backgroundSize: '8px 8px',
+            }}
+          />
+          {/* Ruled lines */}
+          <div className="absolute inset-0 pointer-events-none" style={{ opacity: 0.04 }}>
+            {Array.from({ length: 14 }).map((_, i) => (
+              <div key={i} className="absolute w-full"
+                style={{ top: `${72 + i * 22}px`, height: '0.8px', background: '#6b7280' }}
+              />
+            ))}
+          </div>
+          {/* Red margin (mirrored on right side for RTL Arabic writing) */}
+          <div className="absolute top-0 bottom-0 pointer-events-none"
+            style={{ [isRtl ? 'right' : 'left']: '36px', width: '1.2px', background: 'rgba(220,50,50,0.08)' }}
+          />
+          {/* Top adhesive */}
+          <div className="absolute top-0 left-0 right-0 pointer-events-none"
+            style={{ height: '6px', background: `linear-gradient(180deg, ${step.paperEdge}90, transparent)` }}
+          />
+
+          {/* Pushpin — tactile pinning strike on reveal & quick unpin on exit */}
+          <motion.div
+            className="flex justify-center pt-2 relative z-10"
+            initial={{ opacity: 0, y: -20, scale: 1.32 }}
+            animate={
+              isRevealed
+                ? { opacity: 1, y: 0, scale: 1 }
+                : { opacity: 0, y: -16, scale: 1.2 }
+            }
+            transition={
+              isRevealed
+                ? {
+                    type: 'spring',
+                    stiffness: 360,
+                    damping: 20,
+                    mass: 0.55,
+                    delay: 0.08,
+                    opacity: { duration: 0.16, delay: 0.06 },
+                  }
+                : {
+                    duration: 0.18,
+                    ease: [0.4, 0, 1, 1],
+                  }
+            }
+          >
+            <Pushpin color={step.pinColor} />
+          </motion.div>
 
         {/* Content */}
         <div className={`px-5 sm:px-7 pb-5 sm:pb-7 pt-1 sm:pt-2 relative z-10 ${isRtl ? 'text-right' : 'text-left'}`}>
-          <div className="flex items-center gap-2.5 sm:gap-3 mb-2.5 sm:mb-3">
-            <span className="inline-flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-lg font-mono text-xs sm:text-sm font-black"
-              style={{ background: `${step.pinColor}12`, color: step.pinColor, border: `2px solid ${step.pinColor}25` }}
+          {/* Header: Number and Title side-by-side on the same line */}
+          <div className="flex items-baseline gap-2.5 sm:gap-3 mb-2 sm:mb-2.5">
+            <span className="text-xl sm:text-2xl font-black font-sans tracking-tight leading-none select-none shrink-0"
+              style={{ color: '#1a1a2e' }}
             >
               {step.num}
             </span>
-            <div className="h-px flex-1" style={{ background: `${step.pinColor}15` }} />
+            <h3 className="text-lg sm:text-xl font-extrabold tracking-tight leading-snug" style={{ color: '#1a1a2e' }}>
+              {step.title}
+            </h3>
           </div>
-          <h3 className="text-lg sm:text-xl font-extrabold tracking-tight leading-snug mb-2 sm:mb-3" style={{ color: '#1a1a2e' }}>
-            {step.title}
-          </h3>
           <div className="flex items-center gap-1 mb-3 sm:mb-4">
             <div className="w-8 h-[3px] rounded-full" style={{ background: step.pinColor }} />
             <div className="w-3 h-[3px] rounded-full" style={{ background: `${step.pinColor}40` }} />
@@ -308,7 +412,8 @@ const StickyNoteCard = ({
           />
         </div>
       </div>
-    </motion.div>
+      </motion.div>
+    </div>
   );
 };
 
@@ -568,9 +673,24 @@ const HowItWorks = () => {
   return (
     <section
       id="how-i-work"
-      className="scroll-mt-24 py-10 sm:py-14 md:py-18 px-4 sm:px-6 lg:px-8 bg-transparent overflow-x-hidden overflow-y-visible"
+      className="relative scroll-mt-24 py-10 sm:py-14 md:py-18 px-4 sm:px-6 lg:px-8 bg-transparent overflow-x-hidden overflow-y-visible"
       aria-label="Engineering process and workflow"
     >
+      {/* ── Seamless Dot Grid Background System (Plain, Neutral & Comfortable — Zero Colored Glow) ── */}
+      <div
+        className="absolute inset-0 pointer-events-none -z-10 overflow-hidden select-none"
+        style={{
+          maskImage: 'linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%)',
+        }}
+        aria-hidden="true"
+      >
+        {/* Pure, plain Dot Grid Pattern Layer */}
+        <div
+          className="absolute inset-0 [background-size:26px_26px] bg-[radial-gradient(circle_at_center,rgba(15,23,42,0.13)_1.1px,transparent_1.1px)] dark:bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.09)_1.1px,transparent_1.1px)]"
+        />
+      </div>
+
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <motion.div

@@ -99,7 +99,7 @@ const FloatingTooltip = ({ skill }: { skill: HoveredSkillData }) => {
         width: `${tooltipWidth}px`,
       }}
     >
-      <div className="bg-white dark:bg-[#0c100e] border border-emerald-500/50 p-2.5 sm:p-3 rounded-xl shadow-[0_12px_28px_rgba(15,23,42,0.16)] dark:shadow-[0_16px_32px_rgba(0,0,0,0.95)] text-start relative select-none">
+      <div className="bg-popover dark:bg-[#121417] border border-border/80 dark:border-white/10 p-2.5 sm:p-3 rounded-xl shadow-[0_10px_25px_rgba(0,0,0,0.08)] dark:shadow-[0_16px_32px_rgba(0,0,0,0.85)] text-start relative select-none backdrop-blur-md">
         {/* Tooltip Header: Skill Name & Brand Icon directly adjacent */}
         <div className="flex items-center gap-2 mb-1.5 pb-1.5 border-b border-border/40">
           <span className="text-xs font-bold text-foreground font-sans">
@@ -126,7 +126,7 @@ const FloatingTooltip = ({ skill }: { skill: HoveredSkillData }) => {
           <svg width="16" height="8" viewBox="0 0 16 8" className="block overflow-visible">
             <polygon
               points="0,0 8,8 16,0"
-              className="fill-white dark:fill-[#0c100e] stroke-emerald-500/50"
+              className="fill-popover dark:fill-[#121417] stroke-border/80 dark:stroke-white/10"
               strokeWidth="1.5"
               strokeLinejoin="round"
             />
@@ -135,7 +135,7 @@ const FloatingTooltip = ({ skill }: { skill: HoveredSkillData }) => {
               y1="0"
               x2="15.5"
               y2="0"
-              className="stroke-white dark:stroke-[#0c100e]"
+              className="stroke-popover dark:stroke-[#121417]"
               strokeWidth="2"
             />
           </svg>
@@ -414,7 +414,7 @@ const SkillsSection = () => {
             </div>
 
             {/* Body Paragraphs */}
-            <FadeContent delay={0.15} blur={true} distance={20} className="space-y-4">
+            <FadeContent delay={0.15} blur={false} distance={16} className="space-y-4">
               {p1 ? (
                 <>
                   <p className="text-base md:text-lg text-muted-foreground leading-relaxed whitespace-pre-line">

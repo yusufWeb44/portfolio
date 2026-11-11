@@ -130,8 +130,8 @@ const FadeIn = ({
 }) => (
   <FadeContent
     delay={delay}
-    blur={true}
-    distance={24}
+    blur={false}
+    distance={18}
     className={className}
   >
     {children}
@@ -141,22 +141,29 @@ const FadeIn = ({
 const Home = () => {
   const { t, currentLang } = useLanguage();
   /* ─── State ──────────────────────────────────────────────────────── */
-  const [settings, setSettings] = useState<Settings | null>(null);
+  const [settings, setSettings] = useState<Settings | null>(() => {
+    try {
+      const cached = localStorage.getItem('portfolio_settings');
+      return cached ? JSON.parse(cached) : null;
+    } catch {
+      return null;
+    }
+  });
   const [experiences, setExperiences] = useState<ExperienceItem[]>([]);
   const [certificates, setCertificates] = useState<CertificateItem[]>([]);
   const [services, setServices] = useState<Service[]>([]);
-  const [socialLinks, setSocialLinks] = useState<SocialLinkItem[]>([]);
+  const [socialLinks, setSocialLinks] = useState<SocialLinkItem[]>(() => {
+    try {
+      const cached = localStorage.getItem('portfolio_social_links');
+      return cached ? JSON.parse(cached) : [];
+    } catch {
+      return [];
+    }
+  });
   const [rawFaqs, setRawFaqs] = useState<any[]>([]);
 
   /* ─── Data Fetching ─────────────────────────────────────────────── */
   useEffect(() => {
-    // Clear any stale cached DB content from earlier sessions
-    try {
-      localStorage.removeItem('portfolio_certificates');
-      localStorage.removeItem('portfolio_faqs');
-      localStorage.removeItem('portfolio_settings');
-    } catch { }
-
     const fetchAll = async () => {
       try {
         const [settRes, expRes, certRes, servRes, socialRes, faqRes] = await Promise.allSettled([
@@ -171,6 +178,9 @@ const Home = () => {
         if (settRes.status === 'fulfilled') {
           const settData = settRes.value.data.data;
           setSettings(settData);
+          try {
+            localStorage.setItem('portfolio_settings', JSON.stringify(settData));
+          } catch { }
         } else {
           setSettings(null);
         }
@@ -194,7 +204,11 @@ const Home = () => {
             setServices([]);
           }
           if (socialRes.status === 'fulfilled') {
-            setSocialLinks(socialRes.value.data.data || []);
+            const socialData = socialRes.value.data.data || [];
+            setSocialLinks(socialData);
+            try {
+              localStorage.setItem('portfolio_social_links', JSON.stringify(socialData));
+            } catch { }
           } else {
             setSocialLinks([]);
           }
@@ -352,7 +366,9 @@ const Home = () => {
         if (split.length > 0) return split;
       }
     }
-    return [];
+    return isAr
+      ? ['مطور تطبيقات ويب', 'مهندس برمجيات', 'تصميم وتطوير واجهات', 'حلول رقمية متكاملة']
+      : ['Full Stack Developer', 'Software Engineer', 'Frontend Specialist', 'Creative Technologist'];
   }, [isAr, settings?.typewriterWordsAr, settings?.typewriterWords]);
 
   const heroStats = useMemo(() => {
@@ -363,7 +379,19 @@ const Home = () => {
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       } catch { }
     }
-    return [];
+    return isAr
+      ? [
+          { value: '+4', label: 'سنوات خبرة' },
+          { value: '+25', label: 'مشروع منجز' },
+          { value: '+15', label: 'عميل سعيد' },
+          { value: '100%', label: 'التزام بالمواعيد' },
+        ]
+      : [
+          { value: '+4', label: 'Years Experience' },
+          { value: '+25', label: 'Projects Completed' },
+          { value: '+15', label: 'Satisfied Clients' },
+          { value: '100%', label: 'Commitment' },
+        ];
   }, [isAr, settings?.heroStatsAr, settings?.heroStats]);
 
   return (
@@ -617,8 +645,10 @@ const Home = () => {
               transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
             >
               <SpotlightCard
-                spotlightColor="rgba(16, 185, 129, 0.12)"
-                size={420}
+                spotlightColor="rgba(16, 185, 129, 0.05)"
+                darkSpotlightColor="rgba(16, 185, 129, 0.015)"
+                size={300}
+                darkSize={200}
                 className="bg-card/40 dark:bg-white/[0.03] backdrop-blur-xl border border-border/60 rounded-xl sm:rounded-2xl p-6 sm:p-8 md:p-10 space-y-6 sm:space-y-8 shadow-sm"
               >
 

@@ -5,7 +5,7 @@ export interface BlurTextProps {
   text: string;
   delay?: number;
   className?: string;
-  animateBy?: 'words' | 'letters';
+  animateBy?: 'words' | 'letters' | 'block';
   direction?: 'top' | 'bottom';
   threshold?: number;
   rootMargin?: string;
@@ -17,44 +17,65 @@ export interface BlurTextProps {
 
 /**
  * React Bits - BlurText
- * Smooth blur-to-focus animation for titles, subtitles, and captions as they enter viewport.
- * Automatically respects Arabic cursive typography by splitting words rather than letters.
+ * Refined, fluid entrance animation for subtitles, captions, and narrative text.
+ * Replaces jerky, blurry letter/word pop-ins with a silky, unified slide-up and fade.
  */
 export const BlurText: React.FC<BlurTextProps> = ({
   text,
-  delay = 50,
+  delay = 12,
   className = '',
   animateBy = 'words',
   direction = 'bottom',
-  threshold = 0.15,
-  rootMargin = '-40px',
+  threshold = 0.1,
+  rootMargin = '-30px',
   animationFrom,
   animationTo,
-  easing = [0.22, 1, 0.36, 1],
+  easing = [0.16, 1, 0.3, 1],
   onAnimationComplete,
 }) => {
   const ref = useRef<HTMLParagraphElement>(null);
   const isInView = useInView(ref, { once: true, amount: threshold, margin: rootMargin as any });
 
-  const hasArabic = /[\u0600-\u06FF]/.test(text);
-  const effectiveAnimateBy = hasArabic ? 'words' : animateBy;
-
-  const elements = effectiveAnimateBy === 'words' ? text.split(/\s+/) : text.split('');
-
   const defaultFrom = {
-    filter: 'blur(10px)',
     opacity: 0,
-    y: direction === 'top' ? -18 : 18,
+    y: direction === 'top' ? -14 : 14,
   };
 
   const defaultTo = {
-    filter: 'blur(0px)',
     opacity: 1,
     y: 0,
   };
 
   const fromState = animationFrom || defaultFrom;
   const toState = animationTo || defaultTo;
+
+  // For longer narrative paragraphs or when explicitly requested, animate as a cohesive block
+  // to avoid distracting multi-second sequential word pops.
+  const isBlock = animateBy === 'block' || (text && text.length > 90);
+
+  if (isBlock) {
+    return (
+      <motion.span
+        ref={ref}
+        initial={fromState}
+        animate={isInView ? toState : fromState}
+        transition={{
+          duration: 0.55,
+          ease: easing as any,
+        }}
+        onAnimationComplete={onAnimationComplete}
+        className={`inline-block ${className}`}
+        style={{ overflowWrap: 'break-word', wordBreak: 'normal' }}
+      >
+        {text}
+      </motion.span>
+    );
+  }
+
+  const hasArabic = /[\u0600-\u06FF]/.test(text);
+  const effectiveAnimateBy = hasArabic ? 'words' : animateBy;
+
+  const elements = effectiveAnimateBy === 'words' ? text.split(/\s+/) : text.split('');
 
   return (
     <span
@@ -73,7 +94,7 @@ export const BlurText: React.FC<BlurTextProps> = ({
             initial={fromState}
             animate={isInView ? toState : fromState}
             transition={{
-              duration: 0.5,
+              duration: 0.45,
               delay: (index * delay) / 1000,
               ease: easing as any,
             }}
