@@ -1,8 +1,9 @@
 import { motion } from 'framer-motion';
 import {
-  ArrowUpRight,
   Mail,
   Globe,
+  MapPin,
+  CalendarCheck,
 } from 'lucide-react';
 import {
   GithubIcon,
@@ -333,7 +334,9 @@ const Home = () => {
   );
 
   const email = settings?.email || '';
-  const location = settings?.location || '';
+  const location = isAr
+    ? (settings?.locationAr || settings?.location || '')
+    : (settings?.location || '');
 
   const availability = resolveField(
     'hero.availability',
@@ -558,47 +561,43 @@ const Home = () => {
         className="scroll-mt-24 relative overflow-hidden bg-transparent text-foreground py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8"
       >
         <div className="relative z-10 max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-
-            {/* ── Left Column: Headline + CTAs ── */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-40px' }}
+            transition={{ duration: 0.45, ease: [0.23, 1, 0.32, 1] }}
+          >
+            <SpotlightCard
+              spotlightColor="rgba(16, 185, 129, 0.04)"
+              darkSpotlightColor="rgba(255, 255, 255, 0.025)"
+              size={420}
+              darkSize={300}
+              className="bg-white dark:bg-[#121417] border border-slate-200/90 dark:border-white/[0.09] rounded-2xl sm:rounded-3xl shadow-[0_1px_2px_rgba(15,23,42,0.03),0_12px_32px_-8px_rgba(15,23,42,0.06)] dark:shadow-[0_16px_48px_rgba(0,0,0,0.45)] overflow-hidden"
             >
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight leading-[1.15] mb-6 text-foreground">
-                {isAr ? (
-                  resolveField('contact.headline', settings?.contactTitleAr, undefined, '') || (
-                    <>
-                      لديك فكرة أو مشروع؟
-                      <br />
-                      <span className="text-muted-foreground/60 italic">دعنا نتحدث.</span>
-                    </>
-                  )
-                ) : (
-                  resolveField('contact.headline', undefined, settings?.contactTitle, '') || (
-                    <>
-                      Have an idea?
-                      <br />
-                      <span className="text-muted-foreground/60 italic">Let&apos;s talk.</span>
-                    </>
-                  )
-                )}
-              </h2>
+              {/* ── Primary Invitation Zone: Title + Description + Action Buttons ── */}
+              <div className="relative z-10 px-6 py-10 sm:px-12 sm:py-14 md:px-16 md:py-16 flex flex-col items-center text-center">
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight leading-[1.15] text-foreground max-w-2xl">
+                  {resolveField(
+                    'contact.headline',
+                    settings?.contactTitleAr,
+                    settings?.contactTitle,
+                    isAr ? 'لديك فكرة؟' : 'Have an idea?'
+                  )}
+                </h2>
 
-              <p className="text-muted-foreground text-base md:text-lg leading-relaxed max-w-md mb-8">
-                <BlurText
-                  text={resolveField('contact.subtitle', settings?.contactSubtitleAr, settings?.contactSubtitle, "Whether you need a full-stack application, a custom API, or a mobile app — I'm ready to bring your vision to life.")}
-                  delay={20}
-                  className="text-muted-foreground text-base md:text-lg leading-relaxed max-w-md"
-                />
-              </p>
+                <p className="mt-4 text-slate-600 dark:text-zinc-300 text-base md:text-lg leading-relaxed max-w-xl">
+                  {resolveField(
+                    'contact.subtitle',
+                    settings?.contactSubtitleAr,
+                    settings?.contactSubtitle,
+                    isAr
+                      ? 'سواء كنت بحاجة إلى تطبيق ويب متكامل، أو واجهة برمجية مخصصة، أو لوحة تحكم حديثة، أو تطبيق هاتف — أنا جاهز لتحويل رؤيتك إلى واقع.'
+                      : "Whether you need a full-stack application, a custom API, a modern dashboard, or a mobile app — I'm ready to bring your vision to life."
+                  )}
+                </p>
 
-              {/* CTA Buttons */}
-              <FadeContent delay={0.2} blur={true} distance={15}>
-                <div className="flex flex-col sm:flex-row gap-3">
-                  {/* WhatsApp — primary */}
+                {/* CTA Buttons (WhatsApp + Email Button Only) */}
+                <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 w-full sm:w-auto">
                   <a
                     href={
                       settings?.whatsappNumber
@@ -616,94 +615,75 @@ const Home = () => {
                     <span>{isAr ? t('contact.chatWhatsapp', 'تواصل عبر واتساب') : 'Chat on WhatsApp'}</span>
                   </a>
 
-                  {/* Email — secondary */}
                   <a
                     href={`mailto:${email}`}
                     className={cn(
                       buttonVariants({ variant: 'secondary', size: 'default' }),
-                      "w-full sm:w-auto"
+                      "w-full sm:w-auto bg-slate-50 dark:bg-white/[0.05] hover:bg-white dark:hover:bg-white/[0.09] border-slate-200/90 dark:border-white/15"
                     )}
                   >
                     <Mail size={16} />
                     <span>{isAr ? t('contact.sendEmail', 'إرسال بريد إلكتروني') : 'Send an Email'}</span>
                   </a>
                 </div>
-              </FadeContent>
-            </motion.div>
+              </div>
 
-            {/* ── Right Column: Info Card ── */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <SpotlightCard
-                spotlightColor="rgba(16, 185, 129, 0.05)"
-                darkSpotlightColor="rgba(16, 185, 129, 0.015)"
-                size={300}
-                darkSize={200}
-                className="bg-card/40 dark:bg-white/[0.03] backdrop-blur-xl border border-border/60 rounded-xl sm:rounded-2xl p-6 sm:p-8 md:p-10 space-y-6 sm:space-y-8 shadow-sm"
-              >
+              {/* ── Bottom Architectural Dock: Location, Availability & Social Links ── */}
+              {(location || availability || socialLinks.length > 0) && (
+                <div className="relative z-10 border-t border-slate-200/80 dark:border-white/[0.08] bg-slate-50/70 dark:bg-white/[0.02] px-6 py-5 sm:px-10 md:px-14 sm:py-6 flex flex-col md:flex-row items-center justify-between gap-5">
+                  {/* Start Side: Location & Availability */}
+                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 sm:gap-6">
+                    {location && (
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-lg bg-white dark:bg-white/[0.06] border border-slate-200/90 dark:border-white/[0.1] flex items-center justify-center text-foreground shrink-0 shadow-2xs">
+                          <MapPin size={16} />
+                        </div>
+                        <div className="text-start">
+                          <p className="text-xs font-medium text-muted-foreground leading-none mb-1">
+                            {isAr ? 'العنوان' : 'Location'}
+                          </p>
+                          <p className="text-sm font-semibold text-foreground leading-snug">
+                            {location}
+                          </p>
+                        </div>
+                      </div>
+                    )}
 
-                {/* Email row */}
-                <a
-                  href={`mailto:${email}`}
-                  className="group flex items-center gap-4 hover:opacity-80 transition-opacity"
-                >
-                  <div className="w-12 h-12 rounded-xl bg-card/60 dark:bg-white/[0.05] border border-border/50 flex items-center justify-center shrink-0">
-                    <Mail size={18} />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-[11px] font-mono text-muted-foreground tracking-wider uppercase mb-0.5">Email</p>
-                    <p className="text-sm font-semibold text-foreground truncate">{email}</p>
-                  </div>
-                  <ArrowUpRight size={14} className="ms-auto shrink-0 opacity-0 group-hover:opacity-60 transition-opacity rtl:rotate-[-90deg]" />
-                </a>
+                    {location && availability && (
+                      <div className="hidden sm:block h-8 w-px bg-slate-200/80 dark:bg-white/[0.08]" aria-hidden="true" />
+                    )}
 
-                {/* Location row */}
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-card/60 dark:bg-white/[0.05] border border-border/50 flex items-center justify-center shrink-0">
-                    <Globe size={18} />
+                    {availability && (
+                      <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-emerald-500/[0.08] dark:bg-emerald-500/[0.1] border border-emerald-500/20 text-emerald-700 dark:text-emerald-400">
+                        <CalendarCheck size={15} className="shrink-0" />
+                        <span className="text-xs font-semibold leading-none">{availability}</span>
+                      </div>
+                    )}
                   </div>
-                  <div>
-                    <p className="text-[11px] font-mono text-muted-foreground tracking-wider uppercase mb-0.5">Location</p>
-                    <p className="text-sm font-semibold text-foreground">{location}</p>
-                  </div>
+
+                  {/* End Side: Social Links */}
+                  {socialLinks.length > 0 && (
+                    <div className="flex flex-col sm:flex-row items-center gap-3">
+                      <span className="text-xs font-medium text-muted-foreground">
+                        {isAr ? t('contact.findMe', 'تواصل معي على') : t('contact.findMe', 'Find me on')}
+                      </span>
+                      <div className="flex items-center gap-2 flex-wrap justify-center">
+                        {socialLinks.map(link => (
+                          <SocialButton
+                            key={link.platform}
+                            href={link.url}
+                            label={link.platform}
+                            icon={getSocialIcon(link.platform)}
+                            size="sm"
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-
-                {/* Availability row */}
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center shrink-0">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                  </div>
-                  <div>
-                    <p className="text-[11px] font-mono text-muted-foreground tracking-wider uppercase mb-0.5">Status</p>
-                    <p className="text-sm font-semibold text-emerald-500">{availability}</p>
-                  </div>
-                </div>
-
-                {/* Divider */}
-                <div className="h-px bg-border/40" />
-
-                {/* Social links row */}
-                <div>
-                  <p className="text-[11px] font-mono text-muted-foreground tracking-wider uppercase mb-4">Find me on</p>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    {socialLinks.map(link => (
-                      <SocialButton
-                        key={link.platform}
-                        href={link.url}
-                        label={link.platform}
-                        icon={getSocialIcon(link.platform)}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </SpotlightCard>
-            </motion.div>
-
-          </div>
+              )}
+            </SpotlightCard>
+          </motion.div>
         </div>
       </section>
 
