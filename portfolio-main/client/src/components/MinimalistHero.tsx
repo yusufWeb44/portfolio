@@ -292,9 +292,9 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
             )}
 
             {/* Blob + Profile Image */}
-            <div className="relative flex justify-center items-center min-h-[320px] sm:min-h-[400px] lg:min-h-[500px] w-full">
+            <div className="relative flex justify-center items-center min-h-[320px] sm:min-h-[400px] lg:min-h-[500px] w-full select-none pointer-events-none">
               {/* Fluid Blob Backdrop — Enlarged to match reference photo, perfectly framing profile */}
-              <div className="absolute -top-6 sm:-top-8 lg:-top-11 w-[290px] h-[290px] sm:w-[360px] sm:h-[360px] lg:w-[450px] lg:h-[450px] z-0 pointer-events-none">
+              <div className="absolute -top-6 sm:-top-8 lg:-top-11 w-[290px] h-[290px] sm:w-[360px] sm:h-[360px] lg:w-[450px] lg:h-[450px] z-0 pointer-events-none select-none">
                 <motion.div
                   initial={{ scale: 0.9, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
@@ -342,7 +342,7 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.35, ease: cubicEase }}
-                className="relative z-10 flex items-center justify-center pointer-events-none transform-gpu"
+                className="relative z-10 flex items-center justify-center pointer-events-none select-none transform-gpu"
                 style={{ willChange: 'opacity, transform', transform: 'translateZ(0)' }}
               >
                 <img
@@ -355,11 +355,15 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
                   fetchPriority="high"
                   width={420}
                   height={420}
+                  draggable={false}
                   style={{
                     maskImage: 'linear-gradient(to bottom, black 0%, black 76%, rgba(0, 0, 0, 0.99) 79%, rgba(0, 0, 0, 0.96) 82%, rgba(0, 0, 0, 0.91) 85%, rgba(0, 0, 0, 0.82) 88%, rgba(0, 0, 0, 0.69) 91%, rgba(0, 0, 0, 0.52) 94%, rgba(0, 0, 0, 0.33) 96.5%, rgba(0, 0, 0, 0.15) 98.2%, rgba(0, 0, 0, 0.04) 99.2%, transparent 100%)',
                     WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 76%, rgba(0, 0, 0, 0.99) 79%, rgba(0, 0, 0, 0.96) 82%, rgba(0, 0, 0, 0.91) 85%, rgba(0, 0, 0, 0.82) 88%, rgba(0, 0, 0, 0.69) 91%, rgba(0, 0, 0, 0.52) 94%, rgba(0, 0, 0, 0.33) 96.5%, rgba(0, 0, 0, 0.15) 98.2%, rgba(0, 0, 0, 0.04) 99.2%, transparent 100%)',
+                    userSelect: 'none',
+                    WebkitUserSelect: 'none',
+                    pointerEvents: 'none',
                   }}
-                  className="w-[240px] sm:w-[300px] lg:w-[420px] h-auto object-contain scale-[1.6] pointer-events-auto"
+                  className="w-[240px] sm:w-[300px] lg:w-[420px] h-auto object-contain scale-[1.6] pointer-events-none select-none"
                 />
               </motion.div>
             </div>

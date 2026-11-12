@@ -158,6 +158,19 @@
     @apply bg-foreground text-background;
   }
 
+  img::selection,
+  svg::selection {
+    background: transparent;
+  }
+
+  img {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
   /* Typography & Dynamic Font Families */
   html[dir="rtl"],
   body[dir="rtl"],
