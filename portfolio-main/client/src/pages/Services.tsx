@@ -56,11 +56,11 @@ const Services = () => {
             transition={{ duration: 0.7 }}
           >
 
-            <div className="grid md:grid-cols-2 gap-12 items-end">
-              <h1 className="text-5xl md:text-7xl font-bold tracking-tighter leading-[1.05]">
+            <div className="max-w-2xl">
+              <h1 className="text-5xl md:text-7xl font-bold tracking-tighter leading-[1.05] mb-6">
                 {isAr ? 'الخدمات.' : 'Services.'}
               </h1>
-              <p className="text-xl text-muted-foreground leading-relaxed max-w-md">
+              <p className="text-base md:text-xl text-muted-foreground leading-relaxed">
                 {isAr 
                   ? 'خدمات برمجية وهندسية متخصصة لمساعدتك في بناء وإطلاق مشاريعك بأعلى كفاءة وسرعة.'
                   : 'Specialized engineering services built to help you ship faster, scale confidently, and delight users.'}
@@ -71,16 +71,16 @@ const Services = () => {
       </section>
 
       {/* Services Carousel */}
-      <section className="py-12 px-6">
-        <div className="max-w-7xl mx-auto">
+      <section className="py-4">
+        <div className="w-full">
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-pulse">
+            <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-6 animate-pulse">
               {[1, 2, 3].map(i => (
-                <div key={i} className="h-[460px] bg-muted/40 rounded-xl border border-border/50" />
+                <div key={i} className="h-[400px] bg-muted/40 rounded-xl border border-border/50" />
               ))}
             </div>
           ) : services.length === 0 ? (
-            <div className="py-16 text-center border border-dashed border-border/70 rounded-xl bg-card/30">
+            <div className="max-w-7xl mx-auto px-6 py-16 text-center border border-dashed border-border/70 rounded-xl bg-card/30">
               <p className="text-muted-foreground">{isAr ? 'يتم تحديث الخدمات حالياً.' : 'No services published yet.'}</p>
             </div>
           ) : (

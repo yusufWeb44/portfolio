@@ -325,7 +325,7 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({ cert
                       setSelectedCert(cert);
                     }
                   }}
-                  className="w-full h-full rounded-none bg-white dark:bg-zinc-900 border-[2px] border-white/80 dark:border-white/20 shadow-[0_16px_40px_rgba(0,0,0,0.55)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.9)] overflow-hidden cursor-pointer transition-transform duration-300 hover:scale-[1.02] hover:border-emerald-500/35 dark:hover:border-emerald-500/20 hover:shadow-md dark:hover:shadow-none"
+                  className="w-full h-full rounded-none bg-white dark:bg-zinc-900 border-[2px] border-neutral-200/80 dark:border-white/20 shadow-[0_8px_24px_-4px_rgba(15,23,42,0.12),0_4px_12px_-2px_rgba(15,23,42,0.06)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.9)] overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:border-neutral-400/60 dark:hover:border-white/40 hover:shadow-[0_14px_32px_-4px_rgba(15,23,42,0.16),0_6px_16px_-2px_rgba(15,23,42,0.08)] dark:hover:shadow-none"
                 >
                   {imgSrc ? (
                     <img
@@ -371,8 +371,8 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({ cert
           <h2
             className={
               isRtl
-                ? "text-2xl sm:text-3xl md:text-4xl lg:text-[2.6rem] font-extrabold tracking-tight text-white select-none drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)]"
-                : "text-xl sm:text-2xl md:text-3xl lg:text-[2.2rem] font-extrabold uppercase tracking-widest text-white select-none drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)]"
+                ? "text-2xl sm:text-3xl md:text-4xl lg:text-[2.6rem] font-extrabold tracking-tight text-foreground select-none dark:drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)]"
+                : "text-xl sm:text-2xl md:text-3xl lg:text-[2.2rem] font-extrabold uppercase tracking-widest text-foreground select-none dark:drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)]"
             }
           >
             {isRtl ? 'الشهادات' : 'CERTIFICATES'}

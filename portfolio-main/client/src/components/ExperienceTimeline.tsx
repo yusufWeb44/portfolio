@@ -406,7 +406,7 @@ const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
               >
                 {/* ─── Central Spine Node & Clean Horizontal Connector Line ────── */}
                 <div
-                  className={`absolute top-6 ${spinePositionClass} z-20 flex items-center justify-center pointer-events-none`}
+                  className={`absolute top-4 ${spinePositionClass} z-20 flex items-center justify-center pointer-events-none`}
                 >
                   {/* Clean Central Node Circle (No glow) */}
                   <div
@@ -423,12 +423,12 @@ const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
                   <div
                     className={`hidden md:flex items-center absolute top-1/2 -translate-y-1/2 h-[2px] pointer-events-none ${
                       stemGoesRight
-                        ? 'left-full w-[40px] lg:w-[48px]'
-                        : 'right-full w-[40px] lg:w-[48px]'
+                        ? 'left-full w-[42px] lg:w-[50px]'
+                        : 'right-full w-[42px] lg:w-[50px]'
                     }`}
                   >
                     {/* Subtle base line */}
-                    <div className="absolute inset-x-0 h-[1.5px] bg-border/50 dark:bg-white/10 rounded-full" />
+                    <div className="absolute inset-x-0 h-[1.5px] bg-border/50 dark:bg-white/10" />
 
                     {/* Smooth scroll-drawn colored line (clean, no square tip, no harsh glow) */}
                     <motion.div
@@ -444,17 +444,17 @@ const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
                         transformOrigin: stemGoesRight ? 'left center' : 'right center',
                         backgroundColor: theme.accent,
                       }}
-                      className="relative w-full h-[1.5px] opacity-70 group-hover/item:opacity-85 rounded-full transition-opacity duration-300"
+                      className="relative w-full h-[1.5px] opacity-75 group-hover/item:opacity-100 transition-opacity duration-300"
                     />
                   </div>
 
                   {/* ── Horizontal Branching Connector Line (Mobile) ── */}
                   <div
-                    className={`md:hidden flex items-center absolute top-1/2 -translate-y-1/2 h-[2px] w-[24px] pointer-events-none ${
+                    className={`md:hidden flex items-center absolute top-1/2 -translate-y-1/2 h-[2px] w-[26px] pointer-events-none ${
                       isRtl ? 'right-full' : 'left-full'
                     }`}
                   >
-                    <div className="absolute inset-x-0 h-[1.5px] bg-border/50 dark:bg-white/10 rounded-full" />
+                    <div className="absolute inset-x-0 h-[1.5px] bg-border/50 dark:bg-white/10" />
                     <motion.div
                       initial={{ scaleX: 0 }}
                       whileInView={{ scaleX: 1 }}
@@ -468,7 +468,7 @@ const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
                         transformOrigin: isRtl ? 'right center' : 'left center',
                         backgroundColor: theme.accent,
                       }}
-                      className="relative w-full h-[1.5px] opacity-70 group-hover/item:opacity-85 rounded-full"
+                      className="relative w-full h-[1.5px] opacity-75 group-hover/item:opacity-100"
                     />
                   </div>
                 </div>

@@ -492,53 +492,48 @@ const Home = () => {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 5: SERVICES (Offerings & Workflow Process)
+          SECTION 5: SERVICES (Scroll-Driven Mandatory Horizontal Scroll)
       ═══════════════════════════════════════════════════════════════ */}
-      <section id="services" className="scroll-mt-24 pt-10 sm:pt-12 md:pt-14 pb-12 sm:pb-16 md:pb-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto space-y-10 sm:space-y-12">
-          <FadeIn>
-            <div className="grid md:grid-cols-2 gap-6 lg:gap-8 items-end justify-between">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-foreground leading-[1.15]">
-                <SplitText
-                  text={resolveField('services.title', settings?.servicesTitleAr, settings?.servicesTitle, 'Services.')}
-                  delay={35}
-                  duration={0.45}
-                />
-              </h2>
-              <div className="max-w-xl">
-                <BlurText
-                  text={resolveField('services.subtitle', settings?.servicesSubtitleAr, settings?.servicesSubtitle, 'End-to-end software development services tailored to help you launch faster, eliminate technical debt, and scale reliably.')}
-                  delay={20}
-                  className="text-base md:text-lg text-muted-foreground leading-relaxed"
-                />
-              </div>
-            </div>
-          </FadeIn>
-
-          {/* Draggable Services Horizontal Carousel */}
-          {services.length === 0 ? (
-            <div className="py-14 text-center border border-dashed border-border/70 rounded-xl bg-card/30 backdrop-blur-md">
-              <p className="text-muted-foreground">{isAr ? 'يتم تحديث الخدمات حالياً.' : 'Services are being updated.'}</p>
-            </div>
-          ) : (
-            <Suspense fallback={<div className="min-h-[160px]" />}>
-              <ServiceCarousel
-                services={services.map((service, i) => ({
-                  id: service.id,
-                  number: String(i + 1).padStart(2, '0'),
-                  title: isAr ? (service.titleAr || service.title) : service.title,
-                  description: isAr ? (service.descriptionAr || service.description) : service.description,
-                }))}
-                whatsappBaseUrl={
-                  settings?.whatsappNumber
-                    ? `https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, '')}`
-                    : socialLinks.find(s => s.platform.toLowerCase() === 'whatsapp')?.url
-                }
-              />
-            </Suspense>
-          )}
-
-        </div>
+      <section id="services" className="scroll-mt-20 relative w-full">
+        {services.length === 0 ? (
+          <div className="max-w-7xl mx-auto py-14 px-4 sm:px-6 lg:px-8 text-center border border-dashed border-border/70 rounded-xl bg-card/30 backdrop-blur-md">
+            <p className="text-muted-foreground">{isAr ? 'يتم تحديث الخدمات حالياً.' : 'Services are being updated.'}</p>
+          </div>
+        ) : (
+          <Suspense fallback={<div className="min-h-[480px]" />}>
+            <ServiceCarousel
+              header={
+                <FadeIn>
+                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-foreground leading-tight mb-1 sm:mb-1.5">
+                    <SplitText
+                      text={resolveField('services.title', settings?.servicesTitleAr, settings?.servicesTitle, 'Services.')}
+                      delay={35}
+                      duration={0.45}
+                    />
+                  </h2>
+                  <div className="max-w-2xl">
+                    <BlurText
+                      text={resolveField('services.subtitle', settings?.servicesSubtitleAr, settings?.servicesSubtitle, 'End-to-end software development services tailored to help you launch faster, eliminate technical debt, and scale reliably.')}
+                      delay={20}
+                      className="text-xs sm:text-sm text-muted-foreground leading-relaxed line-clamp-2"
+                    />
+                  </div>
+                </FadeIn>
+              }
+              services={services.map((service, i) => ({
+                id: service.id,
+                number: String(i + 1).padStart(2, '0'),
+                title: isAr ? (service.titleAr || service.title) : service.title,
+                description: isAr ? (service.descriptionAr || service.description) : service.description,
+              }))}
+              whatsappBaseUrl={
+                settings?.whatsappNumber
+                  ? `https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, '')}`
+                  : socialLinks.find(s => s.platform.toLowerCase() === 'whatsapp')?.url
+              }
+            />
+          </Suspense>
+        )}
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════
@@ -549,7 +544,6 @@ const Home = () => {
           <FAQ
             id="faq"
             title={resolveField('faq.title', settings?.faqTitleAr, settings?.faqTitle, 'Common Questions.')}
-            subtitle={resolveField('faq.badge', settings?.faqBadgeAr, settings?.faqBadge, 'Got a question?')}
             categories={faqCategories}
             faqData={faqDataMap}
           />

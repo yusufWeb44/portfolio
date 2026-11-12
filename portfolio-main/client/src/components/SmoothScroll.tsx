@@ -30,7 +30,6 @@ declare global {
  */
 export const SmoothScrollProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const lenisRef = useRef<Lenis | null>(null);
-  const progressBarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Honor accessibility reduced-motion preference
@@ -102,24 +101,9 @@ export const SmoothScrollProvider: React.FC<{ children: React.ReactNode }> = ({ 
     };
     document.addEventListener('click', handleAnchorClick);
 
-    // GSAP ScrollTrigger Reading Progress Bar Animation
-    let progressTrigger: ScrollTrigger | null = null;
-    if (progressBarRef.current) {
-      progressTrigger = ScrollTrigger.create({
-        start: 'top top',
-        end: 'bottom bottom',
-        onUpdate: (self) => {
-          if (progressBarRef.current) {
-            gsap.set(progressBarRef.current, { scaleX: self.progress });
-          }
-        },
-      });
-    }
-
     return () => {
       document.removeEventListener('click', handleAnchorClick);
       gsap.ticker.remove(onGsapTick);
-      if (progressTrigger) progressTrigger.kill();
       lenis.destroy();
       lenisRef.current = null;
       delete window.__lenis;
@@ -150,18 +134,6 @@ export const SmoothScrollProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   return (
     <SmoothScrollContext.Provider value={{ lenis: lenisRef.current, scrollTo }}>
-      {/* ── Luxury Scroll Progress Glow Bar ── */}
-      <div
-        className="fixed top-0 left-0 right-0 h-[2.5px] z-[99999] pointer-events-none origin-left"
-        style={{ contain: 'paint' }}
-        aria-hidden="true"
-      >
-        <div
-          ref={progressBarRef}
-          className="h-full w-full bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-300 origin-left scale-x-0 shadow-[0_0_12px_rgba(16,185,129,0.8)]"
-        />
-      </div>
-
       {children}
     </SmoothScrollContext.Provider>
   );

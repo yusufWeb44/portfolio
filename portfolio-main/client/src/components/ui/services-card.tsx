@@ -1,11 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { motion, useInView } from "framer-motion";
+import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import { 
   ArrowRight, 
-  ChevronLeft, 
-  ChevronRight, 
   Code2, 
   Palette, 
   Smartphone, 
@@ -21,10 +19,7 @@ import {
 } from "lucide-react";
 import { WhatsappIcon } from "./BrandIcons";
 import { cn } from "@/lib/utils";
-
-// Shadcn UI Carousel Imports
-import useEmblaCarousel from "embla-carousel-react";
-import { Button, buttonVariants } from "@/components/ui/Button";
+import { buttonVariants } from "@/components/ui/Button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SpotlightCard } from "../react-bits";
 
@@ -44,224 +39,7 @@ export const getServiceIcon = (title?: string): LucideIcon => {
   return Code2;
 };
 
-// --- Carousel Context ---
-type UseEmblaCarouselType = ReturnType<typeof useEmblaCarousel>;
-export type CarouselApi = UseEmblaCarouselType[1];
-export type CarouselOptions = Parameters<typeof useEmblaCarousel>[0];
-export type CarouselPlugin = Parameters<typeof useEmblaCarousel>[1];
-export type CarouselProps = {
-  opts?: CarouselOptions;
-  plugins?: CarouselPlugin;
-  orientation?: "horizontal" | "vertical";
-  setApi?: (api: CarouselApi) => void;
-};
-export type CarouselContextProps = {
-  carouselRef: ReturnType<typeof useEmblaCarousel>[0];
-  api: ReturnType<typeof useEmblaCarousel>[1];
-  scrollPrev: () => void;
-  scrollNext: () => void;
-  canScrollPrev: boolean;
-  canScrollNext: boolean;
-} & CarouselProps;
-
-const CarouselContext = React.createContext<CarouselContextProps | null>(null);
-
-export function useCarousel() {
-  const context = React.useContext(CarouselContext);
-  if (!context) {
-    throw new Error("useCarousel must be used within a <Carousel />");
-  }
-  return context;
-}
-
-// --- Main Carousel Component ---
-export const Carousel = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & CarouselProps
->(
-  (
-    {
-      orientation = "horizontal",
-      opts,
-      setApi,
-      plugins,
-      className,
-      children,
-      ...props
-    },
-    ref,
-  ) => {
-    const [carouselRef, api] = useEmblaCarousel(
-      {
-        ...opts,
-        axis: orientation === "horizontal" ? "x" : "y",
-      },
-      plugins,
-    );
-    const [canScrollPrev, setCanScrollPrev] = React.useState(false);
-    const [canScrollNext, setCanScrollNext] = React.useState(false);
-
-    const onSelect = React.useCallback((api: CarouselApi) => {
-      if (!api) return;
-      setCanScrollPrev(api.canScrollPrev());
-      setCanScrollNext(api.canScrollNext());
-    }, []);
-
-    const scrollPrev = React.useCallback(() => {
-      api?.scrollPrev();
-    }, [api]);
-
-    const scrollNext = React.useCallback(() => {
-      api?.scrollNext();
-    }, [api]);
-
-    const handleKeyDown = React.useCallback(
-      (event: React.KeyboardEvent<HTMLDivElement>) => {
-        if (event.key === "ArrowLeft") {
-          event.preventDefault();
-          scrollPrev();
-        } else if (event.key === "ArrowRight") {
-          event.preventDefault();
-          scrollNext();
-        }
-      },
-      [scrollPrev, scrollNext],
-    );
-
-    React.useEffect(() => {
-      if (!api || !setApi) return;
-      setApi(api);
-    }, [api, setApi]);
-
-    React.useEffect(() => {
-      if (!api) return;
-      onSelect(api);
-      api.on("reInit", onSelect);
-      api.on("select", onSelect);
-      return () => {
-        api?.off("select", onSelect);
-      };
-    }, [api, onSelect]);
-
-    return (
-      <CarouselContext.Provider
-        value={{
-          carouselRef,
-          api: api,
-          opts,
-          orientation,
-          scrollPrev,
-          scrollNext,
-          canScrollPrev,
-          canScrollNext,
-        }}
-      >
-        <div
-          ref={ref}
-          onKeyDownCapture={handleKeyDown}
-          className={cn("relative", className)}
-          role="region"
-          aria-roledescription="carousel"
-          {...props}
-        >
-          {children}
-        </div>
-      </CarouselContext.Provider>
-    );
-  },
-);
-Carousel.displayName = "Carousel";
-
-// --- Carousel Content ---
-export const CarouselContent = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => {
-  const { carouselRef, orientation } = useCarousel();
-  return (
-    <div ref={carouselRef} className="overflow-hidden cursor-grab active:cursor-grabbing">
-      <div
-        ref={ref}
-        className={cn(
-          "flex",
-          orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col",
-          className,
-        )}
-        {...props}
-      />
-    </div>
-  );
-});
-CarouselContent.displayName = "CarouselContent";
-
-// --- Carousel Item ---
-export const CarouselItem = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => {
-  const { orientation } = useCarousel();
-  return (
-    <div
-      ref={ref}
-      role="group"
-      aria-roledescription="slide"
-      className={cn(
-        "min-w-0 shrink-0 grow-0 basis-full",
-        orientation === "horizontal" ? "pl-4" : "pt-4",
-        className,
-      )}
-      {...props}
-    />
-  );
-});
-CarouselItem.displayName = "CarouselItem";
-
-// --- Carousel Controls ---
-export const CarouselPrevious = React.forwardRef<
-  HTMLButtonElement,
-  React.ComponentProps<typeof Button>
->(({ className, variant = "secondary", size = "icon", ...props }, ref) => {
-  const { scrollPrev, canScrollPrev } = useCarousel();
-  return (
-    <Button
-      ref={ref}
-      variant={variant}
-      size={size}
-      className={cn(className)}
-      onClick={scrollPrev}
-      disabled={!canScrollPrev}
-      {...props}
-    >
-      <ChevronLeft className="h-4 w-4 rtl:rotate-180" />
-      <span className="sr-only">Previous slide</span>
-    </Button>
-  );
-});
-CarouselPrevious.displayName = "CarouselPrevious";
-
-export const CarouselNext = React.forwardRef<
-  HTMLButtonElement,
-  React.ComponentProps<typeof Button>
->(({ className, variant = "secondary", size = "icon", ...props }, ref) => {
-  const { scrollNext, canScrollNext } = useCarousel();
-  return (
-    <Button
-      ref={ref}
-      variant={variant}
-      size={size}
-      className={cn(className)}
-      onClick={scrollNext}
-      disabled={!canScrollNext}
-      {...props}
-    >
-      <ChevronRight className="h-4 w-4 rtl:rotate-180" />
-      <span className="sr-only">Next slide</span>
-    </Button>
-  );
-});
-CarouselNext.displayName = "CarouselNext";
-
-// --- Service Card & Carousel Section ---
+// --- Service Interface ---
 export interface Service {
   id?: string;
   number: string;
@@ -277,27 +55,13 @@ export interface Service {
 // Sub-component for individual cards
 export const ServiceCard = ({
   service,
-  index,
   whatsappBaseUrl,
 }: {
   service: Service;
-  index: number;
   whatsappBaseUrl?: string | null;
 }) => {
   const { currentLang } = useLanguage();
   const isAr = currentLang === 'ar';
-
-  const cardVariants = {
-    hidden: { opacity: 0, y: 40 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.5,
-        delay: index * 0.08,
-      },
-    },
-  };
 
   const title = isAr ? (service.titleAr || service.title) : service.title;
   const description = isAr ? (service.descriptionAr || service.description) : service.description;
@@ -314,142 +78,163 @@ export const ServiceCard = ({
     ? `${whatsappBaseUrl}${whatsappBaseUrl.includes('?') ? '&' : '?'}text=${inquiryMsg}`
     : `https://wa.me/?text=${inquiryMsg}`;
 
-  // Unified theme-harmonized gradient for cards fitting both light mode and dark mode
-  const cardGradients = [
-    "from-emerald-500/[0.08] via-emerald-500/[0.02] to-card dark:from-emerald-500/10 dark:via-white/[0.03] dark:to-white/[0.01]",
-    "from-teal-500/[0.08] via-teal-500/[0.02] to-card dark:from-teal-500/10 dark:via-white/[0.03] dark:to-white/[0.01]",
-    "from-emerald-600/[0.06] via-emerald-500/[0.02] to-card dark:from-emerald-600/10 dark:via-white/[0.03] dark:to-white/[0.01]",
-    "from-teal-600/[0.06] via-teal-500/[0.02] to-card dark:from-teal-600/10 dark:via-white/[0.03] dark:to-white/[0.01]",
-  ];
-
-  const activeGradient = service.gradient || cardGradients[index % cardGradients.length];
+  // Crisp, high-contrast solid card surface with zero blur filter
+  const cardBg = "bg-white dark:bg-[#121417]";
 
   return (
-    <motion.div
-      variants={cardVariants}
-      className="h-full"
-    >
+    <div className="h-full">
       <SpotlightCard
-        spotlightColor="rgba(16, 185, 129, 0.05)"
-        darkSpotlightColor="rgba(16, 185, 129, 0.015)"
+        spotlightColor="rgba(0, 0, 0, 0.02)"
+        darkSpotlightColor="rgba(255, 255, 255, 0.03)"
         size={280}
-        darkSize={180}
+        darkSize={200}
         className={cn(
-          "group relative flex min-h-[440px] sm:h-[460px] w-full flex-col justify-between overflow-hidden rounded-xl sm:rounded-2xl p-6 sm:p-8 border border-border/70 bg-gradient-to-b backdrop-blur-xl shadow-md hover:border-emerald-500/35 dark:hover:border-emerald-500/20 hover:shadow-lg dark:hover:shadow-none transition-all duration-300 select-none",
-          activeGradient
+          "group relative flex h-[360px] sm:h-[375px] w-full flex-col justify-between overflow-hidden rounded-xl sm:rounded-2xl p-5 sm:p-6 border border-slate-200/90 dark:border-white/[0.09] shadow-xs hover:border-slate-300 dark:hover:border-white/20 hover:shadow-lg dark:hover:shadow-[0_12px_40px_rgba(0,0,0,0.6)] transition-all duration-300 select-none",
+          cardBg
         )}
       >
-        {/* Top Ambient Glow on Hover (Subdued in dark mode) */}
-        <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/[0.04] dark:bg-emerald-500/[0.02] rounded-full blur-3xl group-hover:bg-emerald-500/[0.08] dark:group-hover:bg-emerald-500/[0.03] transition-all duration-700 pointer-events-none" />
-
-        {/* Card Top: Number & Icon */}
-        <div className="z-10 flex flex-col items-start text-start w-full">
-          <div className="w-full flex items-center justify-between mb-8">
-            <span className="text-xl sm:text-2xl font-black font-sans tracking-tight text-foreground dark:text-white leading-none select-none">
-              {service.number}
-            </span>
-            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/40 group-hover:bg-emerald-400 group-hover:scale-125 transition-all duration-300" />
+        {/* Upper Group: Icon + Title + Bio (properly grouped and raised directly under icon) */}
+        <div className="z-10 flex flex-col items-start w-full">
+          {/* Icon */}
+          <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-white/[0.07] border border-slate-200 dark:border-white/[0.12] flex items-center justify-center text-foreground shadow-2xs">
+            <IconComp className="h-5 w-5 text-foreground" />
           </div>
 
-          <div className="w-12 h-12 rounded-xl bg-card/80 dark:bg-white/[0.06] border border-border/80 flex items-center justify-center text-foreground group-hover:text-emerald-400 group-hover:border-emerald-500/30 dark:group-hover:border-emerald-500/20 transition-colors duration-200 shadow-inner">
-            <IconComp className="h-6 w-6" />
-          </div>
-        </div>
-
-        {/* Card Bottom: Title, Description & WhatsApp Inquiry CTA */}
-        <div className="z-10 flex flex-col gap-4 mt-auto">
-          <div>
-            <h3 className="mb-2 text-xl font-bold tracking-tight text-foreground group-hover:text-emerald-400 transition-colors duration-200 leading-snug">
+          {/* Title & Bio right below icon with deliberate, elegant spacing */}
+          <div className="mt-4 sm:mt-5 w-full">
+            <h3 className="mb-2 text-base sm:text-lg font-bold tracking-tight text-foreground leading-snug line-clamp-2">
               {title}
             </h3>
-            <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
+            <p className="text-xs sm:text-[13.5px] text-slate-600 dark:text-zinc-300 leading-relaxed line-clamp-4">
               {description}
             </p>
           </div>
+        </div>
 
-          {/* WhatsApp Inquiry Button */}
+        {/* Lower Group: WhatsApp Inquiry Button pinned at bottom */}
+        <div className="z-10 mt-auto pt-3 w-full">
           <a
             href={waLink}
             target="_blank"
             rel="noreferrer"
             className={cn(
-              buttonVariants({ variant: 'secondary', size: 'default' }),
-              "mt-2 w-full justify-between"
+              buttonVariants({ variant: 'secondary', size: 'sm' }),
+              "w-full justify-between py-2 px-3.5 hover:text-foreground dark:hover:text-foreground hover:border-slate-300 dark:hover:border-white/20 hover:shadow-xs group/btn"
             )}
           >
-            <span className="flex items-center gap-2.5">
-              <WhatsappIcon size={17} className="text-emerald-500 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors" />
-              <span>{isAr ? 'استفسار واتساب' : 'WhatsApp Inquiry'}</span>
+            <span className="flex items-center gap-2">
+              <WhatsappIcon size={16} className="text-emerald-500 shrink-0" />
+              <span className="text-foreground transition-colors group-hover/btn:text-foreground text-xs sm:text-[13px]">
+                {isAr ? 'استفسار واتساب' : 'WhatsApp Inquiry'}
+              </span>
             </span>
-            <ArrowRight size={14} className="rtl:rotate-180 transition-transform duration-200 group-hover:translate-x-1 rtl:group-hover:-translate-x-1" />
+            <ArrowRight size={13} className="rtl:rotate-180 transition-transform duration-200 group-hover/btn:translate-x-1 rtl:group-hover/btn:-translate-x-1 text-foreground" />
           </a>
         </div>
-
-        {/* Subtle bottom emerald line */}
-        <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-500/0 to-transparent group-hover:via-emerald-500/30 dark:group-hover:via-emerald-500/15 transition-all duration-500" />
       </SpotlightCard>
-    </motion.div>
+    </div>
   );
 };
 
-// Main exportable component
+// --- Scroll-Driven Mandatory Horizontal Carousel ---
 export const ServiceCarousel = ({
   services,
   whatsappBaseUrl,
+  header,
 }: {
   services: Service[];
   whatsappBaseUrl?: string | null;
+  header?: React.ReactNode;
 }) => {
   const { currentLang, currentDirection } = useLanguage();
   const isRtl = currentDirection === 'rtl' || currentLang === 'ar';
-  const ref = React.useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.15 });
+
+  const trackRef = React.useRef<HTMLDivElement>(null);
+  const cardsContainerRef = React.useRef<HTMLDivElement>(null);
+  const [maxScroll, setMaxScroll] = React.useState(0);
+
+  const { scrollYProgress } = useScroll({
+    target: trackRef,
+    offset: ["start start", "end end"],
+  });
+
+  const smoothProgress = useSpring(scrollYProgress, {
+    stiffness: 85,
+    damping: 24,
+    mass: 0.85,
+  });
+
+  React.useEffect(() => {
+    const calcMaxScroll = () => {
+      if (cardsContainerRef.current) {
+        const scrollW = cardsContainerRef.current.scrollWidth;
+        const clientW = window.innerWidth;
+        const total = Math.max(0, scrollW - clientW);
+        setMaxScroll(total);
+      }
+    };
+
+    calcMaxScroll();
+    window.addEventListener("resize", calcMaxScroll);
+    const timer = setTimeout(calcMaxScroll, 350);
+    return () => {
+      window.removeEventListener("resize", calcMaxScroll);
+      clearTimeout(timer);
+    };
+  }, [services, currentDirection]);
+
+  const x = useTransform(smoothProgress, (val) => {
+    const clamped = Math.max(0, Math.min(1, val));
+    const offset = clamped * maxScroll;
+    return isRtl ? `${offset}px` : `-${offset}px`;
+  });
+
+  if (!services || services.length === 0) {
+    return null;
+  }
+
+  // Mandatory horizontal scroll track height: ~45vh per card ensures silky, natural pacing
+  const trackHeight = services.length > 1 ? `${100 + services.length * 45}vh` : "auto";
 
   return (
-    <div className="w-full">
-      <Carousel
-        ref={ref}
-        opts={{
-          align: "start",
-          loop: false,
-          direction: isRtl ? "rtl" : "ltr",
-        }}
-        className="relative"
-      >
-        <motion.div
-          initial="hidden"
-          animate={isInView ? "visible" : "hidden"}
-          transition={{ staggerChildren: 0.08 }}
-        >
-          <CarouselContent className="-ms-4 sm:-ms-6">
-            {services.map((service, index) => (
-              <CarouselItem
-                key={service.id || index}
-                className="ps-4 sm:ps-6 basis-full sm:basis-1/2 lg:basis-1/3"
-              >
-                <div className="p-1">
-                  <ServiceCard
-                    service={service}
-                    index={index}
-                    whatsappBaseUrl={whatsappBaseUrl}
-                  />
-                </div>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-        </motion.div>
-
-        {/* Carousel Arrow Controls & Drag Helper */}
-        <div className="flex items-center justify-between mt-8 px-1">
-          <span className="text-xs font-mono text-muted-foreground/70 hidden sm:inline">
-            {isRtl ? '← اسحب أفقياً لتصفح الخدمات →' : '← Drag horizontally to explore services →'}
-          </span>
-          <div className="flex items-center gap-2 ms-auto">
-            <CarouselPrevious className="static translate-y-0 bg-card/60 dark:bg-white/[0.04] border-border/80 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all duration-200" />
-            <CarouselNext className="static translate-y-0 bg-card/60 dark:bg-white/[0.04] border-border/80 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all duration-200" />
+    <div
+      ref={trackRef}
+      className="relative w-full overflow-x-clip"
+      style={{ height: trackHeight }}
+    >
+      <div className="sticky top-0 h-screen w-full flex flex-col justify-start pt-[68px] sm:pt-[74px] pb-4 overflow-x-clip overflow-y-visible">
+        {/* Optional Header slot (Title + Subtitle) pinned inside the sticky viewport */}
+        {header && (
+          <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 shrink-0 mb-2 sm:mb-3">
+            {header}
           </div>
+        )}
+
+        {/* Horizontal Cards Viewport (generous vertical clearance so borders and buttons never clip) */}
+        <div className="w-full flex-1 flex items-center overflow-x-hidden overflow-y-visible py-3 sm:py-5">
+          <motion.div
+            ref={cardsContainerRef}
+            style={{ x }}
+            className={cn(
+              "flex gap-4 sm:gap-6 items-stretch shrink-0 py-2",
+              "ps-4 sm:ps-6 lg:ps-8 xl:ps-[max(2rem,calc((100vw-80rem)/2+2rem))]",
+              "pe-4 sm:pe-6 lg:pe-8 xl:pe-[max(2rem,calc((100vw-80rem)/2+2rem))]"
+            )}
+          >
+            {services.map((service, index) => (
+              <div
+                key={service.id || index}
+                className="w-[280px] sm:w-[320px] lg:w-[350px] shrink-0"
+              >
+                <ServiceCard
+                  service={service}
+                  whatsappBaseUrl={whatsappBaseUrl}
+                />
+              </div>
+            ))}
+          </motion.div>
         </div>
-      </Carousel>
+      </div>
     </div>
   );
 };
