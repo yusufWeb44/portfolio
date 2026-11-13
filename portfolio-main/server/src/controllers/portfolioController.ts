@@ -22,7 +22,9 @@ const ALLOWED_SETTINGS_KEYS = new Set([
   'skillsPoint1Title', 'skillsPoint1TitleAr', 'skillsPoint1Text', 'skillsPoint1TextAr',
   'skillsPoint2Title', 'skillsPoint2TitleAr', 'skillsPoint2Text', 'skillsPoint2TextAr',
   'experienceBadge', 'experienceBadgeAr', 'experienceTitle', 'experienceTitleAr',
-  'experienceSubtitle', 'experienceSubtitleAr', 'servicesBadge', 'servicesBadgeAr',
+  'experienceSubtitle', 'experienceSubtitleAr',
+  'certificatesTitle', 'certificatesTitleAr', 'certificatesSubtitle', 'certificatesSubtitleAr',
+  'servicesBadge', 'servicesBadgeAr',
   'servicesTitle', 'servicesTitleAr', 'servicesSubtitle', 'servicesSubtitleAr',
   'faqBadge', 'faqBadgeAr', 'faqTitle', 'faqTitleAr', 'faqSubtitle', 'faqSubtitleAr',
   'contactBadge', 'contactBadgeAr', 'contactTitle', 'contactTitleAr',
@@ -239,7 +241,12 @@ export const getCertificates = async (req: Request, res: Response) => {
 };
 
 export const createCertificate = async (req: Request, res: Response) => {
-  const cert = await prisma.certificate.create({ data: req.body });
+  const data = {
+    ...req.body,
+    title: req.body.title?.trim() || 'Certificate',
+    issuer: req.body.issuer?.trim() || 'Verified Credential',
+  };
+  const cert = await prisma.certificate.create({ data });
   res.status(201).json({ success: true, data: cert });
 };
 

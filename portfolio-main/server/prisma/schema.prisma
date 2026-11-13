@@ -92,6 +92,11 @@ model PortfolioSettings {
   experienceSubtitle String?  @db.Text
   experienceSubtitleAr String? @db.Text
 
+  certificatesTitle      String?  @default("Certificates")
+  certificatesTitleAr    String?  @default("الشهادات")
+  certificatesSubtitle   String?  @db.Text
+  certificatesSubtitleAr String?  @db.Text
+
   servicesBadge      String?  @default("Consulting & Offerings")
   servicesBadgeAr    String?  @default("الخدمات والاستشارات")
   servicesTitle      String?  @default("Services.")
