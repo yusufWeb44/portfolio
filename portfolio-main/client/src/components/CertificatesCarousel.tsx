@@ -23,11 +23,25 @@ export interface CertificateItem {
 
 interface CertificatesCarouselProps {
   certificates: CertificateItem[];
+  title?: string | null;
+  subtitle?: string | null;
 }
 
-export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({ certificates }) => {
+export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({ 
+  certificates,
+  title,
+  subtitle,
+}) => {
   const { currentLang, currentDirection } = useLanguage();
   const isRtl = currentDirection === 'rtl' || currentLang === 'ar';
+
+  const defaultTitle = isRtl ? 'الشهادات والمؤهلات' : 'CERTIFICATES';
+  const defaultSubtitle = isRtl
+    ? 'مؤهلات وشهادات معتمدة توثق الكفاءة التقنية والإنجازات الأكاديمية.'
+    : 'Recognized industry credentials, academic achievements, and verified technical licenses.';
+
+  const displayTitle = title || defaultTitle;
+  const displaySubtitle = subtitle || defaultSubtitle;
 
   // Lightbox Modal state
   const [selectedCert, setSelectedCert] = useState<CertificateItem | null>(null);
@@ -46,39 +60,41 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({ cert
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Responsive Layout configuration tailored to match reference proportions
+  // Responsive 3D Curved Cylinder configuration (preserving existing card dimensions)
   const layout = useMemo(() => {
     const isLg = windowWidth >= 1400;
     const isMd = windowWidth >= 1024 && windowWidth < 1400;
     const isSm = windowWidth >= 640 && windowWidth < 1024;
 
     const cardWidth = isLg ? 410 : (isMd ? 360 : (isSm ? 290 : 220));
-    const arcRadius = isLg ? 1250 : (isMd ? 1100 : (isSm ? 880 : 660));
-    const angleStep = isLg ? 18.2 : (isMd ? 18.5 : (isSm ? 19.0 : 20.0));
-    const topBaseline = isLg ? 45 : (isMd ? 40 : (isSm ? 32 : 25));
-    const titleGap = isLg ? 68 : (isMd ? 58 : (isSm ? 46 : 36));
     const cardHeight = cardWidth / 1.414;
-    const titleTop = Math.round(topBaseline + cardHeight + titleGap);
-    const outerDrop = (1 - Math.cos(2.4 * angleStep * Math.PI / 180)) * arcRadius;
-    const containerHeight = Math.round(topBaseline + cardHeight + outerDrop + 20);
+    const angleStep = isLg ? 22.0 : (isMd ? 22.5 : (isSm ? 23.0 : 24.0));
+    const gap = isLg ? 26 : (isMd ? 22 : (isSm ? 18 : 14));
 
-    const halfW = windowWidth / 2;
-    // Calculate the angle where the card reaches the screen edge
-    const edgeRatio = Math.min(0.88, (halfW + cardWidth * 0.25) / arcRadius);
-    const edgeAngle = Math.asin(edgeRatio) * (180 / Math.PI);
-    
-    // Cards remain 100% sharp and visible until almost at the viewport edge
-    const fadeEnd = (isMd || isLg)
-      ? Math.max(50, Math.min(62, Math.round(edgeAngle + 6)))
-      : Math.max(38, Math.round(edgeAngle + 8));
-    const sharpThreshold = Math.max(26, fadeEnd - 12);
+    // Calibrated horizontal curve radius so adjacent cards maintain a crisp uniform gap without stretching
+    const stepRad = (angleStep * 0.6 * Math.PI) / 180;
+    const arcRadius = Math.round((cardWidth * 0.95 + gap) / Math.sin(stepRad));
+
+    // Local 3D perspective per card: creates the 3D concave curve without wide-angle horizontal stretching
+    const perspective = Math.round(cardWidth * 2.4);
+
+    // Vertical bleed buffer so 3D-tilted outer card corners and shadows never clip at top or bottom,
+    // paired with equal negative margins so section spacing remains 100% unchanged
+    const bleed = isLg ? 75 : (isMd ? 65 : 50);
+    const topBaseline = (isLg ? 16 : (isMd ? 14 : 10)) + bleed;
+    const bottomClearance = (isLg ? 36 : (isMd ? 30 : 24)) + bleed;
+    const containerHeight = Math.round(topBaseline + cardHeight + bottomClearance);
+
+    const sharpThreshold = isLg ? 46 : (isMd ? 44 : 40);
+    const fadeEnd = isLg ? 58 : (isMd ? 56 : 50);
 
     return {
       cardWidth,
       arcRadius,
+      perspective,
       angleStep,
+      bleed,
       topBaseline,
-      titleTop,
       containerHeight,
       sharpThreshold,
       fadeEnd,
@@ -234,44 +250,62 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({ cert
   }
 
   return (
-    <div className="w-full pt-2 pb-0 relative select-none">
+    <div className="w-full pt-4 pb-2 relative select-none overflow-x-clip">
 
-      {/* ── Ferris Wheel Arch Stage (الناعورة) ── */}
+      {/* ── Section Header (Title & Subtitle placed at top of certificates, centered) ── */}
+      <div className="relative z-20 max-w-3xl mx-auto px-4 text-center mb-6 sm:mb-8 md:mb-10 pointer-events-none">
+        <h2
+          className={
+            isRtl
+              ? "text-2xl sm:text-3xl md:text-4xl lg:text-[2.6rem] font-extrabold tracking-tight text-foreground select-none"
+              : "text-xl sm:text-2xl md:text-3xl lg:text-[2.2rem] font-extrabold uppercase tracking-widest text-foreground select-none"
+          }
+        >
+          {displayTitle}
+        </h2>
+        {displaySubtitle && (
+          <p className="mt-2 text-xs sm:text-sm md:text-base text-muted-foreground leading-relaxed max-w-xl mx-auto select-none">
+            {displaySubtitle}
+          </p>
+        )}
+      </div>
+
+      {/* ── 3D Curved Panoramic Stage ── */}
       <div 
         style={{ 
           height: `${layout.containerHeight}px`,
-          WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 78%, transparent 99%)',
-          maskImage: 'linear-gradient(to bottom, black 0%, black 78%, transparent 99%)',
+          marginTop: `-${layout.bleed}px`,
+          marginBottom: `-${layout.bleed}px`,
         }}
-        className="relative w-full flex items-center justify-center cursor-grab active:cursor-grabbing touch-pan-y"
+        className="relative w-full overflow-visible flex items-center justify-center cursor-grab active:cursor-grabbing touch-pan-y"
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
       >
-        {/* ── Cards Arc ── */}
+        {/* ── 3D Curved Cylinder Cards ── */}
         <div className="relative w-full h-full pointer-events-none">
           {wheelItems.map((cert, index) => {
-            // Calculate card angular position along the periodic wheel
+            // Calculate card angular position along the periodic cylinder
             const rawAngle = (rotationAngle + index * layout.angleStep) % totalPeriod;
             const angle = rawAngle > totalPeriod / 2 
               ? rawAngle - totalPeriod 
               : (rawAngle < -totalPeriod / 2 ? rawAngle + totalPeriod : rawAngle);
             const absAngle = Math.abs(angle);
 
-            // Only render cards up to layout.fadeEnd (prevents any second blurred card lingering on either side)
+            // Only render cards up to layout.fadeEnd
             if (absAngle > layout.fadeEnd) {
               return null;
             }
 
-            // Radial Math:
-            // Arc center is placed below, so card bottom center follows R*sin(rad) and drop R*(1-cos(rad))
+            // 3D Concave Cylinder Math (distortion-free):
+            // Horizontal position is applied before local perspective so side cards never stretch horizontally
             const rad = (angle * Math.PI) / 180;
-            const xOffset = Math.sin(rad) * layout.arcRadius;
-            const yDrop = (1 - Math.cos(rad)) * layout.arcRadius;
+            const xOffset = Math.sin(rad * 0.6) * layout.arcRadius;
+            const zOffset = (1 - Math.cos(rad)) * layout.perspective * 0.68;
 
             // Visual parameters:
-            // Sharp across the arc, smoothly fading out with opacity at the edges (no blur)
+            // Sharp across the cylinder, smoothly fading out with opacity at the viewport edges
             let opacity = 1.0;
             let scale = 1.0;
 
@@ -280,12 +314,11 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({ cert
               scale = 1.0;
             } else {
               const t = Math.min(1, Math.max(0, (absAngle - layout.sharpThreshold) / (layout.fadeEnd - layout.sharpThreshold)));
-              // Smooth cosine opacity fadeout without any blur filter
               opacity = Math.cos((t * Math.PI) / 2);
-              scale = 1.0 - t * 0.05;
+              scale = 1.0 - t * 0.03;
             }
 
-            // Depth stacking: center card is highest z-index, side cards step down symmetrically
+            // Depth stacking
             const zIndex = Math.round(100 - absAngle * 1.5);
             const imgSrc = getMediaUrl(cert.imageUrl || cert.credentialUrl);
 
@@ -296,8 +329,12 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({ cert
                   position: 'absolute',
                   left: '50%',
                   top: `${layout.topBaseline}px`,
-                  transform: `translate3d(calc(-50% + ${xOffset}px), ${yDrop}px, 0) rotate(${angle}deg) scale(${scale})`,
-                  transformOrigin: 'center bottom',
+                  marginLeft: `${-layout.cardWidth / 2}px`,
+                  transform: `translate3d(${xOffset}px, 0px, 0px) perspective(${layout.perspective}px) translateZ(${zOffset}px) rotateY(${-angle}deg) scale(${scale})`,
+                  transformOrigin: 'center center',
+                  backfaceVisibility: 'hidden',
+                  WebkitBackfaceVisibility: 'hidden',
+                  willChange: 'transform, opacity',
                   opacity,
                   zIndex,
                   width: `${layout.cardWidth}px`,
@@ -361,22 +398,6 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({ cert
               </div>
             );
           })}
-        </div>
-
-        {/* ── Center Stage Title (Portfolio Primary Font) ── */}
-        <div 
-          style={{ top: `${layout.titleTop}px` }}
-          className="absolute left-1/2 -translate-x-1/2 z-30 pointer-events-none text-center whitespace-nowrap"
-        >
-          <h2
-            className={
-              isRtl
-                ? "text-2xl sm:text-3xl md:text-4xl lg:text-[2.6rem] font-extrabold tracking-tight text-foreground select-none dark:drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)]"
-                : "text-xl sm:text-2xl md:text-3xl lg:text-[2.2rem] font-extrabold uppercase tracking-widest text-foreground select-none dark:drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)]"
-            }
-          >
-            {isRtl ? 'الشهادات' : 'CERTIFICATES'}
-          </h2>
         </div>
       </div>
 

@@ -132,7 +132,6 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     scrollbar-gutter: stable;
-    scroll-padding-top: 5.5rem;
   }
 
   /* Lenis smooth scroll optimization */
@@ -371,11 +370,5 @@
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
-  }
-
-  /* content-visibility optimization: skip rendering for off-screen sections only (never hero) */
-  section[id]:not(#hero) {
-    content-visibility: auto;
-    contain-intrinsic-size: auto 600px;
   }
 }

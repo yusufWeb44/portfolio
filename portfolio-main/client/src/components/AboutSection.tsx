@@ -55,7 +55,14 @@ const AboutSection = () => {
   const { t, currentLang } = useLanguage();
   const isAr = currentLang === 'ar';
 
-  const [aboutData, setAboutData] = useState<any>(null);
+  const [aboutData, setAboutData] = useState<any>(() => {
+    try {
+      const cached = localStorage.getItem('portfolio_about');
+      return cached ? JSON.parse(cached) : null;
+    } catch {
+      return null;
+    }
+  });
 
   useEffect(() => {
     const fetchAbout = async () => {
@@ -63,6 +70,9 @@ const AboutSection = () => {
         const res = await api.get('/about');
         if (res.data?.success && res.data?.data) {
           setAboutData(res.data.data);
+          try {
+            localStorage.setItem('portfolio_about', JSON.stringify(res.data.data));
+          } catch {}
         }
       } catch (err) {
         console.warn('Could not load about data', err);

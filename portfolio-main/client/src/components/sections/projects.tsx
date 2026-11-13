@@ -293,7 +293,14 @@ const StackedCard = ({
 const ProjectsSection = () => {
   const { t, currentLang } = useLanguage();
   const isAr = currentLang === 'ar';
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [projects, setProjects] = useState<Project[]>(() => {
+    try {
+      const cached = localStorage.getItem('portfolio_projects');
+      return cached ? JSON.parse(cached) : [];
+    } catch {
+      return [];
+    }
+  });
   const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -309,7 +316,13 @@ const ProjectsSection = () => {
       api.get('/settings').then((res) => setSettings(res.data?.data)).catch(() => { });
       api
         .get('/projects?public=true')
-        .then((res) => setProjects(res.data.data || []))
+        .then((res) => {
+          const data = res.data.data || [];
+          setProjects(data);
+          try {
+            localStorage.setItem('portfolio_projects', JSON.stringify(data));
+          } catch {}
+        })
         .catch(() => { })
         .finally(() => setLoading(false));
     };
@@ -348,7 +361,7 @@ const ProjectsSection = () => {
   const numCards = deckProjects.length;
 
   // Track height: 70vh per incoming card for a tight, natural scroll
-  const trackHeight = numCards <= 1 ? 'auto' : `${100 + (numCards - 1) * 70}vh`;
+  const trackHeight = numCards === 0 ? '240vh' : (numCards === 1 ? 'auto' : `${100 + (numCards - 1) * 70}vh`);
 
   return (
     <section id="projects" className="scroll-mt-24 relative bg-transparent [--cards-step:36px] sm:[--cards-step:40px] lg:[--cards-step:44px]">

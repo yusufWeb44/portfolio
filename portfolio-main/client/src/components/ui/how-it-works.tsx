@@ -570,7 +570,14 @@ const HowItWorks = () => {
   const { t, currentLang, currentDirection } = useLanguage();
   const isRtl = currentDirection === 'rtl' || currentLang === 'ar';
   const isAr = currentLang === 'ar';
-  const [stepsData, setStepsData] = useState<Step[]>([]);
+  const [stepsData, setStepsData] = useState<Step[]>(() => {
+    try {
+      const cached = localStorage.getItem('portfolio_workflow');
+      return cached ? JSON.parse(cached) : [];
+    } catch {
+      return [];
+    }
+  });
   const [settings, setSettings] = useState<any>(null);
   const [isMobile, setIsMobile] = useState(() =>
     typeof window !== 'undefined' ? window.innerWidth < 640 : false
@@ -631,6 +638,9 @@ const HowItWorks = () => {
                 };
               });
               setStepsData(mapped);
+              try {
+                localStorage.setItem('portfolio_workflow', JSON.stringify(mapped));
+              } catch {}
             }
           }
         }
@@ -667,12 +677,18 @@ const HowItWorks = () => {
   });
 
   if (displaySteps.length === 0) {
-    return null;
+    return (
+      <section
+        id="workflow"
+        className="relative scroll-mt-24 py-10 sm:py-14 md:py-18 px-4 sm:px-6 lg:px-8 bg-transparent"
+        aria-label="Engineering process and workflow"
+      />
+    );
   }
 
   return (
     <section
-      id="how-i-work"
+      id="workflow"
       className="relative scroll-mt-24 py-10 sm:py-14 md:py-18 px-4 sm:px-6 lg:px-8 bg-transparent overflow-x-hidden overflow-y-visible"
       aria-label="Engineering process and workflow"
     >

@@ -3,7 +3,6 @@ import {
   Mail,
   Globe,
   MapPin,
-  CalendarCheck,
 } from 'lucide-react';
 import {
   GithubIcon,
@@ -94,6 +93,10 @@ interface Settings {
   experienceTitleAr?: string;
   experienceSubtitle?: string;
   experienceSubtitleAr?: string;
+  certificatesTitle?: string;
+  certificatesTitleAr?: string;
+  certificatesSubtitle?: string;
+  certificatesSubtitleAr?: string;
   servicesBadge?: string;
   servicesBadgeAr?: string;
   servicesTitle?: string;
@@ -150,9 +153,30 @@ const Home = () => {
       return null;
     }
   });
-  const [experiences, setExperiences] = useState<ExperienceItem[]>([]);
-  const [certificates, setCertificates] = useState<CertificateItem[]>([]);
-  const [services, setServices] = useState<Service[]>([]);
+  const [experiences, setExperiences] = useState<ExperienceItem[]>(() => {
+    try {
+      const cached = localStorage.getItem('portfolio_experiences');
+      return cached ? JSON.parse(cached) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [certificates, setCertificates] = useState<CertificateItem[]>(() => {
+    try {
+      const cached = localStorage.getItem('portfolio_certificates');
+      return cached ? JSON.parse(cached) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [services, setServices] = useState<Service[]>(() => {
+    try {
+      const cached = localStorage.getItem('portfolio_services');
+      return cached ? JSON.parse(cached) : [];
+    } catch {
+      return [];
+    }
+  });
   const [socialLinks, setSocialLinks] = useState<SocialLinkItem[]>(() => {
     try {
       const cached = localStorage.getItem('portfolio_social_links');
@@ -161,7 +185,14 @@ const Home = () => {
       return [];
     }
   });
-  const [rawFaqs, setRawFaqs] = useState<any[]>([]);
+  const [rawFaqs, setRawFaqs] = useState<any[]>(() => {
+    try {
+      const cached = localStorage.getItem('portfolio_faqs');
+      return cached ? JSON.parse(cached) : [];
+    } catch {
+      return [];
+    }
+  });
 
   /* ─── Data Fetching ─────────────────────────────────────────────── */
   useEffect(() => {
@@ -189,18 +220,23 @@ const Home = () => {
         // Below-the-fold data — defer with startTransition to avoid blocking paint
         startTransition(() => {
           if (expRes.status === 'fulfilled') {
-            setExperiences(expRes.value.data.data || []);
+            const expData = expRes.value.data.data || [];
+            setExperiences(expData);
+            try { localStorage.setItem('portfolio_experiences', JSON.stringify(expData)); } catch { }
           } else {
             setExperiences([]);
           }
           if (certRes.status === 'fulfilled') {
             const certData = certRes.value.data.data || [];
             setCertificates(certData);
+            try { localStorage.setItem('portfolio_certificates', JSON.stringify(certData)); } catch { }
           } else {
             setCertificates([]);
           }
           if (servRes.status === 'fulfilled') {
-            setServices((servRes.value.data.data || []).filter((s: Service) => s.isEnabled));
+            const servData = (servRes.value.data.data || []).filter((s: Service) => s.isEnabled);
+            setServices(servData);
+            try { localStorage.setItem('portfolio_services', JSON.stringify(servData)); } catch { }
           } else {
             setServices([]);
           }
@@ -218,6 +254,7 @@ const Home = () => {
             if (Array.isArray(fetchedFaqs) && fetchedFaqs.length > 0) {
               const valid = fetchedFaqs.filter((f: any) => f.isEnabled !== false);
               setRawFaqs(valid);
+              try { localStorage.setItem('portfolio_faqs', JSON.stringify(valid)); } catch { }
             } else {
               setRawFaqs([]);
             }
@@ -338,13 +375,6 @@ const Home = () => {
     ? (settings?.locationAr || settings?.location || '')
     : (settings?.location || '');
 
-  const availability = resolveField(
-    'hero.availability',
-    settings?.availabilityAr,
-    settings?.availability,
-    ''
-  );
-
   const ctaText = resolveField(
     'hero.cta',
     settings?.ctaTextAr,
@@ -455,7 +485,7 @@ const Home = () => {
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 4: EXPERIENCE (Vertical Animated Timeline & Certificates)
       ═══════════════════════════════════════════════════════════════ */}
-      <section id="experience" className="scroll-mt-24 pt-10 sm:pt-14 md:pt-18 pb-4 sm:pb-6 relative overflow-hidden">
+      <section id="experience" className="scroll-mt-24 pt-10 sm:pt-14 md:pt-18 pb-4 sm:pb-6 relative overflow-x-clip">
         <div className="max-w-7xl mx-auto space-y-8 sm:space-y-10 px-4 sm:px-6 lg:px-8 mb-6 sm:mb-8">
           <FadeIn>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-foreground leading-[1.15] mb-4">
@@ -489,7 +519,23 @@ const Home = () => {
         {/* Full-width seamless Certificates Carousel */}
         {certificates.length > 0 && (
           <Suspense fallback={<div className="min-h-[300px]" />}>
-            <CertificatesCarousel certificates={certificates} />
+            <CertificatesCarousel
+              certificates={certificates}
+              title={resolveField(
+                'certificates.title',
+                settings?.certificatesTitleAr,
+                settings?.certificatesTitle,
+                isAr ? 'الشهادات والمؤهلات' : 'CERTIFICATES'
+              )}
+              subtitle={resolveField(
+                'certificates.subtitle',
+                settings?.certificatesSubtitleAr,
+                settings?.certificatesSubtitle,
+                isAr
+                  ? 'مؤهلات وشهادات معتمدة توثق الكفاءة التقنية والإنجازات الأكاديمية.'
+                  : 'Recognized industry credentials, academic achievements, and verified technical licenses.'
+              )}
+            />
           </Suspense>
         )}
       </section>
@@ -560,7 +606,7 @@ const Home = () => {
         id="contact"
         className="scroll-mt-24 relative overflow-hidden bg-transparent text-foreground py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8"
       >
-        <div className="relative z-10 max-w-7xl mx-auto">
+        <div className="relative z-10 max-w-[620px] mx-auto w-full">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -570,22 +616,30 @@ const Home = () => {
             <SpotlightCard
               spotlightColor="rgba(16, 185, 129, 0.04)"
               darkSpotlightColor="rgba(255, 255, 255, 0.025)"
-              size={420}
-              darkSize={300}
-              className="bg-white dark:bg-[#121417] border border-slate-200/90 dark:border-white/[0.09] rounded-2xl sm:rounded-3xl shadow-[0_1px_2px_rgba(15,23,42,0.03),0_12px_32px_-8px_rgba(15,23,42,0.06)] dark:shadow-[0_16px_48px_rgba(0,0,0,0.45)] overflow-hidden"
+              size={360}
+              darkSize={240}
+              className={cn(
+                "group relative overflow-hidden rounded-2xl sm:rounded-3xl p-7 sm:p-10",
+                "bg-white dark:bg-[#121417]/95",
+                "border border-slate-200/90 dark:border-white/[0.08]",
+                "shadow-[0_1px_2px_rgba(15,23,42,0.03),0_16px_36px_-12px_rgba(15,23,42,0.08)]",
+                "dark:shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset,0_20px_48px_-16px_rgba(0,0,0,0.5)]",
+                "transition-all duration-300"
+              )}
             >
-              {/* ── Primary Invitation Zone: Title + Description + Action Buttons ── */}
-              <div className="relative z-10 px-6 py-10 sm:px-12 sm:py-14 md:px-16 md:py-16 flex flex-col items-center text-center">
-                <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight leading-[1.15] text-foreground max-w-2xl">
+              <div className="relative z-10 flex flex-col items-center text-center">
+                {/* 1. Headline */}
+                <h2 className="text-3xl sm:text-4xl md:text-[36px] font-extrabold tracking-tight leading-[1.18] text-foreground">
                   {resolveField(
                     'contact.headline',
                     settings?.contactTitleAr,
                     settings?.contactTitle,
-                    isAr ? 'لديك فكرة؟' : 'Have an idea?'
+                    isAr ? 'لديك فكرة أو مشروع؟' : 'Have an idea?'
                   )}
                 </h2>
 
-                <p className="mt-4 text-slate-600 dark:text-zinc-300 text-base md:text-lg leading-relaxed max-w-xl">
+                {/* 2. Subtitle */}
+                <p className="mt-3.5 text-xs sm:text-sm md:text-[14.5px] text-slate-600 dark:text-zinc-300 leading-relaxed max-w-md mx-auto">
                   {resolveField(
                     'contact.subtitle',
                     settings?.contactSubtitleAr,
@@ -596,8 +650,8 @@ const Home = () => {
                   )}
                 </p>
 
-                {/* CTA Buttons (WhatsApp + Email Button Only) */}
-                <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 w-full sm:w-auto">
+                {/* 3. Action Buttons */}
+                <div className="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3 w-full sm:w-auto">
                   <a
                     href={
                       settings?.whatsappNumber
@@ -608,7 +662,7 @@ const Home = () => {
                     rel="noreferrer"
                     className={cn(
                       buttonVariants({ variant: 'primary', size: 'default' }),
-                      "w-full sm:w-auto"
+                      "w-full sm:w-auto shadow-sm hover:shadow-[0_8px_20px_rgba(16,185,129,0.22)]"
                     )}
                   >
                     <WhatsappIcon size={16} />
@@ -619,69 +673,53 @@ const Home = () => {
                     href={`mailto:${email}`}
                     className={cn(
                       buttonVariants({ variant: 'secondary', size: 'default' }),
-                      "w-full sm:w-auto bg-slate-50 dark:bg-white/[0.05] hover:bg-white dark:hover:bg-white/[0.09] border-slate-200/90 dark:border-white/15"
+                      "w-full sm:w-auto bg-slate-50 dark:bg-white/[0.05] hover:bg-white dark:hover:bg-white/[0.09]",
+                      "border-slate-200/90 dark:border-white/15 hover:border-slate-300 dark:hover:border-white/25",
+                      "!text-foreground hover:!text-foreground dark:hover:!text-foreground",
+                      "[&_svg]:!text-foreground [&_span]:!text-foreground",
+                      "hover:shadow-xs transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]"
                     )}
                   >
-                    <Mail size={16} />
-                    <span>{isAr ? t('contact.sendEmail', 'إرسال بريد إلكتروني') : 'Send an Email'}</span>
+                    <Mail size={16} strokeWidth={1.5} className="!text-foreground" />
+                    <span className="!text-foreground">{isAr ? t('contact.sendEmail', 'إرسال بريد إلكتروني') : 'Send an Email'}</span>
                   </a>
                 </div>
-              </div>
 
-              {/* ── Bottom Architectural Dock: Location, Availability & Social Links ── */}
-              {(location || availability || socialLinks.length > 0) && (
-                <div className="relative z-10 border-t border-slate-200/80 dark:border-white/[0.08] bg-slate-50/70 dark:bg-white/[0.02] px-6 py-5 sm:px-10 md:px-14 sm:py-6 flex flex-col md:flex-row items-center justify-between gap-5">
-                  {/* Start Side: Location & Availability */}
-                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 sm:gap-6">
-                    {location && (
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-lg bg-white dark:bg-white/[0.06] border border-slate-200/90 dark:border-white/[0.1] flex items-center justify-center text-foreground shrink-0 shadow-2xs">
-                          <MapPin size={16} />
-                        </div>
-                        <div className="text-start">
-                          <p className="text-xs font-medium text-muted-foreground leading-none mb-1">
-                            {isAr ? 'العنوان' : 'Location'}
-                          </p>
-                          <p className="text-sm font-semibold text-foreground leading-snug">
-                            {location}
-                          </p>
-                        </div>
-                      </div>
-                    )}
-
-                    {location && availability && (
-                      <div className="hidden sm:block h-8 w-px bg-slate-200/80 dark:bg-white/[0.08]" aria-hidden="true" />
-                    )}
-
-                    {availability && (
-                      <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-emerald-500/[0.08] dark:bg-emerald-500/[0.1] border border-emerald-500/20 text-emerald-700 dark:text-emerald-400">
-                        <CalendarCheck size={15} className="shrink-0" />
-                        <span className="text-xs font-semibold leading-none">{availability}</span>
-                      </div>
-                    )}
+                {/* 4. Location Row */}
+                {location && (
+                  <div className="mt-5 flex items-center justify-center gap-1.5 text-xs text-muted-foreground select-none font-medium">
+                    <MapPin size={13} className="text-emerald-500 shrink-0" strokeWidth={1.5} />
+                    <span>{location}</span>
                   </div>
+                )}
 
-                  {/* End Side: Social Links */}
-                  {socialLinks.length > 0 && (
-                    <div className="flex flex-col sm:flex-row items-center gap-3">
-                      <span className="text-xs font-medium text-muted-foreground">
-                        {isAr ? t('contact.findMe', 'تواصل معي على') : t('contact.findMe', 'Find me on')}
-                      </span>
-                      <div className="flex items-center gap-2 flex-wrap justify-center">
-                        {socialLinks.map(link => (
-                          <SocialButton
-                            key={link.platform}
-                            href={link.url}
-                            label={link.platform}
-                            icon={getSocialIcon(link.platform)}
-                            size="sm"
-                          />
-                        ))}
-                      </div>
+                {/* 5. Hairline Gradient Divider */}
+                {socialLinks.length > 0 && (
+                  <div className="w-full my-6 flex items-center justify-center" aria-hidden="true">
+                    <div className="h-px w-full max-w-[240px] bg-gradient-to-r from-transparent via-slate-200 dark:via-white/10 to-transparent" />
+                  </div>
+                )}
+
+                {/* 6. Social Links */}
+                {socialLinks.length > 0 && (
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5">
+                    <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground select-none">
+                      {isAr ? t('contact.findMe', 'أو تابعنا على:') : t('contact.findMe', 'Find me on:')}
+                    </span>
+                    <div className="flex items-center gap-2 flex-wrap justify-center">
+                      {socialLinks.map(link => (
+                        <SocialButton
+                          key={link.platform}
+                          href={link.url}
+                          label={link.platform}
+                          icon={getSocialIcon(link.platform)}
+                          size="sm"
+                        />
+                      ))}
                     </div>
-                  )}
-                </div>
-              )}
+                  </div>
+                )}
+              </div>
             </SpotlightCard>
           </motion.div>
         </div>

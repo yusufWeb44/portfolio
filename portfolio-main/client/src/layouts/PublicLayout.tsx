@@ -2,7 +2,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import {
   Menu, X, Mail, Sun, Moon,
-  ChevronRight, User, FolderKanban, Terminal, Briefcase, Wrench, HelpCircle
+  ChevronRight, User, FolderKanban, Terminal, Briefcase, Wrench, HelpCircle, Layers
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../components/ui/Button';
@@ -54,9 +54,11 @@ const PublicLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const isNavigatingRef = useRef(false);
+  const navTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const navLinks = [
     { name: t('nav.about', 'About'), id: 'about', icon: User },
+    { name: t('nav.workflow', isAr ? 'سير العمل' : 'Workflow'), id: 'workflow', icon: Layers },
     { name: t('nav.projects', 'Projects'), id: 'projects', icon: FolderKanban },
     { name: t('nav.skills', 'Skills'), id: 'skills', icon: Terminal },
     { name: t('nav.experience', 'Experience'), id: 'experience', icon: Briefcase },
@@ -65,53 +67,97 @@ const PublicLayout = () => {
     { name: t('nav.contact', isAr ? 'تواصل' : 'Contact'), id: 'contact', icon: Mail },
   ];
 
-  // Passive RAF scroll detection (zero reflows/lag)
+  // Cleanup navigation timer on unmount
+  useEffect(() => {
+    return () => {
+      if (navTimerRef.current) clearTimeout(navTimerRef.current);
+    };
+  }, []);
+
+  // Passive RAF scroll detection & High-Precision Active Section Spy
   useEffect(() => {
     let ticking = false;
+    const navSectionIds = ['about', 'workflow', 'projects', 'skills', 'experience', 'services', 'faq', 'contact'];
+
+    const updateSpy = () => {
+      const scrollY = window.scrollY;
+      setScrolled(scrollY > 20);
+
+      // If user is on another route or currently navigating via click, lock the active section
+      if (location.pathname !== '/' || isNavigatingRef.current) {
+        ticking = false;
+        return;
+      }
+
+      // Hero section: top of the page
+      if (scrollY < 100) {
+        setActiveSection('');
+        ticking = false;
+        return;
+      }
+
+      // Check if user reached near the very bottom of the document -> activate Contact
+      const scrollBottom = window.innerHeight + scrollY;
+      const docHeight = document.documentElement.scrollHeight;
+      if (scrollBottom >= docHeight - 80) {
+        setActiveSection('contact');
+        ticking = false;
+        return;
+      }
+
+      // Determine active section using the reading line threshold (~140px below fixed navbar)
+      const headerThreshold = 140;
+      let matchedSection = '';
+
+      for (const id of navSectionIds) {
+        const el = document.getElementById(id);
+        if (!el) continue;
+        const rect = el.getBoundingClientRect();
+        if (rect.top <= headerThreshold && rect.bottom > headerThreshold) {
+          matchedSection = id;
+          break;
+        }
+      }
+
+      // Secondary fallback: find the section closest to the top viewport edge
+      if (!matchedSection) {
+        let minDiff = Infinity;
+        for (const id of navSectionIds) {
+          const el = document.getElementById(id);
+          if (!el) continue;
+          const rect = el.getBoundingClientRect();
+          if (rect.bottom > 60 && rect.top < window.innerHeight * 0.75) {
+            const diff = Math.abs(rect.top - headerThreshold);
+            if (diff < minDiff) {
+              minDiff = diff;
+              matchedSection = id;
+            }
+          }
+        }
+      }
+
+      if (matchedSection) {
+        setActiveSection(matchedSection);
+      }
+
+      ticking = false;
+    };
+
     const handleScroll = () => {
       if (!ticking) {
-        window.requestAnimationFrame(() => {
-          setScrolled(window.scrollY > 20);
-          if (window.scrollY < 80 && !isNavigatingRef.current) {
-            setActiveSection('');
-          }
-          ticking = false;
-        });
+        window.requestAnimationFrame(updateSpy);
         ticking = true;
       }
     };
+
+    // Run initial assessment
+    updateSpy();
+
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // Track active section via Intersection Observer without jitter
-  useEffect(() => {
-    if (location.pathname !== '/') {
-      setActiveSection('');
-      return;
-    }
-
-    const sections = navLinks.map(l => document.getElementById(l.id)).filter(Boolean) as HTMLElement[];
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (isNavigatingRef.current) return;
-        const visibleEntries = entries.filter(e => e.isIntersecting);
-        if (visibleEntries.length > 0) {
-          visibleEntries.sort(
-            (a, b) => Math.abs(a.boundingClientRect.top - 120) - Math.abs(b.boundingClientRect.top - 120)
-          );
-          setActiveSection(visibleEntries[0].target.id);
-        }
-      },
-      {
-        rootMargin: '-15% 0px -50% 0px',
-        threshold: [0, 0.1, 0.25],
-      }
-    );
-
-    sections.forEach((sec) => observer.observe(sec));
-    return () => observer.disconnect();
-  }, [location.pathname, t]);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [location.pathname]);
 
   // Handle hash scrolling on direct load or navigation (skipped on reload so refresh starts cleanly at top)
   useEffect(() => {
@@ -129,16 +175,37 @@ const PublicLayout = () => {
     }
 
     if (location.hash) {
-      const id = location.hash.replace('#', '');
+      const rawId = location.hash.replace(/^#+/, '');
+      const id = rawId === 'faqs' ? 'faq' : rawId === 'how-i-work' ? 'workflow' : rawId;
       const timer = setTimeout(() => {
         const el = document.getElementById(id);
         if (el) {
-          if (window.__lenis) {
-            window.__lenis.scrollTo(el, { offset: -80, duration: 1.2 });
-          } else {
-            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
           setActiveSection(id);
+          isNavigatingRef.current = true;
+          if (navTimerRef.current) clearTimeout(navTimerRef.current);
+          const navOffset = id === 'projects' || id === 'services' ? 0 : 60;
+          if (window.__lenis) {
+            window.__lenis.resize();
+            const currentScroll = window.scrollY || window.pageYOffset || 0;
+            const targetTop = Math.max(0, Math.round(el.getBoundingClientRect().top + currentScroll - navOffset));
+            window.__lenis.scrollTo(targetTop, {
+              duration: 1.1,
+              onComplete: () => {
+                setActiveSection(id);
+                setTimeout(() => {
+                  isNavigatingRef.current = false;
+                }, 100);
+              },
+            });
+          } else {
+            const currentScroll = window.scrollY || window.pageYOffset || 0;
+            const targetTop = Math.max(0, Math.round(el.getBoundingClientRect().top + currentScroll - navOffset));
+            window.scrollTo({ top: targetTop, behavior: 'smooth' });
+          }
+          navTimerRef.current = setTimeout(() => {
+            setActiveSection(id);
+            isNavigatingRef.current = false;
+          }, 1300);
         }
       }, 150);
       return () => clearTimeout(timer);
@@ -146,33 +213,78 @@ const PublicLayout = () => {
   }, [location]);
 
   const scrollToSection = (id: string) => {
+    const rawId = (id || '').replace(/^#+/, '');
+    const targetId = rawId === 'faqs' ? 'faq' : rawId === 'how-i-work' ? 'workflow' : rawId;
+
     if (location.pathname !== '/') {
-      navigate(`/#${id}`);
+      navigate(`/#${targetId}`);
       return;
     }
 
-    if (id === 'hero') {
+    if (targetId === 'hero') {
       setActiveSection('');
+      isNavigatingRef.current = true;
+      if (navTimerRef.current) clearTimeout(navTimerRef.current);
       if (window.__lenis) {
-        window.__lenis.scrollTo(0, { duration: 1.2 });
+        window.__lenis.resize();
+        window.__lenis.scrollTo(0, {
+          duration: 1.1,
+          onComplete: () => {
+            setActiveSection('');
+            setTimeout(() => {
+              isNavigatingRef.current = false;
+            }, 100);
+          },
+        });
       } else {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
+      navTimerRef.current = setTimeout(() => {
+        setActiveSection('');
+        isNavigatingRef.current = false;
+      }, 1200);
       return;
     }
 
-    const el = document.getElementById(id);
+    const el = document.getElementById(targetId);
     if (el) {
-      setActiveSection(id);
+      // 1. Instantly highlight the target in navbar
+      setActiveSection(targetId);
+      // 2. Lock spy during smooth animation
       isNavigatingRef.current = true;
+      if (navTimerRef.current) clearTimeout(navTimerRef.current);
+
+      const navOffset = targetId === 'projects' || targetId === 'services' ? 0 : 60;
+
       if (window.__lenis) {
-        window.__lenis.scrollTo(el, { offset: -80, duration: 1.2 });
+        // Immediate recalculation of document dimensions
+        window.__lenis.resize();
+
+        // Calculate absolute target coordinate with exact navbar clearance
+        const currentScroll = window.scrollY || window.pageYOffset || 0;
+        const rect = el.getBoundingClientRect();
+        const targetTop = Math.max(0, Math.round(rect.top + currentScroll - navOffset));
+
+        window.__lenis.scrollTo(targetTop, {
+          duration: 1.1,
+          onComplete: () => {
+            setActiveSection(targetId);
+            setTimeout(() => {
+              isNavigatingRef.current = false;
+            }, 100);
+          },
+        });
       } else {
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const currentScroll = window.scrollY || window.pageYOffset || 0;
+        const targetTop = Math.max(0, Math.round(el.getBoundingClientRect().top + currentScroll - navOffset));
+        window.scrollTo({ top: targetTop, behavior: 'smooth' });
       }
-      setTimeout(() => {
+
+      // Safety timeout: unlock after animation finishes
+      navTimerRef.current = setTimeout(() => {
+        setActiveSection(targetId);
         isNavigatingRef.current = false;
-      }, 700);
+      }, 1300);
     }
   };
 

@@ -311,8 +311,22 @@ const fadeUpVariants = {
 const SkillsSection = () => {
   const { t, currentLang } = useLanguage();
   const isAr = currentLang === 'ar';
-  const [rawSkillsData, setRawSkillsData] = useState<any[]>([]);
-  const [settings, setSettings] = useState<any>(null);
+  const [rawSkillsData, setRawSkillsData] = useState<any[]>(() => {
+    try {
+      const cached = localStorage.getItem('portfolio_skills');
+      return cached ? JSON.parse(cached) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [settings, setSettings] = useState<any>(() => {
+    try {
+      const cached = localStorage.getItem('portfolio_settings');
+      return cached ? JSON.parse(cached) : null;
+    } catch {
+      return null;
+    }
+  });
 
   useEffect(() => {
     const fetchData = () => {
@@ -330,6 +344,9 @@ const SkillsSection = () => {
             const activeSkills = rawSkills.filter((s: any) => s.isEnabled !== false);
             activeSkills.sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
             setRawSkillsData(activeSkills);
+            try {
+              localStorage.setItem('portfolio_skills', JSON.stringify(activeSkills));
+            } catch {}
           }
         })
         .catch((err) => {

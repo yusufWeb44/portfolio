@@ -85,23 +85,46 @@ export const SmoothScrollProvider: React.FC<{ children: React.ReactNode }> = ({ 
     gsap.ticker.add(onGsapTick);
     gsap.ticker.lagSmoothing(0);
 
+    // Immediate synchronization on any document layout resize (e.g. dynamic API data rendering)
+    let resizeTimer: any = null;
+    const resizeObserver = new ResizeObserver(() => {
+      lenis.resize();
+      ScrollTrigger.refresh();
+      // Additional micro-tick to ensure layout settle
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        lenis.resize();
+        ScrollTrigger.refresh();
+      }, 100);
+    });
+    if (document.body) {
+      resizeObserver.observe(document.body);
+    }
+
     // Intercept in-page hash links (#projects, #about, etc.) for buttery smooth glides
     const handleAnchorClick = (e: MouseEvent) => {
       const target = (e.target as HTMLElement).closest('a');
       if (!target) return;
       const href = target.getAttribute('href');
       if (href && href.startsWith('#') && href.length > 1) {
-        const targetId = href.slice(1);
+        const rawId = href.slice(1);
+        const targetId = rawId === 'faqs' ? 'faq' : rawId === 'how-i-work' ? 'workflow' : rawId;
         const el = document.getElementById(targetId);
         if (el) {
           e.preventDefault();
-          lenis.scrollTo(el, { offset: -80, duration: 1.2 });
+          lenis.resize();
+          const navOffset = targetId === 'projects' || targetId === 'services' ? 0 : 60;
+          const currentScroll = window.scrollY || window.pageYOffset || 0;
+          const targetTop = Math.max(0, Math.round(el.getBoundingClientRect().top + currentScroll - navOffset));
+          lenis.scrollTo(targetTop, { duration: 1.1 });
         }
       }
     };
     document.addEventListener('click', handleAnchorClick);
 
     return () => {
+      resizeObserver.disconnect();
+      clearTimeout(resizeTimer);
       document.removeEventListener('click', handleAnchorClick);
       gsap.ticker.remove(onGsapTick);
       lenis.destroy();
