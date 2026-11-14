@@ -1,21 +1,21 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
-import { buttonVariants } from '../components/ui/Button';
+import { buttonVariants, cn } from '../components/ui/Button';
 import { useLocation, Link } from 'react-router-dom';
 import {
   ArrowLeft,
   ChevronLeft,
   ChevronRight,
   ExternalLink,
-  Calendar,
-  Layers,
   Code2,
-  Sparkles,
-  CheckCircle2
+  Maximize2,
+  X
 } from 'lucide-react';
 import api from '../services/api';
 import { useLanguage } from '../contexts/LanguageContext';
+import { getMediaUrl } from '../utils/mediaUrl';
 
 /* ─── Interfaces ─────────────────────────────────────────────────── */
 interface ProjectImage {
@@ -60,36 +60,24 @@ const ProjectShowcaseItem = ({
   const { t, currentLang } = useLanguage();
   const isAr = currentLang === 'ar';
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
-  // Ensure at least 3-4 images for the interactive slider
-  const rawImages = project.images && project.images.length > 0 ? project.images.map((i) => i.url) : [];
-  let displayImages: string[] = [...rawImages];
+  const displayTitle = isAr ? project.titleAr || project.title : project.title;
+  const displayCategory = isAr ? project.categoryAr || project.category : project.category;
+  const displayDescription = isAr ? project.descriptionAr || project.description : project.description;
+  const displayRole = isAr ? project.roleAr || project.role : project.role;
+  const formattedNumber = String(index + 1).padStart(2, '0');
 
-  if (displayImages.length === 0) {
-    displayImages = [
-      'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1555774698-0b77e0d5fac6?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80',
-    ];
-  } else if (displayImages.length === 1) {
-    displayImages = [
-      displayImages[0],
-      displayImages[0],
-      'https://images.unsplash.com/photo-1555774698-0b77e0d5fac6?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80',
-    ];
-  } else if (displayImages.length === 2) {
-    displayImages = [
-      displayImages[0],
-      displayImages[1],
-      displayImages[0],
-      displayImages[1],
-    ];
-  } else if (displayImages.length === 3) {
-    displayImages = [...displayImages, displayImages[0]];
-  }
+  // Load real uploaded images with full media URL resolution
+  const rawImages = project.images && project.images.length > 0
+    ? project.images.map((img) => getMediaUrl(img.url))
+    : [];
 
+  const displayImages: string[] = rawImages.length > 0
+    ? rawImages
+    : ['https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80'];
+
+  // Keep active index within bounds if images change
   const currentImage = displayImages[activeImageIndex] || displayImages[0];
 
   const handlePrevImage = (e?: React.MouseEvent) => {
@@ -102,116 +90,116 @@ const ProjectShowcaseItem = ({
     setActiveImageIndex((prev) => (prev === displayImages.length - 1 ? 0 : prev + 1));
   };
 
+  // Keyboard navigation & body scroll-lock for Lightbox
+  useEffect(() => {
+    if (!isLightboxOpen) return;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsLightboxOpen(false);
+      } else if (e.key === 'ArrowLeft') {
+        setActiveImageIndex((prev) => (prev === 0 ? displayImages.length - 1 : prev - 1));
+      } else if (e.key === 'ArrowRight') {
+        setActiveImageIndex((prev) => (prev === displayImages.length - 1 ? 0 : prev + 1));
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isLightboxOpen, displayImages.length]);
+
   return (
     <article
       id={project.slug}
-      className="scroll-mt-28 relative rounded-3xl border border-border/70 bg-card/40 dark:bg-white/[0.025] backdrop-blur-xl p-6 sm:p-8 md:p-12 shadow-2xl transition-all duration-500 hover:border-emerald-500/40"
+      className="scroll-mt-28 relative rounded-2xl sm:rounded-3xl border border-slate-200/90 dark:border-white/[0.09] bg-card dark:bg-[#121417] p-5 sm:p-7 md:p-8 shadow-sm dark:shadow-[0_20px_50px_-10px_rgba(0,0,0,0.7)] transition-all duration-300 hover:border-emerald-500/40"
     >
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
         
         {/* ════ LEFT COLUMN: PROJECT DETAILS & INFORMATION ════ */}
-        <div className="lg:col-span-6 flex flex-col gap-6 order-2 lg:order-1">
+        <div className="lg:col-span-6 flex flex-col justify-between order-2 lg:order-1 space-y-4 sm:space-y-5">
           
-          {/* Category Tag & Index Number */}
-          <div className="flex items-center justify-between gap-3">
-            {(project.category || (isAr && project.categoryAr)) ? (
-              <span className="inline-flex items-center px-3.5 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-widest border border-border/80 bg-card/60 dark:bg-white/[0.04] backdrop-blur-md text-foreground">
-                {isAr ? (project.categoryAr || project.category) : project.category}
+          <div>
+            {/* 1. Number + Category & Year Strip (Matches projects.tsx deck card) */}
+            <div className="flex items-baseline gap-2.5 sm:gap-3 mb-1 sm:mb-1.5">
+              <span className="text-xl sm:text-2xl lg:text-[2rem] font-black font-sans tracking-tight text-foreground dark:text-white leading-none select-none">
+                {formattedNumber}
               </span>
-            ) : (
-              <span className="inline-flex items-center px-3.5 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-widest border border-border/80 bg-card/60 dark:bg-white/[0.04] backdrop-blur-md text-muted-foreground">
-                {isAr ? 'دراسة حالة' : 'Case Study'}
-              </span>
-            )}
-
-            <span className="text-3xl font-mono font-extrabold text-foreground/15 select-none">
-              #{String(index + 1).padStart(2, '0')}
-            </span>
-          </div>
-
-          {/* Project Title */}
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold uppercase tracking-tight text-foreground leading-[1.1]">
-            {isAr ? (project.titleAr || project.title) : project.title}
-          </h2>
-
-          {/* Meta Row: Year, Role, Status */}
-          <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-muted-foreground py-1">
-            {project.year && (
-              <div className="flex items-center gap-1.5">
-                <Calendar size={14} className="text-emerald-500" />
-                <span>{project.year}</span>
-              </div>
-            )}
-            {(project.role || (isAr && project.roleAr)) && (
-              <>
-                <span className="text-border">•</span>
-                <div className="flex items-center gap-1.5">
-                  <Layers size={14} className="text-emerald-500" />
-                  <span>{isAr ? (project.roleAr || project.role) : project.role}</span>
-                </div>
-              </>
-            )}
-            <span className="text-border">•</span>
-            <div className="flex items-center gap-1.5 text-emerald-400 text-xs font-semibold font-mono">
-              <span>{t('projects.production', 'PRODUCTION')}</span>
+              {(displayCategory || project.year) && (
+                <span className="text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-wider text-muted-foreground/80 dark:text-zinc-400">
+                  {displayCategory ? displayCategory : ''}
+                  {project.year ? ` • ${project.year}` : ''}
+                </span>
+              )}
             </div>
-          </div>
 
-          {/* Project Details Section */}
-          <div className="pt-2">
-            <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-muted-foreground mb-3 flex items-center gap-2">
-              <Sparkles size={14} className="text-emerald-500" />
-              {t('projects.projectDetails', 'Project Details')}
-            </h3>
-            <p className="text-base sm:text-lg text-muted-foreground leading-relaxed whitespace-pre-wrap">
-              {isAr ? (project.descriptionAr || project.description) : project.description}
-            </p>
-          </div>
+            {/* 2. Project Title */}
+            <h2 className="text-xl sm:text-2xl lg:text-[1.65rem] font-bold tracking-tight text-foreground dark:text-white mb-3 leading-snug">
+              {displayTitle}
+            </h2>
 
-          {/* Technologies Used */}
-          {project.technologies && project.technologies.length > 0 && (
-            <div className="pt-2">
-              <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-muted-foreground mb-3">
-                {t('projects.technologies', 'Technologies Used')}
+            {/* 3. Project Overview / Details */}
+            <div className="space-y-1.5 mb-4">
+              <h3 className="text-[11px] sm:text-xs font-mono font-bold uppercase tracking-widest text-foreground dark:text-zinc-100">
+                {t('projects.projectDetails', isAr ? 'نظرة عامة على المشروع' : 'Project Overview')}
               </h3>
-              <div className="flex flex-wrap gap-2">
-                {project.technologies.map((tech) => (
-                  <span
-                    key={tech.id || tech.name}
-                    className="px-3 py-1.5 rounded-full text-xs font-mono font-medium border border-border/70 bg-card/40 dark:bg-white/[0.03] backdrop-blur-md text-foreground/90 hover:border-emerald-500/40 hover:text-emerald-400 transition-colors"
-                  >
-                    {tech.name}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Role in Project (Dynamic from Dashboard) */}
-          {(project.role || (isAr && project.roleAr)) && (
-            <div className="pt-2">
-              <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-muted-foreground mb-2 flex items-center gap-2">
-                <CheckCircle2 size={13} className="text-emerald-500" />
-                {isAr ? 'الدور والمسؤوليات في المشروع' : t('projects.role', 'Role')}
-              </h3>
-              <p className="text-sm font-medium text-foreground/90 leading-relaxed">
-                {isAr ? (project.roleAr || project.role) : project.role}
+              <p className="text-xs sm:text-[13.5px] lg:text-sm text-muted-foreground dark:text-zinc-300 leading-relaxed whitespace-pre-wrap">
+                {displayDescription}
               </p>
             </div>
-          )}
 
-          {/* CTA Buttons: Visit Site & View Source (NO Request Similar Project) */}
+            {/* 4. Technologies Used */}
+            {project.technologies && project.technologies.length > 0 && (
+              <div className="space-y-2 mb-4 pt-3 border-t border-border/50 dark:border-white/[0.06]">
+                <h3 className="text-[11px] sm:text-xs font-mono font-bold uppercase tracking-widest text-foreground dark:text-zinc-100">
+                  {t('projects.technologies', isAr ? 'التقنيات المستخدمة' : 'Technologies Used')}
+                </h3>
+                <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                  {project.technologies.map((tech) => (
+                    <span
+                      key={tech.id || tech.name}
+                      className="px-2.5 py-1 rounded-md text-[11px] sm:text-xs font-mono font-medium border border-border/80 bg-card/60 dark:bg-white/[0.04] text-foreground/90 hover:border-emerald-500/40 hover:text-emerald-400 transition-colors"
+                    >
+                      {tech.name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 5. Role in Project (Only at the bottom) */}
+            {displayRole && (
+              <div className="space-y-1.5 pt-3 border-t border-border/50 dark:border-white/[0.06]">
+                <h3 className="text-[11px] sm:text-xs font-mono font-bold uppercase tracking-widest text-foreground dark:text-zinc-100">
+                  <span>{isAr ? 'الدور والمسؤوليات' : t('projects.role', 'Role & Responsibilities')}</span>
+                </h3>
+                <p className="text-xs sm:text-[13.5px] font-medium text-foreground dark:text-zinc-200 leading-relaxed">
+                  {displayRole}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* 6. CTA Buttons */}
           {(project.liveDemo || project.github) && (
-            <div className="flex flex-wrap items-center gap-3 pt-4">
+            <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 pt-2">
               {project.liveDemo && (
                 <a
                   href={project.liveDemo}
                   target="_blank"
                   rel="noreferrer"
-                  className={buttonVariants({ variant: 'primary', size: 'default' })}
+                  className={cn(
+                    buttonVariants({ variant: 'primary', size: 'sm' }),
+                    "font-bold tracking-wide"
+                  )}
                 >
-                  <span>{t('projects.liveDemo', 'Live Demo')}</span>
-                  <ExternalLink size={14} />
+                  <span>{t('projects.liveDemo', isAr ? 'معاينة حية' : 'Live Demo')}</span>
+                  <ExternalLink size={14} strokeWidth={1.5} />
                 </a>
               )}
 
@@ -220,10 +208,13 @@ const ProjectShowcaseItem = ({
                   href={project.github}
                   target="_blank"
                   rel="noreferrer"
-                  className={buttonVariants({ variant: 'secondary', size: 'default' })}
+                  className={cn(
+                    buttonVariants({ variant: 'secondary', size: 'sm' }),
+                    "font-bold tracking-wide"
+                  )}
                 >
-                  <Code2 size={14} />
-                  <span>{t('projects.sourceCode', 'Source Code')}</span>
+                  <Code2 size={14} strokeWidth={1.5} />
+                  <span>{t('projects.sourceCode', isAr ? 'الكود المصدري' : 'Source Code')}</span>
                 </a>
               )}
             </div>
@@ -231,91 +222,197 @@ const ProjectShowcaseItem = ({
         </div>
 
         {/* ════ RIGHT COLUMN: INTERACTIVE MEDIA SHOWCASE WITH SLIDER ════ */}
-        <div className="lg:col-span-6 flex flex-col gap-4 order-1 lg:order-2">
+        <div className="lg:col-span-6 flex flex-col gap-3 order-1 lg:order-2">
           
-          {/* Main Featured Image Container */}
-          <div className="relative w-full aspect-[16/10] rounded-2xl overflow-hidden border border-border/70 bg-card/30 dark:bg-white/[0.02] backdrop-blur-xl shadow-xl group">
-            {/* Active Image with smooth cross-fade animation */}
+          {/* Main Featured Image Container (100% Uncropped Display via object-contain) */}
+          <div
+            onClick={() => setIsLightboxOpen(true)}
+            className="relative w-full aspect-[16/10] rounded-xl sm:rounded-2xl overflow-hidden border border-border/70 bg-slate-900/[0.03] dark:bg-black/60 backdrop-blur-xl shadow-md group flex items-center justify-center p-1.5 sm:p-2.5 cursor-zoom-in"
+          >
+            {/* Ambient Blurred Backdrop using the image itself for premium edge-to-edge aesthetic */}
+            <div
+              className="absolute inset-0 bg-center bg-cover blur-2xl opacity-15 dark:opacity-25 pointer-events-none scale-110"
+              style={{ backgroundImage: `url(${currentImage})` }}
+            />
+
+            {/* Active Image (uncropped, complete uploaded layout) */}
             <AnimatePresence mode="wait">
               <motion.img
                 key={currentImage}
                 src={currentImage}
                 alt={`${project.title} preview ${activeImageIndex + 1}`}
-                initial={{ opacity: 0, scale: 1.02 }}
+                initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.98 }}
-                transition={{ duration: 0.35, ease: 'easeInOut' }}
-                className="w-full h-full object-cover select-none"
+                transition={{ duration: 0.25, ease: 'easeInOut' }}
+                className="w-full h-full object-contain select-none relative z-10 rounded-lg drop-shadow-sm"
                 loading="lazy"
               />
             </AnimatePresence>
 
-            {/* Image Counter Badge */}
-            <div className="absolute top-4 right-4 z-20 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white font-mono text-[11px] font-bold tracking-widest select-none">
-              {String(activeImageIndex + 1).padStart(2, '0')} / {String(displayImages.length).padStart(2, '0')}
+            {/* Fullscreen Expand Button on Hover */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsLightboxOpen(true);
+              }}
+              aria-label="View Fullscreen"
+              className="absolute top-3 left-3 z-20 p-1.5 rounded-md bg-black/60 hover:bg-black/85 backdrop-blur-md border border-white/10 text-white/80 hover:text-white transition-all duration-200 active:scale-95 opacity-0 group-hover:opacity-100 cursor-pointer shadow-md"
+            >
+              <Maximize2 size={13} strokeWidth={1.5} />
+            </button>
+
+            {/* Image Counter Badge (Only if multiple images) */}
+            {displayImages.length > 1 && (
+              <div className="absolute top-3 right-3 z-20 px-2.5 py-0.5 rounded-md bg-black/70 backdrop-blur-md border border-white/10 text-white font-mono text-[10px] font-bold tracking-widest select-none pointer-events-none">
+                {String(activeImageIndex + 1).padStart(2, '0')} / {String(displayImages.length).padStart(2, '0')}
+              </div>
+            )}
+
+            {/* Left Navigation Arrow (Only if multiple images) */}
+            {displayImages.length > 1 && (
+              <button
+                type="button"
+                onClick={handlePrevImage}
+                aria-label="Previous Image"
+                className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/60 hover:bg-black/85 backdrop-blur-md border border-white/15 text-white hover:text-emerald-400 hover:border-emerald-500/50 flex items-center justify-center transition-all duration-200 active:scale-95 cursor-pointer shadow-md"
+              >
+                <ChevronLeft size={16} strokeWidth={1.5} className="rtl:rotate-180" />
+              </button>
+            )}
+
+            {/* Right Navigation Arrow (Only if multiple images) */}
+            {displayImages.length > 1 && (
+              <button
+                type="button"
+                onClick={handleNextImage}
+                aria-label="Next Image"
+                className="absolute right-2.5 sm:right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/60 hover:bg-black/85 backdrop-blur-md border border-white/15 text-white hover:text-emerald-400 hover:border-emerald-500/50 flex items-center justify-center transition-all duration-200 active:scale-95 cursor-pointer shadow-md"
+              >
+                <ChevronRight size={16} strokeWidth={1.5} className="rtl:rotate-180" />
+              </button>
+            )}
+          </div>
+
+          {/* Mini Thumbnails Row Below Main Image (Only if multiple images) */}
+          {displayImages.length > 1 && (
+            <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 pt-0.5">
+              {displayImages.map((imgUrl, idx) => {
+                const isActive = activeImageIndex === idx;
+                return (
+                  <button
+                    type="button"
+                    key={`${imgUrl}-${idx}`}
+                    onClick={() => setActiveImageIndex(idx)}
+                    aria-label={`View image ${idx + 1}`}
+                    className={`relative flex-1 min-w-[55px] max-w-[120px] aspect-[16/10] rounded-lg overflow-hidden border transition-all duration-200 cursor-pointer bg-slate-900/[0.04] dark:bg-black/50 p-0.5 ${
+                      isActive
+                        ? 'border-emerald-500 ring-2 ring-emerald-500/40 scale-[1.02] shadow-sm'
+                        : 'border-border/60 hover:border-foreground/40 opacity-70 hover:opacity-100'
+                    }`}
+                  >
+                    <img
+                      src={imgUrl}
+                      alt={`Thumbnail ${idx + 1}`}
+                      className="w-full h-full object-contain"
+                      loading="lazy"
+                    />
+                    {isActive && (
+                      <div className="absolute inset-0 bg-emerald-500/10 pointer-events-none" />
+                    )}
+                  </button>
+                );
+              })}
             </div>
-
-            {/* Left Navigation Arrow */}
-            <button
-              onClick={handlePrevImage}
-              aria-label="Previous Image"
-              className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-black/60 hover:bg-black/85 backdrop-blur-md border border-white/15 text-white hover:text-emerald-400 hover:border-emerald-500/50 flex items-center justify-center transition-colors duration-200 active:scale-95 cursor-pointer shadow-md"
-            >
-              <ChevronLeft size={16} className="rtl:rotate-180" />
-            </button>
-
-            {/* Right Navigation Arrow */}
-            <button
-              onClick={handleNextImage}
-              aria-label="Next Image"
-              className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-black/60 hover:bg-black/85 backdrop-blur-md border border-white/15 text-white hover:text-emerald-400 hover:border-emerald-500/50 flex items-center justify-center transition-colors duration-200 active:scale-95 cursor-pointer shadow-md"
-            >
-              <ChevronRight size={16} className="rtl:rotate-180" />
-            </button>
-          </div>
-
-          {/* 4 Mini Thumbnails Row Below Main Image */}
-          <div className="grid grid-cols-4 gap-3 pt-1">
-            {displayImages.map((imgUrl, idx) => {
-              const isActive = activeImageIndex === idx;
-              return (
-                <button
-                  key={`${imgUrl}-${idx}`}
-                  onClick={() => setActiveImageIndex(idx)}
-                  aria-label={`View image ${idx + 1}`}
-                  className={`relative aspect-[16/10] rounded-xl overflow-hidden border transition-all duration-300 cursor-pointer ${
-                    isActive
-                      ? 'border-emerald-500 ring-2 ring-emerald-500/50 scale-[1.03] shadow-md shadow-emerald-500/10'
-                      : 'border-border/60 hover:border-foreground/40 opacity-70 hover:opacity-100'
-                  }`}
-                >
-                  <img
-                    src={imgUrl}
-                    alt={`Thumbnail ${idx + 1}`}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
-                  {isActive && (
-                    <div className="absolute inset-0 bg-emerald-500/10 pointer-events-none" />
-                  )}
-                </button>
-              );
-            })}
-          </div>
+          )}
         </div>
 
       </div>
+
+      {/* Fullscreen Lightbox Modal */}
+      {isLightboxOpen && typeof document !== 'undefined' && createPortal(
+        <AnimatePresence>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => setIsLightboxOpen(false)}
+            className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 md:p-8 select-none"
+          >
+            {/* Close Button */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsLightboxOpen(false);
+              }}
+              className="fixed top-5 right-5 sm:top-6 sm:right-6 z-50 w-11 h-11 rounded-full bg-white/10 hover:bg-white/25 border border-white/20 text-white flex items-center justify-center transition-all cursor-pointer hover:scale-105 active:scale-95 shadow-2xl backdrop-blur-md"
+              aria-label="Close Preview"
+            >
+              <X size={20} strokeWidth={1.5} />
+            </button>
+
+            {/* Previous Button in Modal */}
+            {displayImages.length > 1 && (
+              <button
+                type="button"
+                onClick={handlePrevImage}
+                className="fixed left-3 sm:left-6 top-1/2 -translate-y-1/2 z-50 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/25 border border-white/20 text-white flex items-center justify-center transition-all cursor-pointer hover:scale-105 active:scale-95 backdrop-blur-md shadow-2xl"
+                aria-label="Previous Image"
+              >
+                <ChevronLeft size={22} strokeWidth={1.5} className="rtl:rotate-180" />
+              </button>
+            )}
+
+            {/* Next Button in Modal */}
+            {displayImages.length > 1 && (
+              <button
+                type="button"
+                onClick={handleNextImage}
+                className="fixed right-3 sm:right-6 top-1/2 -translate-y-1/2 z-50 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/25 border border-white/20 text-white flex items-center justify-center transition-all cursor-pointer hover:scale-105 active:scale-95 backdrop-blur-md shadow-2xl"
+                aria-label="Next Image"
+              >
+                <ChevronRight size={22} strokeWidth={1.5} className="rtl:rotate-180" />
+              </button>
+            )}
+
+            {/* Full Image Container (100% uncropped display) */}
+            <motion.div
+              initial={{ scale: 0.94, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.94, opacity: 0 }}
+              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative max-w-[95vw] max-h-[88vh] flex items-center justify-center"
+            >
+              <img
+                src={currentImage}
+                alt={`${project.title} preview`}
+                className="max-w-[95vw] max-h-[86vh] object-contain rounded-lg shadow-[0_25px_80px_rgba(0,0,0,0.9)] border border-white/15"
+              />
+              {displayImages.length > 1 && (
+                <div className="absolute -bottom-7 left-1/2 -translate-x-1/2 text-white/70 font-mono text-xs tracking-widest uppercase">
+                  {activeImageIndex + 1} / {displayImages.length}
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>,
+        document.body
+      )}
     </article>
   );
 };
 
 /* ─── Skeleton Loader ────────────────────────────────────────────── */
 const SkeletonProjects = () => (
-  <div className="space-y-16 animate-pulse">
+  <div className="space-y-8 sm:space-y-12 animate-pulse">
     {[1, 2].map((i) => (
       <div
         key={i}
-        className="h-[520px] rounded-3xl bg-card/40 dark:bg-white/[0.02] border border-border/50"
+        className="h-[440px] rounded-2xl sm:rounded-3xl bg-card/40 dark:bg-white/[0.02] border border-border/50"
       />
     ))}
   </div>
@@ -325,8 +422,17 @@ const SkeletonProjects = () => (
    MAIN PROJECTS PAGE (ALL PROJECTS STACKED VERTICALLY)
    ═══════════════════════════════════════════════════════════════════ */
 const Projects = () => {
-  const { t } = useLanguage();
+  const { t, currentLang } = useLanguage();
+  const isAr = currentLang === 'ar';
   const [projects, setProjects] = useState<Project[]>([]);
+  const [settings, setSettings] = useState<any>(() => {
+    try {
+      const cached = localStorage.getItem('portfolio_settings');
+      return cached ? JSON.parse(cached) : null;
+    } catch {
+      return null;
+    }
+  });
   const [loading, setLoading] = useState(true);
   const location = useLocation();
 
@@ -338,6 +444,18 @@ const Projects = () => {
         setLoading(false);
       })
       .catch(() => setLoading(false));
+
+    api
+      .get('/settings')
+      .then((res) => {
+        if (res.data?.data) {
+          setSettings(res.data.data);
+          try {
+            localStorage.setItem('portfolio_settings', JSON.stringify(res.data.data));
+          } catch {}
+        }
+      })
+      .catch(() => {});
   }, []);
 
   // Handle hash scrolling if url contains #slug
@@ -353,58 +471,68 @@ const Projects = () => {
     }
   }, [loading, location.hash]);
 
+  const pageTitle = isAr
+    ? (settings?.projectsTitleAr || t('projects.title', 'المشاريع المنفذة'))
+    : (settings?.projectsTitle || t('projects.title', 'Featured Projects'));
+
+  const pageSubtitle = isAr
+    ? (settings?.projectsSubtitleAr || t('projects.subtitle', 'مجموعة مختارة من التطبيقات ومنصات SaaS والأنظمة الرقمية المطورة وفق أعلى معايير الجودة والأداء.'))
+    : (settings?.projectsSubtitle || t('projects.subtitle', 'A curated selection of production web applications, custom CRM platforms, and full-stack software architectures built for performance and measurable business impact.'));
+
   return (
     <div className="w-full bg-transparent min-h-screen">
       <Helmet>
-        <title>{t('projects.title', 'Projects & Case Studies')} | Yusuf</title>
-        <meta name="description" content="All architectural case studies and full-stack projects by Yusuf." />
+        <title>{pageTitle} | {settings?.name || 'Portfolio'}</title>
+        <meta name="description" content={pageSubtitle} />
       </Helmet>
 
       {/* Hero Header */}
-      <section className="pt-32 pb-16 px-6">
+      <section className="pt-24 sm:pt-28 md:pt-32 pb-8 sm:pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           >
             {/* Back to Portfolio Button */}
-            <div className="mb-6">
+            <div className="mb-5 sm:mb-6">
               <Link
                 to="/"
-                className="group inline-flex items-center gap-2 h-9 px-4 rounded-full bg-card/70 dark:bg-white/[0.04] border border-border/80 hover:border-emerald-500/50 hover:text-emerald-400 backdrop-blur-md text-foreground text-xs font-mono font-semibold uppercase tracking-wider transition-colors duration-200 shadow-sm cursor-pointer"
+                className={cn(
+                  buttonVariants({ variant: 'secondary', size: 'sm' }),
+                  "gap-2 font-mono text-xs uppercase tracking-wider"
+                )}
               >
-                <ArrowLeft size={13} className="text-emerald-500 rtl:rotate-180" />
-                <span>{t('projects.backToProjects', 'Back to Portfolio')}</span>
+                <ArrowLeft size={14} strokeWidth={1.5} className="rtl:rotate-180" />
+                <span>{t('projects.backToProjects', isAr ? 'العودة للرئيسية' : 'Back to Portfolio')}</span>
               </Link>
             </div>
 
-
-            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
-              <h1 className="text-5xl md:text-8xl font-bold tracking-tighter leading-[1.05]">
-                {t('projects.title', 'Selected Work.')}
-              </h1>
-              <p className="text-base md:text-lg text-muted-foreground max-w-sm leading-relaxed md:text-right">
-                {projects.length > 0
-                  ? `${projects.length} ${t('projects.production', 'Projects')}`
-                  : t('projects.subtitle', 'Digital products, enterprise architectures & web applications.')}
-              </p>
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 sm:gap-6 border-b border-border/40 pb-6 sm:pb-8">
+              <div>
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight leading-[1.15] text-foreground mb-2">
+                  {pageTitle}
+                </h1>
+                <p className="text-base md:text-lg text-muted-foreground max-w-2xl leading-relaxed">
+                  {pageSubtitle}
+                </p>
+              </div>
             </div>
           </motion.div>
         </div>
       </section>
 
       {/* Projects Showcase Stack (Rendered Under Each Other) */}
-      <section className="pb-32 px-6">
+      <section className="pb-24 sm:pb-32 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           {loading ? (
             <SkeletonProjects />
           ) : projects.length === 0 ? (
-            <div className="py-24 text-center border border-dashed border-border/70 rounded-3xl bg-card/30 backdrop-blur-md">
-              <p className="text-2xl font-bold tracking-tight mb-2">{t('projects.noProjects', 'No projects published yet.')}</p>
+            <div className="py-20 text-center border border-dashed border-border/70 rounded-2xl sm:rounded-3xl bg-card/30 backdrop-blur-md">
+              <p className="text-xl font-bold tracking-tight mb-2">{t('projects.noProjects', 'No projects published yet.')}</p>
             </div>
           ) : (
-            <div className="space-y-16 md:space-y-24">
+            <div className="space-y-8 sm:space-y-10 md:space-y-12">
               {projects.map((project, index) => (
                 <ProjectShowcaseItem
                   key={project.id}

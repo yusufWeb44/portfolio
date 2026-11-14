@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, useScroll, useTransform, MotionValue } from 'framer-motion';
-import { ArrowRight, ArrowUpRight, ChevronDown, Sparkles } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -202,28 +202,25 @@ const StackedCard = ({
         className="rounded-xl sm:rounded-2xl border border-slate-200/90 dark:border-white/[0.14] bg-background dark:bg-background shadow-[0_4px_20px_-2px_rgba(0,0,0,0.12),0_12px_36px_-4px_rgba(0,0,0,0.18)] dark:shadow-[0_20px_50px_-10px_rgba(0,0,0,0.9)] overflow-hidden relative w-full"
       >
         {/* ── Main Card Body Grid: Beautifully balanced aspect ratio with exposed numbering strip ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 px-4 sm:px-5 lg:px-6 pt-2.5 sm:pt-3 lg:pt-3.5 pb-4 sm:pb-5 lg:pb-6 items-stretch min-h-[315px] sm:min-h-[335px] lg:min-h-[355px]">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 px-4 sm:px-5 lg:px-6 pt-2.5 sm:pt-3 lg:pt-3.5 pb-4 sm:pb-5 lg:pb-6 items-stretch min-h-[315px] sm:min-h-[335px] lg:min-h-[355px] lg:max-h-[355px] lg:h-[355px]">
 
-          {/* Details Column (5 cols of 12) */}
+          {/* Details Column (5 cols of 12): Natural flow (Right in RTL, Left in LTR) */}
           <div
-            className={`lg:col-span-5 flex flex-col justify-between ${
-              isAr ? 'text-right lg:order-2' : 'text-left lg:order-1'
+            className={`lg:col-span-5 flex flex-col justify-between h-full ${
+              isAr ? 'text-right' : 'text-left'
             }`}
           >
             <div>
               {/* 1. Large Order Number: positioned in the top strip to peek out when stacked */}
-              <div
-                className={`flex items-baseline gap-2.5 sm:gap-3 mb-1 sm:mb-1.5 ${
-                  isAr ? 'justify-end flex-row-reverse' : 'justify-start'
-                }`}
-              >
+              <div className="flex items-baseline gap-2.5 sm:gap-3 mb-1 sm:mb-1.5 justify-start">
                 <span className="text-xl sm:text-2xl lg:text-[2rem] font-black font-sans tracking-tight text-foreground dark:text-white leading-none select-none">
                   {formattedNumber}
                 </span>
                 {(project.year || displayCategory) && (
-                  <span className="text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-wider text-muted-foreground/80 dark:text-zinc-400">
-                    {displayCategory ? displayCategory : ''}
-                    {project.year ? ` • ${project.year}` : ''}
+                  <span className="text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-wider text-muted-foreground/80 dark:text-zinc-400 inline-flex items-center gap-1.5">
+                    {displayCategory && <span>{displayCategory}</span>}
+                    {displayCategory && project.year && <span className="text-muted-foreground/50">•</span>}
+                    {project.year && <span dir="ltr">{project.year}</span>}
                   </span>
                 )}
               </div>
@@ -233,22 +230,18 @@ const StackedCard = ({
                 {displayTitle}
               </h3>
 
-              {/* 4. Project Description */}
-              <p className="text-xs sm:text-[13px] lg:text-[13.5px] text-muted-foreground dark:text-zinc-300 leading-relaxed line-clamp-4 sm:line-clamp-5 lg:line-clamp-6 mb-3 sm:mb-3.5 w-full">
+              {/* 4. Project Description (tight clamp so cards never stretch or expand) */}
+              <p className="text-xs sm:text-[13px] lg:text-[13.5px] text-muted-foreground dark:text-zinc-300 leading-relaxed line-clamp-3 sm:line-clamp-4 mb-2.5 sm:mb-3 w-full">
                 {displayDescription}
               </p>
 
               {/* 5. Technologies Badges */}
               {project.technologies && project.technologies.length > 0 && (
-                <div
-                  className={`flex flex-wrap items-center gap-1.5 mb-2.5 sm:mb-3 ${
-                    isAr ? 'justify-end' : 'justify-start'
-                  }`}
-                >
+                <div className="flex flex-wrap items-center gap-1.5 mb-2.5 sm:mb-3 max-h-[26px] overflow-hidden justify-start">
                   {project.technologies.slice(0, 5).map((tech, tIdx) => (
                     <span
                       key={tech.id || tech.name || tIdx}
-                      className="inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] font-mono font-medium border border-border/70 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-foreground dark:text-zinc-300"
+                      className="inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] font-mono font-medium border border-border/70 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-foreground dark:text-zinc-300 whitespace-nowrap"
                     >
                       {tech.name}
                     </span>
@@ -258,7 +251,7 @@ const StackedCard = ({
             </div>
 
             {/* 6. Action Button */}
-            <div className={`pt-2 flex items-center ${isAr ? 'justify-end' : 'justify-start'}`}>
+            <div className="pt-2 flex items-center justify-start">
               <Link
                 to={`/projects#${project.slug}`}
                 className={cn(
@@ -274,9 +267,9 @@ const StackedCard = ({
             </div>
           </div>
 
-          {/* Media Column (7 cols of 12) */}
-          <div className={`lg:col-span-7 flex items-stretch ${isAr ? 'lg:order-1' : 'lg:order-2'}`}>
-            <div className="w-full h-full min-h-[210px] sm:min-h-[240px] md:min-h-[270px] lg:min-h-[295px] max-h-[325px] rounded-lg sm:rounded-xl overflow-hidden border border-foreground/15 dark:border-white/10 bg-muted/20 shadow-inner group">
+          {/* Media Column (7 cols of 12): Natural flow (Left in RTL, Right in LTR) */}
+          <div className="lg:col-span-7 flex items-stretch h-full">
+            <div className="w-full h-full min-h-[210px] sm:min-h-[240px] md:min-h-[270px] lg:min-h-full rounded-lg sm:rounded-xl overflow-hidden border border-foreground/15 dark:border-white/10 bg-muted/20 shadow-inner group">
               <ProjectMediaVisual project={project} cardIndex={i} />
             </div>
           </div>
@@ -331,15 +324,16 @@ const ProjectsSection = () => {
 
     const handleUpdate = () => fetchSettingsAndProjects();
     window.addEventListener('portfolio_settings_updated', handleUpdate);
-    return () => window.removeEventListener('portfolio_settings_updated', handleUpdate);
+    window.addEventListener('portfolio_projects_updated', handleUpdate);
+    return () => {
+      window.removeEventListener('portfolio_settings_updated', handleUpdate);
+      window.removeEventListener('portfolio_projects_updated', handleUpdate);
+    };
   }, []);
 
-  // Assemble projects for the stacked deck:
+  // Assemble projects for the stacked deck: ONLY projects explicitly starred as featured appear on the homepage
   const deckProjects: Project[] = useMemo(() => {
-    const featuredList = projects.filter((p: any) => p.isFeatured);
-    const nonFeaturedList = projects.filter((p: any) => !p.isFeatured);
-    const combined = [...featuredList, ...nonFeaturedList];
-    return combined.slice(0, Math.min(combined.length, 5));
+    return projects.filter((p: any) => Boolean(p.isFeatured));
   }, [projects]);
 
   const resolveField = (key: string, arVal?: string, enVal?: string, fallback?: string) => {
@@ -361,7 +355,7 @@ const ProjectsSection = () => {
   const numCards = deckProjects.length;
 
   // Track height: 70vh per incoming card for a tight, natural scroll
-  const trackHeight = numCards === 0 ? '240vh' : (numCards === 1 ? 'auto' : `${100 + (numCards - 1) * 70}vh`);
+  const trackHeight = numCards === 0 ? 'auto' : (numCards === 1 ? 'auto' : `${100 + (numCards - 1) * 70}vh`);
 
   return (
     <section id="projects" className="scroll-mt-24 relative bg-transparent [--cards-step:36px] sm:[--cards-step:40px] lg:[--cards-step:44px]">
@@ -382,9 +376,11 @@ const ProjectsSection = () => {
               </h2>
               {displaySubtitle && (
                 <BlurText
+                  key={`projects-subtitle-${isAr ? 'ar' : 'en'}`}
                   text={displaySubtitle}
+                  animateBy="block"
                   delay={20}
-                  className="text-xs sm:text-sm text-muted-foreground leading-relaxed line-clamp-1 sm:line-clamp-2"
+                  className="text-base md:text-lg text-muted-foreground leading-relaxed line-clamp-2"
                 />
               )}
             </div>
@@ -392,27 +388,6 @@ const ProjectsSection = () => {
 
           {/* ── 2. Cards Deck Container: Beautifully proportioned with comfortable height ── */}
           <div className="relative mt-1 sm:mt-2 w-full max-w-[980px] mx-auto px-4 sm:px-6 flex-1 flex flex-col justify-start">
-            {/* Scroll Indicator */}
-            {!loading && numCards > 1 && (
-              <div
-                className={`hidden xl:flex flex-col items-center gap-2 absolute ${
-                  isAr ? '-left-14' : '-right-14'
-                } top-16 select-none pointer-events-none z-30`}
-              >
-                <div className="w-5 h-8 rounded-full border border-emerald-500/40 dark:border-emerald-400/30 flex justify-center pt-1 bg-card/40 dark:bg-black/40 backdrop-blur-xs shadow-xs">
-                  <motion.div
-                    animate={{ y: [0, 8, 0], opacity: [0.3, 1, 0.3] }}
-                    transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
-                    className="w-1.5 h-1.5 rounded-full bg-emerald-500"
-                  />
-                </div>
-                <span className="text-[9px] font-mono font-semibold tracking-[0.25em] uppercase text-muted-foreground/60 [writing-mode:vertical-lr] rotate-180">
-                  {isAr ? 'تمرير' : 'SCROLL'}
-                </span>
-                <ChevronDown size={13} className="text-emerald-500/70 animate-bounce -mt-0.5" />
-              </div>
-            )}
-
             {loading ? (
               <div className="h-[320px] flex items-center justify-center px-4">
                 <div className="w-full max-w-[920px] h-[280px] rounded-xl bg-card/40 dark:bg-white/[0.02] border border-border/50 animate-pulse flex items-center justify-center">
@@ -454,7 +429,7 @@ const ProjectsSection = () => {
               "font-bold tracking-wide"
             )}
           >
-            <span className="relative z-10">{isAr ? `استكشاف جميع المشاريع (${totalCount})` : `EXPLORE ALL PROJECTS (${totalCount})`}</span>
+            <span className="relative z-10">{isAr ? 'استكشاف جميع المشاريع' : 'EXPLORE ALL PROJECTS'}</span>
             <ArrowUpRight
               size={16}
               className="relative z-10 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 rtl:rotate-[-90deg] text-slate-950"

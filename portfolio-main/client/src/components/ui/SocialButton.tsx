@@ -40,7 +40,8 @@ export const SocialButton: React.FC<SocialButtonProps> = ({
       className={cn(
         // Base shape, flex layout and transition
         "group relative rounded-full flex items-center justify-center shrink-0 cursor-pointer",
-        "transition-all duration-200 ease-out select-none",
+        "transition-all duration-200 ease-out select-none transform-gpu will-change-transform [backface-visibility:hidden]",
+        "before:absolute before:-inset-1.5 before:rounded-full before:content-['']",
 
         // Light Mode styling: crisp white porcelain card with refined slate border & soft shadow
         "bg-white border border-slate-200/90 text-slate-700 shadow-sm",

@@ -30,6 +30,7 @@ export const defaultEnTranslations: Record<string, string> = {
   "nav.experience": "Experience",
   "nav.services": "Services",
   "nav.faq": "FAQ",
+  "nav.reviews": "Reviews",
   "nav.contact": "Contact",
   "nav.startProject": "Contact Us",
   "nav.contactUs": "Contact Us",

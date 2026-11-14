@@ -25,7 +25,9 @@ export interface ExperienceItem {
   company: string;
   companyAr?: string | null;
   startDate: string;
+  startDateAr?: string | null;
   endDate?: string | null;
+  endDateAr?: string | null;
   location?: string | null;
   locationAr?: string | null;
   description?: string | null;
@@ -207,6 +209,11 @@ const TimelineNodeCard = ({ item, theme, isRtl, alignToSpineEnd }: TimelineNodeC
   const locationName = isRtl ? (item.locationAr || item.location) : item.location;
   const descriptionText = isRtl ? (item.descriptionAr || item.description) : item.description;
 
+  const displayEnd = isRtl
+    ? (item.endDateAr || (item.endDate?.trim().toLowerCase() === 'present' ? 'حتى الآن' : item.endDate))
+    : item.endDate;
+  const displayStart = isRtl ? (item.startDateAr || item.startDate) : item.startDate;
+
   const badgeElement = (
     <div
       className={`relative flex-shrink-0 w-12 h-12 rounded-full border-2 ${theme.badgeBorder} ${theme.badgeBg} flex items-center justify-center transition-all duration-300 group-hover/item:scale-105 bg-background backdrop-blur-md shadow-sm`}
@@ -224,14 +231,17 @@ const TimelineNodeCard = ({ item, theme, isRtl, alignToSpineEnd }: TimelineNodeC
   const yearElement = (
     <div className={`flex flex-col ${alignToSpineEnd ? 'items-end' : 'items-start'}`}>
       <div
-        className="text-2xl md:text-3xl font-extrabold tracking-tight font-mono leading-none"
+        className="text-2xl md:text-3xl font-extrabold tracking-tight font-mono leading-none flex items-center gap-1.5"
         style={{ color: theme.accent }}
       >
-        {item.startDate}
-        {item.endDate && item.endDate !== item.startDate ? (
-          <span className="text-muted-foreground/60 text-sm font-normal ms-1.5">
-            — {item.endDate}
-          </span>
+        <span dir="ltr">{displayStart}</span>
+        {displayEnd && displayEnd !== displayStart ? (
+          <>
+            <span className="text-muted-foreground/60 text-sm font-normal">—</span>
+            <span className="text-muted-foreground/80 text-sm font-medium font-sans">
+              {displayEnd}
+            </span>
+          </>
         ) : null}
       </div>
     </div>

@@ -49,9 +49,11 @@ export const BlurText: React.FC<BlurTextProps> = ({
   const fromState = animationFrom || defaultFrom;
   const toState = animationTo || defaultTo;
 
-  // For longer narrative paragraphs or when explicitly requested, animate as a cohesive block
-  // to avoid distracting multi-second sequential word pops.
-  const isBlock = animateBy === 'block' || (text && text.length > 90);
+  const hasArabic = text ? /[\u0600-\u06FF]/.test(text) : false;
+
+  // For longer narrative paragraphs, when explicitly requested, or for Arabic cursive scripts,
+  // animate as a cohesive block to avoid breaking word connectivity, line clamps, or letter spacing.
+  const isBlock = animateBy === 'block' || hasArabic || (text && text.length > 70);
 
   if (isBlock) {
     return (
@@ -72,7 +74,6 @@ export const BlurText: React.FC<BlurTextProps> = ({
     );
   }
 
-  const hasArabic = /[\u0600-\u06FF]/.test(text);
   const effectiveAnimateBy = hasArabic ? 'words' : animateBy;
 
   const elements = effectiveAnimateBy === 'words' ? text.split(/\s+/) : text.split('');

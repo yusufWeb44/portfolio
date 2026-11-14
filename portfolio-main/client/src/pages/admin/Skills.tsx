@@ -131,7 +131,7 @@ const Skills = () => {
     try {
       const res = await api.post('/skills', {
         name: 'New Skill',
-        nameAr: 'مهارة جديدة',
+        nameAr: 'New Skill',
         category: 'Frontend',
         categoryAr: 'الواجهة الأمامية',
         description: 'Technology description for hover tooltip in English...',
@@ -140,6 +140,8 @@ const Skills = () => {
         isEnabled: true,
       });
       setSkills([res.data.data, ...skills]);
+      try { localStorage.removeItem('portfolio_skills'); } catch {}
+      window.dispatchEvent(new CustomEvent('portfolio_skills_updated'));
       showToast("Skill created successfully");
     } catch {
       showToast("Failed to add skill", "error");
@@ -160,6 +162,7 @@ const Skills = () => {
       if (res.data?.data) {
         setSkills(prev => prev.map(s => s.id === skillToSave.id ? { ...s, ...res.data.data } : s));
       }
+      try { localStorage.removeItem('portfolio_skills'); } catch {}
       window.dispatchEvent(new CustomEvent('portfolio_skills_updated'));
       showToast(`Saved skill "${skillToSave.name}" successfully!`);
     } catch {
@@ -173,6 +176,7 @@ const Skills = () => {
     setSavingAll(true);
     try {
       await Promise.all(skills.map(s => api.put(`/skills/${s.id}`, s)));
+      try { localStorage.removeItem('portfolio_skills'); } catch {}
       window.dispatchEvent(new CustomEvent('portfolio_skills_updated'));
       showToast("All skills saved successfully!");
     } catch {
@@ -187,6 +191,7 @@ const Skills = () => {
     try {
       await api.delete(`/skills/${id}`);
       setSkills(skills.filter(s => s.id !== id));
+      try { localStorage.removeItem('portfolio_skills'); } catch {}
       window.dispatchEvent(new CustomEvent('portfolio_skills_updated'));
       showToast("Skill removed");
     } catch {

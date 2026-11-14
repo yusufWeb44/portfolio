@@ -689,25 +689,25 @@ const HowItWorks = () => {
   return (
     <section
       id="workflow"
-      className="relative scroll-mt-24 py-10 sm:py-14 md:py-18 px-4 sm:px-6 lg:px-8 bg-transparent overflow-x-hidden overflow-y-visible"
+      className="relative isolate scroll-mt-24 py-10 sm:py-14 md:py-18 px-4 sm:px-6 lg:px-8 bg-transparent overflow-x-hidden overflow-y-visible"
       aria-label="Engineering process and workflow"
     >
       {/* ── Seamless Dot Grid Background System (Plain, Neutral & Comfortable — Zero Colored Glow) ── */}
       <div
-        className="absolute inset-0 pointer-events-none -z-10 overflow-hidden select-none"
+        className="absolute inset-0 pointer-events-none z-0 overflow-hidden select-none"
         style={{
-          maskImage: 'linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%)',
-          WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%)',
+          maskImage: 'linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%)',
         }}
         aria-hidden="true"
       >
         {/* Pure, plain Dot Grid Pattern Layer */}
         <div
-          className="absolute inset-0 [background-size:26px_26px] bg-[radial-gradient(circle_at_center,rgba(15,23,42,0.13)_1.1px,transparent_1.1px)] dark:bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.09)_1.1px,transparent_1.1px)]"
+          className="absolute inset-0 [background-size:24px_24px] bg-[radial-gradient(circle_at_center,rgba(15,23,42,0.22)_1.25px,transparent_1.25px)] dark:bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.18)_1.25px,transparent_1.25px)]"
         />
       </div>
 
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-5xl mx-auto relative z-10">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}

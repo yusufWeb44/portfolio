@@ -156,6 +156,14 @@ const Projects = () => {
     setTimeout(() => setToast(null), 3000);
   };
 
+  const syncProjectsCache = () => {
+    try {
+      localStorage.removeItem('portfolio_projects');
+      window.dispatchEvent(new Event('portfolio_projects_updated'));
+      window.dispatchEvent(new Event('portfolio_settings_updated'));
+    } catch {}
+  };
+
   const handleCreateNew = () => {
     setCurrentProject({
       title: '', 
@@ -195,6 +203,7 @@ const Projects = () => {
     try {
       await api.delete(`/projects/${id}`);
       setProjects(projects.filter(p => p.id !== id));
+      syncProjectsCache();
       showToast("Project deleted successfully");
     } catch (error) {
       showToast("Failed to delete project", "error");
@@ -210,6 +219,7 @@ const Projects = () => {
         isPublished: !project.isPublished
       });
       setProjects(projects.map(p => p.id === project.id ? res.data.data : p));
+      syncProjectsCache();
       showToast(res.data.data.isPublished ? "Project published" : "Project unpublished");
     } catch (error) {
       showToast("Failed to update status", "error");
@@ -226,7 +236,8 @@ const Projects = () => {
         isFeatured: nextFeatured
       });
       setProjects(projects.map(p => p.id === project.id ? res.data.data : p));
-      showToast(nextFeatured ? "Project featured on homepage" : "Project removed from featured");
+      syncProjectsCache();
+      showToast(nextFeatured ? "تمت إضافة المشروع للصفحة الرئيسية ⭐" : "تمت إزالة المشروع من الصفحة الرئيسية");
     } catch (error) {
       showToast("Failed to update featured status", "error");
     }
@@ -241,6 +252,7 @@ const Projects = () => {
     try {
       const items = updated.map(p => ({ id: p.id, order: p.order }));
       await api.put('/projects/reorder', { items });
+      syncProjectsCache();
       showToast("تم تحديث ترتيب المشاريع بنجاح");
     } catch (error) {
       showToast("فشل في حفظ الترتيب", "error");
@@ -411,6 +423,7 @@ const Projects = () => {
         await api.put(`/projects/${currentProject.id}`, payload);
         showToast("Project updated successfully");
       }
+      syncProjectsCache();
       fetchProjects();
       fetchTechnologies();
       setView('list');
@@ -554,7 +567,7 @@ const Projects = () => {
                       <th className="px-4 py-4 font-medium text-center w-28">الترتيب / Order</th>
                       <th className="px-6 py-4 font-medium">Project</th>
                       <th className="px-6 py-4 font-medium">Role</th>
-                      <th className="px-6 py-4 font-medium text-center">Featured</th>
+                      <th className="px-6 py-4 font-medium text-center">الرئيسية ⭐</th>
                       <th className="px-6 py-4 font-medium">Status</th>
                       <th className="px-6 py-4 font-medium">Year</th>
                       <th className="px-6 py-4 font-medium text-right">Actions</th>
@@ -614,7 +627,7 @@ const Projects = () => {
                         <td className="px-6 py-4 text-center">
                           <button
                             onClick={() => handleToggleFeatured(project)}
-                            title={project.isFeatured ? "Featured on homepage (click to toggle)" : "Click to feature on homepage"}
+                            title={project.isFeatured ? "معروض في الصفحة الرئيسية (اضغط لإزالته)" : "اضغط لعرضه في الصفحة الرئيسية ⭐"}
                             className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
                               project.isFeatured
                                 ? 'bg-amber-500/15 border-amber-500/40 text-amber-500 hover:bg-amber-500/25'

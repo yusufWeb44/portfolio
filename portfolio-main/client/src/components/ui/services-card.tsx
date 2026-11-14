@@ -89,7 +89,7 @@ export const ServiceCard = ({
         size={280}
         darkSize={200}
         className={cn(
-          "group relative flex h-[360px] sm:h-[375px] w-full flex-col justify-between overflow-hidden rounded-xl sm:rounded-2xl p-5 sm:p-6 border border-slate-200/90 dark:border-white/[0.09] shadow-xs hover:border-slate-300 dark:hover:border-white/20 hover:shadow-lg dark:hover:shadow-[0_12px_40px_rgba(0,0,0,0.6)] transition-all duration-300 select-none",
+          "group relative flex h-[340px] sm:h-[360px] w-full flex-col justify-between overflow-hidden rounded-xl sm:rounded-2xl p-5 sm:p-6 border border-slate-200/90 dark:border-white/[0.09] shadow-xs hover:border-slate-300 dark:hover:border-white/20 hover:shadow-lg dark:hover:shadow-[0_12px_40px_rgba(0,0,0,0.6)] transition-all duration-300 select-none",
           cardBg
         )}
       >
@@ -202,7 +202,7 @@ export const ServiceCarousel = ({
       className="relative w-full overflow-x-clip"
       style={{ height: trackHeight }}
     >
-      <div className="sticky top-0 h-screen w-full flex flex-col justify-start pt-[68px] sm:pt-[74px] pb-4 overflow-x-clip overflow-y-visible">
+      <div className="sticky top-0 h-screen w-full flex flex-col justify-start pt-[68px] sm:pt-[74px] pb-4 overflow-x-clip overflow-y-clip [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {/* Optional Header slot (Title + Subtitle) pinned inside the sticky viewport */}
         {header && (
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 shrink-0 mb-2 sm:mb-3">
@@ -211,7 +211,7 @@ export const ServiceCarousel = ({
         )}
 
         {/* Horizontal Cards Viewport (generous vertical clearance so borders and buttons never clip) */}
-        <div className="w-full flex-1 flex items-center overflow-x-hidden overflow-y-visible py-3 sm:py-5">
+        <div className="w-full flex-1 flex items-center overflow-x-clip overflow-y-clip py-2.5 sm:py-3.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <motion.div
             ref={cardsContainerRef}
             style={{ x }}

@@ -38,7 +38,9 @@ interface ExperienceItem {
   position: string;
   positionAr?: string | null;
   startDate: string;
+  startDateAr?: string | null;
   endDate?: string | null;
+  endDateAr?: string | null;
   location?: string | null;
   locationAr?: string | null;
   description?: string | null;
@@ -146,6 +148,7 @@ const AdminExperience = () => {
         companyAr: 'كلية الهندسة وتكنولوجيا المعلومات',
         startDate: '2016',
         endDate: '2020',
+        endDateAr: '2020',
         location: 'Campus',
         locationAr: 'الحرم الجامعي',
         type: 'education',
@@ -161,6 +164,7 @@ const AdminExperience = () => {
         companyAr: 'المجتمع التقني العالمي / منظمة تكنولوجية',
         startDate: '2022',
         endDate: '2022',
+        endDateAr: '2022',
         location: 'International',
         locationAr: 'دولي',
         type: 'milestone',
@@ -176,6 +180,7 @@ const AdminExperience = () => {
         companyAr: 'حلول التكنولوجيا المتطورة',
         startDate: '2023',
         endDate: 'Present',
+        endDateAr: 'حتى الآن',
         location: 'Remote',
         locationAr: 'عن بُعد',
         type: 'work',
@@ -594,7 +599,7 @@ const AdminExperience = () => {
                       </div>
 
                       {/* Grid 2: Dates, Location */}
-                      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                         <div className="space-y-1">
                           <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                             Start Date
@@ -607,12 +612,24 @@ const AdminExperience = () => {
                         </div>
                         <div className="space-y-1">
                           <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                            End Date
+                            End Date (EN)
                           </label>
                           <Input
                             value={exp.endDate || ''}
                             onChange={e => handleUpdateExperience(exp.id, 'endDate', e.target.value)}
                             placeholder="e.g. 2020 or Present"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-xs font-semibold text-emerald-500/90 dark:text-emerald-400 uppercase tracking-wider">
+                            تاريخ الانتهاء (عربي)
+                          </label>
+                          <Input
+                            value={exp.endDateAr || ''}
+                            onChange={e => handleUpdateExperience(exp.id, 'endDateAr', e.target.value)}
+                            placeholder="مثال: حتى الآن أو 2024"
+                            dir="rtl"
+                            className="font-arabic"
                           />
                         </div>
                         <div className="space-y-1">
@@ -634,6 +651,7 @@ const AdminExperience = () => {
                             onChange={e => handleUpdateExperience(exp.id, 'locationAr', e.target.value)}
                             placeholder="مثال: عن بُعد / دبي"
                             dir="rtl"
+                            className="font-arabic"
                           />
                         </div>
                       </div>

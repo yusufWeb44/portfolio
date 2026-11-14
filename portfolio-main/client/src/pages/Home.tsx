@@ -28,6 +28,7 @@ import HowItWorks from '../components/ui/how-it-works';
 import SkillsSection from '../components/sections/skills';
 import ProjectsSection from '../components/sections/projects';
 import { FAQ } from '../components/ui/faq-tabs';
+import ReviewsSection, { type ReviewItem } from '../components/ReviewsSection';
 import { ServiceCarousel } from '../components/ui/services-card';
 import ExperienceTimeline from '../components/ExperienceTimeline';
 import CertificatesCarousel from '../components/CertificatesCarousel';
@@ -109,6 +110,12 @@ interface Settings {
   faqTitleAr?: string;
   faqSubtitle?: string;
   faqSubtitleAr?: string;
+  reviewsBadge?: string;
+  reviewsBadgeAr?: string;
+  reviewsTitle?: string;
+  reviewsTitleAr?: string;
+  reviewsSubtitle?: string;
+  reviewsSubtitleAr?: string;
   contactBadge?: string;
   contactBadgeAr?: string;
   contactTitle?: string;
@@ -193,18 +200,27 @@ const Home = () => {
       return [];
     }
   });
+  const [reviews, setReviews] = useState<ReviewItem[]>(() => {
+    try {
+      const cached = localStorage.getItem('portfolio_reviews');
+      return cached ? JSON.parse(cached) : [];
+    } catch {
+      return [];
+    }
+  });
 
   /* ─── Data Fetching ─────────────────────────────────────────────── */
   useEffect(() => {
     const fetchAll = async () => {
       try {
-        const [settRes, expRes, certRes, servRes, socialRes, faqRes] = await Promise.allSettled([
+        const [settRes, expRes, certRes, servRes, socialRes, faqRes, revRes] = await Promise.allSettled([
           api.get('/settings'),
           api.get('/experience'),
           api.get('/certificates'),
           api.get('/services'),
           api.get('/social-links'),
           api.get('/faqs'),
+          api.get('/reviews'),
         ]);
 
         if (settRes.status === 'fulfilled') {
@@ -260,6 +276,13 @@ const Home = () => {
             }
           } else {
             setRawFaqs([]);
+          }
+          if (revRes.status === 'fulfilled') {
+            const revData = revRes.value.data.data || [];
+            setReviews(revData);
+            try { localStorage.setItem('portfolio_reviews', JSON.stringify(revData)); } catch { }
+          } else {
+            setReviews([]);
           }
         });
       } catch (err) {
@@ -349,9 +372,15 @@ const Home = () => {
 
   const resolveField = (key: string, arSetting?: string, enSetting?: string, fallback?: string) => {
     if (isAr) {
-      return t(key, arSetting || fallback);
+      if (arSetting && arSetting.trim() !== '') return arSetting;
+      const trans = t(key, '');
+      if (trans && trans !== key && trans !== '') return trans;
+      return fallback || '';
     }
-    return t(key, enSetting || fallback);
+    if (enSetting && enSetting.trim() !== '') return enSetting;
+    const trans = t(key, '');
+    if (trans && trans !== key && trans !== '') return trans;
+    return fallback || '';
   };
 
   const name = isAr ? (settings?.nameAr || 'يوسف الأيوبي') : (settings?.name || 'Yusuf Ayoubi');
@@ -485,7 +514,7 @@ const Home = () => {
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 4: EXPERIENCE (Vertical Animated Timeline & Certificates)
       ═══════════════════════════════════════════════════════════════ */}
-      <section id="experience" className="scroll-mt-24 pt-10 sm:pt-14 md:pt-18 pb-4 sm:pb-6 relative overflow-x-clip">
+      <section id="experience" className="scroll-mt-24 pt-10 sm:pt-14 md:pt-18 pb-4 sm:pb-6 relative z-10 overflow-x-clip">
         <div className="max-w-7xl mx-auto space-y-8 sm:space-y-10 px-4 sm:px-6 lg:px-8 mb-6 sm:mb-8">
           <FadeIn>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-foreground leading-[1.15] mb-4">
@@ -555,16 +584,31 @@ const Home = () => {
                 <FadeIn>
                   <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-foreground leading-tight mb-1 sm:mb-1.5">
                     <SplitText
-                      text={resolveField('services.title', settings?.servicesTitleAr, settings?.servicesTitle, 'Services.')}
+                      key={`services-title-${isAr ? 'ar' : 'en'}`}
+                      text={resolveField(
+                        'services.title',
+                        settings?.servicesTitleAr,
+                        settings?.servicesTitle,
+                        isAr ? 'ما الذي أقدمه لك.' : 'What I Deliver.'
+                      )}
                       delay={35}
                       duration={0.45}
                     />
                   </h2>
                   <div className="max-w-2xl">
                     <BlurText
-                      text={resolveField('services.subtitle', settings?.servicesSubtitleAr, settings?.servicesSubtitle, 'End-to-end software development services tailored to help you launch faster, eliminate technical debt, and scale reliably.')}
+                      key={`services-subtitle-${isAr ? 'ar' : 'en'}`}
+                      text={resolveField(
+                        'services.subtitle',
+                        settings?.servicesSubtitleAr,
+                        settings?.servicesSubtitle,
+                        isAr
+                          ? 'خدمات تطوير برمجيات متكاملة تساعدك على الإطلاق بسرعة، وتفادي الديون التقنية، والتوسع بثقة.'
+                          : 'End-to-end software development services tailored to help you launch faster, eliminate technical debt, and scale reliably.'
+                      )}
+                      animateBy="block"
                       delay={20}
-                      className="text-xs sm:text-sm text-muted-foreground leading-relaxed line-clamp-2"
+                      className="text-base md:text-lg text-muted-foreground leading-relaxed line-clamp-2"
                     />
                   </div>
                 </FadeIn>
@@ -595,6 +639,37 @@ const Home = () => {
             title={resolveField('faq.title', settings?.faqTitleAr, settings?.faqTitle, 'Common Questions.')}
             categories={faqCategories}
             faqData={faqDataMap}
+          />
+        </Suspense>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════════
+          SECTION 6.5: REVIEWS / TESTIMONIALS
+      ═══════════════════════════════════════════════════════════════ */}
+      {reviews.length > 0 && (
+        <Suspense fallback={<div className="min-h-[300px]" />}>
+          <ReviewsSection
+            reviews={reviews}
+            badge={resolveField(
+              'reviews.badge',
+              settings?.reviewsBadgeAr,
+              settings?.reviewsBadge,
+              isAr ? 'آراء العملاء والشركاء' : 'CLIENT ENDORSEMENTS'
+            )}
+            title={resolveField(
+              'reviews.title',
+              settings?.reviewsTitleAr,
+              settings?.reviewsTitle,
+              isAr ? 'ماذا يقول العملاء والشركاء.' : 'What Clients & Partners Say.'
+            )}
+            subtitle={resolveField(
+              'reviews.subtitle',
+              settings?.reviewsSubtitleAr,
+              settings?.reviewsSubtitle,
+              isAr
+                ? 'شهادات وتجارب حقيقية من مؤسسين وقادة تقنيين تشرفت بالتعاون معهم في بناء وإطلاق مشاريعهم الرقمية.'
+                : 'Authentic feedback and endorsements from founders, engineering leads, and product teams I have collaborated with.'
+            )}
           />
         </Suspense>
       )}

@@ -264,7 +264,7 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
           {displayTitle}
         </h2>
         {displaySubtitle && (
-          <p className="mt-2 text-xs sm:text-sm md:text-base text-muted-foreground leading-relaxed max-w-xl mx-auto select-none">
+          <p className="mt-2 text-base md:text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto select-none">
             {displaySubtitle}
           </p>
         )}
@@ -318,8 +318,8 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
               scale = 1.0 - t * 0.03;
             }
 
-            // Depth stacking
-            const zIndex = Math.round(100 - absAngle * 1.5);
+            // Depth stacking: scoped between 1 and 30 so in-cylinder cards stack correctly without exceeding the fixed header (z-50)
+            const zIndex = Math.round(30 - absAngle * 0.4);
             const imgSrc = getMediaUrl(cert.imageUrl || cert.credentialUrl);
 
             return (

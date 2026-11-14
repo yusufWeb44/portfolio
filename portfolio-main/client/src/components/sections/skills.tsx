@@ -36,40 +36,41 @@ interface HoveredSkillData {
 
 /* ─── Default Fallback Skills ────────────────────────────────────── */
 const DEFAULT_SKILLS = [
-  { name: 'JavaScript', nameAr: 'جافاسكريبت', description: 'Modern ES6+ web development and dynamic interactivity.' },
-  { name: 'TypeScript', nameAr: 'تايب سكريبت', description: 'Type-safe enterprise software design and maintainable architectures.' },
-  { name: 'React', nameAr: 'رياكت', description: 'Component-driven front-end UI architecture and state management.' },
-  { name: 'Next.js', nameAr: 'نكست جي اس', description: 'Server-side rendering, static site generation, and full-stack React apps.' },
-  { name: 'Drizzle ORM', nameAr: 'دريزل او ار ام', description: 'Type-safe TypeScript ORM with fast SQL query execution.' },
-  { name: 'GraphQL', nameAr: 'جراف كيو ال', description: 'Schema-first API design and optimized flexible data fetching.' },
-  { name: 'CSS', nameAr: 'سي اس اس', description: 'Modern layout design with CSS Grid, Flexbox, and micro-animations.' },
-  { name: 'Tailwind CSS', nameAr: 'تيلويند سي اس اس', description: 'Utility-first modern responsive design system.' },
-  { name: 'PostgreSQL', nameAr: 'بوستجريسكيول', description: 'Robust relational database architecture and query optimization.' },
-  { name: 'Node.js', nameAr: 'نود جي اس', description: 'High-performance scalable backend services and microservices.' },
-  { name: 'Express', nameAr: 'اكسبرس', description: 'Fast, minimalist Node.js web and API framework.' },
-  { name: 'MongoDB', nameAr: 'مونجو دي بي', description: 'Document-oriented NoSQL database for flexible data schemas.' },
-  { name: 'MySQL', nameAr: 'ماي اس كيو ال', description: 'Relational data management and ACID-compliant storage.' },
-  { name: 'HTML', nameAr: 'اتش تي ام ال', description: 'Semantic, accessible, and SEO-friendly document structuring.' },
-  { name: 'Docker', nameAr: 'دوكر', description: 'Containerization, reproducible environments, and cloud deployment.' },
-  { name: 'Git & GitHub', nameAr: 'جيت وجيتهاب', description: 'Version control, collaborative workflows, and CI/CD pipelines.' },
-  { name: 'prisma ORM', nameAr: 'بريزما', description: 'Next-generation ORM for Node.js and TypeScript.' },
-  { name: 'Flutter', nameAr: 'فلاتر', description: 'Cross-platform mobile applications for iOS and Android.' },
-  { name: 'Dart', nameAr: 'دارت', description: 'Client-optimized object-oriented language for mobile apps.' },
-  { name: 'Figma', nameAr: 'فيجما', description: 'UI/UX prototyping, design systems, and wireframing.' },
-  { name: 'ASP.NET', nameAr: 'ايه اس بي دوت نت', description: 'Enterprise backend solutions and C# Web APIs.' },
-  { name: 'java', nameAr: 'جافا', description: 'Object-oriented backend software and enterprise applications.' },
-  { name: 'REST APIs', nameAr: 'واجهات برمجة التطبيقات', description: 'Standardized RESTful microservices and secure JSON endpoints.' },
-  { name: 'database design', nameAr: 'تصميم قواعد البيانات', description: 'Normalized database schema design and performance tuning.' },
-  { name: 'OOP', nameAr: 'البرمجة كائنية التوجه', description: 'SOLID design principles and object-oriented software patterns.' },
-  { name: 'Data Structure & Algorithm', nameAr: 'هياكل البيانات والخوارزميات', description: 'Efficient algorithmic problem solving and time-complexity optimization.' },
-  { name: 'prompt engineering', nameAr: 'هندسة الأوامر', description: 'LLM agent workflows, prompt optimization, and AI tool integration.' },
-  { name: 'SEO', nameAr: 'تحسين محركات البحث', description: 'Search engine optimization, metadata tuning, and Core Web Vitals.' },
+  { name: 'JavaScript', nameAr: 'JavaScript', description: 'Modern ES6+ web development and dynamic interactivity.', descriptionAr: 'توظيف معايير ES6+ الحديثة، وحلقة الأحداث (Event Loop)، والبرمجة غير المتزامنة لكتابة أكواد ويب عالية الأداء.' },
+  { name: 'TypeScript', nameAr: 'TypeScript', description: 'Type-safe enterprise software design and maintainable architectures.', descriptionAr: 'تطبيق الأمان الصارم للأنواع (Type Safety) ونمذجة النطاقات عبر كامل النظام البرمجي لمنع أخطاء وقت التشغيل.' },
+  { name: 'React', nameAr: 'React', description: 'Component-driven front-end UI architecture and state management.', descriptionAr: 'بناء واجهات مستخدم تفاعلية قائمة على المكونات باستخدام الخطافات المخصصة (Custom Hooks) وإدارة الحالة المتقدمة لتطبيقات الويب المؤسسية.' },
+  { name: 'Next.js', nameAr: 'Next.js', description: 'Server-side rendering, static site generation, and full-stack React apps.', descriptionAr: 'توظيف تقنيات العرض من جهة الخادم (SSR) والتوليد الثابت المتزايد (ISR) لبناء مواقع إنتاجية فائقة السرعة ومتوافقة مع محركات البحث.' },
+  { name: 'Drizzle ORM', nameAr: 'Drizzle ORM', description: 'Type-safe TypeScript ORM with fast SQL query execution.', descriptionAr: 'إدارة قواعد البيانات العلائقية في TypeScript بأمان تام للأنواع واستعلامات SQL فائقة السرعة.' },
+  { name: 'GraphQL', nameAr: 'GraphQL', description: 'Schema-first API design and optimized flexible data fetching.', descriptionAr: 'بناء واجهات برمجية معتمدة على المخططات (Schema-First) لمنع جلب البيانات الفائضة وتمكين استعلامات مرنة للواجهة الأمامية.' },
+  { name: 'CSS', nameAr: 'CSS', description: 'Modern layout design with CSS Grid, Flexbox, and micro-animations.', descriptionAr: 'بناء أنظمة التخطيط المتقدمة باستخدام CSS Grid و Flexbox، مع الحركات الانسيابية والمتغيرات المخصصة.' },
+  { name: 'Tailwind CSS', nameAr: 'Tailwind CSS', description: 'Utility-first modern responsive design system.', descriptionAr: 'تصميم أنظمة واجهات مستخدم متجاوبة ودقيقة الأبعاد (Pixel-Perfect) باستخدام أنماط التصميم الزجاجي الحديثة.' },
+  { name: 'PostgreSQL', nameAr: 'PostgreSQL', description: 'Robust relational database architecture and query optimization.', descriptionAr: 'هندسة قواعد البيانات العلائقية مع الفهرسة المتقدمة، والمفاتيح الخارجية، وتحسين أداء الاستعلامات المعقدة.' },
+  { name: 'Node.js', nameAr: 'Node.js', description: 'High-performance scalable backend services and microservices.', descriptionAr: 'تطوير خدمات خلفية قابلة للتوسع، ومسارات RESTful، وقنوات اتصال فورية في الوقت الفعلي عبر WebSockets.' },
+  { name: 'Express', nameAr: 'Express', description: 'Fast, minimalist Node.js web and API framework.', descriptionAr: 'هيكلة طبقات الـ API الخفيفة في Node.js، وبرمجيات الوسيط (Middlewares)، ومتحكمات المسارات المعيارية.' },
+  { name: 'MongoDB', nameAr: 'MongoDB', description: 'Document-oriented NoSQL database for flexible data schemas.', descriptionAr: 'نمذجة قواعد بيانات NoSQL المستندية لهياكل البيانات المرنة وعمليات القراءة والكتابة ذات الكثافة العالية.' },
+  { name: 'MySQL', nameAr: 'MySQL', description: 'Relational data management and ACID-compliant storage.', descriptionAr: 'تصميم قواعد بيانات إنتاجية معيارية، وإجراءات مخزنة (Stored Procedures)، وهياكل بيانات عالية التوافر والموثوقية.' },
+  { name: 'HTML', nameAr: 'HTML', description: 'Semantic, accessible, and SEO-friendly document structuring.', descriptionAr: 'بناء هيكلية صفحات ويب دلالية (Semantic) متوافقة مع معايير الوصول الشامل وقارئات الشاشة ومحركات المتصفحات الحديثة.' },
+  { name: 'Docker', nameAr: 'Docker', description: 'Containerization, reproducible environments, and cloud deployment.', descriptionAr: 'تحزيم بيئات التطوير المتكاملة داخل حاويات باستخدام Docker Compose لضمان نشر سلس وموحد من البيئة المحلية إلى السحابة.' },
+  { name: 'Git & GitHub', nameAr: 'Git & GitHub', description: 'Version control, collaborative workflows, and CI/CD pipelines.', descriptionAr: 'إدارة إصدارات الأكواد البرمجية عبر استراتيجيات التفريع المنظمة، والدمج التفاعلي، وخطوط التكامل والنشر المستمر (CI/CD).' },
+  { name: 'prisma ORM', nameAr: 'prisma ORM', description: 'Next-generation ORM for Node.js and TypeScript.', descriptionAr: 'إدارة تهجير قواعد البيانات (Migrations) وتنفيذ استعلامات SQL عبر واجهات برمجية مولدة تلقائياً وآمنة الأنواع.' },
+  { name: 'Flutter', nameAr: 'Flutter', description: 'Cross-platform mobile applications for iOS and Android.', descriptionAr: 'تطوير تطبيقات الهواتف الذكية المتعددة المنصات باستخدام معمارية BLoC، والحركات المخصصة، والتكامل السلس مع خصائص النظام.' },
+  { name: 'Dart', nameAr: 'Dart', description: 'Client-optimized object-oriented language for mobile apps.', descriptionAr: 'كتابة المنطق الأساسي لتطبيقات الهواتف بهيكلة كائنية متينة، مع إدارة التدفقات غير المتزامنة (Async Streams) والأمان التام للقيم الفارغة.' },
+  { name: 'Figma', nameAr: 'Figma', description: 'UI/UX prototyping, design systems, and wireframing.', descriptionAr: 'تصميم المخططات التفاعلية والنماذج الأولية للواجهات (UI/UX)، وتحويل عناصر التصميم مباشرة إلى كود برمجي دقيق.' },
+  { name: 'ASP.NET', nameAr: 'ASP.NET', description: 'Enterprise backend solutions and C# Web APIs.', descriptionAr: 'بناء واجهات برمجية وخدمات خلفية على مستوى المؤسسات بالاعتماد على لغة C# وبيئة عمل .NET المتكاملة.' },
+  { name: 'java', nameAr: 'java', description: 'Object-oriented backend software and enterprise applications.', descriptionAr: 'تطوير تطبيقات كائنية التوجه صارمة الأنواع، وبناء الخدمات الخلفية، وحل المشكلات الخوارزمية المعقدة.' },
+  { name: 'REST APIs', nameAr: 'REST APIs', description: 'Standardized RESTful microservices and secure JSON endpoints.', descriptionAr: 'هندسة واجهات برمجية RESTful نظيفة ومؤمنة بمصادقة JWT، مع تحديد معدل الطلبات (Rate Limiting) والتوثيق وفق معايير OpenAPI.' },
+  { name: 'database design', nameAr: 'database design', description: 'Normalized database schema design and performance tuning.', descriptionAr: 'تصميم مخططات الكيانات والعلاقات (ERD)، وتطبيع جداول البيانات (Normalization)، وضبط القيود العلائقية بكفاءة عالية.' },
+  { name: 'OOP', nameAr: 'OOP', description: 'SOLID design principles and object-oriented software patterns.', descriptionAr: 'تطبيق مبادئ SOLID والوراثة والتغليف لبناء أنظمة برمجية قابلة لإعادة الاستخدام وسهلة الصيانة والتطوير.' },
+  { name: 'Data Structure & Algorithm', nameAr: 'Data Structure & Algorithm', description: 'Efficient algorithmic problem solving and time-complexity optimization.', descriptionAr: 'حل المشكلات البرمجية المعقدة بأفضل كفاءة للوقت والذاكرة (Time & Space Complexity) باستخدام هياكل البيانات المتقدمة.' },
+  { name: 'prompt engineering', nameAr: 'prompt engineering', description: 'LLM agent workflows, prompt optimization, and AI tool integration.', descriptionAr: 'تصميم الأوامر النظامية (System Prompts)، وأنماط التوجيه الذكية، ودمج النماذج اللغوية الكبيرة (LLMs) داخل المنتجات البرمجية.' },
+  { name: 'SEO', nameAr: 'SEO', description: 'Search engine optimization, metadata tuning, and Core Web Vitals.', descriptionAr: 'تحسين مؤشرات الأداء الأساسية للويب (Core Web Vitals)، والبيانات الوصفية الدلالية، وهيكلة البيانات لتصدر نتائج محركات البحث.' },
+  { name: 'Postman', nameAr: 'Postman', description: 'API testing, automated request collections, debugging, and endpoint documentation.', descriptionAr: 'اختبار واجهات البرمجة (APIs)، تتبع الأخطاء، وتوثيق نقاط الاتصال لضمان موثوقية الربط مع الخوادم.' },
 ];
 
 /* ─── Floating Tooltip Window (Above the skill with pointed arrow) ── */
-const FloatingTooltip = ({ skill }: { skill: HoveredSkillData }) => {
+const FloatingTooltip = ({ skill, isAr }: { skill: HoveredSkillData; isAr: boolean }) => {
   // Compact, sleeker tooltip width
-  const tooltipWidth = 230;
+  const tooltipWidth = 240;
   const halfW = tooltipWidth / 2;
 
   // Float directly above the skill capsule with 6px clearance
@@ -99,15 +100,18 @@ const FloatingTooltip = ({ skill }: { skill: HoveredSkillData }) => {
         width: `${tooltipWidth}px`,
       }}
     >
-      <div className="bg-popover dark:bg-[#121417] border border-border/80 dark:border-white/10 p-2.5 sm:p-3 rounded-xl shadow-[0_10px_25px_rgba(0,0,0,0.08)] dark:shadow-[0_16px_32px_rgba(0,0,0,0.85)] text-start relative select-none backdrop-blur-md">
-        {/* Tooltip Header: Skill Name & Brand Icon directly adjacent */}
+      <div
+        dir={isAr ? 'rtl' : 'ltr'}
+        className="bg-popover dark:bg-[#121417] border border-border/80 dark:border-white/10 p-2.5 sm:p-3 rounded-xl shadow-[0_10px_25px_rgba(0,0,0,0.08)] dark:shadow-[0_16px_32px_rgba(0,0,0,0.85)] text-start relative select-none backdrop-blur-md"
+      >
+        {/* Tooltip Header: Skill Brand Icon & English Name */}
         <div className="flex items-center gap-2 mb-1.5 pb-1.5 border-b border-border/40">
-          <span className="text-xs font-bold text-foreground font-sans">
-            {skill.label}
-          </span>
-          <div className="scale-90 origin-left rtl:origin-right">
+          <div className="scale-90 origin-left rtl:origin-right flex items-center shrink-0">
             <SkillBrandIcon name={skill.originalName || skill.label} />
           </div>
+          <span className="text-xs font-bold text-foreground font-sans" dir="ltr">
+            {skill.label}
+          </span>
         </div>
 
         {/* Skill Description */}
@@ -214,7 +218,7 @@ const SkillMarqueeRow = ({
 };
 
 /* ─── Full Marquee System (Right Column) ─────────────────────────── */
-const InfiniteSkillsMarquee = ({ items }: { items: TechItem[] }) => {
+const InfiniteSkillsMarquee = ({ items, isAr }: { items: TechItem[]; isAr: boolean }) => {
   const { scrollY } = useScroll();
   const scrollVelocity = useVelocity(scrollY);
   const smoothVelocity = useSpring(scrollVelocity, {
@@ -259,7 +263,10 @@ const InfiniteSkillsMarquee = ({ items }: { items: TechItem[] }) => {
   ];
 
   return (
-    <div className="w-full relative overflow-hidden flex flex-col gap-2.5 sm:gap-3 py-2 [mask-image:linear-gradient(to_right,transparent_0%,black_3%,black_97%,transparent_100%)]">
+    <div
+      dir="ltr"
+      className="w-full relative overflow-hidden flex flex-col gap-2.5 sm:gap-3 py-2 [mask-image:linear-gradient(to_right,transparent_0%,black_3%,black_97%,transparent_100%)]"
+    >
       {rows.map((rowSkills, rIdx) => {
         const config = rowConfigs[rIdx % rowConfigs.length];
         return (
@@ -283,6 +290,7 @@ const InfiniteSkillsMarquee = ({ items }: { items: TechItem[] }) => {
             <FloatingTooltip
               key={activeHover.label}
               skill={activeHover}
+              isAr={isAr}
             />
           )}
         </AnimatePresence>,
@@ -367,9 +375,10 @@ const SkillsSection = () => {
     const dataSource = rawSkillsData.length > 0 ? rawSkillsData : DEFAULT_SKILLS;
 
     return dataSource.map((s: any) => {
-      const label = isAr ? (s.nameAr || s.name) : s.name;
+      // Keep the skill name in English as requested
+      const label = s.name;
       const description = isAr 
-        ? (s.descriptionAr || s.description || `${label} - تطوير وبرمجة متقدمة.`)
+        ? (s.descriptionAr || s.description || `${label} — تطوير وهندسة برمجية متقدمة.`)
         : (s.description || `${s.name} development & integration.`);
 
       return {
@@ -480,9 +489,9 @@ const SkillsSection = () => {
           </motion.div>
 
           {/* ── Right Column (7 cols): Infinite Horizontal Scroll Marquee ── */}
-          <div className="w-full lg:col-span-7 lg:translate-x-6 rtl:lg:-translate-x-6 -mt-2 lg:-mt-3 overflow-hidden">
+          <div className="w-full lg:col-span-7 -mt-2 lg:-mt-3 overflow-hidden">
             {skillsItems.length > 0 ? (
-              <InfiniteSkillsMarquee items={skillsItems} />
+              <InfiniteSkillsMarquee items={skillsItems} isAr={isAr} />
             ) : (
               <div className="h-[240px] flex items-center justify-center border border-dashed border-border/70 rounded-3xl bg-card/20 text-muted-foreground text-sm">
                 {isAr ? 'لا توجد مهارات معروضة حالياً.' : 'No skills available yet.'}

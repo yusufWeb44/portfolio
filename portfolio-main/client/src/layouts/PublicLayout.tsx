@@ -2,7 +2,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import {
   Menu, X, Mail, Sun, Moon,
-  ChevronRight, User, FolderKanban, Terminal, Briefcase, Wrench, HelpCircle, Layers
+  ChevronRight, User, FolderKanban, Terminal, Briefcase, Wrench, HelpCircle, Layers, MessageSquareQuote
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../components/ui/Button';
@@ -64,6 +64,7 @@ const PublicLayout = () => {
     { name: t('nav.experience', 'Experience'), id: 'experience', icon: Briefcase },
     { name: t('nav.services', 'Services'), id: 'services', icon: Wrench },
     { name: t('nav.faq', 'FAQ'), id: 'faq', icon: HelpCircle },
+    { name: t('nav.reviews', isAr ? 'الآراء' : 'Reviews'), id: 'reviews', icon: MessageSquareQuote },
     { name: t('nav.contact', isAr ? 'تواصل' : 'Contact'), id: 'contact', icon: Mail },
   ];
 
@@ -77,7 +78,7 @@ const PublicLayout = () => {
   // Passive RAF scroll detection & High-Precision Active Section Spy
   useEffect(() => {
     let ticking = false;
-    const navSectionIds = ['about', 'workflow', 'projects', 'skills', 'experience', 'services', 'faq', 'contact'];
+    const navSectionIds = ['about', 'workflow', 'projects', 'skills', 'experience', 'services', 'faq', 'reviews', 'contact'];
 
     const updateSpy = () => {
       const scrollY = window.scrollY;
