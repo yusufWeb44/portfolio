@@ -19,6 +19,10 @@ import {
 import {
   getFaqs, createFaq, updateFaq, deleteFaq
 } from '../controllers/faqController';
+import {
+  getReviews, getAdminReviews, createReview,
+  updateReview, deleteReview, reorderReviews
+} from '../controllers/reviewController';
 import { getSeo, updateSeo } from '../controllers/seoController';
 import {
   getTranslations, getTranslationByLang, createOrUpdateTranslation,
@@ -58,6 +62,18 @@ router.route('/faqs')
 router.route('/faqs/:id')
   .put(protect, updateFaq)
   .delete(protect, deleteFaq);
+
+// Reviews
+router.route('/reviews')
+  .get(getReviews)
+  .post(protect, createReview);
+router.route('/reviews/admin')
+  .get(protect, getAdminReviews);
+router.route('/reviews/reorder')
+  .put(protect, reorderReviews);
+router.route('/reviews/:id')
+  .put(protect, updateReview)
+  .delete(protect, deleteReview);
 
 // SEO Settings
 router.route('/seo')

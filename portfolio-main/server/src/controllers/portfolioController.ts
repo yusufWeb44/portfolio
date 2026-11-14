@@ -27,6 +27,7 @@ const ALLOWED_SETTINGS_KEYS = new Set([
   'servicesBadge', 'servicesBadgeAr',
   'servicesTitle', 'servicesTitleAr', 'servicesSubtitle', 'servicesSubtitleAr',
   'faqBadge', 'faqBadgeAr', 'faqTitle', 'faqTitleAr', 'faqSubtitle', 'faqSubtitleAr',
+  'reviewsBadge', 'reviewsBadgeAr', 'reviewsTitle', 'reviewsTitleAr', 'reviewsSubtitle', 'reviewsSubtitleAr',
   'contactBadge', 'contactBadgeAr', 'contactTitle', 'contactTitleAr',
   'contactSubtitle', 'contactSubtitleAr'
 ]);

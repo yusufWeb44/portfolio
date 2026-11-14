@@ -111,6 +111,13 @@ model PortfolioSettings {
   faqSubtitle        String?  @db.Text
   faqSubtitleAr      String?  @db.Text
 
+  reviewsBadge       String?  @default("Client Testimonials")
+  reviewsBadgeAr     String?  @default("آراء العملاء والشركاء")
+  reviewsTitle       String?  @default("What Clients & Partners Say.")
+  reviewsTitleAr     String?  @default("ماذا يقول العملاء والشركاء.")
+  reviewsSubtitle    String?  @db.Text
+  reviewsSubtitleAr  String?  @db.Text
+
   contactBadge       String?  @default("Get In Touch")
   contactBadgeAr     String?  @default("تواصل معي")
   contactTitle       String?  @default("Have an idea? Let's talk.")
@@ -291,7 +298,9 @@ model Experience {
   position           String
   positionAr         String?
   startDate          String
+  startDateAr        String?
   endDate            String?
+  endDateAr          String?
   location           String?
   locationAr         String?
   description        String?      @db.Text
@@ -346,6 +355,25 @@ model Message {
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Review {
+  id          String   @id @default(uuid())
+  name        String
+  nameAr      String?
+  role        String
+  roleAr      String?
+  company     String?
+  companyAr   String?
+  avatarUrl   String?  @db.Text
+  linkedinUrl String?  @db.Text
+  githubUrl   String?  @db.Text
+  content     String   @db.Text
+  contentAr   String?  @db.Text
+  order       Int      @default(0)
+  isEnabled   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model FooterSettings {
