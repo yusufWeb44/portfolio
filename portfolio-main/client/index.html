@@ -42,12 +42,13 @@
         }
       })();
     </script>
-    <!-- Critical inline CSS: prevents white flash before stylesheets load -->
+    <!-- Critical inline CSS: prevents white flash before stylesheets load & hides default scrollbars -->
     <style>
-      html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+      html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;scrollbar-width:none;-ms-overflow-style:none}
+      html::-webkit-scrollbar,body::-webkit-scrollbar{display:none;width:0;height:0}
       html.dark{background-color:#0a0a0a;color:#ededed}
       html:not(.dark){background-color:#f4f6f8;color:#111827}
-      body{margin:0}
+      body{margin:0;scrollbar-width:none;-ms-overflow-style:none}
     </style>
     <link rel="icon" type="image/webp" href="/logo.webp" />
     <link rel="shortcut icon" href="/logo.webp" />

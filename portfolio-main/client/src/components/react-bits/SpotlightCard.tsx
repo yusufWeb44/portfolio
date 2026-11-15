@@ -9,18 +9,32 @@ export interface SpotlightCardProps extends React.HTMLAttributes<HTMLDivElement>
   darkSize?: number;
 }
 
+const isGreenish = (color?: string): boolean => {
+  if (!color) return false;
+  const c = color.toLowerCase();
+  return (
+    c.includes('16, 185, 129') ||
+    c.includes('16,185,129') ||
+    c.includes('10b981') ||
+    c.includes('emerald') ||
+    c.includes('green') ||
+    c.includes('34, 197, 94') ||
+    c.includes('22c55e')
+  );
+};
+
 /**
  * React Bits - SpotlightCard
- * Enhances cards with an interactive radial spotlight following the cursor,
- * preserving all native styles, borders, and layouts.
- * Calibrated with subdued, non-glaring lighting in dark mode across the entire app.
+ * Enhances cards with a soft, architectural ambient spotlight following the cursor.
+ * In dark mode: calibrated with feathered multi-stop falloff (no visible circle outline/disc)
+ * and calm neutral illumination (no jarring neon green glare).
  */
 export const SpotlightCard: React.FC<SpotlightCardProps> = ({
   children,
   className = '',
-  spotlightColor = 'rgba(16, 185, 129, 0.05)',
+  spotlightColor = 'rgba(0, 0, 0, 0.025)',
   darkSpotlightColor,
-  size = 300,
+  size = 360,
   darkSize,
   ...props
 }) => {
@@ -30,11 +44,13 @@ export const SpotlightCard: React.FC<SpotlightCardProps> = ({
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (!divRef.current) return;
+    if (typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches) return;
     const rect = divRef.current.getBoundingClientRect();
     setPosition({ x: e.clientX - rect.left, y: e.clientY - rect.top });
   }, []);
 
   const handleMouseEnter = useCallback(() => {
+    if (typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches) return;
     setOpacity(1);
   }, []);
 
@@ -42,16 +58,19 @@ export const SpotlightCard: React.FC<SpotlightCardProps> = ({
     setOpacity(0);
   }, []);
 
-  // In dark mode, ensure any emerald/green spotlight is softly muted (~1.5% alpha, max 220px radius)
-  // so it never causes an overwhelming or annoying flashlight glare across dark backgrounds.
+  // In dark mode: ensure ZERO harsh glowing spots or sharp circular discs.
+  // We use an ultra-delicate, whisper-quiet architectural platinum micro-sheen (< 0.8% peak opacity).
   const effectiveDarkColor =
-    darkSpotlightColor ??
-    (typeof spotlightColor === 'string' &&
-    (spotlightColor.includes('16, 185, 129') || spotlightColor.includes('16,185,129'))
-      ? 'rgba(16, 185, 129, 0.015)'
-      : spotlightColor);
+    !darkSpotlightColor || isGreenish(darkSpotlightColor)
+      ? 'rgba(255, 255, 255, 0.007)'
+      : darkSpotlightColor;
 
-  const effectiveDarkSize = darkSize ?? Math.min(size, 200);
+  const effectiveDarkSize = Math.max(darkSize ?? 580, 520);
+
+  const effectiveLightColor = isGreenish(spotlightColor)
+    ? 'rgba(0, 0, 0, 0.02)'
+    : spotlightColor;
+  const effectiveLightSize = Math.max(size, 340);
 
   return (
     <div
@@ -62,20 +81,20 @@ export const SpotlightCard: React.FC<SpotlightCardProps> = ({
       className={`relative overflow-hidden ${className}`}
       {...props}
     >
-      {/* Light mode spotlight */}
+      {/* Light mode spotlight (soft, diffused, non-intrusive) */}
       <div
         className="pointer-events-none absolute -inset-px transition-opacity duration-300 z-0 dark:hidden"
         style={{
           opacity,
-          background: `radial-gradient(${size}px circle at ${position.x}px ${position.y}px, ${spotlightColor}, transparent 80%)`,
+          background: `radial-gradient(${effectiveLightSize}px circle at ${position.x}px ${position.y}px, ${effectiveLightColor} 0%, rgba(0, 0, 0, 0.006) 45%, transparent 80%)`,
         }}
       />
-      {/* Dark mode spotlight (calm, subtle, non-glaring) */}
+      {/* Dark mode spotlight (barely-there whisper micro-sheen, ultra-wide diffusion, zero glare) */}
       <div
-        className="pointer-events-none absolute -inset-px transition-opacity duration-300 z-0 hidden dark:block"
+        className="pointer-events-none absolute -inset-px transition-opacity duration-700 ease-out z-0 hidden dark:block"
         style={{
           opacity,
-          background: `radial-gradient(${effectiveDarkSize}px circle at ${position.x}px ${position.y}px, ${effectiveDarkColor}, transparent 80%)`,
+          background: `radial-gradient(${effectiveDarkSize}px circle at ${position.x}px ${position.y}px, ${effectiveDarkColor} 0%, rgba(255, 255, 255, 0.003) 35%, rgba(255, 255, 255, 0.0008) 65%, transparent 85%)`,
         }}
       />
       {children}
@@ -84,4 +103,3 @@ export const SpotlightCard: React.FC<SpotlightCardProps> = ({
 };
 
 export default SpotlightCard;
-

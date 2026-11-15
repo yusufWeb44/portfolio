@@ -58,7 +58,7 @@ export const FadeContent: React.FC<FadeContentProps> = ({
       ref={ref}
       initial={{
         opacity: initialOpacity,
-        filter: blur ? 'blur(8px)' : 'none',
+        ...(blur ? { filter: 'blur(8px)' } : {}),
         x: offset.x,
         y: offset.y,
       }}
@@ -66,13 +66,13 @@ export const FadeContent: React.FC<FadeContentProps> = ({
         isInView
           ? {
               opacity: 1,
-              filter: blur ? 'blur(0px)' : 'none',
+              ...(blur ? { filter: 'blur(0px)' } : {}),
               x: 0,
               y: 0,
             }
           : {
               opacity: initialOpacity,
-              filter: blur ? 'blur(8px)' : 'none',
+              ...(blur ? { filter: 'blur(8px)' } : {}),
               x: offset.x,
               y: offset.y,
             }

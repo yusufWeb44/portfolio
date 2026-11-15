@@ -229,12 +229,12 @@ export const Footer: React.FC<FooterProps> = ({ settings, socialLinks = [], scro
       {/* Subtle top ambient glow */}
       <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-emerald-500/25 to-transparent pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 pt-10 md:pt-12 pb-6 md:pb-8">
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 pt-10 md:pt-12 pb-6 md:pb-8">
         {/* Main 4-Column Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 items-start">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-8 sm:gap-8 lg:gap-12 items-start">
 
           {/* COLUMN 1: Brand & Identity (Far Right in Arabic RTL) */}
-          <div className="space-y-3.5">
+          <div className="col-span-2 sm:col-span-2 lg:col-span-1 space-y-3.5">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => scrollToSection('hero')}
@@ -279,7 +279,7 @@ export const Footer: React.FC<FooterProps> = ({ settings, socialLinks = [], scro
 
           {/* COLUMN 2: User's Services (خدماتي) - Title starting flush without icon */}
           {showServicesCol && (
-            <div className="space-y-3.5">
+            <div className="col-span-1 space-y-3.5">
               <h3 className="text-foreground font-bold text-sm sm:text-base tracking-tight">
                 {servicesTitle}
               </h3>
@@ -321,7 +321,7 @@ export const Footer: React.FC<FooterProps> = ({ settings, socialLinks = [], scro
 
           {/* COLUMN 3: Quick Links (روابط سريعة) - Title starting flush without icon */}
           {showQuickLinksCol && (
-            <div className="space-y-3.5">
+            <div className="col-span-1 space-y-3.5">
               <h3 className="text-foreground font-bold text-sm sm:text-base tracking-tight">
                 {quickLinksTitle}
               </h3>
@@ -351,7 +351,7 @@ export const Footer: React.FC<FooterProps> = ({ settings, socialLinks = [], scro
 
           {/* COLUMN 4: Support & Contact (الدعم والتواصل) - Address is the LAST line */}
           {showContactCol && (
-            <div className="space-y-3.5">
+            <div className="col-span-2 sm:col-span-2 lg:col-span-1 space-y-3.5">
               <h3 className="text-foreground font-bold text-sm sm:text-base tracking-tight">
                 {contactTitle}
               </h3>

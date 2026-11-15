@@ -66,7 +66,7 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
     const isMd = windowWidth >= 1024 && windowWidth < 1400;
     const isSm = windowWidth >= 640 && windowWidth < 1024;
 
-    const cardWidth = isLg ? 410 : (isMd ? 360 : (isSm ? 290 : 220));
+    const cardWidth = isLg ? 410 : (isMd ? 360 : (isSm ? 310 : 255));
     const cardHeight = cardWidth / 1.414;
     const angleStep = isLg ? 22.0 : (isMd ? 22.5 : (isSm ? 23.0 : 24.0));
     const gap = isLg ? 26 : (isMd ? 22 : (isSm ? 18 : 14));
@@ -187,8 +187,8 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
 
   // Pointer event handlers for container drag
   const handlePointerDown = (e: React.PointerEvent) => {
-    // Only drag on primary mouse button
-    if (e.button !== 0 && e.buttons !== 1) return;
+    // Only drag on primary mouse button (allow all touch/pen pointers)
+    if (e.pointerType === 'mouse' && e.button !== 0 && e.buttons !== 1) return;
     isDraggingRef.current = true;
     dragStartRef.current = {
       x: e.clientX,
@@ -201,8 +201,8 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
-    // If no mouse button is held down, immediately cancel any active drag state
-    if (e.buttons === 0) {
+    // If mouse pointer has no button held down, immediately cancel any active drag state
+    if (e.pointerType === 'mouse' && e.buttons === 0) {
       isDraggingRef.current = false;
       dragStartRef.current.moved = false;
       return;

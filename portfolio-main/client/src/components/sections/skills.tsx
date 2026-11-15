@@ -208,6 +208,16 @@ const SkillMarqueeRow = ({
                   });
                 }}
                 onMouseLeave={onLeave}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  onHover({
+                    label: skill.label,
+                    originalName: skill.originalName,
+                    description: skill.description,
+                    rect,
+                  });
+                }}
               />
             ))}
           </div>
@@ -231,13 +241,16 @@ const InfiniteSkillsMarquee = ({ items, isAr }: { items: TechItem[]; isAr: boole
 
   const [activeHover, setActiveHover] = useState<HoveredSkillData | null>(null);
 
-  // Close tooltip on page scroll so marquee accelerates cleanly
+  // Close tooltip on page scroll or outside tap so marquee accelerates cleanly
   useEffect(() => {
-    const handleScroll = () => {
-      if (activeHover) setActiveHover(null);
+    if (!activeHover) return;
+    const handleDismiss = () => setActiveHover(null);
+    window.addEventListener('scroll', handleDismiss, { passive: true });
+    window.addEventListener('pointerdown', handleDismiss, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleDismiss);
+      window.removeEventListener('pointerdown', handleDismiss);
     };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
   }, [activeHover]);
 
   // Stagger items into 5 rows (or 4 if few items)
@@ -413,11 +426,11 @@ const SkillsSection = () => {
       aria-label="Skills and expertise"
     >
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-8 items-start">
 
           {/* ── Left Column (5 cols) - Preserved exactly as requested ── */}
           <motion.div
-            className="lg:col-span-5 flex flex-col gap-7"
+            className="lg:col-span-5 flex flex-col gap-5 sm:gap-6 lg:gap-7"
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"
@@ -425,7 +438,7 @@ const SkillsSection = () => {
           >
             {/* Headline */}
             <div>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-foreground tracking-tight leading-[1.15]">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-foreground tracking-tight leading-[1.15]">
                 {mainTitle === 'Engineered Core Capabilities' ? (
                   <>
                     <SplitText text="Engineered Core" delay={30} duration={0.45} />{' '}

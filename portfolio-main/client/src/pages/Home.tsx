@@ -517,7 +517,7 @@ const Home = () => {
       <section id="experience" className="scroll-mt-24 pt-10 sm:pt-14 md:pt-18 pb-4 sm:pb-6 relative z-10 overflow-x-clip">
         <div className="max-w-7xl mx-auto space-y-8 sm:space-y-10 px-4 sm:px-6 lg:px-8 mb-6 sm:mb-8">
           <FadeIn>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-foreground leading-[1.15] mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground leading-[1.15] mb-3 sm:mb-4">
               <SplitText
                 text={resolveField('experience.title', settings?.experienceTitleAr, settings?.experienceTitle, 'Experience.')}
                 delay={35}
@@ -689,22 +689,21 @@ const Home = () => {
             transition={{ duration: 0.45, ease: [0.23, 1, 0.32, 1] }}
           >
             <SpotlightCard
-              spotlightColor="rgba(16, 185, 129, 0.04)"
-              darkSpotlightColor="rgba(255, 255, 255, 0.025)"
-              size={360}
-              darkSize={240}
+              spotlightColor="rgba(0, 0, 0, 0.02)"
+              darkSpotlightColor="rgba(255, 255, 255, 0.007)"
+              size={420}
+              darkSize={580}
               className={cn(
-                "group relative overflow-hidden rounded-2xl sm:rounded-3xl p-7 sm:p-10",
-                "bg-white dark:bg-[#121417]/95",
-                "border border-slate-200/90 dark:border-white/[0.08]",
-                "shadow-[0_1px_2px_rgba(15,23,42,0.03),0_16px_36px_-12px_rgba(15,23,42,0.08)]",
-                "dark:shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset,0_20px_48px_-16px_rgba(0,0,0,0.5)]",
-                "transition-all duration-300"
+                "group relative overflow-hidden rounded-2xl sm:rounded-3xl p-6 sm:p-10",
+                "bg-white/95 dark:bg-zinc-900/60 backdrop-blur-xl",
+                "border border-zinc-200/90 dark:border-white/[0.08]",
+                "shadow-[0_1px_2px_rgba(0,0,0,0.03),0_8px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset,0_16px_32px_-12px_rgba(0,0,0,0.4)]",
+                "hover:border-zinc-300 dark:hover:border-white/[0.18] transition-all duration-300"
               )}
             >
               <div className="relative z-10 flex flex-col items-center text-center">
                 {/* 1. Headline */}
-                <h2 className="text-3xl sm:text-4xl md:text-[36px] font-extrabold tracking-tight leading-[1.18] text-foreground">
+                <h2 className="text-2xl sm:text-4xl md:text-[36px] font-extrabold tracking-tight leading-[1.18] text-foreground">
                   {resolveField(
                     'contact.headline',
                     settings?.contactTitleAr,

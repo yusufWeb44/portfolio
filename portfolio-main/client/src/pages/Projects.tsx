@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
@@ -61,6 +61,7 @@ const ProjectShowcaseItem = ({
   const isAr = currentLang === 'ar';
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const touchStartXRef = useRef<number | null>(null);
 
   const displayTitle = isAr ? project.titleAr || project.title : project.title;
   const displayCategory = isAr ? project.categoryAr || project.category : project.category;
@@ -117,7 +118,7 @@ const ProjectShowcaseItem = ({
   return (
     <article
       id={project.slug}
-      className="scroll-mt-28 relative rounded-2xl sm:rounded-3xl border border-slate-200/90 dark:border-white/[0.09] bg-card dark:bg-[#121417] p-5 sm:p-7 md:p-8 shadow-sm dark:shadow-[0_20px_50px_-10px_rgba(0,0,0,0.7)] transition-all duration-300 hover:border-emerald-500/40"
+      className="scroll-mt-28 relative rounded-2xl sm:rounded-3xl border border-zinc-200/90 dark:border-white/[0.08] bg-white/95 dark:bg-zinc-900/60 backdrop-blur-xl p-5 sm:p-7 md:p-8 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_8px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset,0_16px_32px_-12px_rgba(0,0,0,0.4)] transition-all duration-300 hover:border-zinc-300 dark:hover:border-white/[0.18]"
     >
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
         
@@ -163,7 +164,7 @@ const ProjectShowcaseItem = ({
                   {project.technologies.map((tech) => (
                     <span
                       key={tech.id || tech.name}
-                      className="px-2.5 py-1 rounded-md text-[11px] sm:text-xs font-mono font-medium border border-border/80 bg-card/60 dark:bg-white/[0.04] text-foreground/90 hover:border-emerald-500/40 hover:text-emerald-400 transition-colors"
+                      className="px-2.5 py-1 rounded-md text-[11px] sm:text-xs font-mono font-medium border border-border/80 bg-card/60 dark:bg-white/[0.04] text-foreground/90 hover:border-zinc-300 dark:hover:border-white/[0.18] hover:text-foreground dark:hover:text-white transition-colors"
                     >
                       {tech.name}
                     </span>
@@ -227,7 +228,24 @@ const ProjectShowcaseItem = ({
           {/* Main Featured Image Container (100% Uncropped Display via object-contain) */}
           <div
             onClick={() => setIsLightboxOpen(true)}
-            className="relative w-full aspect-[16/10] rounded-xl sm:rounded-2xl overflow-hidden border border-border/70 bg-slate-900/[0.03] dark:bg-black/60 backdrop-blur-xl shadow-md group flex items-center justify-center p-1.5 sm:p-2.5 cursor-zoom-in"
+            onTouchStart={(e) => {
+              if (e.touches.length === 1) {
+                touchStartXRef.current = e.touches[0].clientX;
+              }
+            }}
+            onTouchEnd={(e) => {
+              if (touchStartXRef.current === null || displayImages.length <= 1) return;
+              const deltaX = e.changedTouches[0].clientX - touchStartXRef.current;
+              touchStartXRef.current = null;
+              if (Math.abs(deltaX) > 40) {
+                if (deltaX < 0) {
+                  handleNextImage();
+                } else {
+                  handlePrevImage();
+                }
+              }
+            }}
+            className="relative w-full aspect-[16/10] rounded-xl sm:rounded-2xl overflow-hidden border border-border/70 bg-slate-900/[0.03] dark:bg-black/60 backdrop-blur-xl shadow-md group flex items-center justify-center p-1.5 sm:p-2.5 cursor-zoom-in touch-pan-y"
           >
             {/* Ambient Blurred Backdrop using the image itself for premium edge-to-edge aesthetic */}
             <div
@@ -250,7 +268,7 @@ const ProjectShowcaseItem = ({
               />
             </AnimatePresence>
 
-            {/* Fullscreen Expand Button on Hover */}
+            {/* Fullscreen Expand Button on Hover (and visible on touch devices) */}
             <button
               type="button"
               onClick={(e) => {
@@ -258,7 +276,7 @@ const ProjectShowcaseItem = ({
                 setIsLightboxOpen(true);
               }}
               aria-label="View Fullscreen"
-              className="absolute top-3 left-3 z-20 p-1.5 rounded-md bg-black/60 hover:bg-black/85 backdrop-blur-md border border-white/10 text-white/80 hover:text-white transition-all duration-200 active:scale-95 opacity-0 group-hover:opacity-100 cursor-pointer shadow-md"
+              className="absolute top-3 left-3 z-20 p-1.5 rounded-md bg-black/60 hover:bg-black/85 backdrop-blur-md border border-white/10 text-white/80 hover:text-white transition-all duration-200 active:scale-95 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 cursor-pointer shadow-md"
             >
               <Maximize2 size={13} strokeWidth={1.5} />
             </button>

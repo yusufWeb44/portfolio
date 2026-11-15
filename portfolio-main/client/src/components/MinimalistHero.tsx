@@ -169,11 +169,11 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
   ].filter(Boolean) as { label: string; href: string; Icon: any }[];
 
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] flex flex-col justify-between overflow-hidden bg-transparent">
+    <div className="relative min-h-[100svh] lg:min-h-[calc(100vh-4rem)] flex flex-col justify-between overflow-hidden bg-transparent">
 
       {/* Main Hero Content */}
-      <div className="flex-1 max-w-7xl mx-auto w-full px-6 pt-24 sm:pt-28 md:pt-32 pb-8 flex flex-col justify-center">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+      <div className="flex-1 max-w-7xl mx-auto w-full px-5 sm:px-6 lg:px-6 pt-20 sm:pt-24 md:pt-28 lg:pt-32 pb-8 flex flex-col justify-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-8 items-center">
 
           {/* ── Left Column (desktop): Headline, Bio, CTA, Social, Stats ── */}
           <div className="order-2 lg:order-1 lg:col-span-5 flex flex-col items-start z-10 min-w-0">
@@ -181,7 +181,7 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
-              className="space-y-6 w-full"
+              className="space-y-5 sm:space-y-6 w-full"
             >
               {/* Headline + Bio */}
               <div>
@@ -238,13 +238,19 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
               {/* Stats Bar */}
               {activeStats.length > 0 && (
                 <FadeContent delay={0.4} blur={false} distance={15}>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6 border-t border-border/40 mt-6 w-full">
+                  <div
+                    className={`grid ${
+                      activeStats.length === 3
+                        ? 'grid-cols-3 sm:grid-cols-3 lg:grid-cols-4'
+                        : 'grid-cols-2 sm:grid-cols-4'
+                    } gap-3 sm:gap-4 pt-5 sm:pt-6 border-t border-border/40 mt-5 sm:mt-6 w-full`}
+                  >
                     {activeStats.map((stat, idx) => (
                       <div key={idx} className="flex flex-col">
-                        <span className="text-xl sm:text-2xl font-extrabold text-foreground font-mono">
+                        <span className="text-lg sm:text-2xl font-extrabold text-foreground font-mono">
                           <AnimatedStatValue value={stat.value} />
                         </span>
-                        <span className="text-xs text-muted-foreground uppercase tracking-wider mt-1.5 leading-snug">
+                        <span className="text-[11px] sm:text-xs text-muted-foreground uppercase tracking-wider mt-1 sm:mt-1.5 leading-snug">
                           {formatStatLabel(stat.label)}
                         </span>
                       </div>
@@ -264,15 +270,15 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
 
             {/* ── Mobile-only: typewriter above image ── */}
             {words.length > 0 && (
-              <div className="lg:hidden w-full flex flex-col mb-4 px-1">
+              <div className="lg:hidden w-full flex flex-col mb-2.5 sm:mb-4 px-1">
                 <motion.div
                   initial={{ opacity: 0, y: -8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: 0.05 }}
-                  className="flex justify-center items-center min-h-[3.2rem] sm:min-h-[3.8rem]"
+                  className="flex justify-center items-center min-h-[2.8rem] sm:min-h-[3.5rem]"
                 >
                   <h2
-                    className="text-xl sm:text-2xl font-extrabold tracking-tight rtl:tracking-normal uppercase rtl:normal-case text-foreground text-center leading-[1.45] rtl:leading-[1.55]"
+                    className="text-lg sm:text-2xl font-extrabold tracking-tight rtl:tracking-normal uppercase rtl:normal-case text-foreground text-center leading-[1.4] rtl:leading-[1.5]"
                     dir="auto"
                     style={{
                       overflowWrap: 'break-word',
@@ -292,9 +298,9 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
             )}
 
             {/* Blob + Profile Image */}
-            <div className="relative flex justify-center items-center min-h-[320px] sm:min-h-[400px] lg:min-h-[500px] w-full select-none pointer-events-none">
+            <div className="relative flex justify-center items-center min-h-[285px] sm:min-h-[355px] md:min-h-[385px] lg:min-h-[500px] w-full select-none pointer-events-none">
               {/* Fluid Blob Backdrop — Enlarged to match reference photo, perfectly framing profile */}
-              <div className="absolute -top-6 sm:-top-8 lg:-top-11 w-[290px] h-[290px] sm:w-[360px] sm:h-[360px] lg:w-[450px] lg:h-[450px] z-0 pointer-events-none select-none">
+              <div className="absolute -top-4 sm:-top-6 md:-top-7 lg:-top-11 w-[255px] h-[255px] sm:w-[315px] sm:h-[315px] md:w-[345px] md:h-[345px] lg:w-[450px] lg:h-[450px] z-0 pointer-events-none select-none">
                 <motion.div
                   initial={{ scale: 0.9, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
@@ -363,7 +369,7 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
                     WebkitUserSelect: 'none',
                     pointerEvents: 'none',
                   }}
-                  className="w-[240px] sm:w-[300px] lg:w-[420px] h-auto object-contain scale-[1.6] pointer-events-none select-none"
+                  className="w-[215px] sm:w-[265px] md:w-[290px] lg:w-[420px] h-auto object-contain scale-[1.32] sm:scale-[1.38] md:scale-[1.42] lg:scale-[1.6] pointer-events-none select-none"
                 />
               </motion.div>
             </div>

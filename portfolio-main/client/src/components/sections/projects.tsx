@@ -52,17 +52,21 @@ const ProjectMediaVisual = ({
     project.images?.[0]?.url;
 
   if (coverImage) {
+    const resolvedCover = getMediaUrl(coverImage);
     return (
-      <div className="w-full h-full relative overflow-hidden group">
+      <div className="w-full h-full relative overflow-hidden group flex items-center justify-center bg-slate-900/[0.03] dark:bg-black/60 p-1 sm:p-1.5">
+        <div
+          className="absolute inset-0 bg-center bg-cover blur-2xl opacity-15 dark:opacity-25 pointer-events-none scale-110"
+          style={{ backgroundImage: `url(${resolvedCover})` }}
+        />
         <img
-          src={getMediaUrl(coverImage)}
+          src={resolvedCover}
           alt={project.title}
           width={700}
           height={450}
-          className="w-full h-full object-cover select-none transition-transform duration-700 group-hover:scale-105"
+          className="w-full h-full object-contain select-none relative z-10 rounded-md sm:rounded-lg transition-transform duration-700 group-hover:scale-[1.02]"
           loading="lazy"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60" />
       </div>
     );
   }
@@ -190,10 +194,10 @@ const StackedCard = ({
       className="absolute inset-x-0 mx-auto flex justify-center will-change-transform"
     >
       <SpotlightCard
-        spotlightColor="rgba(16, 185, 129, 0.04)"
-        darkSpotlightColor="rgba(16, 185, 129, 0.012)"
-        size={320}
-        darkSize={200}
+        spotlightColor="rgba(0, 0, 0, 0.02)"
+        darkSpotlightColor="rgba(255, 255, 255, 0.007)"
+        size={420}
+        darkSize={580}
         style={{
           maxWidth: `calc(980px - ${diff * 20}px)`,
           width: `calc(100% - ${diff * 10}px)`,
@@ -202,23 +206,23 @@ const StackedCard = ({
         className="rounded-xl sm:rounded-2xl border border-slate-200/90 dark:border-white/[0.14] bg-background dark:bg-background shadow-[0_4px_20px_-2px_rgba(0,0,0,0.12),0_12px_36px_-4px_rgba(0,0,0,0.18)] dark:shadow-[0_20px_50px_-10px_rgba(0,0,0,0.9)] overflow-hidden relative w-full"
       >
         {/* ── Main Card Body Grid: Beautifully balanced aspect ratio with exposed numbering strip ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 px-4 sm:px-5 lg:px-6 pt-2.5 sm:pt-3 lg:pt-3.5 pb-4 sm:pb-5 lg:pb-6 items-stretch min-h-[315px] sm:min-h-[335px] lg:min-h-[355px] lg:max-h-[355px] lg:h-[355px]">
+        <div className="flex flex-col justify-between md:grid md:grid-cols-12 gap-2.5 sm:gap-3.5 md:gap-5 lg:gap-6 px-4 sm:px-5 lg:px-6 pt-2.5 sm:pt-3 lg:pt-3.5 pb-3.5 sm:pb-4.5 lg:pb-6 items-stretch h-[415px] min-h-[415px] max-h-[415px] sm:h-[430px] sm:min-h-[430px] sm:max-h-[430px] md:h-[330px] md:min-h-[330px] md:max-h-[330px] lg:min-h-[355px] lg:max-h-[355px] lg:h-[355px]">
 
           {/* Details Column (5 cols of 12): Natural flow (Right in RTL, Left in LTR) */}
           <div
-            className={`lg:col-span-5 flex flex-col justify-between h-full ${
+            className={`md:col-span-5 lg:col-span-5 flex flex-col justify-between md:h-full min-h-0 ${
               isAr ? 'text-right' : 'text-left'
             }`}
           >
             <div>
               {/* 1. Large Order Number: positioned in the top strip to peek out when stacked */}
-              <div className="flex items-baseline gap-2.5 sm:gap-3 mb-1 sm:mb-1.5 justify-start">
-                <span className="text-xl sm:text-2xl lg:text-[2rem] font-black font-sans tracking-tight text-foreground dark:text-white leading-none select-none">
+              <div className="flex items-baseline gap-2 sm:gap-3 mb-0.5 sm:mb-1.5 justify-start">
+                <span className="text-lg sm:text-2xl lg:text-[2rem] font-black font-sans tracking-tight text-foreground dark:text-white leading-none select-none">
                   {formattedNumber}
                 </span>
                 {(project.year || displayCategory) && (
-                  <span className="text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-wider text-muted-foreground/80 dark:text-zinc-400 inline-flex items-center gap-1.5">
-                    {displayCategory && <span>{displayCategory}</span>}
+                  <span className="text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-wider text-muted-foreground/80 dark:text-zinc-400 inline-flex items-center gap-1.5 truncate">
+                    {displayCategory && <span className="truncate">{displayCategory}</span>}
                     {displayCategory && project.year && <span className="text-muted-foreground/50">•</span>}
                     {project.year && <span dir="ltr">{project.year}</span>}
                   </span>
@@ -226,18 +230,18 @@ const StackedCard = ({
               </div>
 
               {/* 3. Project Title */}
-              <h3 className="text-lg sm:text-xl lg:text-[1.45rem] font-bold tracking-tight text-foreground dark:text-white mb-1.5 leading-snug">
+              <h3 className="text-base sm:text-xl lg:text-[1.45rem] font-bold tracking-tight text-foreground dark:text-white mb-1 sm:mb-1.5 leading-snug line-clamp-1">
                 {displayTitle}
               </h3>
 
-              {/* 4. Project Description (tight clamp so cards never stretch or expand) */}
-              <p className="text-xs sm:text-[13px] lg:text-[13.5px] text-muted-foreground dark:text-zinc-300 leading-relaxed line-clamp-3 sm:line-clamp-4 mb-2.5 sm:mb-3 w-full">
+              {/* 4. Project Description (Generous clamp that only cuts when truly long, preserving layout) */}
+              <p className="text-xs sm:text-[13px] lg:text-[13.5px] text-muted-foreground dark:text-zinc-300 leading-relaxed line-clamp-2 sm:line-clamp-3 md:line-clamp-4 lg:line-clamp-6 mb-2 sm:mb-3 w-full">
                 {displayDescription}
               </p>
 
               {/* 5. Technologies Badges */}
               {project.technologies && project.technologies.length > 0 && (
-                <div className="flex flex-wrap items-center gap-1.5 mb-2.5 sm:mb-3 max-h-[26px] overflow-hidden justify-start">
+                <div className="flex flex-wrap items-center gap-1.5 mb-2 sm:mb-3 max-h-[26px] overflow-hidden justify-start">
                   {project.technologies.slice(0, 5).map((tech, tIdx) => (
                     <span
                       key={tech.id || tech.name || tIdx}
@@ -251,12 +255,12 @@ const StackedCard = ({
             </div>
 
             {/* 6. Action Button */}
-            <div className="pt-2 flex items-center justify-start">
+            <div className="pt-1 sm:pt-2 flex items-center justify-start">
               <Link
                 to={`/projects#${project.slug}`}
                 className={cn(
                   buttonVariants({ variant: 'primary', size: 'default' }),
-                  "font-bold text-xs sm:text-[13px] tracking-wide shadow-sm hover:shadow-[0_8px_20px_rgba(16,185,129,0.22)] dark:hover:shadow-[0_6px_16px_rgba(16,185,129,0.14)]"
+                  "max-md:py-2 max-md:px-4 font-bold text-xs sm:text-[13px] tracking-wide shadow-sm hover:shadow-[0_8px_20px_rgba(16,185,129,0.22)] dark:hover:shadow-[0_6px_16px_rgba(16,185,129,0.14)]"
                 )}
               >
                 <span>{isAr ? 'عرض دراسة الحالة' : 'VIEW CASE STUDY'}</span>
@@ -268,8 +272,8 @@ const StackedCard = ({
           </div>
 
           {/* Media Column (7 cols of 12): Natural flow (Left in RTL, Right in LTR) */}
-          <div className="lg:col-span-7 flex items-stretch h-full">
-            <div className="w-full h-full min-h-[210px] sm:min-h-[240px] md:min-h-[270px] lg:min-h-full rounded-lg sm:rounded-xl overflow-hidden border border-foreground/15 dark:border-white/10 bg-muted/20 shadow-inner group">
+          <div className="md:col-span-7 lg:col-span-7 flex items-stretch h-[168px] sm:h-[180px] md:h-full shrink-0">
+            <div className="w-full h-full lg:min-h-full rounded-lg sm:rounded-xl overflow-hidden border border-foreground/15 dark:border-white/10 bg-muted/20 shadow-inner group">
               <ProjectMediaVisual project={project} cardIndex={i} />
             </div>
           </div>
@@ -358,14 +362,14 @@ const ProjectsSection = () => {
   const trackHeight = numCards === 0 ? 'auto' : (numCards === 1 ? 'auto' : `${100 + (numCards - 1) * 70}vh`);
 
   return (
-    <section id="projects" className="scroll-mt-24 relative bg-transparent [--cards-step:36px] sm:[--cards-step:40px] lg:[--cards-step:44px]">
+    <section id="projects" className="scroll-mt-24 relative bg-transparent [--cards-step:28px] sm:[--cards-step:34px] md:[--cards-step:38px] lg:[--cards-step:44px]">
       {/* ── Outer Scroll Track ── */}
       <div ref={trackRef} className="relative w-full" style={{ height: trackHeight }}>
         {/* ── Single Unified Sticky Container: Locks title + cards together with proper navbar clearance ── */}
-        <div className="sticky top-0 h-screen w-full flex flex-col justify-start pt-[80px] sm:pt-[84px] lg:pt-[84px] pb-4 overflow-x-clip pointer-events-none">
+        <div className="sticky top-0 h-[100dvh] lg:h-screen w-full flex flex-col justify-start pt-[68px] sm:pt-[76px] lg:pt-[84px] pb-4 overflow-x-clip pointer-events-none">
 
           {/* ── 1. Section Header: Clear margin below floating navbar ── */}
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-2 sm:pb-2.5 w-full pointer-events-auto">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-1.5 sm:pb-2.5 w-full pointer-events-auto">
             <div className="max-w-3xl">
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight leading-[1.15] text-foreground mb-1">
                 <SplitText
@@ -380,7 +384,7 @@ const ProjectsSection = () => {
                   text={displaySubtitle}
                   animateBy="block"
                   delay={20}
-                  className="text-base md:text-lg text-muted-foreground leading-relaxed line-clamp-2"
+                  className="text-sm sm:text-base md:text-lg text-muted-foreground leading-relaxed line-clamp-2"
                 />
               )}
             </div>

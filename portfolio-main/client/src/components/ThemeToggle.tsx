@@ -25,9 +25,9 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
       transition={{ type: 'spring', stiffness: 400, damping: 25 }}
       className={cn(
         "relative w-9 h-9 rounded-full flex items-center justify-center border transition-colors duration-200",
-        "bg-card/70 dark:bg-white/[0.05] border-border/70 hover:border-emerald-500/50",
-        "text-muted-foreground hover:text-foreground",
-        "hover:shadow-[0_0_14px_hsl(var(--emerald-500)/0.25)] cursor-pointer overflow-hidden select-none",
+        "bg-card/70 dark:bg-white/[0.04] border-border/70 dark:border-white/[0.08] hover:border-zinc-300 dark:hover:border-white/[0.15] dark:hover:bg-white/[0.07]",
+        "text-muted-foreground hover:text-foreground dark:text-zinc-300 dark:hover:text-white",
+        "cursor-pointer overflow-hidden select-none",
         className
       )}
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}

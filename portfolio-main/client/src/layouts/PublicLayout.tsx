@@ -510,7 +510,7 @@ const PublicLayout = () => {
 
               {/* Center: Desktop Navigation Links */}
               <nav
-                className="hidden md:flex items-center gap-1 sm:gap-2"
+                className="hidden lg:flex items-center gap-1 sm:gap-2"
                 aria-label="Main Navigation"
               >
                 {navLinks.map((link) => {
@@ -533,12 +533,12 @@ const PublicLayout = () => {
               </nav>
 
               {/* End: Desktop Action Controls (Theme Toggle, Language) */}
-              <div className="hidden md:flex items-center gap-2.5 sm:gap-3">
+              <div className="hidden lg:flex items-center gap-2.5 sm:gap-3">
                 {/* 1. Theme Toggle (Sun / Moon) */}
                 <button
                   type="button"
                   onClick={toggleTheme}
-                  className="p-2 sm:p-2.5 rounded-lg bg-white/50 hover:bg-white/80 dark:bg-white/[0.08] dark:hover:bg-white/[0.14] border border-slate-900/[0.07] hover:border-slate-900/[0.15] dark:border-white/[0.12] dark:hover:border-white/[0.22] text-slate-700 dark:text-slate-100 hover:text-emerald-500 dark:hover:text-emerald-400 transition-all cursor-pointer group shadow-xs dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.10)] backdrop-blur-md flex items-center justify-center shrink-0"
+                  className="p-2 sm:p-2.5 rounded-lg bg-white/50 hover:bg-white/80 dark:bg-white/[0.04] dark:hover:bg-white/[0.07] border border-slate-900/[0.07] hover:border-slate-900/[0.15] dark:border-white/[0.08] dark:hover:border-white/[0.15] text-slate-700 dark:text-zinc-300 dark:hover:text-white transition-all cursor-pointer group shadow-xs backdrop-blur-md flex items-center justify-center shrink-0"
                   title={isDark ? (isAr ? 'تفعيل الوضع الفاتح' : 'Switch to Light Mode') : (isAr ? 'تفعيل الوضع الداكن' : 'Switch to Dark Mode')}
                   aria-label="Toggle Theme"
                 >
@@ -553,14 +553,14 @@ const PublicLayout = () => {
                 <LanguageSwitcher />
               </div>
 
-              {/* Mobile Controls: Language + Theme + Hamburger Button */}
-              <div className="flex md:hidden items-center gap-2">
+              {/* Mobile & Tablet Controls: Language + Theme + Hamburger Button */}
+              <div className="flex lg:hidden items-center gap-2">
                 <LanguageSwitcher />
 
                 <button
                   type="button"
                   onClick={toggleTheme}
-                  className="p-2 rounded-lg bg-white/50 hover:bg-white/80 dark:bg-white/[0.08] dark:hover:bg-white/[0.14] border border-slate-900/[0.07] dark:border-white/[0.12] text-foreground transition-all cursor-pointer shadow-xs dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.10)] flex items-center justify-center shrink-0 backdrop-blur-md"
+                  className="w-10 h-10 rounded-lg bg-white/50 hover:bg-white/80 dark:bg-white/[0.04] dark:hover:bg-white/[0.07] border border-slate-900/[0.07] dark:border-white/[0.08] dark:hover:border-white/[0.15] text-foreground dark:text-zinc-300 transition-all cursor-pointer shadow-xs active:scale-95 flex items-center justify-center shrink-0 backdrop-blur-md"
                   aria-label="Toggle Theme"
                 >
                   {isDark ? (
@@ -573,7 +573,7 @@ const PublicLayout = () => {
                 <button
                   type="button"
                   onClick={() => setMobileMenuOpen(true)}
-                  className="w-10 h-10 rounded-lg bg-white/50 hover:bg-white/80 dark:bg-white/[0.08] dark:hover:bg-white/[0.14] border border-slate-900/[0.07] dark:border-white/[0.12] text-foreground transition-all cursor-pointer shadow-xs active:scale-95 flex items-center justify-center shrink-0 backdrop-blur-md"
+                  className="w-10 h-10 rounded-lg bg-white/50 hover:bg-white/80 dark:bg-white/[0.04] dark:hover:bg-white/[0.07] border border-slate-900/[0.07] dark:border-white/[0.08] dark:hover:border-white/[0.15] text-foreground dark:text-zinc-300 transition-all cursor-pointer shadow-xs active:scale-95 flex items-center justify-center shrink-0 backdrop-blur-md"
                   aria-label="Open menu"
                   aria-expanded={mobileMenuOpen}
                 >
@@ -584,7 +584,7 @@ const PublicLayout = () => {
           </div>
         </header>
 
-        {/* ── Mobile Sidebar Drawer (Backdrop + Sliding Panel) ── */}
+        {/* ── Mobile & Tablet Sidebar Drawer (Backdrop + Sliding Panel) ── */}
         <AnimatePresence>
           {mobileMenuOpen && (
             <>
@@ -594,7 +594,7 @@ const PublicLayout = () => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.25 }}
-                className="fixed inset-0 z-[9998] bg-black/70 backdrop-blur-sm md:hidden"
+                className="fixed inset-0 z-[9998] bg-black/70 backdrop-blur-sm lg:hidden"
                 onClick={() => setMobileMenuOpen(false)}
                 aria-hidden="true"
               />
@@ -606,7 +606,7 @@ const PublicLayout = () => {
                 exit={{ x: currentDirection === 'rtl' ? '100%' : '-100%' }}
                 transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                 className={cn(
-                  "fixed inset-y-0 top-0 bottom-0 z-[9999] w-[80vw] max-w-[320px] sm:max-w-[340px] h-screen bg-background dark:bg-slate-950 text-foreground shadow-2xl flex flex-col md:hidden",
+                  "fixed inset-y-0 top-0 bottom-0 z-[9999] w-[82vw] max-w-[320px] sm:max-w-[360px] h-[100dvh] bg-background dark:bg-slate-950 text-foreground shadow-2xl flex flex-col lg:hidden",
                   currentDirection === 'rtl'
                     ? "right-0 border-s border-border/70 dark:border-white/10"
                     : "left-0 border-e border-border/70 dark:border-white/10"
@@ -620,6 +620,8 @@ const PublicLayout = () => {
                   <button
                     onClick={() => {
                       setMobileMenuOpen(false);
+                      document.body.style.overflow = '';
+                      window.__lenis?.start();
                       scrollToSection('hero');
                     }}
                     className="flex items-center cursor-pointer bg-transparent border-none p-0 focus:outline-none"
@@ -634,7 +636,7 @@ const PublicLayout = () => {
                   <button
                     type="button"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 border border-transparent hover:border-border text-muted-foreground hover:text-emerald-500 transition-all cursor-pointer active:scale-95"
+                    className="w-9 h-9 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 border border-transparent hover:border-border text-muted-foreground hover:text-emerald-500 transition-all cursor-pointer active:scale-95 flex items-center justify-center"
                     aria-label="Close menu"
                   >
                     <X className="w-5 h-5" />
@@ -646,7 +648,7 @@ const PublicLayout = () => {
 
 
                   {/* Theme Toggle - Clean Row */}
-                  <div className="flex items-center justify-between py-1 text-xs font-medium text-muted-foreground border-b border-border/70 dark:border-white/10 pb-3">
+                  <div className="flex items-center justify-between py-1 text-xs sm:text-[13px] font-medium text-muted-foreground border-b border-border/70 dark:border-white/10 pb-3">
                     <span className="flex items-center gap-2">
                       {isDark ? (
                         <Moon className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
@@ -659,7 +661,7 @@ const PublicLayout = () => {
                     <button
                       type="button"
                       onClick={toggleTheme}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/70 hover:border-emerald-500/50 text-xs font-semibold text-foreground transition-all cursor-pointer"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/70 hover:border-emerald-500/50 text-xs font-semibold text-foreground transition-all cursor-pointer active:scale-95"
                       title="Toggle theme"
                     >
                       <span>{isDark ? (isAr ? 'تفعيل الفاتح' : 'Light') : (isAr ? 'تفعيل الداكن' : 'Dark')}</span>
@@ -682,10 +684,12 @@ const PublicLayout = () => {
                           key={item.id}
                           onClick={() => {
                             setMobileMenuOpen(false);
+                            document.body.style.overflow = '';
+                            window.__lenis?.start();
                             scrollToSection(item.id);
                           }}
                           className={cn(
-                            "w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer bg-transparent border-none text-start",
+                            "w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-xs sm:text-[13.5px] font-semibold transition-all cursor-pointer bg-transparent border-none text-start active:scale-[0.99]",
                             isActive
                               ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 dark:bg-emerald-500/20 font-bold border border-emerald-500/30 dark:shadow-[0_0_12px_rgba(16,185,129,0.15)]"
                               : "text-muted-foreground hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.06]"

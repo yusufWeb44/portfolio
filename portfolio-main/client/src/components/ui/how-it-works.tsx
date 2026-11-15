@@ -580,7 +580,7 @@ const HowItWorks = () => {
   });
   const [settings, setSettings] = useState<any>(null);
   const [isMobile, setIsMobile] = useState(() =>
-    typeof window !== 'undefined' ? window.innerWidth < 640 : false
+    typeof window !== 'undefined' ? window.innerWidth < 768 : false
   );
   const [revealedCards, setRevealedCards] = useState<Record<number, boolean>>({});
 
@@ -602,7 +602,7 @@ const HowItWorks = () => {
   }, []);
 
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 640);
+    const check = () => setIsMobile(window.innerWidth < 768);
     check();
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
@@ -717,7 +717,7 @@ const HowItWorks = () => {
           className="text-center mb-8 sm:mb-10 md:mb-12 px-2"
         >
 
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-foreground tracking-tight leading-[1.15] mb-4">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-foreground tracking-tight leading-[1.15] mb-3 sm:mb-4">
             <SplitText
               text={displayTitle}
               delay={30}
@@ -739,7 +739,7 @@ const HowItWorks = () => {
             <div key={step.num + i}>
               {/* Card row */}
               <div className={`flex ${step.side === 'right' ? 'justify-end' : 'justify-start'}`}>
-                <div className="w-[88%] sm:w-[82%] md:w-full md:max-w-[420px]">
+                <div className="w-[88%] sm:w-[82%] md:w-full md:max-w-[390px] lg:max-w-[420px]">
                   <StickyNoteCard
                     step={step}
                     isMobile={isMobile}

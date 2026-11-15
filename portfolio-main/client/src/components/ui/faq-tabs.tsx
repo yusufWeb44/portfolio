@@ -28,8 +28,8 @@ interface FAQProps {
 }
 
 const FAQHeader = ({ title }: { title: string; subtitle?: string }) => (
-  <div className="relative z-10 flex flex-col items-start justify-start mb-10 sm:mb-12">
-    <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight leading-[1.15] text-foreground">
+  <div className="relative z-10 flex flex-col items-start justify-start mb-6 sm:mb-10 lg:mb-12">
+    <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight leading-[1.15] text-foreground">
       <SplitText
         text={title}
         delay={35}
@@ -49,16 +49,16 @@ const FAQTabs = ({
   selected: string;
   setSelected: (key: string) => void;
 }) => (
-  <div className="relative z-10 flex flex-wrap items-center gap-2 mb-12">
+  <div className="relative z-10 flex flex-nowrap sm:flex-wrap items-center gap-2 mb-7 sm:mb-10 lg:mb-12 overflow-x-auto sm:overflow-visible pb-1.5 sm:pb-0 no-scrollbar">
     {Object.entries(categories).map(([key, label]) => (
       <button
         key={key}
         onClick={() => setSelected(key)}
         className={cn(
-          'relative overflow-hidden whitespace-nowrap rounded-full border px-3.5 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer select-none active:scale-[0.98]',
+          'relative shrink-0 overflow-hidden whitespace-nowrap rounded-full border px-3.5 sm:px-5 py-2 sm:py-2 text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer select-none active:scale-[0.98]',
           selected === key
-            ? 'border-emerald-500/60 text-white shadow-md shadow-emerald-500/25 -translate-y-0.5'
-            : 'border-border/80 dark:border-white/10 bg-card/40 dark:bg-white/[0.03] text-muted-foreground hover:text-foreground hover:border-emerald-500/40 hover:-translate-y-0.5'
+            ? 'border-emerald-500/60 text-white shadow-md shadow-emerald-500/25 sm:-translate-y-0.5'
+            : 'border-border/80 dark:border-white/10 bg-card/40 dark:bg-white/[0.03] text-muted-foreground hover:text-foreground hover:border-emerald-500/40 sm:hover:-translate-y-0.5'
         )}
       >
         <span className="relative z-10">{label}</span>
@@ -114,24 +114,24 @@ const FAQItemCard = ({ question, answer }: FAQItem) => {
 
   return (
     <SpotlightCard
-      spotlightColor="rgba(16, 185, 129, 0.04)"
-      darkSpotlightColor="rgba(16, 185, 129, 0.012)"
-      size={260}
-      darkSize={180}
+      spotlightColor="rgba(0, 0, 0, 0.02)"
+      darkSpotlightColor="rgba(255, 255, 255, 0.007)"
+      size={340}
+      darkSize={560}
       className={cn(
-        'rounded-xl border backdrop-blur-xl transition-all duration-300',
+        'rounded-xl border backdrop-blur-xl transition-all duration-300 shadow-[0_1px_2px_rgba(0,0,0,0.03)] dark:shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset,0_16px_32px_-12px_rgba(0,0,0,0.4)]',
         isOpen
-          ? 'bg-card/60 dark:bg-white/[0.04] border-emerald-500/25 dark:border-emerald-500/20 shadow-sm'
-          : 'bg-card/30 dark:bg-white/[0.02] border-border/50 hover:border-emerald-500/25 dark:hover:border-emerald-500/15'
+          ? 'bg-white/95 dark:bg-zinc-900/80 border-zinc-300 dark:border-white/[0.18]'
+          : 'bg-white/90 dark:bg-zinc-900/60 border-zinc-200/90 dark:border-white/[0.08] hover:border-zinc-300 dark:hover:border-white/[0.18]'
       )}
     >
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center justify-between gap-6 p-6 text-start cursor-pointer relative z-10"
+        className="flex w-full items-center justify-between gap-4 sm:gap-6 p-4 sm:p-5 lg:p-6 text-start cursor-pointer relative z-10"
       >
         <span
           className={cn(
-            'text-base md:text-lg font-medium tracking-tight transition-colors leading-snug',
+            'text-sm sm:text-base md:text-lg font-medium tracking-tight transition-colors leading-snug',
             isOpen ? 'text-foreground' : 'text-muted-foreground'
           )}
         >
@@ -154,12 +154,12 @@ const FAQItemCard = ({ question, answer }: FAQItem) => {
         initial={false}
         animate={{
           height: isOpen ? 'auto' : '0px',
-          marginBottom: isOpen ? '24px' : '0px',
+          marginBottom: isOpen ? '20px' : '0px',
         }}
         transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-        className="overflow-hidden px-6 relative z-10"
+        className="overflow-hidden px-4 sm:px-5 lg:px-6 relative z-10"
       >
-        <p className="text-muted-foreground leading-relaxed text-sm md:text-base text-start">{answer}</p>
+        <p className="text-muted-foreground leading-relaxed text-xs sm:text-sm md:text-base text-start">{answer}</p>
       </motion.div>
     </SpotlightCard>
   );

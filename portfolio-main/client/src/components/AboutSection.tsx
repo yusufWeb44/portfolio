@@ -129,11 +129,11 @@ const AboutSection = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* ── 12-Column Main Grid (Both Left & Right aligned at the exact same horizontal level) ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-16 items-start">
 
           {/* ── Left Column: 5 cols — Title & Bio ── */}
           <motion.div
-            className={`flex flex-col gap-7 lg:pt-[70px] ${displayCards.length > 0 ? 'lg:col-span-5' : 'lg:col-span-8'}`}
+            className={`flex flex-col gap-5 sm:gap-6 lg:gap-7 lg:pt-[70px] ${displayCards.length > 0 ? 'lg:col-span-5' : 'lg:col-span-8'}`}
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"
@@ -141,7 +141,7 @@ const AboutSection = () => {
           >
             {/* Main Title */}
             <div>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-foreground tracking-tight leading-[1.22] pb-1">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-foreground tracking-tight leading-[1.22] pb-1">
                 <SplitText
                   text={displayHeadline}
                   delay={30}
@@ -188,20 +188,21 @@ const AboutSection = () => {
                   className={card.colSpan || (i === 2 && displayCards.length === 3 ? 'sm:col-span-2' : '')}
                 >
                   <SpotlightCard
-                    spotlightColor="rgba(16, 185, 129, 0.05)"
-                    darkSpotlightColor="rgba(16, 185, 129, 0.015)"
-                    size={280}
-                    darkSize={180}
+                    spotlightColor="rgba(0, 0, 0, 0.025)"
+                    darkSpotlightColor="rgba(255, 255, 255, 0.007)"
+                    size={360}
+                    darkSize={580}
                     className={[
-                      'group relative flex flex-col gap-5 rounded-xl sm:rounded-2xl p-6 sm:p-7 md:p-8 h-full',
-                      'bg-card/40 dark:bg-white/[0.03] border border-border/60 backdrop-blur-xl',
-                      'hover:border-emerald-500/35 dark:hover:border-emerald-500/20 hover:-translate-y-1',
-                      'shadow-sm dark:hover:shadow-none',
+                      'group relative flex flex-col gap-3.5 sm:gap-5 rounded-xl sm:rounded-2xl p-5 sm:p-6 md:p-7 lg:p-8 h-full',
+                      'bg-white/95 dark:bg-zinc-900/60 backdrop-blur-xl',
+                      'border border-zinc-200/90 dark:border-white/[0.08]',
+                      'shadow-[0_1px_2px_rgba(0,0,0,0.03),0_8px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset,0_16px_32px_-12px_rgba(0,0,0,0.4)]',
+                      'hover:border-zinc-300 dark:hover:border-white/[0.18] hover:-translate-y-1',
                       'transition-all duration-300 ease-out cursor-default',
                     ].join(' ')}
                   >
                     {/* Subtle background tint on hover */}
-                    <div className="absolute inset-0 rounded-xl sm:rounded-2xl bg-gradient-to-br from-emerald-500/0 to-emerald-500/0 group-hover:from-emerald-500/[0.02] group-hover:to-transparent transition-all duration-500 pointer-events-none" />
+                    <div className="absolute inset-0 rounded-xl sm:rounded-2xl bg-gradient-to-br from-emerald-500/0 to-emerald-500/0 group-hover:from-emerald-500/[0.02] dark:group-hover:from-transparent group-hover:to-transparent transition-all duration-500 pointer-events-none" />
 
                     {/* Card Header */}
                     <div className="flex items-start justify-between gap-4 relative z-10">
@@ -224,7 +225,7 @@ const AboutSection = () => {
                     </p>
 
                     {/* Bottom subtle accent line */}
-                    <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-500/0 to-transparent group-hover:via-emerald-500/25 dark:group-hover:via-emerald-500/10 transition-all duration-500 pointer-events-none" />
+                    <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-500/0 to-transparent group-hover:via-emerald-500/25 dark:group-hover:via-transparent transition-all duration-500 pointer-events-none" />
                   </SpotlightCard>
                 </motion.div>
               ))}
@@ -240,7 +241,7 @@ const AboutSection = () => {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: '-50px' }}
-          className="mt-14 sm:mt-18 md:mt-24 w-full"
+          className="mt-10 sm:mt-14 md:mt-18 lg:mt-24 w-full"
         >
           <TechStackMarquee
             technologies={coreStack.length > 0 ? coreStack : DEFAULT_CORE_STACK}

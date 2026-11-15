@@ -172,7 +172,7 @@ export const getThemeColors = (colorName?: string | null, index = 0) => {
         badgeBorder: 'border-emerald-500/25 dark:border-emerald-500/20',
         text: 'text-emerald-600 dark:text-emerald-400',
         glow: 'shadow-sm',
-        cardBorder: 'group-hover/item:border-emerald-500/20 dark:group-hover/item:border-emerald-500/15',
+        cardBorder: 'group-hover/item:border-emerald-500/20 dark:group-hover/item:border-white/[0.06]',
         tagBg: 'bg-emerald-500/[0.06] text-emerald-700 dark:text-emerald-300 border-emerald-500/15',
         lineColor: '#10B981',
       };
@@ -216,7 +216,7 @@ const TimelineNodeCard = ({ item, theme, isRtl, alignToSpineEnd }: TimelineNodeC
 
   const badgeElement = (
     <div
-      className={`relative flex-shrink-0 w-12 h-12 rounded-full border-2 ${theme.badgeBorder} ${theme.badgeBg} flex items-center justify-center transition-all duration-300 group-hover/item:scale-105 bg-background backdrop-blur-md shadow-sm`}
+      className={`relative flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 ${theme.badgeBorder} ${theme.badgeBg} flex items-center justify-center transition-all duration-300 group-hover/item:scale-105 bg-background backdrop-blur-md shadow-sm`}
     >
       <div
         className="absolute inset-1 rounded-full border border-dashed opacity-30 group-hover/item:opacity-45 group-hover/item:rotate-45 transition-all duration-700 ease-out"
@@ -231,7 +231,7 @@ const TimelineNodeCard = ({ item, theme, isRtl, alignToSpineEnd }: TimelineNodeC
   const yearElement = (
     <div className={`flex flex-col ${alignToSpineEnd ? 'items-end' : 'items-start'}`}>
       <div
-        className="text-2xl md:text-3xl font-extrabold tracking-tight font-mono leading-none flex items-center gap-1.5"
+        className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight font-mono leading-none flex items-center gap-1.5"
         style={{ color: theme.accent }}
       >
         <span dir="ltr">{displayStart}</span>
@@ -270,11 +270,11 @@ const TimelineNodeCard = ({ item, theme, isRtl, alignToSpineEnd }: TimelineNodeC
 
       {/* Experience Content Card */}
       <SpotlightCard
-        spotlightColor={`rgba(${theme.accentRgb}, 0.03)`}
-        darkSpotlightColor={`rgba(${theme.accentRgb}, 0.01)`}
-        size={220}
-        darkSize={160}
-        className={`relative w-full p-5 sm:p-6 rounded-xl bg-card/70 dark:bg-white/[0.03] backdrop-blur-xl border border-border/70 ${theme.cardBorder} transition-all duration-300 ease-out shadow-sm group-hover/item:-translate-y-0.5 text-start`}
+        spotlightColor="rgba(0, 0, 0, 0.02)"
+        darkSpotlightColor="rgba(255, 255, 255, 0.007)"
+        size={340}
+        darkSize={560}
+        className={`relative w-full p-5 sm:p-6 rounded-xl bg-white/95 dark:bg-zinc-900/60 backdrop-blur-xl border border-zinc-200/90 dark:border-white/[0.08] shadow-[0_1px_2px_rgba(0,0,0,0.03),0_8px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset,0_16px_32px_-12px_rgba(0,0,0,0.4)] hover:border-zinc-300 dark:hover:border-white/[0.18] transition-all duration-300 ease-out group-hover/item:-translate-y-0.5 text-start`}
       >
         {/* Role / Position Title */}
         <h3 className="text-lg md:text-xl font-bold tracking-tight text-foreground relative z-10">
@@ -344,8 +344,8 @@ const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
   const particleTop = useTransform(smoothProgress, (val) => `${Math.max(0, Math.min(1, val)) * 100}%`);
 
   const spinePositionClass = isRtl
-    ? 'right-6 sm:right-8 md:right-1/2 translate-x-1/2'
-    : 'left-6 sm:left-8 md:left-1/2 -translate-x-1/2';
+    ? 'right-5 sm:right-7 md:right-1/2 translate-x-1/2'
+    : 'left-5 sm:left-7 md:left-1/2 -translate-x-1/2';
 
   return (
     <div ref={containerRef} className="relative w-full py-4 max-w-5xl mx-auto">
@@ -460,7 +460,7 @@ const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
 
                   {/* ── Horizontal Branching Connector Line (Mobile) ── */}
                   <div
-                    className={`md:hidden flex items-center absolute top-1/2 -translate-y-1/2 h-[2px] w-[26px] pointer-events-none ${
+                    className={`md:hidden flex items-center absolute top-1/2 -translate-y-1/2 h-[2px] w-[20px] sm:w-[26px] pointer-events-none ${
                       isRtl ? 'right-full' : 'left-full'
                     }`}
                   >
@@ -496,7 +496,7 @@ const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
                 </div>
 
                 {/* ─── Second Column (Inline-End of Spine, & All Items on Mobile) ── */}
-                <div className="w-full ps-14 sm:ps-16 md:ps-12 lg:ps-14 md:w-1/2 flex justify-start">
+                <div className="w-full ps-11 sm:ps-15 md:ps-12 lg:ps-14 md:w-1/2 flex justify-start">
                   <div className={`w-full ${!isRightSide ? 'md:hidden' : ''}`}>
                     <TimelineNodeCard
                       item={item}

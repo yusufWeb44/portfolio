@@ -78,18 +78,18 @@ export const ServiceCard = ({
     ? `${whatsappBaseUrl}${whatsappBaseUrl.includes('?') ? '&' : '?'}text=${inquiryMsg}`
     : `https://wa.me/?text=${inquiryMsg}`;
 
-  // Crisp, high-contrast solid card surface with zero blur filter
-  const cardBg = "bg-white dark:bg-[#121417]";
+  // Layered surface matching reviews card architecture
+  const cardBg = "bg-white/95 dark:bg-zinc-900/60 backdrop-blur-xl";
 
   return (
     <div className="h-full">
       <SpotlightCard
         spotlightColor="rgba(0, 0, 0, 0.02)"
-        darkSpotlightColor="rgba(255, 255, 255, 0.03)"
-        size={280}
-        darkSize={200}
+        darkSpotlightColor="rgba(255, 255, 255, 0.007)"
+        size={360}
+        darkSize={560}
         className={cn(
-          "group relative flex h-[340px] sm:h-[360px] w-full flex-col justify-between overflow-hidden rounded-xl sm:rounded-2xl p-5 sm:p-6 border border-slate-200/90 dark:border-white/[0.09] shadow-xs hover:border-slate-300 dark:hover:border-white/20 hover:shadow-lg dark:hover:shadow-[0_12px_40px_rgba(0,0,0,0.6)] transition-all duration-300 select-none",
+          "group relative flex h-[315px] sm:h-[345px] lg:h-[360px] w-full flex-col justify-between overflow-hidden rounded-xl sm:rounded-2xl p-5 sm:p-6 border border-zinc-200/90 dark:border-white/[0.08] shadow-[0_1px_2px_rgba(0,0,0,0.03),0_8px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset,0_16px_32px_-12px_rgba(0,0,0,0.4)] hover:border-zinc-300 dark:hover:border-white/[0.18] transition-all duration-300 select-none",
           cardBg
         )}
       >
@@ -202,7 +202,7 @@ export const ServiceCarousel = ({
       className="relative w-full overflow-x-clip"
       style={{ height: trackHeight }}
     >
-      <div className="sticky top-0 h-screen w-full flex flex-col justify-start pt-[68px] sm:pt-[74px] pb-4 overflow-x-clip overflow-y-clip [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="sticky top-0 h-[100dvh] lg:h-screen w-full flex flex-col justify-start pt-[68px] sm:pt-[74px] pb-4 overflow-x-clip overflow-y-clip [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {/* Optional Header slot (Title + Subtitle) pinned inside the sticky viewport */}
         {header && (
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 shrink-0 mb-2 sm:mb-3">
@@ -224,7 +224,7 @@ export const ServiceCarousel = ({
             {services.map((service, index) => (
               <div
                 key={service.id || index}
-                className="w-[280px] sm:w-[320px] lg:w-[350px] shrink-0"
+                className="w-[270px] sm:w-[310px] lg:w-[350px] shrink-0"
               >
                 <ServiceCard
                   service={service}

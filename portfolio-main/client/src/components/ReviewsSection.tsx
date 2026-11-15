@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Quote } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -92,6 +92,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
   const [currentIndex, setCurrentIndex] = useState(batchSize || 0);
   const [isTransitionEnabled, setIsTransitionEnabled] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
+  const touchStartXRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (batchSize > 0) {
@@ -158,8 +159,8 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
     <section id="reviews" className="scroll-mt-24 pt-12 sm:pt-16 md:pt-20 pb-16 sm:pb-20 relative w-full overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* ── Section Header (Title, Subtitle & Navigation Controls) ── */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 sm:mb-16">
+        {/* ── Section Header (Title & Subtitle) ── */}
+        <div className="mb-8 sm:mb-12">
           <FadeIn distance={14}>
             <div className="space-y-2">
               <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[2.6rem] font-extrabold tracking-tight text-foreground leading-[1.15]">
@@ -181,36 +182,61 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
               </div>
             </div>
           </FadeIn>
-
-          {/* Navigation Arrows (Prev / Next) */}
-          {activeReviews.length > 1 && (
-            <div className="flex items-center gap-2.5 shrink-0 self-start md:self-end">
-              <button
-                type="button"
-                onClick={handlePrev}
-                aria-label="Previous review"
-                className="w-10 h-10 rounded-full border border-border/80 bg-card/80 hover:bg-accent/80 active:scale-95 text-foreground flex items-center justify-center transition-all duration-200 shadow-sm hover:border-foreground/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
-              >
-                <ChevronLeft size={18} strokeWidth={2} className="rtl:rotate-180" />
-              </button>
-              <button
-                type="button"
-                onClick={handleNext}
-                aria-label="Next review"
-                className="w-10 h-10 rounded-full border border-border/80 bg-card/80 hover:bg-accent/80 active:scale-95 text-foreground flex items-center justify-center transition-all duration-200 shadow-sm hover:border-foreground/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
-              >
-                <ChevronRight size={18} strokeWidth={2} className="rtl:rotate-180" />
-              </button>
-            </div>
-          )}
         </div>
 
-        {/* ── Continuous Carousel Slider Viewport ── */}
-        <div
-          className="relative w-full pt-12 pb-4 overflow-hidden"
-          onMouseEnter={() => setIsPaused(true)}
-          onMouseLeave={() => setIsPaused(false)}
-        >
+        {/* ── Continuous Carousel Slider Area with Side Navigation Arrows ── */}
+        <div className="relative w-full">
+          {/* Side Navigation Arrow: Left (Balanced positioning: neither touching cards nor page edges) */}
+          {activeReviews.length > 1 && (
+            <button
+              type="button"
+              onClick={isAr ? handleNext : handlePrev}
+              aria-label={isAr ? "التالي" : "Previous review"}
+              className="absolute -left-2 sm:-left-5 md:-left-6 lg:-left-7 xl:-left-8 top-[calc(50%+14px)] -translate-y-1/2 z-30 w-7 h-7 rounded-full border border-zinc-200/90 dark:border-white/[0.12] bg-white/95 dark:bg-zinc-900/90 backdrop-blur-md hover:bg-white dark:hover:bg-zinc-800 text-foreground flex items-center justify-center transition-all duration-200 shadow-md hover:shadow-lg dark:shadow-[0_4px_20px_rgba(0,0,0,0.5)] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 cursor-pointer"
+            >
+              <ChevronLeft size={14} strokeWidth={2.2} />
+            </button>
+          )}
+
+          {/* Side Navigation Arrow: Right (Balanced positioning: neither touching cards nor page edges) */}
+          {activeReviews.length > 1 && (
+            <button
+              type="button"
+              onClick={isAr ? handlePrev : handleNext}
+              aria-label={isAr ? "السابق" : "Next review"}
+              className="absolute -right-2 sm:-right-5 md:-right-6 lg:-right-7 xl:-right-8 top-[calc(50%+14px)] -translate-y-1/2 z-30 w-7 h-7 rounded-full border border-zinc-200/90 dark:border-white/[0.12] bg-white/95 dark:bg-zinc-900/90 backdrop-blur-md hover:bg-white dark:hover:bg-zinc-800 text-foreground flex items-center justify-center transition-all duration-200 shadow-md hover:shadow-lg dark:shadow-[0_4px_20px_rgba(0,0,0,0.5)] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 cursor-pointer"
+            >
+              <ChevronRight size={14} strokeWidth={2.2} />
+            </button>
+          )}
+
+          {/* ── Continuous Carousel Slider Viewport ── */}
+          <div
+            className="relative w-full pt-12 pb-4 overflow-hidden touch-pan-y"
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+            onTouchStart={(e) => {
+              setIsPaused(true);
+              if (e.touches.length === 1) {
+                touchStartXRef.current = e.touches[0].clientX;
+              }
+            }}
+            onTouchEnd={(e) => {
+              setIsPaused(false);
+              if (touchStartXRef.current === null || activeReviews.length <= 1) return;
+              const deltaX = e.changedTouches[0].clientX - touchStartXRef.current;
+              touchStartXRef.current = null;
+              if (Math.abs(deltaX) > 40) {
+                if (deltaX < 0) {
+                  // Swiped left
+                  isAr ? handlePrev() : handleNext();
+                } else {
+                  // Swiped right
+                  isAr ? handleNext() : handlePrev();
+                }
+              }
+            }}
+          >
           <motion.div
             className="flex items-stretch"
             animate={{
@@ -329,6 +355,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
             })}
           </motion.div>
         </div>
+      </div>
 
         {/* ── Dynamic Pagination Dots Indicator ── */}
         {activeReviews.length > 1 && (
