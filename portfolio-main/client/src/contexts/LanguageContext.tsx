@@ -106,7 +106,7 @@ export const defaultEnTranslations: Record<string, string> = {
   "projects.filterFeatured": "Featured",
   "projects.searchPlaceholder": "Search projects by title, stack, or category...",
   "projects.noProjects": "No projects found matching your search.",
-  "projects.backToProjects": "Back to all projects",
+  "projects.backToProjects": "Back to Portfolio",
   "projects.projectDetails": "Project Overview",
   "projects.challenge": "The Challenge",
   "projects.solution": "The Solution",

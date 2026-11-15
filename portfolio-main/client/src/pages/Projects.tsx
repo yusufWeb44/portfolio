@@ -2,7 +2,6 @@ import { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
-import { buttonVariants, cn } from '../components/ui/Button';
 import { useLocation, Link } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -186,38 +185,34 @@ const ProjectShowcaseItem = ({
             )}
           </div>
 
-          {/* 6. CTA Buttons */}
+          {/* 6. Action CTA Buttons */}
           {(project.liveDemo || project.github) && (
-            <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 pt-2">
-              {project.liveDemo && (
-                <a
-                  href={project.liveDemo}
-                  target="_blank"
-                  rel="noreferrer"
-                  className={cn(
-                    buttonVariants({ variant: 'primary', size: 'sm' }),
-                    "font-bold tracking-wide"
-                  )}
-                >
-                  <span>{t('projects.liveDemo', isAr ? 'معاينة حية' : 'Live Demo')}</span>
-                  <ExternalLink size={14} strokeWidth={1.5} />
-                </a>
-              )}
+            <div className="pt-2 sm:pt-3">
+              <div className="flex items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
+                {project.liveDemo && (
+                  <a
+                    href={project.liveDemo}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 h-11 sm:h-10 px-4 sm:px-5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs sm:text-[13px] tracking-wide shadow-sm hover:shadow-[0_8px_20px_rgba(16,185,129,0.25)] dark:hover:shadow-[0_6px_18px_rgba(16,185,129,0.18)] transition-all duration-200 active:scale-[0.98] group cursor-pointer"
+                  >
+                    <span>{isAr ? 'معاينة حية' : t('projects.liveDemo', 'Live Demo')}</span>
+                    <ExternalLink size={15} strokeWidth={1.75} className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                  </a>
+                )}
 
-              {project.github && (
-                <a
-                  href={project.github}
-                  target="_blank"
-                  rel="noreferrer"
-                  className={cn(
-                    buttonVariants({ variant: 'secondary', size: 'sm' }),
-                    "font-bold tracking-wide"
-                  )}
-                >
-                  <Code2 size={14} strokeWidth={1.5} />
-                  <span>{t('projects.sourceCode', isAr ? 'الكود المصدري' : 'Source Code')}</span>
-                </a>
-              )}
+                {project.github && (
+                  <a
+                    href={project.github}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 h-11 sm:h-10 px-4 sm:px-5 rounded-xl bg-card/90 dark:bg-white/[0.05] hover:bg-card dark:hover:bg-white/[0.09] border border-border/80 dark:border-white/10 hover:border-emerald-500/50 dark:hover:border-emerald-500/40 text-foreground dark:text-zinc-200 hover:text-emerald-500 dark:hover:text-emerald-400 font-semibold text-xs sm:text-[13px] tracking-wide backdrop-blur-md shadow-xs transition-all duration-200 active:scale-[0.98] group cursor-pointer"
+                  >
+                    <Code2 size={15} strokeWidth={1.75} className="transition-transform duration-200 group-hover:scale-110" />
+                    <span>{isAr ? 'الكود المصدري' : t('projects.sourceCode', 'Source Code')}</span>
+                  </a>
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -276,14 +271,14 @@ const ProjectShowcaseItem = ({
                 setIsLightboxOpen(true);
               }}
               aria-label="View Fullscreen"
-              className="absolute top-3 left-3 z-20 p-1.5 rounded-md bg-black/60 hover:bg-black/85 backdrop-blur-md border border-white/10 text-white/80 hover:text-white transition-all duration-200 active:scale-95 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 cursor-pointer shadow-md"
+              className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-20 w-8 h-8 rounded-lg bg-black/60 hover:bg-black/85 backdrop-blur-md border border-white/15 text-white/90 hover:text-white flex items-center justify-center transition-all duration-200 active:scale-95 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 cursor-pointer shadow-md"
             >
-              <Maximize2 size={13} strokeWidth={1.5} />
+              <Maximize2 size={14} strokeWidth={1.5} />
             </button>
 
             {/* Image Counter Badge (Only if multiple images) */}
             {displayImages.length > 1 && (
-              <div className="absolute top-3 right-3 z-20 px-2.5 py-0.5 rounded-md bg-black/70 backdrop-blur-md border border-white/10 text-white font-mono text-[10px] font-bold tracking-widest select-none pointer-events-none">
+              <div className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 z-20 px-2.5 py-1 rounded-lg bg-black/70 backdrop-blur-md border border-white/15 text-white font-mono text-[10px] sm:text-[10.5px] font-bold tracking-widest select-none pointer-events-none">
                 {String(activeImageIndex + 1).padStart(2, '0')} / {String(displayImages.length).padStart(2, '0')}
               </div>
             )}
@@ -294,7 +289,7 @@ const ProjectShowcaseItem = ({
                 type="button"
                 onClick={handlePrevImage}
                 aria-label="Previous Image"
-                className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/60 hover:bg-black/85 backdrop-blur-md border border-white/15 text-white hover:text-emerald-400 hover:border-emerald-500/50 flex items-center justify-center transition-all duration-200 active:scale-95 cursor-pointer shadow-md"
+                className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/70 hover:bg-black/90 backdrop-blur-md border border-white/20 text-white hover:text-emerald-400 hover:border-emerald-500/50 flex items-center justify-center transition-all duration-200 active:scale-90 cursor-pointer shadow-md"
               >
                 <ChevronLeft size={16} strokeWidth={1.5} className="rtl:rotate-180" />
               </button>
@@ -306,7 +301,7 @@ const ProjectShowcaseItem = ({
                 type="button"
                 onClick={handleNextImage}
                 aria-label="Next Image"
-                className="absolute right-2.5 sm:right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/60 hover:bg-black/85 backdrop-blur-md border border-white/15 text-white hover:text-emerald-400 hover:border-emerald-500/50 flex items-center justify-center transition-all duration-200 active:scale-95 cursor-pointer shadow-md"
+                className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/70 hover:bg-black/90 backdrop-blur-md border border-white/20 text-white hover:text-emerald-400 hover:border-emerald-500/50 flex items-center justify-center transition-all duration-200 active:scale-90 cursor-pointer shadow-md"
               >
                 <ChevronRight size={16} strokeWidth={1.5} className="rtl:rotate-180" />
               </button>
@@ -516,13 +511,10 @@ const Projects = () => {
             <div className="mb-5 sm:mb-6">
               <Link
                 to="/"
-                className={cn(
-                  buttonVariants({ variant: 'secondary', size: 'sm' }),
-                  "gap-2 font-mono text-xs uppercase tracking-wider"
-                )}
+                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-[13px] font-mono uppercase tracking-wider border border-border/80 dark:border-white/10 bg-white/50 dark:bg-white/[0.04] hover:bg-white/80 dark:hover:bg-white/[0.08] hover:border-emerald-500/50 text-foreground dark:text-zinc-200 transition-all duration-200 cursor-pointer shadow-xs active:scale-[0.98] backdrop-blur-md group"
               >
-                <ArrowLeft size={14} strokeWidth={1.5} className="rtl:rotate-180" />
-                <span>{t('projects.backToProjects', isAr ? 'العودة للرئيسية' : 'Back to Portfolio')}</span>
+                <ArrowLeft size={14} strokeWidth={1.5} className="transition-transform duration-200 group-hover:-translate-x-0.5 rtl:group-hover:translate-x-0.5 rtl:rotate-180 text-muted-foreground group-hover:text-foreground" />
+                <span>{isAr ? 'العودة للرئيسية' : 'Back to Portfolio'}</span>
               </Link>
             </div>
 

@@ -43,7 +43,7 @@ export const LanguageSwitcher = () => {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg bg-white/50 hover:bg-white/75 dark:bg-white/[0.04] dark:hover:bg-white/[0.07] border border-slate-900/[0.07] hover:border-slate-900/[0.14] dark:border-white/[0.08] dark:hover:border-white/[0.15] text-foreground dark:text-zinc-300 dark:hover:text-white transition-all duration-200 cursor-pointer shadow-xs backdrop-blur-md text-xs sm:text-sm font-semibold select-none group"
+        className="h-10 px-3 sm:px-3.5 rounded-lg flex items-center gap-1.5 sm:gap-2 bg-white/50 hover:bg-white/75 dark:bg-white/[0.04] dark:hover:bg-white/[0.07] border border-slate-900/[0.07] hover:border-slate-900/[0.14] dark:border-white/[0.08] dark:hover:border-white/[0.15] text-foreground dark:text-zinc-300 dark:hover:text-white transition-all duration-200 cursor-pointer shadow-xs backdrop-blur-md text-xs sm:text-sm font-semibold select-none group shrink-0"
         aria-label="Select Language"
       >
         <Globe className="w-4 h-4 text-muted-foreground group-hover:text-foreground dark:group-hover:text-zinc-200 transition-colors shrink-0" />

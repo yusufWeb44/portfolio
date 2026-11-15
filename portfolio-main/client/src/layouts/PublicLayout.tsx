@@ -1,7 +1,7 @@
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import {
-  Menu, X, Mail, Sun, Moon,
+  Menu, X, Mail, Sun, Moon, ExternalLink,
   ChevronRight, User, FolderKanban, Terminal, Briefcase, Wrench, HelpCircle, Layers, MessageSquareQuote
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -14,6 +14,16 @@ import Footer from '../components/Footer';
 import { applyThemePalette, getThemeAuras } from '../utils/themeEngine';
 import SplashScreen from '../components/ui/SplashScreen';
 import SmoothScrollProvider from '../components/SmoothScroll';
+import {
+  GithubIcon,
+  LinkedinIcon,
+  InstagramIcon,
+  FacebookIcon,
+  TwitterXIcon,
+  WhatsappIcon,
+  TelegramIcon
+} from '../components/ui/BrandIcons';
+import { SocialButton } from '../components/ui/SocialButton';
 
 const PublicLayout = () => {
   const { t, currentLang, currentDirection } = useLanguage();
@@ -39,6 +49,7 @@ const PublicLayout = () => {
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState<string>('');
   const [socialLinks, setSocialLinks] = useState<{ platform: string; url: string }[]>([]);
+  const [footerSocials, setFooterSocials] = useState<{ platform: string; url: string; isEnabled?: boolean }[]>([]);
   const [settings, setSettings] = useState<any>(() => {
     try {
       const cached = localStorage.getItem('portfolio_settings');
@@ -51,6 +62,47 @@ const PublicLayout = () => {
       return null;
     }
   });
+
+  const getPlatformIcon = (platform: string) => {
+    const p = platform.toLowerCase();
+    if (p.includes('git')) return <GithubIcon size={16} />;
+    if (p.includes('linkedin')) return <LinkedinIcon size={16} />;
+    if (p.includes('insta')) return <InstagramIcon size={16} />;
+    if (p.includes('face')) return <FacebookIcon size={16} />;
+    if (p.includes('twitter') || p === 'x') return <TwitterXIcon size={16} />;
+    if (p.includes('whats')) return <WhatsappIcon size={16} />;
+    if (p.includes('tele')) return <TelegramIcon size={16} />;
+    if (p.includes('mail') || p.includes('email')) return <Mail size={16} />;
+    return <ExternalLink size={16} />;
+  };
+
+  const defaultSocials = [
+    { platform: 'GitHub', url: 'https://github.com' },
+    { platform: 'LinkedIn', url: 'https://linkedin.com' },
+    { platform: 'Instagram', url: 'https://instagram.com' },
+    { platform: 'X', url: 'https://x.com' },
+  ];
+
+  const resolvedSocials = useMemo(() => {
+    if (footerSocials && footerSocials.length > 0) {
+      return footerSocials;
+    }
+    if (settings?.customSocialLinks) {
+      try {
+        const parsed = typeof settings.customSocialLinks === 'string'
+          ? JSON.parse(settings.customSocialLinks)
+          : settings.customSocialLinks;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const enabled = parsed.filter((s: any) => s.isEnabled !== false);
+          if (enabled.length > 0) return enabled;
+        }
+      } catch {}
+    }
+    if (socialLinks && socialLinks.length > 0) {
+      return socialLinks;
+    }
+    return defaultSocials;
+  }, [footerSocials, settings?.customSocialLinks, socialLinks]);
   const location = useLocation();
   const navigate = useNavigate();
   const isNavigatingRef = useRef(false);
@@ -317,6 +369,22 @@ const PublicLayout = () => {
 
   useEffect(() => {
     api.get('/social-links').then(res => setSocialLinks(res.data.data)).catch(() => { });
+    const fetchFooter = () => {
+      api.get('/footer').then(res => {
+        const raw = res.data?.data?.customSocialLinks;
+        if (raw) {
+          try {
+            const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+            if (Array.isArray(parsed)) {
+              const enabled = parsed.filter((s: any) => s.isEnabled !== false);
+              if (enabled.length > 0) setFooterSocials(enabled);
+            }
+          } catch {}
+        }
+      }).catch(() => {});
+    };
+    fetchFooter();
+
     const fetchSettings = () => {
       api.get('/settings').then(res => {
         const data = res.data.data;
@@ -332,7 +400,11 @@ const PublicLayout = () => {
     fetchSettings();
 
     window.addEventListener('portfolio_settings_updated', fetchSettings);
-    return () => window.removeEventListener('portfolio_settings_updated', fetchSettings);
+    window.addEventListener('portfolio_footer_updated', fetchFooter);
+    return () => {
+      window.removeEventListener('portfolio_settings_updated', fetchSettings);
+      window.removeEventListener('portfolio_footer_updated', fetchFooter);
+    };
   }, []);
 
   useEffect(() => {
@@ -553,9 +625,9 @@ const PublicLayout = () => {
                   aria-label="Toggle Theme"
                 >
                   {isDark ? (
-                    <Sun className="w-4 h-4 text-amber-400 group-hover:rotate-45 transition-transform duration-300" />
+                    <Sun className="w-4 h-4 text-zinc-700 dark:text-zinc-200 group-hover:rotate-45 transition-transform duration-300" />
                   ) : (
-                    <Moon className="w-4 h-4 text-emerald-500 group-hover:-rotate-12 transition-transform duration-300" />
+                    <Moon className="w-4 h-4 text-zinc-700 dark:text-zinc-200 group-hover:-rotate-12 transition-transform duration-300" />
                   )}
                 </button>
 
@@ -574,9 +646,9 @@ const PublicLayout = () => {
                   aria-label="Toggle Theme"
                 >
                   {isDark ? (
-                    <Sun className="w-4 h-4 text-amber-400" />
+                    <Sun className="w-4 h-4 text-zinc-700 dark:text-zinc-200" />
                   ) : (
-                    <Moon className="w-4 h-4 text-emerald-500" />
+                    <Moon className="w-4 h-4 text-zinc-700 dark:text-zinc-200" />
                   )}
                 </button>
 
@@ -587,7 +659,7 @@ const PublicLayout = () => {
                   aria-label="Open menu"
                   aria-expanded={mobileMenuOpen}
                 >
-                  <Menu className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+                  <Menu className="w-5 h-5 text-zinc-700 dark:text-zinc-200" />
                 </button>
               </div>
             </div>
@@ -616,7 +688,7 @@ const PublicLayout = () => {
                 exit={{ x: currentDirection === 'rtl' ? '100%' : '-100%' }}
                 transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                 className={cn(
-                  "fixed inset-y-0 top-0 bottom-0 z-[9999] w-[82vw] max-w-[320px] sm:max-w-[360px] h-[100dvh] bg-background dark:bg-slate-950 text-foreground shadow-2xl flex flex-col lg:hidden",
+                  "fixed inset-y-0 top-0 bottom-0 z-[9999] w-[82vw] max-w-[320px] sm:max-w-[360px] h-[100dvh] bg-white dark:bg-zinc-950 text-foreground shadow-2xl flex flex-col lg:hidden",
                   currentDirection === 'rtl'
                     ? "right-0 border-s border-border/70 dark:border-white/10"
                     : "left-0 border-e border-border/70 dark:border-white/10"
@@ -655,36 +727,8 @@ const PublicLayout = () => {
 
                 {/* Scrollable Body */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar overscroll-contain">
-
-
-                  {/* Theme Toggle - Clean Row */}
-                  <div className="flex items-center justify-between py-1 text-xs sm:text-[13px] font-medium text-muted-foreground border-b border-border/70 dark:border-white/10 pb-3">
-                    <span className="flex items-center gap-2">
-                      {isDark ? (
-                        <Moon className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
-                      ) : (
-                        <Sun className="w-4 h-4 text-amber-500" />
-                      )}
-                      <span>{isAr ? (isDark ? 'المظهر الداكن' : 'المظهر الفاتح') : (isDark ? 'Dark Theme' : 'Light Theme')}</span>
-                    </span>
-
-                    <button
-                      type="button"
-                      onClick={toggleTheme}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/70 hover:border-emerald-500/50 text-xs font-semibold text-foreground transition-all cursor-pointer active:scale-95"
-                      title="Toggle theme"
-                    >
-                      <span>{isDark ? (isAr ? 'تفعيل الفاتح' : 'Light') : (isAr ? 'تفعيل الداكن' : 'Dark')}</span>
-                      {isDark ? (
-                        <Sun className="w-3.5 h-3.5 text-amber-400" />
-                      ) : (
-                        <Moon className="w-3.5 h-3.5 text-emerald-500" />
-                      )}
-                    </button>
-                  </div>
-
                   {/* Navigation Links - Clean list with active highlight */}
-                  <nav className="space-y-1 pt-1" aria-label="Sidebar Navigation">
+                  <nav className="space-y-1.5" aria-label="Sidebar Navigation">
                     {navLinks.map((item) => {
                       const isActive = activeSection === item.id;
                       const Icon = item.icon;
@@ -699,16 +743,16 @@ const PublicLayout = () => {
                             scrollToSection(item.id);
                           }}
                           className={cn(
-                            "w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-xs sm:text-[13.5px] font-semibold transition-all cursor-pointer bg-transparent border-none text-start active:scale-[0.99]",
+                            "w-full flex items-center justify-between px-4 py-3.5 rounded-xl text-[15px] sm:text-base font-semibold transition-all cursor-pointer bg-transparent border-none text-start active:scale-[0.99]",
                             isActive
                               ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 dark:bg-emerald-500/20 font-bold border border-emerald-500/30 dark:shadow-[0_0_12px_rgba(16,185,129,0.15)]"
                               : "text-muted-foreground hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.06]"
                           )}
                         >
-                          <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-3.5">
                             <Icon
                               className={cn(
-                                "w-4 h-4",
+                                "w-5 h-5 shrink-0",
                                 isActive ? "text-emerald-500 dark:text-emerald-400" : "text-muted-foreground"
                               )}
                             />
@@ -717,7 +761,7 @@ const PublicLayout = () => {
 
                           <ChevronRight
                             className={cn(
-                              "w-3.5 h-3.5 rtl:rotate-180 transition-transform",
+                              "w-4 h-4 rtl:rotate-180 transition-transform shrink-0",
                               isActive ? "text-emerald-500 dark:text-emerald-400" : "text-muted-foreground/60"
                             )}
                           />
@@ -725,18 +769,28 @@ const PublicLayout = () => {
                       );
                     })}
                   </nav>
+
+                  {/* Social Links Section (4 icons matching footer) */}
+                  <div className="pt-4 mt-2 border-t border-border/70 dark:border-white/10">
+                    <div className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground px-1 mb-2.5 font-semibold">
+                      {isAr ? 'روابط التواصل' : 'CONNECT'}
+                    </div>
+                    <div className="flex items-center gap-2.5 px-1 flex-wrap">
+                      {resolvedSocials.slice(0, 4).map((sl) => (
+                        <SocialButton
+                          key={sl.platform}
+                          href={sl.url}
+                          label={sl.platform}
+                          icon={getPlatformIcon(sl.platform)}
+                          size="sm"
+                        />
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
                 {/* Drawer Footer */}
-                <div className="p-3.5 border-t border-border/70 dark:border-white/10 text-center text-[11px] text-muted-foreground space-y-1 shrink-0">
-                  {settings?.email && (
-                    <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
-                      <Mail className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
-                      <a href={`mailto:${settings.email}`} className="hover:text-foreground transition-colors" dir="ltr">
-                        {settings.email}
-                      </a>
-                    </div>
-                  )}
+                <div className="p-3.5 border-t border-border/70 dark:border-white/10 text-center text-[11px] text-muted-foreground shrink-0">
                   <p className="text-[10px] text-muted-foreground/75">
                     © {new Date().getFullYear()} {brandName}. {isAr ? 'جميع الحقوق محفوظة' : 'All rights reserved'}
                   </p>
