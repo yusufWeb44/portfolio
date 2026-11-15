@@ -127,9 +127,25 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
   // totalPeriod based on exact angleStep so spacing between adjacent cards never gets compressed
   const totalPeriod = wheelItems.length * layout.angleStep;
 
-  // Continuous auto-rotation loop (never pauses on hover)
+  // Track visibility with IntersectionObserver so continuous loop only runs when in viewport
+  const carouselContainerRef = useRef<HTMLDivElement>(null);
+  const [isInView, setIsInView] = useState(false);
+
   useEffect(() => {
-    if (wheelItems.length === 0) return;
+    if (!carouselContainerRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInView(entry.isIntersecting);
+      },
+      { rootMargin: '100px 0px' }
+    );
+    observer.observe(carouselContainerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  // Continuous auto-rotation loop (only runs when visible in viewport)
+  useEffect(() => {
+    if (wheelItems.length === 0 || !isInView) return;
 
     let lastTime = performance.now();
 
@@ -158,7 +174,7 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
     return () => {
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     };
-  }, [wheelItems.length, totalPeriod]);
+  }, [wheelItems.length, totalPeriod, isInView]);
 
   // Global drag cancellation and modal synchronization
   useEffect(() => {
@@ -272,6 +288,7 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
 
       {/* ── 3D Curved Panoramic Stage ── */}
       <div 
+        ref={carouselContainerRef}
         style={{ 
           height: `${layout.containerHeight}px`,
           marginTop: `-${layout.bleed}px`,

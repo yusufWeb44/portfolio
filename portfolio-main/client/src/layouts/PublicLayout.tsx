@@ -468,15 +468,25 @@ const PublicLayout = () => {
           )}
 
           {enableGlow && (
-            <div
-              className="absolute inset-0 overflow-hidden opacity-35 dark:opacity-40 pointer-events-none select-none"
-              style={{ contain: 'strict', transform: 'translateZ(0)' }}
-            >
-              <div className={`absolute -top-[5%] -right-[5%] w-[460px] h-[460px] rounded-full bg-gradient-to-br ${auras.orb1} blur-2xl transform-gpu`} />
-              <div className={`absolute top-[35%] -left-[10%] w-[420px] h-[420px] rounded-full bg-gradient-to-tr ${auras.orb2} blur-2xl transform-gpu`} />
-              <div className={`absolute top-[70%] -right-[5%] w-[460px] h-[460px] rounded-full bg-gradient-to-tl ${auras.orb3} blur-2xl transform-gpu`} />
-              <div className={`absolute -bottom-[5%] left-1/2 -translate-x-1/2 w-[520px] h-[300px] rounded-full ${auras.orb4} blur-2xl transform-gpu`} />
-            </div>
+            <>
+              {/* Desktop/Tablet rich multi-layer glowing orbs with blur-2xl */}
+              <div
+                className="hidden md:block absolute inset-0 overflow-hidden opacity-35 dark:opacity-40 pointer-events-none select-none"
+                style={{ contain: 'strict', transform: 'translateZ(0)' }}
+              >
+                <div className={`absolute -top-[5%] -right-[5%] w-[460px] h-[460px] rounded-full bg-gradient-to-br ${auras.orb1} blur-2xl transform-gpu`} />
+                <div className={`absolute top-[35%] -left-[10%] w-[420px] h-[420px] rounded-full bg-gradient-to-tr ${auras.orb2} blur-2xl transform-gpu`} />
+                <div className={`absolute top-[70%] -right-[5%] w-[460px] h-[460px] rounded-full bg-gradient-to-tl ${auras.orb3} blur-2xl transform-gpu`} />
+                <div className={`absolute -bottom-[5%] left-1/2 -translate-x-1/2 w-[520px] h-[300px] rounded-full ${auras.orb4} blur-2xl transform-gpu`} />
+              </div>
+              {/* Mobile lightweight ambient glow (pure CSS radial gradients, zero live Gaussian blur filters to save GPU) */}
+              <div
+                className="md:hidden absolute inset-0 overflow-hidden opacity-30 dark:opacity-35 pointer-events-none select-none"
+                style={{
+                  backgroundImage: 'radial-gradient(circle 300px at 85% 10%, rgba(16,185,129,0.18), transparent 70%), radial-gradient(circle 280px at 15% 50%, rgba(14,165,233,0.15), transparent 70%), radial-gradient(circle 320px at 50% 90%, rgba(16,185,129,0.16), transparent 70%)',
+                }}
+              />
+            </>
           )}
         </div>
 

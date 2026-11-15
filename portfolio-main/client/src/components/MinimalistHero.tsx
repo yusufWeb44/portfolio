@@ -153,6 +153,9 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
 
   const [startMorph, setStartMorph] = useState(false);
   useEffect(() => {
+    // Skip continuous SVG path string morphing on mobile touch devices to keep mobile CPU completely free
+    const isMobile = typeof window !== 'undefined' && (window.innerWidth < 1024 || window.matchMedia('(pointer: coarse)').matches);
+    if (isMobile) return;
     const timer = setTimeout(() => setStartMorph(true), 1200);
     return () => clearTimeout(timer);
   }, []);
@@ -270,15 +273,15 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
 
             {/* ── Mobile-only: typewriter above image ── */}
             {words.length > 0 && (
-              <div className="lg:hidden w-full flex flex-col mb-2.5 sm:mb-4 px-1">
+              <div className="lg:hidden w-full flex flex-col mb-1 sm:mb-2.5 px-1">
                 <motion.div
                   initial={{ opacity: 0, y: -8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: 0.05 }}
-                  className="flex justify-center items-center min-h-[2.8rem] sm:min-h-[3.5rem]"
+                  className="flex justify-center items-center min-h-[2.4rem] sm:min-h-[3rem]"
                 >
                   <h2
-                    className="text-lg sm:text-2xl font-extrabold tracking-tight rtl:tracking-normal uppercase rtl:normal-case text-foreground text-center leading-[1.4] rtl:leading-[1.5]"
+                    className="text-lg sm:text-2xl font-extrabold tracking-tight rtl:tracking-normal uppercase rtl:normal-case text-foreground text-center leading-[1.35] rtl:leading-[1.45]"
                     dir="auto"
                     style={{
                       overflowWrap: 'break-word',
@@ -298,9 +301,9 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
             )}
 
             {/* Blob + Profile Image */}
-            <div className="relative flex justify-center items-center min-h-[285px] sm:min-h-[355px] md:min-h-[385px] lg:min-h-[500px] w-full select-none pointer-events-none">
+            <div className="relative flex justify-center items-center min-h-[350px] sm:min-h-[390px] md:min-h-[420px] lg:min-h-[500px] w-full select-none pointer-events-none">
               {/* Fluid Blob Backdrop — Enlarged to match reference photo, perfectly framing profile */}
-              <div className="absolute -top-4 sm:-top-6 md:-top-7 lg:-top-11 w-[255px] h-[255px] sm:w-[315px] sm:h-[315px] md:w-[345px] md:h-[345px] lg:w-[450px] lg:h-[450px] z-0 pointer-events-none select-none">
+              <div className="absolute -top-6 sm:-top-8 md:-top-9 lg:-top-11 w-[320px] h-[320px] sm:w-[360px] sm:h-[360px] md:w-[390px] md:h-[390px] lg:w-[450px] lg:h-[450px] z-0 pointer-events-none select-none">
                 <motion.div
                   initial={{ scale: 0.9, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
@@ -369,7 +372,7 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
                     WebkitUserSelect: 'none',
                     pointerEvents: 'none',
                   }}
-                  className="w-[215px] sm:w-[265px] md:w-[290px] lg:w-[420px] h-auto object-contain scale-[1.32] sm:scale-[1.38] md:scale-[1.42] lg:scale-[1.6] pointer-events-none select-none"
+                  className="w-[275px] sm:w-[315px] md:w-[340px] lg:w-[420px] h-auto object-contain scale-[1.54] sm:scale-[1.56] md:scale-[1.58] lg:scale-[1.6] pointer-events-none select-none"
                 />
               </motion.div>
             </div>

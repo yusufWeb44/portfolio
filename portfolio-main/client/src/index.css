@@ -134,6 +134,7 @@
     -moz-osx-font-smoothing: grayscale;
     scrollbar-width: none;
     -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
   }
 
   html::-webkit-scrollbar,

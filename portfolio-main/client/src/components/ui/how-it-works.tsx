@@ -7,13 +7,13 @@ import { SplitText, BlurText } from '../react-bits';
 /* ═══════════════════════════════════════════════════════════════════
    Pushpin SVG — 3D pinned head with punctured paper effect
    ═══════════════════════════════════════════════════════════════════ */
-const Pushpin = ({ color }: { color: string }) => {
+const Pushpin = ({ color, isMobile }: { color: string; isMobile?: boolean }) => {
   const safeId = color.replace(/[^a-zA-Z0-9]/g, '');
 
   return (
     <svg
-      width="38"
-      height="34"
+      width={isMobile ? "30" : "38"}
+      height={isMobile ? "26" : "34"}
       viewBox="0 0 38 34"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -21,10 +21,12 @@ const Pushpin = ({ color }: { color: string }) => {
       aria-hidden="true"
     >
       <defs>
-        {/* Soft shadow filter for realistic depth */}
-        <filter id={`shadow_${safeId}`} x="-40%" y="-40%" width="180%" height="180%">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="1.5" />
-        </filter>
+        {/* Soft shadow filter for realistic depth (desktop only to preserve high mobile scroll FPS) */}
+        {!isMobile && (
+          <filter id={`shadow_${safeId}`} x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="1.5" />
+          </filter>
+        )}
 
         {/* 3D Sphere Radial Gradient */}
         <radialGradient
@@ -79,7 +81,7 @@ const Pushpin = ({ color }: { color: string }) => {
         rx="9.5"
         ry="4"
         fill="rgba(0,0,0,0.35)"
-        filter={`url(#shadow_${safeId})`}
+        filter={isMobile ? undefined : `url(#shadow_${safeId})`}
       />
 
       {/* ── 4. 3D Pin Head (فقط رأس الدبوس ثلاثي الأبعاد) ── */}
@@ -151,7 +153,8 @@ const StickyNoteCard = ({
 }) => {
   const ref = useRef<HTMLDivElement>(null);
   const baseTilt = isRtl ? -step.tilt : step.tilt;
-  const tilt = isMobile ? baseTilt * 0.55 : baseTilt;
+  // On mobile: subtle tilt so vertical cards look naturally pinned without drifting
+  const tilt = isMobile ? baseTilt * 0.45 : baseTilt;
   const isVisualLeft = isRtl ? (step.side === 'right') : (step.side === 'left');
 
   const onRevealChangeRef = useRef(onRevealChange);
@@ -159,9 +162,11 @@ const StickyNoteCard = ({
     onRevealChangeRef.current = onRevealChange;
   });
 
-  // First card: driven by IntersectionObserver with expansive top margin so it never hides while reading subsequent cards
+  // On desktop: first card is driven by IntersectionObserver (subsequent cards by connector line)
+  // On mobile: connector lines are removed, so every card observes viewport entry to reveal
   useEffect(() => {
-    if (!isFirst || !ref.current) return;
+    if (!ref.current) return;
+    if (!isFirst && !isMobile) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -169,19 +174,18 @@ const StickyNoteCard = ({
       },
       {
         root: null,
-        rootMargin: '200000px 0px -22% 0px',
+        rootMargin: isMobile ? '200000px 0px -10% 0px' : '200000px 0px -22% 0px',
         threshold: 0,
       }
     );
 
     observer.observe(ref.current);
     return () => observer.disconnect();
-  }, [isFirst]);
+  }, [isFirst, isMobile]);
 
   // Realistic tactile paper & pushpin kinematics (pivoting from the top pushpin hole)
   const unpinnedSwing = tilt + (isVisualLeft ? -5.5 : 5.5);
   const unpinnedRotateY = isVisualLeft ? 7 : -7;
-  // Relative fan-out angles inside the already-tilted card (pivoting from the pushpin at 50% 22px)
   const stackBottomRotate = isRtl ? -1.8 : 1.8;
   const stackMiddleRotate = isRtl ? 1.1 : -1.1;
 
@@ -189,16 +193,19 @@ const StickyNoteCard = ({
     <div
       ref={ref}
       className="relative"
-      style={{ perspective: '1200px' }}
+      style={{
+        perspective: isMobile ? undefined : '1200px',
+        transform: 'translateZ(0)',
+      }}
     >
       <motion.div
         className="relative will-change-transform"
         initial={{
           opacity: 0,
-          y: -12,
+          y: -14,
           scale: 1.035,
-          rotateX: 18,
-          rotateY: unpinnedRotateY,
+          rotateX: isMobile ? 0 : 18,
+          rotateY: isMobile ? 0 : unpinnedRotateY,
           rotate: unpinnedSwing,
         }}
         animate={
@@ -215,58 +222,67 @@ const StickyNoteCard = ({
                 opacity: 0,
                 y: -10,
                 scale: 0.96,
-                rotateX: 16,
-                rotateY: -unpinnedRotateY * 0.8,
+                rotateX: isMobile ? 0 : 16,
+                rotateY: isMobile ? 0 : -unpinnedRotateY * 0.8,
                 rotate: tilt + (isVisualLeft ? 4.5 : -4.5),
               }
         }
         transition={
           isRevealed
-            ? {
-                opacity: { duration: 0.28, ease: [0.16, 1, 0.3, 1] },
-                y: { type: 'spring', stiffness: 190, damping: 20, mass: 0.75 },
-                scale: { type: 'spring', stiffness: 180, damping: 20, mass: 0.8 },
-                rotateX: { type: 'spring', stiffness: 170, damping: 17, mass: 0.8 },
-                rotateY: { type: 'spring', stiffness: 170, damping: 18, mass: 0.8 },
-                rotate: { type: 'spring', stiffness: 145, damping: 13, mass: 0.8 },
-              }
+            ? isMobile
+              ? {
+                  opacity: { duration: 0.22, ease: 'easeOut' },
+                  y: { type: 'spring', stiffness: 220, damping: 24, mass: 0.5 },
+                  scale: { type: 'spring', stiffness: 220, damping: 24, mass: 0.5 },
+                  rotate: { type: 'spring', stiffness: 180, damping: 18, mass: 0.5 },
+                }
+              : {
+                  opacity: { duration: 0.28, ease: [0.16, 1, 0.3, 1] },
+                  y: { type: 'spring', stiffness: 190, damping: 20, mass: 0.75 },
+                  scale: { type: 'spring', stiffness: 180, damping: 20, mass: 0.8 },
+                  rotateX: { type: 'spring', stiffness: 170, damping: 17, mass: 0.8 },
+                  rotateY: { type: 'spring', stiffness: 170, damping: 18, mass: 0.8 },
+                  rotate: { type: 'spring', stiffness: 145, damping: 13, mass: 0.8 },
+                }
             : {
-                opacity: { duration: 0.26, delay: 0.06, ease: 'easeIn' },
-                y: { duration: 0.34, ease: [0.32, 0, 0.67, 0] },
-                scale: { duration: 0.34, ease: [0.32, 0, 0.67, 0] },
-                rotateX: { duration: 0.34, ease: [0.32, 0, 0.67, 0] },
-                rotateY: { duration: 0.34, ease: [0.32, 0, 0.67, 0] },
-                rotate: { duration: 0.34, ease: [0.32, 0, 0.67, 0] },
+                opacity: { duration: 0.2, ease: 'easeIn' },
+                y: { duration: 0.24, ease: 'easeIn' },
+                scale: { duration: 0.24, ease: 'easeIn' },
+                rotate: { duration: 0.24, ease: 'easeIn' },
               }
         }
         style={{
           transformOrigin: '50% 22px',
         }}
       >
-        {/* ── Paper Stack Behind: 100% Opaque Physical Sheets (Zero Transparency Bleed) ── */}
+        {/* ── Paper Stack Behind: 100% Opaque Physical Sheets ── */}
         {/* Deepest backing sheet (Sheet 3) */}
         <motion.div
           className="absolute inset-0 rounded-[1px] pointer-events-none overflow-hidden"
           initial={{ rotate: 0, x: 0, y: 0 }}
           animate={
             isRevealed
-              ? { rotate: stackBottomRotate, x: isRtl ? -3 : 3, y: 5 }
+              ? { rotate: stackBottomRotate, x: isRtl ? -3 : 3, y: isMobile ? 3.5 : 5 }
               : { rotate: 0, x: 0, y: 0 }
           }
           transition={
             isRevealed
-              ? { type: 'spring', stiffness: 155, damping: 16, delay: 0.1 }
+              ? isMobile
+                ? { duration: 0.28, ease: [0.22, 1, 0.36, 1], delay: 0.04 }
+                : { type: 'spring', stiffness: 155, damping: 16, delay: 0.1 }
               : { duration: 0.2, ease: 'easeIn' }
           }
           style={{
             backgroundColor: step.paperEdge,
             backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.03) 100%)`,
             border: '1px solid rgba(0,0,0,0.10)',
-            boxShadow: `
-              0 6px 16px rgba(0,0,0,0.18),
-              0 2px 5px rgba(0,0,0,0.12),
-              inset 0 1px 0 rgba(255,255,255,0.45)
-            `,
+            boxShadow: isMobile
+              ? '0 3px 8px rgba(0,0,0,0.12)'
+              : `
+                0 6px 16px rgba(0,0,0,0.18),
+                0 2px 5px rgba(0,0,0,0.12),
+                inset 0 1px 0 rgba(255,255,255,0.45)
+              `,
             transformOrigin: '50% 22px',
           }}
         />
@@ -277,36 +293,46 @@ const StickyNoteCard = ({
           initial={{ rotate: 0, x: 0, y: 0 }}
           animate={
             isRevealed
-              ? { rotate: stackMiddleRotate, x: isRtl ? 2 : -2, y: 2.5 }
+              ? {
+                  rotate: stackMiddleRotate,
+                  x: isRtl ? (isMobile ? 1.5 : 2) : (isMobile ? -1.5 : -2),
+                  y: isMobile ? 2 : 2.5,
+                }
               : { rotate: 0, x: 0, y: 0 }
           }
           transition={
             isRevealed
-              ? { type: 'spring', stiffness: 170, damping: 18, delay: 0.05 }
+              ? isMobile
+                ? { duration: 0.28, ease: [0.22, 1, 0.36, 1], delay: 0.02 }
+                : { type: 'spring', stiffness: 170, damping: 18, delay: 0.05 }
               : { duration: 0.22, ease: 'easeIn' }
           }
           style={{
             backgroundColor: step.paperBg,
             backgroundImage: `linear-gradient(180deg, ${step.paperEdge}88 0%, rgba(0,0,0,0.03) 100%)`,
             border: '1px solid rgba(0,0,0,0.08)',
-            boxShadow: `
-              0 3px 8px rgba(0,0,0,0.13),
-              0 1px 3px rgba(0,0,0,0.09),
-              inset 0 1px 0 rgba(255,255,255,0.65)
-            `,
+            boxShadow: isMobile
+              ? '0 2px 6px rgba(0,0,0,0.10)'
+              : `
+                0 3px 8px rgba(0,0,0,0.13),
+                0 1px 3px rgba(0,0,0,0.09),
+                inset 0 1px 0 rgba(255,255,255,0.65)
+              `,
             transformOrigin: '50% 22px',
           }}
         >
-          {/* Subtle ruled lines visible on the peeking edges of the middle sheet */}
-          <div className="absolute inset-0 pointer-events-none" style={{ opacity: 0.035 }}>
-            {Array.from({ length: 14 }).map((_, i) => (
-              <div
-                key={i}
-                className="absolute w-full"
-                style={{ top: `${72 + i * 22}px`, height: '0.8px', background: '#6b7280' }}
-              />
-            ))}
-          </div>
+          {/* Subtle ruled lines on middle sheet (desktop only) */}
+          {!isMobile && (
+            <div className="absolute inset-0 pointer-events-none" style={{ opacity: 0.035 }}>
+              {Array.from({ length: 14 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute w-full"
+                  style={{ top: `${72 + i * 22}px`, height: '0.8px', background: '#6b7280' }}
+                />
+              ))}
+            </div>
+          )}
         </motion.div>
 
         {/* Main paper (Top Sheet) */}
@@ -315,44 +341,53 @@ const StickyNoteCard = ({
           style={{
             background: step.paperBg,
             border: '1px solid rgba(0,0,0,0.06)',
-            boxShadow: `
-              0 1px 2px rgba(0,0,0,0.07),
-              0 3px 6px rgba(0,0,0,0.08),
-              0 6px 12px rgba(0,0,0,0.08),
-              0 12px 24px rgba(0,0,0,0.06),
-              inset 0 1px 0 rgba(255,255,255,0.85),
-              inset 0 -1px 0 rgba(0,0,0,0.04)
-            `,
+            boxShadow: isMobile
+              ? '0 4px 14px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.08)'
+              : `
+                0 1px 2px rgba(0,0,0,0.07),
+                0 3px 6px rgba(0,0,0,0.08),
+                0 6px 12px rgba(0,0,0,0.08),
+                0 12px 24px rgba(0,0,0,0.06),
+                inset 0 1px 0 rgba(255,255,255,0.85),
+                inset 0 -1px 0 rgba(0,0,0,0.04)
+              `,
           }}
         >
-          {/* Paper texture — lightweight CSS pattern instead of expensive SVG feTurbulence filter */}
-          <div className="absolute inset-0 pointer-events-none mix-blend-multiply"
-            style={{
-              opacity: 0.04,
-              backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px)',
-              backgroundSize: '8px 8px',
-            }}
-          />
+          {/* Paper texture — desktop only */}
+          {!isMobile && (
+            <div
+              className="absolute inset-0 pointer-events-none mix-blend-multiply"
+              style={{
+                opacity: 0.04,
+                backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px)',
+                backgroundSize: '8px 8px',
+              }}
+            />
+          )}
           {/* Ruled lines */}
           <div className="absolute inset-0 pointer-events-none" style={{ opacity: 0.04 }}>
-            {Array.from({ length: 14 }).map((_, i) => (
-              <div key={i} className="absolute w-full"
-                style={{ top: `${72 + i * 22}px`, height: '0.8px', background: '#6b7280' }}
+            {Array.from({ length: isMobile ? 9 : 14 }).map((_, i) => (
+              <div
+                key={i}
+                className="absolute w-full"
+                style={{ top: `${(isMobile ? 54 : 72) + i * (isMobile ? 18 : 22)}px`, height: '0.8px', background: '#6b7280' }}
               />
             ))}
           </div>
           {/* Red margin (mirrored on right side for RTL Arabic writing) */}
-          <div className="absolute top-0 bottom-0 pointer-events-none"
-            style={{ [isRtl ? 'right' : 'left']: '36px', width: '1.2px', background: 'rgba(220,50,50,0.08)' }}
+          <div
+            className="absolute top-0 bottom-0 pointer-events-none"
+            style={{ [isRtl ? 'right' : 'left']: isMobile ? '28px' : '36px', width: '1.2px', background: 'rgba(220,50,50,0.08)' }}
           />
           {/* Top adhesive */}
-          <div className="absolute top-0 left-0 right-0 pointer-events-none"
+          <div
+            className="absolute top-0 left-0 right-0 pointer-events-none"
             style={{ height: '6px', background: `linear-gradient(180deg, ${step.paperEdge}90, transparent)` }}
           />
 
-          {/* Pushpin — tactile pinning strike on reveal & quick unpin on exit */}
+          {/* Pushpin — tactile pinning strike on reveal */}
           <motion.div
-            className="flex justify-center pt-2 relative z-10"
+            className="flex justify-center pt-1.5 sm:pt-2 relative z-10"
             initial={{ opacity: 0, y: -20, scale: 1.32 }}
             animate={
               isRevealed
@@ -375,43 +410,48 @@ const StickyNoteCard = ({
                   }
             }
           >
-            <Pushpin color={step.pinColor} />
+            <Pushpin color={step.pinColor} isMobile={isMobile} />
           </motion.div>
 
-        {/* Content */}
-        <div className={`px-5 sm:px-7 pb-5 sm:pb-7 pt-1 sm:pt-2 relative z-10 ${isRtl ? 'text-right' : 'text-left'}`}>
-          {/* Header: Number and Title side-by-side on the same line */}
-          <div className="flex items-baseline gap-2.5 sm:gap-3 mb-2 sm:mb-2.5">
-            <span className="text-xl sm:text-2xl font-black font-sans tracking-tight leading-none select-none shrink-0"
-              style={{ color: '#1a1a2e' }}
-            >
-              {step.num}
-            </span>
-            <h3 className="text-lg sm:text-xl font-extrabold tracking-tight leading-snug" style={{ color: '#1a1a2e' }}>
-              {step.title}
-            </h3>
+          {/* Content — compact, proportional mobile sizing */}
+          <div className={`px-4 sm:px-7 pb-4 sm:pb-7 pt-0.5 sm:pt-2 relative z-10 ${isRtl ? 'text-right' : 'text-left'}`}>
+            {/* Header: Number and Title side-by-side */}
+            <div className="flex items-baseline gap-2 sm:gap-3 mb-1 sm:mb-2.5">
+              <span
+                className="text-lg sm:text-2xl font-black font-sans tracking-tight leading-none select-none shrink-0"
+                style={{ color: '#1a1a2e' }}
+              >
+                {step.num}
+              </span>
+              <h3 className="text-[0.95rem] sm:text-xl font-extrabold tracking-tight leading-snug" style={{ color: '#1a1a2e' }}>
+                {step.title}
+              </h3>
+            </div>
+            <div className="flex items-center gap-1 mb-2 sm:mb-4">
+              <div className="w-6 sm:w-8 h-[2.5px] sm:h-[3px] rounded-full" style={{ background: step.pinColor }} />
+              <div className="w-2.5 sm:w-3 h-[2.5px] sm:h-[3px] rounded-full" style={{ background: `${step.pinColor}40` }} />
+              <div className="w-1.5 h-[2.5px] sm:h-[3px] rounded-full" style={{ background: `${step.pinColor}20` }} />
+            </div>
+            <p className="text-[0.76rem] sm:text-[0.88rem] leading-[1.55] sm:leading-[1.65]" style={{ color: '#3d3d5c' }}>
+              {step.description}
+            </p>
           </div>
-          <div className="flex items-center gap-1 mb-3 sm:mb-4">
-            <div className="w-8 h-[3px] rounded-full" style={{ background: step.pinColor }} />
-            <div className="w-3 h-[3px] rounded-full" style={{ background: `${step.pinColor}40` }} />
-            <div className="w-1.5 h-[3px] rounded-full" style={{ background: `${step.pinColor}20` }} />
-          </div>
-          <p className="text-[0.82rem] sm:text-[0.88rem] leading-[1.65]" style={{ color: '#3d3d5c' }}>
-            {step.description}
-          </p>
-        </div>
 
-        {/* Corner fold (mirrored to bottom-left for RTL) */}
-        <div className={`absolute bottom-0 ${isRtl ? 'left-0' : 'right-0'} pointer-events-none overflow-hidden`} style={{ width: 24, height: 24 }}>
-          <div className={`absolute bottom-0 ${isRtl ? 'left-0' : 'right-0'} w-[34px] h-[34px]`}
-            style={{
-              background: isRtl
-                ? `linear-gradient(225deg, ${step.paperBg} 48%, ${step.paperEdge} 50%, rgba(0,0,0,0.06) 52%, rgba(0,0,0,0.02) 100%)`
-                : `linear-gradient(135deg, ${step.paperBg} 48%, ${step.paperEdge} 50%, rgba(0,0,0,0.06) 52%, rgba(0,0,0,0.02) 100%)`
-            }}
-          />
+          {/* Corner fold (mirrored to bottom-left for RTL) */}
+          <div
+            className={`absolute bottom-0 ${isRtl ? 'left-0' : 'right-0'} pointer-events-none overflow-hidden`}
+            style={{ width: isMobile ? 18 : 24, height: isMobile ? 18 : 24 }}
+          >
+            <div
+              className={`absolute bottom-0 ${isRtl ? 'left-0' : 'right-0'} ${isMobile ? 'w-[25px] h-[25px]' : 'w-[34px] h-[34px]'}`}
+              style={{
+                background: isRtl
+                  ? `linear-gradient(225deg, ${step.paperBg} 48%, ${step.paperEdge} 50%, rgba(0,0,0,0.06) 52%, rgba(0,0,0,0.02) 100%)`
+                  : `linear-gradient(135deg, ${step.paperBg} 48%, ${step.paperEdge} 50%, rgba(0,0,0,0.06) 52%, rgba(0,0,0,0.02) 100%)`,
+              }}
+            />
+          </div>
         </div>
-      </div>
       </motion.div>
     </div>
   );
@@ -443,37 +483,41 @@ const ConnectorSegment = ({
 
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: isMobile ? ['start 84%', 'end 58%'] : ['start 80%', 'end 54%'],
+    offset: isMobile ? ['start 92%', 'end 68%'] : ['start 80%', 'end 54%'],
   });
 
   const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 120,
-    damping: 26,
-    mass: 0.6,
+    stiffness: isMobile ? 260 : 120,
+    damping: isMobile ? 32 : 26,
+    mass: isMobile ? 0.35 : 0.6,
     restDelta: 0.001,
   });
 
   // Calculate actual visual position taking RTL into account
   // In RTL, justify-start ('left') is rendered on the visual RIGHT (72%)
   // and justify-end ('right') is rendered on the visual LEFT (28%)
+  // On mobile: both cards are centered vertically, so connector connects straight down center-to-center
   const getVisualX = (side: 'left' | 'right') => {
-    const isVisualLeft = isRtl ? (side === 'right') : (side === 'left');
     if (isMobile) {
-      return isVisualLeft ? 42 : 58;
+      return 50;
     }
+    const isVisualLeft = isRtl ? (side === 'right') : (side === 'left');
     return isVisualLeft ? 28 : 72;
   };
 
   const fromXNum = getVisualX(fromSide);
   const toXNum = getVisualX(toSide);
 
-  const svgHeight = isMobile ? 84 : 130;
+  // Short, compact distance on mobile vs full generous distance on desktop
+  const svgHeight = isMobile ? 38 : 130;
   const startY = 0;
   const endY = svgHeight;
   const cp1Y = svgHeight * 0.35;
   const cp2Y = svgHeight * 0.65;
 
-  const d = `M ${fromXNum} ${startY} C ${fromXNum} ${cp1Y}, ${toXNum} ${cp2Y}, ${toXNum} ${endY}`;
+  const d = isMobile
+    ? `M 50 0 C 48 ${svgHeight * 0.35}, 52 ${svgHeight * 0.65}, 50 ${svgHeight}`
+    : `M ${fromXNum} ${startY} C ${fromXNum} ${cp1Y}, ${toXNum} ${cp2Y}, ${toXNum} ${endY}`;
 
   const isReachedRef = useRef(false);
   const onReachChangeRef = useRef(onReachChange);
@@ -481,7 +525,7 @@ const ConnectorSegment = ({
     onReachChangeRef.current = onReachChange;
   });
 
-  // Monitor line progress to trigger card reveal when touching (0.92) and hide when retracting (< 0.78)
+  // Monitor line progress to trigger card reveal when touching and hide when retracting
   useMotionValueEvent(smoothProgress, 'change', (latest) => {
     if (!isActive) {
       if (isReachedRef.current) {
@@ -491,10 +535,13 @@ const ConnectorSegment = ({
       return;
     }
 
-    if (latest >= 0.92 && !isReachedRef.current) {
+    const revealThresh = isMobile ? 0.82 : 0.92;
+    const hideThresh = isMobile ? 0.65 : 0.78;
+
+    if (latest >= revealThresh && !isReachedRef.current) {
       isReachedRef.current = true;
       onReachChangeRef.current?.(true);
-    } else if (latest < 0.78 && isReachedRef.current) {
+    } else if (latest < hideThresh && isReachedRef.current) {
       isReachedRef.current = false;
       onReachChangeRef.current?.(false);
     }
@@ -514,11 +561,13 @@ const ConnectorSegment = ({
       const rawVal = scrollYProgress.get();
       const smoothVal = smoothProgress.get();
       const currentVal = Math.max(rawVal, smoothVal);
+      const revealThresh = isMobile ? 0.82 : 0.92;
+      const hideThresh = isMobile ? 0.65 : 0.78;
 
-      if (currentVal >= 0.92 && !isReachedRef.current) {
+      if (currentVal >= revealThresh && !isReachedRef.current) {
         isReachedRef.current = true;
         onReachChangeRef.current?.(true);
-      } else if (currentVal < 0.78 && isReachedRef.current) {
+      } else if (currentVal < hideThresh && isReachedRef.current) {
         isReachedRef.current = false;
         onReachChangeRef.current?.(false);
       }
@@ -527,7 +576,7 @@ const ConnectorSegment = ({
     checkState();
     const timer = setTimeout(checkState, 60);
     return () => clearTimeout(timer);
-  }, [isActive, scrollYProgress, smoothProgress]);
+  }, [isActive, scrollYProgress, smoothProgress, isMobile]);
 
   // Transform scroll progress to hardware-accelerated clipPath for drawing the line
   // If not active yet, clipPath hides the line completely without causing layout reflows
@@ -551,8 +600,8 @@ const ConnectorSegment = ({
           <path
             d={d}
             className="stroke-zinc-800 dark:stroke-white"
-            strokeWidth="2.4"
-            strokeDasharray="7 7"
+            strokeWidth={isMobile ? "2" : "2.4"}
+            strokeDasharray={isMobile ? "5 5" : "7 7"}
             strokeLinecap="round"
             fill="none"
             vectorEffect="non-scaling-stroke"
@@ -587,9 +636,11 @@ const HowItWorks = () => {
   const handleRevealChange = useCallback((idx: number, revealed: boolean) => {
     setRevealedCards((prev) => {
       if (prev[idx] === revealed) return prev;
+      // On mobile: once a card is revealed, keep it revealed to prevent scroll-triggered re-renders
+      if (isMobile && !revealed) return prev;
       const next = { ...prev, [idx]: revealed };
-      // When a card is hidden (scrolling up), also hide all subsequent cards immediately
-      if (!revealed) {
+      // On desktop: when a card is hidden (scrolling up), also hide all subsequent cards
+      if (!revealed && !isMobile) {
         Object.keys(next).forEach((key) => {
           const numKey = Number(key);
           if (numKey > idx) {
@@ -599,7 +650,7 @@ const HowItWorks = () => {
       }
       return next;
     });
-  }, []);
+  }, [isMobile]);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
@@ -692,19 +743,26 @@ const HowItWorks = () => {
       className="relative isolate scroll-mt-24 py-10 sm:py-14 md:py-18 px-4 sm:px-6 lg:px-8 bg-transparent overflow-x-hidden overflow-y-visible"
       aria-label="Engineering process and workflow"
     >
-      {/* ── Seamless Dot Grid Background System (Plain, Neutral & Comfortable — Zero Colored Glow) ── */}
+      {/* ── Seamless Dot Grid Background System ── */}
       <div
-        className="absolute inset-0 pointer-events-none z-0 overflow-hidden select-none"
-        style={{
+        className="absolute inset-0 pointer-events-none z-0 overflow-hidden select-none [transform:translateZ(0)]"
+        style={!isMobile ? {
           maskImage: 'linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%)',
           WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%)',
-        }}
+        } : undefined}
         aria-hidden="true"
       >
         {/* Pure, plain Dot Grid Pattern Layer */}
         <div
           className="absolute inset-0 [background-size:24px_24px] bg-[radial-gradient(circle_at_center,rgba(15,23,42,0.22)_1.25px,transparent_1.25px)] dark:bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.18)_1.25px,transparent_1.25px)]"
         />
+        {/* On mobile: lightweight CSS fade overlays instead of expensive full-screen GPU maskImage */}
+        {isMobile && (
+          <>
+            <div className="absolute top-0 inset-x-0 h-16 bg-gradient-to-b from-background to-transparent pointer-events-none" />
+            <div className="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-background to-transparent pointer-events-none" />
+          </>
+        )}
       </div>
 
       <div className="max-w-5xl mx-auto relative z-10">
@@ -733,13 +791,13 @@ const HowItWorks = () => {
           </div>
         </motion.div>
 
-        {/* Cards + connectors interleaved (unified zig-zag on all screens) */}
+        {/* Cards + connectors interleaved (clean centered column on mobile, unified zig-zag on desktop) */}
         <div className="relative">
           {displaySteps.map((step, i) => (
-            <div key={step.num + i}>
-              {/* Card row */}
-              <div className={`flex ${step.side === 'right' ? 'justify-end' : 'justify-start'}`}>
-                <div className="w-[88%] sm:w-[82%] md:w-full md:max-w-[390px] lg:max-w-[420px]">
+            <div key={step.num + i} className="mb-5 sm:mb-6 md:mb-0 last:mb-0">
+              {/* Card row: centered column on mobile with clean simple gap, alternating zig-zag on desktop */}
+              <div className={`flex justify-center ${step.side === 'right' ? 'md:justify-end' : 'md:justify-start'}`}>
+                <div className="w-[82%] max-w-[285px] sm:max-w-[320px] md:w-full md:max-w-[390px] lg:max-w-[420px]">
                   <StickyNoteCard
                     step={step}
                     isMobile={isMobile}
@@ -751,19 +809,21 @@ const HowItWorks = () => {
                 </div>
               </div>
 
-              {/* Connector between this card and the next */}
-              {i < displaySteps.length - 1 && (
-                <ConnectorSegment
-                  fromSide={step.side}
-                  toSide={displaySteps[i + 1].side}
-                  fromColor={step.pinColor}
-                  toColor={displaySteps[i + 1].pinColor}
-                  index={i}
-                  isMobile={isMobile}
-                  isRtl={isRtl}
-                  isActive={Boolean(revealedCards[i])}
-                  onReachChange={(reached) => handleRevealChange(i + 1, reached)}
-                />
+              {/* Connector between this card and the next (DESKTOP ONLY — hidden & unmounted on mobile) */}
+              {i < displaySteps.length - 1 && !isMobile && (
+                <div className="hidden md:block">
+                  <ConnectorSegment
+                    fromSide={step.side}
+                    toSide={displaySteps[i + 1].side}
+                    fromColor={step.pinColor}
+                    toColor={displaySteps[i + 1].pinColor}
+                    index={i}
+                    isMobile={false}
+                    isRtl={isRtl}
+                    isActive={Boolean(revealedCards[i])}
+                    onReachChange={(reached) => handleRevealChange(i + 1, reached)}
+                  />
+                </div>
               )}
             </div>
           ))}

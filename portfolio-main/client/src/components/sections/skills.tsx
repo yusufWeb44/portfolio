@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import {
   motion,
@@ -229,6 +229,21 @@ const SkillMarqueeRow = ({
 
 /* ─── Full Marquee System (Right Column) ─────────────────────────── */
 const InfiniteSkillsMarquee = ({ items, isAr }: { items: TechItem[]; isAr: boolean }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isInView, setIsInView] = useState(false);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInView(entry.isIntersecting);
+      },
+      { rootMargin: '150px 0px' }
+    );
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
   const { scrollY } = useScroll();
   const scrollVelocity = useVelocity(scrollY);
   const smoothVelocity = useSpring(scrollVelocity, {
@@ -277,6 +292,7 @@ const InfiniteSkillsMarquee = ({ items, isAr }: { items: TechItem[]; isAr: boole
 
   return (
     <div
+      ref={containerRef}
       dir="ltr"
       className="w-full relative overflow-hidden flex flex-col gap-2.5 sm:gap-3 py-2 [mask-image:linear-gradient(to_right,transparent_0%,black_3%,black_97%,transparent_100%)]"
     >
@@ -289,7 +305,7 @@ const InfiniteSkillsMarquee = ({ items, isAr }: { items: TechItem[]; isAr: boole
             direction={config.direction}
             baseSpeed={config.baseSpeed}
             velocityFactor={velocityFactor}
-            isPaused={activeHover !== null}
+            isPaused={activeHover !== null || !isInView}
             onHover={setActiveHover}
             onLeave={() => setActiveHover(null)}
           />

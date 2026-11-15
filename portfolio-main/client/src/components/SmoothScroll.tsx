@@ -42,6 +42,37 @@ export const SmoothScrollProvider: React.FC<{ children: React.ReactNode }> = ({ 
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReducedMotion) return;
 
+    // Check if running on a mobile touch device
+    const isMobileTouch =
+      window.matchMedia('(pointer: coarse) and (hover: none)').matches ||
+      (window.innerWidth < 1024 && ('ontouchstart' in window || navigator.maxTouchPoints > 0));
+
+    if (isMobileTouch) {
+      // Allow 100% native hardware-accelerated touch scroll on mobile devices (120 FPS compositor thread).
+      // Intercept in-page hash links (#projects, #about, etc.) for smooth glides
+      const handleAnchorClick = (e: MouseEvent) => {
+        const target = (e.target as HTMLElement).closest('a');
+        if (!target) return;
+        const href = target.getAttribute('href');
+        if (href && href.startsWith('#') && href.length > 1) {
+          const rawId = href.slice(1);
+          const targetId = rawId === 'faqs' ? 'faq' : rawId === 'how-i-work' ? 'workflow' : rawId;
+          const el = document.getElementById(targetId);
+          if (el) {
+            e.preventDefault();
+            const navOffset = targetId === 'projects' || targetId === 'services' ? 0 : 60;
+            const currentScroll = window.scrollY || window.pageYOffset || 0;
+            const targetTop = Math.max(0, Math.round(el.getBoundingClientRect().top + currentScroll - navOffset));
+            window.scrollTo({ top: targetTop, behavior: 'smooth' });
+          }
+        }
+      };
+      document.addEventListener('click', handleAnchorClick);
+      return () => {
+        document.removeEventListener('click', handleAnchorClick);
+      };
+    }
+
     // Check if page was refreshed/reloaded - if so, ensure start at top and clean hash
     const navEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
     const isReload = (navEntries.length > 0 && navEntries[0].type === 'reload') ||
@@ -56,7 +87,7 @@ export const SmoothScrollProvider: React.FC<{ children: React.ReactNode }> = ({ 
       window.scrollTo(0, 0);
     }
 
-    // Initialize Lenis with weighted, luxurious deceleration physics
+    // Initialize Lenis with weighted, luxurious deceleration physics for desktop
     const lenis = new Lenis({
       duration: 1.25,
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Exponential luxury ease-out
@@ -64,7 +95,7 @@ export const SmoothScrollProvider: React.FC<{ children: React.ReactNode }> = ({ 
       gestureOrientation: 'vertical',
       smoothWheel: true,
       wheelMultiplier: 0.92,
-      touchMultiplier: 1.2,
+      touchMultiplier: 0,
       autoResize: true,
     });
 
@@ -83,7 +114,7 @@ export const SmoothScrollProvider: React.FC<{ children: React.ReactNode }> = ({ 
       lenis.raf(time * 1000);
     };
     gsap.ticker.add(onGsapTick);
-    gsap.ticker.lagSmoothing(0);
+    gsap.ticker.lagSmoothing(500, 33);
 
     // Immediate synchronization on any document layout resize (e.g. dynamic API data rendering)
     let resizeTimer: any = null;
