@@ -514,7 +514,7 @@ const Home = () => {
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 4: EXPERIENCE (Vertical Animated Timeline & Certificates)
       ═══════════════════════════════════════════════════════════════ */}
-      <section id="experience" className="scroll-mt-24 pt-10 sm:pt-14 md:pt-18 pb-4 sm:pb-6 relative z-10 overflow-x-clip">
+      <section id="experience" className="scroll-mt-24 py-12 sm:py-14 md:py-16 lg:py-20 relative z-10 overflow-x-clip">
         <div className="max-w-7xl mx-auto space-y-8 sm:space-y-10 px-4 sm:px-6 lg:px-8 mb-6 sm:mb-8">
           <FadeIn>
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground leading-[1.15] mb-3 sm:mb-4">
@@ -637,6 +637,14 @@ const Home = () => {
           <FAQ
             id="faq"
             title={resolveField('faq.title', settings?.faqTitleAr, settings?.faqTitle, 'Common Questions.')}
+            subtitle={resolveField(
+              'faq.subtitle',
+              settings?.faqSubtitleAr,
+              settings?.faqSubtitle,
+              isAr
+                ? 'إجابات واضحة ومباشرة عن أكثر الأسئلة شيوعاً حول آليات العمل، والتعاقد، والتنفيذ.'
+                : 'Clear and direct answers to the most common questions about workflow, collaboration, and execution.'
+            )}
             categories={faqCategories}
             faqData={faqDataMap}
           />
@@ -679,7 +687,7 @@ const Home = () => {
       ═══════════════════════════════════════════════════════════════ */}
       <section
         id="contact"
-        className="scroll-mt-24 relative overflow-hidden bg-transparent text-foreground py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8"
+        className="scroll-mt-24 relative overflow-hidden bg-transparent text-foreground py-12 sm:py-14 md:py-16 lg:py-20 px-4 sm:px-6 lg:px-8"
       >
         <div className="relative z-10 max-w-[620px] mx-auto w-full">
           <motion.div
@@ -736,7 +744,7 @@ const Home = () => {
                     rel="noreferrer"
                     className={cn(
                       buttonVariants({ variant: 'primary', size: 'default' }),
-                      "w-full sm:w-auto shadow-sm hover:shadow-[0_8px_20px_rgba(16,185,129,0.22)]"
+                      "w-full max-w-[220px] sm:max-w-none sm:w-auto shadow-sm hover:shadow-[0_8px_20px_rgba(16,185,129,0.22)]"
                     )}
                   >
                     <WhatsappIcon size={16} />
@@ -747,7 +755,7 @@ const Home = () => {
                     href={`mailto:${email}`}
                     className={cn(
                       buttonVariants({ variant: 'secondary', size: 'default' }),
-                      "w-full sm:w-auto bg-slate-50 dark:bg-white/[0.05] hover:bg-white dark:hover:bg-white/[0.09]",
+                      "w-full max-w-[220px] sm:max-w-none sm:w-auto bg-slate-50 dark:bg-white/[0.05] hover:bg-white dark:hover:bg-white/[0.09]",
                       "border-slate-200/90 dark:border-white/15 hover:border-slate-300 dark:hover:border-white/25",
                       "!text-foreground hover:!text-foreground dark:hover:!text-foreground",
                       "[&_svg]:!text-foreground [&_span]:!text-foreground",

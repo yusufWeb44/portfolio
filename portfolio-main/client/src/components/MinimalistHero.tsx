@@ -172,14 +172,14 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
   ].filter(Boolean) as { label: string; href: string; Icon: any }[];
 
   return (
-    <div className="relative min-h-[100svh] lg:min-h-[calc(100vh-4rem)] flex flex-col justify-between overflow-hidden bg-transparent">
+    <div className="relative min-h-[100svh] md:min-h-0 xl:min-h-[calc(100vh-4rem)] flex flex-col justify-between overflow-hidden bg-transparent">
 
       {/* Main Hero Content */}
-      <div className="flex-1 max-w-7xl mx-auto w-full px-5 sm:px-6 lg:px-6 pt-20 sm:pt-24 md:pt-28 lg:pt-32 pb-8 flex flex-col justify-center">
+      <div className="flex-1 max-w-7xl mx-auto w-full px-5 sm:px-6 lg:px-6 pt-20 sm:pt-24 md:pt-28 xl:pt-32 pb-8 md:pb-12 xl:pb-8 flex flex-col justify-center md:justify-start xl:justify-center">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-8 items-center">
 
-          {/* ── Left Column (desktop): Headline, Bio, CTA, Social, Stats ── */}
-          <div className="order-2 lg:order-1 lg:col-span-5 flex flex-col items-start z-10 min-w-0">
+          {/* ── Left Column (desktop & tablet): Headline, Bio, CTA, Social, Stats ── */}
+          <div className="order-2 lg:order-1 lg:col-span-7 xl:col-span-5 flex flex-col items-start z-10 min-w-0">
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
@@ -264,12 +264,8 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
             </motion.div>
           </div>
 
-          {/* ── Center Column: Blob + Image ── */}
-          {/*
-            On mobile (order-1): we show the image FIRST (above the bio).
-            Above the image we stack: availability badge (left) + typewriter (center).
-          */}
-          <div className="order-1 lg:order-2 lg:col-span-4 relative flex flex-col justify-center items-center min-w-0">
+          {/* ── Center/Right Column: Blob + Image (5 cols on large tablet/iPad, 4 cols on desktop) ── */}
+          <div className="order-1 lg:order-2 lg:col-span-5 xl:col-span-4 relative flex flex-col justify-center items-center min-w-0">
 
             {/* ── Mobile-only: typewriter above image ── */}
             {words.length > 0 && (
@@ -301,9 +297,9 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
             )}
 
             {/* Blob + Profile Image */}
-            <div className="relative flex justify-center items-center min-h-[350px] sm:min-h-[390px] md:min-h-[420px] lg:min-h-[500px] w-full select-none pointer-events-none">
+            <div className="relative flex justify-center items-center min-h-[350px] sm:min-h-[390px] md:min-h-[420px] lg:min-h-[460px] xl:min-h-[500px] w-full select-none pointer-events-none">
               {/* Fluid Blob Backdrop — Enlarged to match reference photo, perfectly framing profile */}
-              <div className="absolute -top-6 sm:-top-8 md:-top-9 lg:-top-11 w-[320px] h-[320px] sm:w-[360px] sm:h-[360px] md:w-[390px] md:h-[390px] lg:w-[450px] lg:h-[450px] z-0 pointer-events-none select-none">
+              <div className="absolute -top-6 sm:-top-8 md:-top-9 lg:-top-10 xl:-top-11 w-[320px] h-[320px] sm:w-[360px] sm:h-[360px] md:w-[390px] md:h-[390px] lg:w-[400px] lg:h-[400px] xl:w-[450px] xl:h-[450px] z-0 pointer-events-none select-none">
                 <motion.div
                   initial={{ scale: 0.9, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
@@ -372,15 +368,15 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
                     WebkitUserSelect: 'none',
                     pointerEvents: 'none',
                   }}
-                  className="w-[275px] sm:w-[315px] md:w-[340px] lg:w-[420px] h-auto object-contain scale-[1.54] sm:scale-[1.56] md:scale-[1.58] lg:scale-[1.6] pointer-events-none select-none"
+                  className="w-[275px] sm:w-[315px] md:w-[340px] lg:w-[370px] xl:w-[420px] h-auto object-contain scale-[1.54] sm:scale-[1.56] md:scale-[1.58] lg:scale-[1.56] xl:scale-[1.6] pointer-events-none select-none"
                 />
               </motion.div>
             </div>
           </div>
 
-          {/* ── Right Column (desktop only): Specialties stacked vertically, single line with prestige dash prefix ── */}
+          {/* ── Right Column (desktop only >= xl): Specialties stacked vertically, single line with prestige dash prefix ── */}
           {words.length > 0 && (
-            <div className="hidden lg:flex order-3 lg:col-span-3 lg:justify-start rtl:lg:justify-start lg:items-center z-10 min-w-0 w-full pl-1 lg:pl-2 xl:pl-3 rtl:pl-0 rtl:pr-1 rtl:lg:pr-2 rtl:xl:pr-3">
+            <div className="hidden xl:flex order-3 xl:col-span-3 xl:justify-start rtl:xl:justify-start xl:items-center z-10 min-w-0 w-full pl-1 xl:pl-3 rtl:pl-0 rtl:pr-1 rtl:xl:pr-3">
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}

@@ -60,16 +60,22 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Responsive 3D Curved Cylinder configuration (preserving existing card dimensions)
+  // Responsive 3D Curved Cylinder configuration (calibrated for optimal desktop and mobile proportions)
   const layout = useMemo(() => {
     const isLg = windowWidth >= 1400;
     const isMd = windowWidth >= 1024 && windowWidth < 1400;
     const isSm = windowWidth >= 640 && windowWidth < 1024;
+    const isXs = windowWidth >= 480 && windowWidth < 640;
 
-    const cardWidth = isLg ? 410 : (isMd ? 360 : (isSm ? 310 : 255));
+    // Mobile-optimized card dimensions:
+    // On mobile (< 480px), scaled to ~185-200px so the carousel looks balanced,
+    // neighboring certificates curve gracefully into view, and it doesn't overpower the viewport.
+    const cardWidth = isLg 
+      ? 410 
+      : (isMd ? 360 : (isSm ? 285 : (isXs ? 230 : (windowWidth < 380 ? 185 : 200))));
     const cardHeight = cardWidth / 1.414;
-    const angleStep = isLg ? 22.0 : (isMd ? 22.5 : (isSm ? 23.0 : 24.0));
-    const gap = isLg ? 26 : (isMd ? 22 : (isSm ? 18 : 14));
+    const angleStep = isLg ? 22.0 : (isMd ? 22.5 : (isSm ? 23.0 : (isXs ? 24.0 : 25.0)));
+    const gap = isLg ? 26 : (isMd ? 22 : (isSm ? 18 : (isXs ? 14 : 11)));
 
     // Calibrated horizontal curve radius so adjacent cards maintain a crisp uniform gap without stretching
     const stepRad = (angleStep * 0.6 * Math.PI) / 180;
@@ -80,13 +86,13 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
 
     // Vertical bleed buffer so 3D-tilted outer card corners and shadows never clip at top or bottom,
     // paired with equal negative margins so section spacing remains 100% unchanged
-    const bleed = isLg ? 75 : (isMd ? 65 : 50);
-    const topBaseline = (isLg ? 16 : (isMd ? 14 : 10)) + bleed;
-    const bottomClearance = (isLg ? 36 : (isMd ? 30 : 24)) + bleed;
+    const bleed = isLg ? 75 : (isMd ? 65 : (isSm ? 48 : 32));
+    const topBaseline = (isLg ? 16 : (isMd ? 14 : (isSm ? 10 : 8))) + bleed;
+    const bottomClearance = (isLg ? 36 : (isMd ? 30 : (isSm ? 22 : 16))) + bleed;
     const containerHeight = Math.round(topBaseline + cardHeight + bottomClearance);
 
-    const sharpThreshold = isLg ? 46 : (isMd ? 44 : 40);
-    const fadeEnd = isLg ? 58 : (isMd ? 56 : 50);
+    const sharpThreshold = isLg ? 46 : (isMd ? 44 : (isSm ? 40 : 36));
+    const fadeEnd = isLg ? 58 : (isMd ? 56 : (isSm ? 50 : 48));
 
     return {
       cardWidth,
@@ -269,7 +275,7 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
     <div className="w-full pt-4 pb-2 relative select-none overflow-x-clip">
 
       {/* ── Section Header (Title & Subtitle placed at top of certificates, centered) ── */}
-      <div className="relative z-20 max-w-3xl mx-auto px-4 text-center mb-6 sm:mb-8 md:mb-10 pointer-events-none">
+      <div className="relative z-20 max-w-3xl mx-auto px-4 text-center mb-4 sm:mb-8 md:mb-10 pointer-events-none">
         <h2
           className={
             isRtl
@@ -280,7 +286,7 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
           {displayTitle}
         </h2>
         {displaySubtitle && (
-          <p className="mt-2 text-base md:text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto select-none">
+          <p className="mt-1.5 sm:mt-2 text-sm sm:text-base md:text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto select-none">
             {displaySubtitle}
           </p>
         )}
@@ -379,7 +385,7 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
                       setSelectedCert(cert);
                     }
                   }}
-                  className="w-full h-full rounded-none bg-white dark:bg-zinc-900 border-[2px] border-neutral-200/80 dark:border-white/20 shadow-[0_8px_24px_-4px_rgba(15,23,42,0.12),0_4px_12px_-2px_rgba(15,23,42,0.06)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.9)] overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:border-neutral-400/60 dark:hover:border-white/40 hover:shadow-[0_14px_32px_-4px_rgba(15,23,42,0.16),0_6px_16px_-2px_rgba(15,23,42,0.08)] dark:hover:shadow-none"
+                  className="w-full h-full rounded-none bg-white dark:bg-zinc-900 border-[1.5px] sm:border-[2px] border-neutral-200/80 dark:border-white/20 shadow-[0_4px_16px_-2px_rgba(15,23,42,0.1),0_2px_8px_-2px_rgba(15,23,42,0.05)] sm:shadow-[0_8px_24px_-4px_rgba(15,23,42,0.12),0_4px_12px_-2px_rgba(15,23,42,0.06)] dark:shadow-[0_12px_32px_rgba(0,0,0,0.85)] sm:dark:shadow-[0_20px_50px_rgba(0,0,0,0.9)] overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:border-neutral-400/60 dark:hover:border-white/40 hover:shadow-[0_14px_32px_-4px_rgba(15,23,42,0.16),0_6px_16px_-2px_rgba(15,23,42,0.08)] dark:hover:shadow-none"
                 >
                   {imgSrc ? (
                     <img

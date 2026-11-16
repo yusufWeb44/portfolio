@@ -211,45 +211,45 @@ const StickyNoteCard = ({
         animate={
           isRevealed
             ? {
-                opacity: 1,
-                y: 0,
-                scale: 1,
-                rotateX: 0,
-                rotateY: 0,
-                rotate: tilt,
-              }
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              rotateX: 0,
+              rotateY: 0,
+              rotate: tilt,
+            }
             : {
-                opacity: 0,
-                y: -10,
-                scale: 0.96,
-                rotateX: isMobile ? 0 : 16,
-                rotateY: isMobile ? 0 : -unpinnedRotateY * 0.8,
-                rotate: tilt + (isVisualLeft ? 4.5 : -4.5),
-              }
+              opacity: 0,
+              y: -10,
+              scale: 0.96,
+              rotateX: isMobile ? 0 : 16,
+              rotateY: isMobile ? 0 : -unpinnedRotateY * 0.8,
+              rotate: tilt + (isVisualLeft ? 4.5 : -4.5),
+            }
         }
         transition={
           isRevealed
             ? isMobile
               ? {
-                  opacity: { duration: 0.22, ease: 'easeOut' },
-                  y: { type: 'spring', stiffness: 220, damping: 24, mass: 0.5 },
-                  scale: { type: 'spring', stiffness: 220, damping: 24, mass: 0.5 },
-                  rotate: { type: 'spring', stiffness: 180, damping: 18, mass: 0.5 },
-                }
-              : {
-                  opacity: { duration: 0.28, ease: [0.16, 1, 0.3, 1] },
-                  y: { type: 'spring', stiffness: 190, damping: 20, mass: 0.75 },
-                  scale: { type: 'spring', stiffness: 180, damping: 20, mass: 0.8 },
-                  rotateX: { type: 'spring', stiffness: 170, damping: 17, mass: 0.8 },
-                  rotateY: { type: 'spring', stiffness: 170, damping: 18, mass: 0.8 },
-                  rotate: { type: 'spring', stiffness: 145, damping: 13, mass: 0.8 },
-                }
-            : {
-                opacity: { duration: 0.2, ease: 'easeIn' },
-                y: { duration: 0.24, ease: 'easeIn' },
-                scale: { duration: 0.24, ease: 'easeIn' },
-                rotate: { duration: 0.24, ease: 'easeIn' },
+                opacity: { duration: 0.22, ease: 'easeOut' },
+                y: { type: 'spring', stiffness: 220, damping: 24, mass: 0.5 },
+                scale: { type: 'spring', stiffness: 220, damping: 24, mass: 0.5 },
+                rotate: { type: 'spring', stiffness: 180, damping: 18, mass: 0.5 },
               }
+              : {
+                opacity: { duration: 0.28, ease: [0.16, 1, 0.3, 1] },
+                y: { type: 'spring', stiffness: 190, damping: 20, mass: 0.75 },
+                scale: { type: 'spring', stiffness: 180, damping: 20, mass: 0.8 },
+                rotateX: { type: 'spring', stiffness: 170, damping: 17, mass: 0.8 },
+                rotateY: { type: 'spring', stiffness: 170, damping: 18, mass: 0.8 },
+                rotate: { type: 'spring', stiffness: 145, damping: 13, mass: 0.8 },
+              }
+            : {
+              opacity: { duration: 0.2, ease: 'easeIn' },
+              y: { duration: 0.24, ease: 'easeIn' },
+              scale: { duration: 0.24, ease: 'easeIn' },
+              rotate: { duration: 0.24, ease: 'easeIn' },
+            }
         }
         style={{
           transformOrigin: '50% 22px',
@@ -294,10 +294,10 @@ const StickyNoteCard = ({
           animate={
             isRevealed
               ? {
-                  rotate: stackMiddleRotate,
-                  x: isRtl ? (isMobile ? 1.5 : 2) : (isMobile ? -1.5 : -2),
-                  y: isMobile ? 2 : 2.5,
-                }
+                rotate: stackMiddleRotate,
+                x: isRtl ? (isMobile ? 1.5 : 2) : (isMobile ? -1.5 : -2),
+                y: isMobile ? 2 : 2.5,
+              }
               : { rotate: 0, x: 0, y: 0 }
           }
           transition={
@@ -397,17 +397,17 @@ const StickyNoteCard = ({
             transition={
               isRevealed
                 ? {
-                    type: 'spring',
-                    stiffness: 360,
-                    damping: 20,
-                    mass: 0.55,
-                    delay: 0.08,
-                    opacity: { duration: 0.16, delay: 0.06 },
-                  }
+                  type: 'spring',
+                  stiffness: 360,
+                  damping: 20,
+                  mass: 0.55,
+                  delay: 0.08,
+                  opacity: { duration: 0.16, delay: 0.06 },
+                }
                 : {
-                    duration: 0.18,
-                    ease: [0.4, 0, 1, 1],
-                  }
+                  duration: 0.18,
+                  ease: [0.4, 0, 1, 1],
+                }
             }
           >
             <Pushpin color={step.pinColor} isMobile={isMobile} />
@@ -691,7 +691,7 @@ const HowItWorks = () => {
               setStepsData(mapped);
               try {
                 localStorage.setItem('portfolio_workflow', JSON.stringify(mapped));
-              } catch {}
+              } catch { }
             }
           }
         }
@@ -740,29 +740,21 @@ const HowItWorks = () => {
   return (
     <section
       id="workflow"
-      className="relative isolate scroll-mt-24 py-10 sm:py-14 md:py-18 px-4 sm:px-6 lg:px-8 bg-transparent overflow-x-hidden overflow-y-visible"
+      className="relative isolate scroll-mt-24 py-12 sm:py-14 md:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-transparent overflow-x-hidden overflow-y-visible"
       aria-label="Engineering process and workflow"
     >
-      {/* ── Seamless Dot Grid Background System ── */}
+      {/* ── Seamless Dot Grid Background System (Crisp & Visible on All Displays) ── */}
       <div
-        className="absolute inset-0 pointer-events-none z-0 overflow-hidden select-none [transform:translateZ(0)]"
-        style={!isMobile ? {
-          maskImage: 'linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%)',
-          WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%)',
-        } : undefined}
+        className="absolute inset-0 pointer-events-none z-0 overflow-hidden select-none"
         aria-hidden="true"
       >
         {/* Pure, plain Dot Grid Pattern Layer */}
         <div
-          className="absolute inset-0 [background-size:24px_24px] bg-[radial-gradient(circle_at_center,rgba(15,23,42,0.22)_1.25px,transparent_1.25px)] dark:bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.18)_1.25px,transparent_1.25px)]"
+          className="absolute inset-0 [background-size:24px_24px] bg-[radial-gradient(circle_at_center,rgba(15,23,42,0.22)_1.25px,transparent_1.25px)] dark:bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.2)_1.25px,transparent_1.25px)]"
         />
-        {/* On mobile: lightweight CSS fade overlays instead of expensive full-screen GPU maskImage */}
-        {isMobile && (
-          <>
-            <div className="absolute top-0 inset-x-0 h-16 bg-gradient-to-b from-background to-transparent pointer-events-none" />
-            <div className="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-background to-transparent pointer-events-none" />
-          </>
-        )}
+        {/* Universal smooth top & bottom blend into page background */}
+        <div className="absolute top-0 inset-x-0 h-20 sm:h-28 md:h-36 bg-gradient-to-b from-background to-transparent pointer-events-none" />
+        <div className="absolute bottom-0 inset-x-0 h-20 sm:h-28 md:h-36 bg-gradient-to-t from-background to-transparent pointer-events-none" />
       </div>
 
       <div className="max-w-5xl mx-auto relative z-10">

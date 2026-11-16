@@ -123,17 +123,17 @@ const AboutSection = () => {
   return (
     <section
       id="about"
-      className="scroll-mt-24 py-12 sm:py-16 md:py-20 bg-transparent overflow-hidden"
+      className="scroll-mt-24 py-12 sm:py-14 md:py-16 lg:py-20 bg-transparent overflow-hidden"
       aria-label="About me"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        {/* ── 12-Column Main Grid (Both Left & Right aligned at the exact same horizontal level) ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-16 items-start">
+        {/* ── 12-Column Main Grid on Desktop (xl), Stacked Title + 2-col Cards on Tablets (including iPad Pro) & Mobile ── */}
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 sm:gap-10 xl:gap-16 items-start">
 
-          {/* ── Left Column: 5 cols — Title & Bio ── */}
+          {/* ── Title & Bio Column: Full-width on mobile/tablets, 5 cols on desktop ── */}
           <motion.div
-            className={`flex flex-col gap-5 sm:gap-6 lg:gap-7 lg:pt-[70px] ${displayCards.length > 0 ? 'lg:col-span-5' : 'lg:col-span-8'}`}
+            className={`flex flex-col gap-5 sm:gap-6 xl:gap-7 xl:pt-[54px] ${displayCards.length > 0 ? 'xl:col-span-5' : 'xl:col-span-8'}`}
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"
@@ -158,7 +158,7 @@ const AboutSection = () => {
                     {displayBio1}
                   </p>
                   {displayBio2 && (
-                    <p className="text-base text-muted-foreground leading-relaxed">
+                    <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
                       {displayBio2}
                     </p>
                   )}
@@ -171,16 +171,16 @@ const AboutSection = () => {
             </FadeContent>
           </motion.div>
 
-          {/* ── Right Column: 7 cols — Bento Cards (Rendered ONLY if data exists) ── */}
+          {/* ── Bento Cards Column: Full-width on mobile/tablets, 7 cols on desktop (xl) ── */}
           {displayCards.length > 0 && (
             <motion.div
-              className="lg:col-span-7 lg:pt-[70px]"
+              className="xl:col-span-7 xl:pt-[54px]"
               variants={containerVariants}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, margin: '-100px' }}
             >
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5 lg:gap-6">
               {displayCards.map((card, i) => (
                 <motion.div
                   key={card.id || i}

@@ -27,15 +27,20 @@ interface FAQProps {
   [key: string]: any;
 }
 
-const FAQHeader = ({ title }: { title: string; subtitle?: string }) => (
-  <div className="relative z-10 flex flex-col items-start justify-start mb-6 sm:mb-10 lg:mb-12">
-    <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight leading-[1.15] text-foreground">
+const FAQHeader = ({ title, subtitle }: { title: string; subtitle?: string }) => (
+  <div className="relative z-10 flex flex-col items-start justify-start mb-6 sm:mb-8 md:mb-10">
+    <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight leading-[1.15] text-foreground mb-2 sm:mb-3">
       <SplitText
         text={title}
         delay={35}
         duration={0.45}
       />
     </h2>
+    {subtitle && (
+      <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-2xl">
+        {subtitle}
+      </p>
+    )}
   </div>
 );
 
@@ -55,7 +60,7 @@ const FAQTabs = ({
         key={key}
         onClick={() => setSelected(key)}
         className={cn(
-          'relative shrink-0 overflow-hidden whitespace-nowrap rounded-full border px-3.5 sm:px-5 py-2 sm:py-2 text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer select-none active:scale-[0.98]',
+          'relative shrink-0 overflow-hidden whitespace-nowrap rounded-xl border px-3.5 sm:px-5 py-2 sm:py-2 text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer select-none active:scale-[0.98]',
           selected === key
             ? 'border-emerald-500/60 text-white shadow-md shadow-emerald-500/25 sm:-translate-y-0.5'
             : 'border-border/80 dark:border-white/10 bg-card/40 dark:bg-white/[0.03] text-muted-foreground hover:text-foreground hover:border-emerald-500/40 sm:hover:-translate-y-0.5'
@@ -185,7 +190,7 @@ export const FAQ = ({
   return (
     <section
       className={cn(
-        'scroll-mt-24 relative overflow-hidden bg-transparent px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20',
+        'scroll-mt-24 relative overflow-hidden bg-transparent px-4 sm:px-6 lg:px-8 py-12 sm:py-14 md:py-16 lg:py-20',
         className
       )}
       {...props}

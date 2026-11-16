@@ -52,23 +52,32 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
     return reviews.filter(r => r.isEnabled !== false);
   }, [reviews]);
 
-  // Responsive visible cards count calculation
-  const [visibleCount, setVisibleCount] = useState(3);
+  // Responsive visible cards count calculation (1.18 on mobile so adjacent card peeks into view)
+  const [visibleCount, setVisibleCount] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const w = window.innerWidth;
+      if (w < 640) return 1.18;
+      if (w < 1024) return 2;
+      return 3;
+    }
+    return 3;
+  });
+
   useEffect(() => {
     const handleResize = () => {
       const w = window.innerWidth;
       if (w < 640) {
-        setVisibleCount(1);
+        setVisibleCount(activeReviews.length > 1 ? 1.18 : 1);
       } else if (w < 1024) {
-        setVisibleCount(2);
+        setVisibleCount(activeReviews.length > 1 ? 2 : 1);
       } else {
-        setVisibleCount(3);
+        setVisibleCount(Math.min(activeReviews.length, 3));
       }
     };
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [activeReviews.length]);
 
   // Base list guarantees sufficient length for seamless infinite sliding
   const baseList = useMemo(() => {
@@ -93,6 +102,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
   const [isTransitionEnabled, setIsTransitionEnabled] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
   const touchStartXRef = useRef<number | null>(null);
+  const touchMovedRef = useRef<boolean>(false);
 
   useEffect(() => {
     if (batchSize > 0) {
@@ -156,7 +166,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
     : -(currentIndex * cardWidthPercent);
 
   return (
-    <section id="reviews" className="scroll-mt-24 pt-12 sm:pt-16 md:pt-20 pb-16 sm:pb-20 relative w-full overflow-hidden">
+    <section id="reviews" className="scroll-mt-24 py-12 sm:py-14 md:py-16 lg:py-20 relative w-full overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* ── Section Header (Title & Subtitle) ── */}
@@ -186,25 +196,25 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
 
         {/* ── Continuous Carousel Slider Area with Side Navigation Arrows ── */}
         <div className="relative w-full">
-          {/* Side Navigation Arrow: Left (Balanced positioning: neither touching cards nor page edges) */}
+          {/* Side Navigation Arrow: Left (Balanced positioning: neither touching cards nor page edges - Hidden on Mobile) */}
           {activeReviews.length > 1 && (
             <button
               type="button"
               onClick={isAr ? handleNext : handlePrev}
               aria-label={isAr ? "التالي" : "Previous review"}
-              className="absolute -left-2 sm:-left-5 md:-left-6 lg:-left-7 xl:-left-8 top-[calc(50%+14px)] -translate-y-1/2 z-30 w-7 h-7 rounded-full border border-zinc-200/90 dark:border-white/[0.12] bg-white/95 dark:bg-zinc-900/90 backdrop-blur-md hover:bg-white dark:hover:bg-zinc-800 text-foreground flex items-center justify-center transition-all duration-200 shadow-md hover:shadow-lg dark:shadow-[0_4px_20px_rgba(0,0,0,0.5)] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 cursor-pointer"
+              className="hidden sm:flex absolute -left-2 sm:-left-5 md:-left-6 lg:-left-7 xl:-left-8 top-[calc(50%+14px)] -translate-y-1/2 z-30 w-7 h-7 rounded-full border border-zinc-200/90 dark:border-white/[0.12] bg-white/95 dark:bg-zinc-900/90 backdrop-blur-md hover:bg-white dark:hover:bg-zinc-800 text-foreground items-center justify-center transition-all duration-200 shadow-md hover:shadow-lg dark:shadow-[0_4px_20px_rgba(0,0,0,0.5)] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 cursor-pointer"
             >
               <ChevronLeft size={14} strokeWidth={2.2} />
             </button>
           )}
 
-          {/* Side Navigation Arrow: Right (Balanced positioning: neither touching cards nor page edges) */}
+          {/* Side Navigation Arrow: Right (Balanced positioning: neither touching cards nor page edges - Hidden on Mobile) */}
           {activeReviews.length > 1 && (
             <button
               type="button"
               onClick={isAr ? handlePrev : handleNext}
               aria-label={isAr ? "السابق" : "Next review"}
-              className="absolute -right-2 sm:-right-5 md:-right-6 lg:-right-7 xl:-right-8 top-[calc(50%+14px)] -translate-y-1/2 z-30 w-7 h-7 rounded-full border border-zinc-200/90 dark:border-white/[0.12] bg-white/95 dark:bg-zinc-900/90 backdrop-blur-md hover:bg-white dark:hover:bg-zinc-800 text-foreground flex items-center justify-center transition-all duration-200 shadow-md hover:shadow-lg dark:shadow-[0_4px_20px_rgba(0,0,0,0.5)] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 cursor-pointer"
+              className="hidden sm:flex absolute -right-2 sm:-right-5 md:-right-6 lg:-right-7 xl:-right-8 top-[calc(50%+14px)] -translate-y-1/2 z-30 w-7 h-7 rounded-full border border-zinc-200/90 dark:border-white/[0.12] bg-white/95 dark:bg-zinc-900/90 backdrop-blur-md hover:bg-white dark:hover:bg-zinc-800 text-foreground items-center justify-center transition-all duration-200 shadow-md hover:shadow-lg dark:shadow-[0_4px_20px_rgba(0,0,0,0.5)] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 cursor-pointer"
             >
               <ChevronRight size={14} strokeWidth={2.2} />
             </button>
@@ -219,6 +229,15 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
               setIsPaused(true);
               if (e.touches.length === 1) {
                 touchStartXRef.current = e.touches[0].clientX;
+                touchMovedRef.current = false;
+              }
+            }}
+            onTouchMove={(e) => {
+              if (touchStartXRef.current !== null && e.touches.length === 1) {
+                const deltaX = Math.abs(e.touches[0].clientX - touchStartXRef.current);
+                if (deltaX > 8) {
+                  touchMovedRef.current = true;
+                }
               }
             }}
             onTouchEnd={(e) => {
@@ -254,12 +273,24 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
               const roleText = isAr ? (review.roleAr || review.role) : review.role;
               const reviewText = isAr ? (review.contentAr || review.content) : review.content;
               const initialLetter = nameText?.trim()?.[0]?.toUpperCase() || 'U';
+              const isCurrent = index === currentIndex;
 
               return (
                 <div
                   key={`${review.id || 'rev'}-${index}`}
-                  className="px-2.5 sm:px-3 flex-shrink-0 flex flex-col"
+                  className={cn(
+                    "px-2.5 sm:px-3 flex-shrink-0 flex flex-col transition-opacity duration-300",
+                    visibleCount < 2 && !isCurrent ? "cursor-pointer opacity-75 sm:opacity-100" : "opacity-100"
+                  )}
                   style={{ width: `${cardWidthPercent}%` }}
+                  onClick={(e) => {
+                    if (touchMovedRef.current) return;
+                    if ((e.target as HTMLElement).closest('a, button')) return;
+                    if (visibleCount < 2 && !isCurrent) {
+                      setIsTransitionEnabled(true);
+                      setCurrentIndex(index);
+                    }
+                  }}
                 >
                   {/* Card Container */}
                   <div
@@ -371,14 +402,18 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
                     const currentBatchBase = Math.floor(currentIndex / activeReviews.length) * activeReviews.length;
                     setCurrentIndex(currentBatchBase + idx);
                   }}
-                  aria-label={`Go to slide ${idx + 1}`}
-                  className={cn(
-                    "h-2 rounded-full transition-all duration-300 focus:outline-none",
-                    activeDotIndex === idx
-                      ? "w-6 bg-emerald-500"
-                      : "w-2 bg-border hover:bg-muted-foreground/50"
-                  )}
-                />
+                  aria-label={isAr ? `الانتقال إلى الرأي ${idx + 1}` : `Go to slide ${idx + 1}`}
+                  className="p-1 focus:outline-none cursor-pointer"
+                >
+                  <span
+                    className={cn(
+                      "block h-2 rounded-full transition-all duration-300",
+                      activeDotIndex === idx
+                        ? "w-6 bg-emerald-500 shadow-xs"
+                        : "w-2 bg-border dark:bg-white/20 hover:bg-muted-foreground/50"
+                    )}
+                  />
+                </button>
               );
             })}
           </div>

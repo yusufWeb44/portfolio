@@ -67,20 +67,22 @@ const DEFAULT_SKILLS = [
   { name: 'Postman', nameAr: 'Postman', description: 'API testing, automated request collections, debugging, and endpoint documentation.', descriptionAr: 'اختبار واجهات البرمجة (APIs)، تتبع الأخطاء، وتوثيق نقاط الاتصال لضمان موثوقية الربط مع الخوادم.' },
 ];
 
-/* ─── Floating Tooltip Window (Above the skill with pointed arrow) ── */
+/* ─── Floating Tooltip Window (Above the skill with pointed arrow, smart flip if near top) ── */
 const FloatingTooltip = ({ skill, isAr }: { skill: HoveredSkillData; isAr: boolean }) => {
-  // Compact, sleeker tooltip width
-  const tooltipWidth = 240;
+  // Compact, sleeker tooltip width with mobile safety margins
+  const tooltipWidth = typeof window !== 'undefined' ? Math.min(260, window.innerWidth - 32) : 260;
   const halfW = tooltipWidth / 2;
 
-  // Float directly above the skill capsule with 6px clearance
-  const topPos = skill.rect.top - 6;
+  // Check if pill is too close to top of viewport (e.g. within 140px of top)
+  const isNearTop = skill.rect.top < 140;
+  const topPos = isNearTop ? skill.rect.bottom + 8 : skill.rect.top - 8;
 
   // X-position clamped inside screen margins
   const pillCenterX = skill.rect.left + skill.rect.width / 2;
+  const screenW = typeof window !== 'undefined' ? window.innerWidth : 390;
   const clampedX = Math.max(
-    halfW + 12,
-    Math.min(window.innerWidth - halfW - 12, pillCenterX)
+    halfW + 16,
+    Math.min(screenW - halfW - 16, pillCenterX)
   );
 
   // Arrow offset relative to tooltip center, safely clamped within tooltip bounds
@@ -89,10 +91,10 @@ const FloatingTooltip = ({ skill, isAr }: { skill: HoveredSkillData; isAr: boole
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.94, x: '-50%', y: '-100%' }}
-      animate={{ opacity: 1, scale: 1, x: '-50%', y: '-100%' }}
-      exit={{ opacity: 0, scale: 0.94, x: '-50%', y: '-100%' }}
-      transition={{ duration: 0.14, ease: 'easeOut' }}
+      initial={{ opacity: 0, scale: 0.94, x: '-50%', y: isNearTop ? '0%' : '-100%' }}
+      animate={{ opacity: 1, scale: 1, x: '-50%', y: isNearTop ? '0%' : '-100%' }}
+      exit={{ opacity: 0, scale: 0.94, x: '-50%', y: isNearTop ? '0%' : '-100%' }}
+      transition={{ duration: 0.16, ease: 'easeOut' }}
       className="fixed pointer-events-none z-[99999]"
       style={{
         top: `${topPos}px`,
@@ -102,7 +104,7 @@ const FloatingTooltip = ({ skill, isAr }: { skill: HoveredSkillData; isAr: boole
     >
       <div
         dir={isAr ? 'rtl' : 'ltr'}
-        className="bg-popover dark:bg-[#121417] border border-border/80 dark:border-white/10 p-2.5 sm:p-3 rounded-xl shadow-[0_10px_25px_rgba(0,0,0,0.08)] dark:shadow-[0_16px_32px_rgba(0,0,0,0.85)] text-start relative select-none backdrop-blur-md"
+        className="bg-popover dark:bg-[#121417] border border-border/80 dark:border-white/10 p-2.5 sm:p-3 rounded-xl shadow-[0_10px_25px_rgba(0,0,0,0.12)] dark:shadow-[0_16px_32px_rgba(0,0,0,0.85)] text-start relative select-none backdrop-blur-md"
       >
         {/* Tooltip Header: Skill Brand Icon & English Name */}
         <div className="flex items-center gap-2 mb-1.5 pb-1.5 border-b border-border/40">
@@ -119,12 +121,12 @@ const FloatingTooltip = ({ skill, isAr }: { skill: HoveredSkillData; isAr: boole
           {skill.description}
         </p>
 
-        {/* Sharp Pointed / Tapered Arrow at bottom (سهم مدبب يلامس البويضة) */}
+        {/* Sharp Pointed / Tapered Arrow (Points down if above pill, points up if below pill) */}
         <div
-          className="absolute top-full -mt-[1px] pointer-events-none"
+          className={`absolute pointer-events-none ${isNearTop ? 'bottom-full -mb-[1px]' : 'top-full -mt-[1px]'}`}
           style={{
             left: `calc(50% + ${arrowOffset}px)`,
-            transform: 'translateX(-50%)',
+            transform: `translateX(-50%) ${isNearTop ? 'rotate(180deg)' : ''}`,
           }}
         >
           <svg width="16" height="8" viewBox="0 0 16 8" className="block overflow-visible">
@@ -149,7 +151,7 @@ const FloatingTooltip = ({ skill, isAr }: { skill: HoveredSkillData; isAr: boole
   );
 };
 
-/* ─── Infinite Marquee Row with Scroll Acceleration ──────────────── */
+/* ─── Infinite Marquee Row with 60fps GPU Compositing ──────────────── */
 interface MarqueeRowProps {
   skills: TechItem[];
   direction: 1 | -1;
@@ -157,6 +159,7 @@ interface MarqueeRowProps {
   velocityFactor: any;
   isPaused: boolean;
   onHover: (data: HoveredSkillData) => void;
+  onToggle: (skill: TechItem, e: React.MouseEvent) => void;
   onLeave: () => void;
 }
 
@@ -167,19 +170,20 @@ const SkillMarqueeRow = ({
   velocityFactor,
   isPaused,
   onHover,
+  onToggle,
   onLeave,
 }: MarqueeRowProps) => {
   const baseX = useMotionValue(0);
-  const x = useTransform(baseX, (v) => `${wrap(-25, 0, v)}%`);
+  const x = useTransform(baseX, (v) => `${wrap(-50, 0, v)}%`);
 
   useAnimationFrame((_t, delta) => {
-    // When hovering over any skill, row pauses so user can read tooltip comfortably
+    // When hovering or tapping a skill, row pauses so user can read tooltip comfortably
     if (isPaused) return;
 
     // delta is time in ms (~16.6ms at 60fps)
-    const extraVelocity = Math.abs(velocityFactor.get());
-    // Smooth dynamic scroll acceleration
-    const speedMultiplier = 1 + Math.min(extraVelocity, 15) * 1.6;
+    const extraVelocity = velocityFactor ? Math.abs(velocityFactor.get()) : 0;
+    // Clamped lightweight velocity acceleration
+    const speedMultiplier = 1 + Math.min(extraVelocity, 8) * 1.2;
     const moveBy = direction * baseSpeed * speedMultiplier * (delta / 1000);
     baseX.set(baseX.get() + moveBy);
   });
@@ -187,12 +191,12 @@ const SkillMarqueeRow = ({
   if (skills.length === 0) return null;
 
   return (
-    <div className="flex overflow-hidden select-none py-1">
+    <div className="flex select-none py-1">
       <motion.div className="flex shrink-0 will-change-transform" style={{ x }}>
-        {[0, 1, 2, 3].map((copyIndex) => (
+        {[0, 1].map((copyIndex) => (
           <div
             key={copyIndex}
-            className="flex shrink-0 items-center gap-3 sm:gap-4 pr-3 sm:pr-4"
+            className="flex shrink-0 items-center gap-2.5 sm:gap-4 pr-2.5 sm:pr-4"
           >
             {skills.map((skill, sIdx) => (
               <SkillPill
@@ -208,16 +212,7 @@ const SkillMarqueeRow = ({
                   });
                 }}
                 onMouseLeave={onLeave}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  onHover({
-                    label: skill.label,
-                    originalName: skill.originalName,
-                    description: skill.description,
-                    rect,
-                  });
-                }}
+                onClick={(e) => onToggle(skill, e)}
               />
             ))}
           </div>
@@ -231,6 +226,15 @@ const SkillMarqueeRow = ({
 const InfiniteSkillsMarquee = ({ items, isAr }: { items: TechItem[]; isAr: boolean }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isInView, setIsInView] = useState(false);
+  const [viewportWidth, setViewportWidth] = useState(() => typeof window !== 'undefined' ? window.innerWidth : 1200);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setViewportWidth(window.innerWidth);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -238,7 +242,7 @@ const InfiniteSkillsMarquee = ({ items, isAr }: { items: TechItem[]; isAr: boole
       ([entry]) => {
         setIsInView(entry.isIntersecting);
       },
-      { rootMargin: '150px 0px' }
+      { rootMargin: '100px 0px' }
     );
     observer.observe(containerRef.current);
     return () => observer.disconnect();
@@ -256,21 +260,57 @@ const InfiniteSkillsMarquee = ({ items, isAr }: { items: TechItem[]; isAr: boole
 
   const [activeHover, setActiveHover] = useState<HoveredSkillData | null>(null);
 
-  // Close tooltip on page scroll or outside tap so marquee accelerates cleanly
+  // Close tooltip on page scroll or outside click/tap
   useEffect(() => {
     if (!activeHover) return;
-    const handleDismiss = () => setActiveHover(null);
-    window.addEventListener('scroll', handleDismiss, { passive: true });
-    window.addEventListener('pointerdown', handleDismiss, { passive: true });
+    const handleDismiss = (e: MouseEvent | TouchEvent) => {
+      if ((e.target as HTMLElement).closest('.group\\/pill')) return;
+      setActiveHover(null);
+    };
+    const handleScroll = () => setActiveHover(null);
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('click', handleDismiss);
+    window.addEventListener('touchend', handleDismiss);
     return () => {
-      window.removeEventListener('scroll', handleDismiss);
-      window.removeEventListener('pointerdown', handleDismiss);
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('click', handleDismiss);
+      window.removeEventListener('touchend', handleDismiss);
     };
   }, [activeHover]);
 
-  // Stagger items into 5 rows (or 4 if few items)
+  const handleToggle = (skill: TechItem, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (activeHover?.label === skill.label) {
+      setActiveHover(null);
+      return;
+    }
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    setActiveHover({
+      label: skill.label,
+      originalName: skill.originalName,
+      description: skill.description,
+      rect,
+    });
+  };
+
+  // Dynamic row splitting:
+  // - Mobile (< 768px): 3 rows
+  // - Tablets & Large iPads (768px <= width < 1280px): exactly 4 rows (eliminates item repetition across wide tablet screen)
+  // - Desktop (>= 1280px): 5 rows (in the 7-col side-by-side grid)
   const rows = useMemo(() => {
-    const numRows = items.length >= 15 ? 5 : 4;
+    const isMobile = viewportWidth < 768;
+    const isTablet = viewportWidth >= 768 && viewportWidth < 1280;
+
+    let numRows = 4;
+    if (isMobile) {
+      numRows = 3;
+    } else if (isTablet) {
+      numRows = 4;
+    } else {
+      numRows = items.length >= 15 ? 5 : 4;
+    }
+
     const result: TechItem[][] = Array.from({ length: numRows }, () => []);
     if (items.length === 0) return result;
 
@@ -279,7 +319,7 @@ const InfiniteSkillsMarquee = ({ items, isAr }: { items: TechItem[]; isAr: boole
     });
 
     return result;
-  }, [items]);
+  }, [items, viewportWidth]);
 
   // Alternating directions and organic base speeds for natural depth
   const rowConfigs: Array<{ direction: 1 | -1; baseSpeed: number }> = [
@@ -290,12 +330,22 @@ const InfiniteSkillsMarquee = ({ items, isAr }: { items: TechItem[]; isAr: boole
     { direction: -1, baseSpeed: 1.5 },
   ];
 
+  // 100% WebKit/Safari compatible multi-stop percentage alpha mask (zero calc() syntax issues)
+  const maskGradient = 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.15) 1.5%, rgba(0,0,0,0.5) 3.5%, rgba(0,0,0,0.85) 6%, black 9%, black 91%, rgba(0,0,0,0.85) 94%, rgba(0,0,0,0.5) 96.5%, rgba(0,0,0,0.15) 98.5%, transparent 100%)';
+
   return (
     <div
       ref={containerRef}
       dir="ltr"
-      className="w-full relative overflow-hidden flex flex-col gap-2.5 sm:gap-3 py-2 [mask-image:linear-gradient(to_right,transparent_0%,black_3%,black_97%,transparent_100%)]"
+      className="w-full relative overflow-hidden flex flex-col gap-2.5 sm:gap-3 py-2 isolate"
+      style={{
+        maskImage: maskGradient,
+        WebkitMaskImage: maskGradient,
+      }}
     >
+      {/* Edge fade overlays for 100% seamless background blending across all iPad & mobile browsers */}
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-8 sm:w-14 md:w-20 bg-gradient-to-r from-background via-background/60 to-transparent z-10" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-8 sm:w-14 md:w-20 bg-gradient-to-l from-background via-background/60 to-transparent z-10" />
       {rows.map((rowSkills, rIdx) => {
         const config = rowConfigs[rIdx % rowConfigs.length];
         return (
@@ -307,7 +357,13 @@ const InfiniteSkillsMarquee = ({ items, isAr }: { items: TechItem[]; isAr: boole
             velocityFactor={velocityFactor}
             isPaused={activeHover !== null || !isInView}
             onHover={setActiveHover}
-            onLeave={() => setActiveHover(null)}
+            onToggle={handleToggle}
+            onLeave={() => {
+              // On desktop mouse leave, close tooltip
+              if (typeof window !== 'undefined' && window.matchMedia('(hover: hover)').matches) {
+                setActiveHover(null);
+              }
+            }}
           />
         );
       })}
@@ -438,15 +494,15 @@ const SkillsSection = () => {
   return (
     <section
       id="skills"
-      className="scroll-mt-24 py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-transparent overflow-x-clip"
+      className="scroll-mt-24 py-12 sm:py-14 md:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-transparent overflow-x-clip"
       aria-label="Skills and expertise"
     >
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-8 items-start">
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 sm:gap-10 xl:gap-12 items-start">
 
-          {/* ── Left Column (5 cols) - Preserved exactly as requested ── */}
+          {/* ── Left Column (5 cols on desktop, full width on tablets & mobile) ── */}
           <motion.div
-            className="lg:col-span-5 flex flex-col gap-5 sm:gap-6 lg:gap-7"
+            className="xl:col-span-5 flex flex-col gap-5 sm:gap-6 xl:gap-7 max-w-3xl xl:max-w-none"
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"
@@ -476,7 +532,7 @@ const SkillsSection = () => {
                     {p1}
                   </p>
                   {p2 && (
-                    <p className="text-base text-muted-foreground leading-relaxed whitespace-pre-line">
+                    <p className="text-base md:text-lg text-muted-foreground leading-relaxed whitespace-pre-line">
                       {p2}
                     </p>
                   )}
@@ -517,8 +573,8 @@ const SkillsSection = () => {
             )}
           </motion.div>
 
-          {/* ── Right Column (7 cols): Infinite Horizontal Scroll Marquee ── */}
-          <div className="w-full lg:col-span-7 -mt-2 lg:-mt-3 overflow-hidden">
+          {/* ── Right Column (7 cols on desktop, full width on tablets & mobile): Infinite Horizontal Scroll Marquee ── */}
+          <div className="w-full xl:col-span-7 -mt-2 xl:-mt-3">
             {skillsItems.length > 0 ? (
               <InfiniteSkillsMarquee items={skillsItems} isAr={isAr} />
             ) : (

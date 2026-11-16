@@ -98,7 +98,7 @@ const ProjectMediaVisual = ({
   );
 };
 
-/* ─── Mobile Project Card Component (Clean, Natural In-Flow Card) ─── */
+/* ─── Mobile & Tablet Project Card Component (Clean, Natural In-Flow Card) ─── */
 const MobileProjectCard = ({
   project,
   i,
@@ -115,34 +115,34 @@ const MobileProjectCard = ({
   const formattedNumber = String(i + 1).padStart(2, '0');
 
   return (
-    <div className="w-full rounded-2xl border border-slate-200/90 dark:border-white/[0.12] bg-background dark:bg-zinc-950/80 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.08),0_12px_36px_-4px_rgba(0,0,0,0.14)] dark:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.8)] overflow-hidden">
+    <div className="w-full rounded-2xl md:rounded-3xl border border-slate-200/90 dark:border-white/[0.12] bg-background dark:bg-zinc-950/80 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.08),0_12px_36px_-4px_rgba(0,0,0,0.14)] dark:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.8)] overflow-hidden transition-all duration-300 hover:border-slate-300 dark:hover:border-white/20">
       {/* 1. Cover Image at Top (Clean, without overlaid badge) */}
-      <div className="relative w-full aspect-[16/10] overflow-hidden bg-muted/20 border-b border-slate-200/70 dark:border-white/[0.08]">
+      <div className="relative w-full aspect-[16/10] sm:aspect-[16/9] overflow-hidden bg-muted/20 border-b border-slate-200/70 dark:border-white/[0.08] group">
         {coverImage ? (
           <img
             src={getMediaUrl(coverImage)}
             alt={project.title}
-            width={700}
-            height={450}
-            className="w-full h-full object-cover select-none"
+            width={900}
+            height={500}
+            className="w-full h-full object-cover select-none transition-transform duration-700 group-hover:scale-105"
             loading="lazy"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-zinc-900 to-zinc-950">
-            <span className="font-mono text-xs text-white/40 uppercase tracking-widest">{project.title}</span>
+            <span className="font-mono text-xs md:text-sm text-white/40 uppercase tracking-widest">{project.title}</span>
           </div>
         )}
       </div>
 
-      {/* 2. Content Body (Matching Desktop structure, numbering & labels 1:1) */}
-      <div className={`p-4 sm:p-5 flex flex-col ${isAr ? 'text-right' : 'text-left'}`}>
-        {/* Numbering + Category + Year: Exactly like Desktop */}
-        <div className="flex items-baseline gap-2.5 mb-1.5 justify-start">
-          <span className="text-xl sm:text-2xl font-black font-sans tracking-tight text-foreground dark:text-white leading-none select-none">
+      {/* 2. Content Body (Matching Desktop structure, numbering & labels 1:1, perfectly scaled for phone & tablet) */}
+      <div className={`p-4 sm:p-5 md:p-6 lg:p-7 flex flex-col ${isAr ? 'text-right' : 'text-left'}`}>
+        {/* Numbering + Category + Year */}
+        <div className="flex items-baseline gap-2.5 sm:gap-3 mb-1.5 md:mb-2 justify-start">
+          <span className="text-xl sm:text-2xl md:text-3xl font-black font-sans tracking-tight text-foreground dark:text-white leading-none select-none">
             {formattedNumber}
           </span>
           {(project.year || displayCategory) && (
-            <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-muted-foreground/80 dark:text-zinc-400 inline-flex items-center gap-1.5 truncate">
+            <span className="text-[11px] sm:text-xs md:text-[13px] font-mono font-bold uppercase tracking-wider text-muted-foreground/80 dark:text-zinc-400 inline-flex items-center gap-1.5 truncate">
               {displayCategory && <span className="truncate">{displayCategory}</span>}
               {displayCategory && project.year && <span className="text-muted-foreground/50">•</span>}
               {project.year && <span dir="ltr">{project.year}</span>}
@@ -150,23 +150,23 @@ const MobileProjectCard = ({
           )}
         </div>
 
-        {/* Title: Exactly like Desktop */}
-        <h3 className="text-lg sm:text-xl font-bold tracking-tight text-foreground dark:text-white mb-2 leading-snug">
+        {/* Title */}
+        <h3 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight text-foreground dark:text-white mb-2 md:mb-2.5 leading-snug">
           {displayTitle}
         </h3>
 
-        {/* Description / Bio: Exactly like Desktop */}
-        <p className="text-xs sm:text-[13px] text-muted-foreground dark:text-zinc-300 leading-relaxed line-clamp-4 mb-3 w-full">
+        {/* Description / Bio */}
+        <p className="text-xs sm:text-[13px] md:text-sm lg:text-[14.5px] text-muted-foreground dark:text-zinc-300 leading-relaxed line-clamp-4 md:line-clamp-5 mb-3 md:mb-4 w-full">
           {displayDescription}
         </p>
 
         {/* Technologies Badges */}
         {project.technologies && project.technologies.length > 0 && (
-          <div className="flex flex-wrap items-center gap-1.5 mb-3.5 max-h-[26px] overflow-hidden justify-start">
-            {project.technologies.slice(0, 5).map((tech, tIdx) => (
+          <div className="flex flex-wrap items-center gap-1.5 md:gap-2 mb-3.5 md:mb-4.5 max-h-[26px] md:max-h-[32px] overflow-hidden justify-start">
+            {project.technologies.slice(0, 6).map((tech, tIdx) => (
               <span
                 key={tech.id || tech.name || tIdx}
-                className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] sm:text-[10.5px] font-mono font-medium border border-border/70 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-foreground dark:text-zinc-300 whitespace-nowrap"
+                className="inline-flex items-center px-2 sm:px-2.5 md:px-3 py-0.5 md:py-1 rounded-full text-[10px] sm:text-[10.5px] md:text-xs font-mono font-medium border border-border/70 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-foreground dark:text-zinc-300 whitespace-nowrap"
               >
                 {tech.name}
               </span>
@@ -174,13 +174,13 @@ const MobileProjectCard = ({
           </div>
         )}
 
-        {/* Action Button: Exact same text and styling as Desktop */}
-        <div className="pt-1 flex items-center justify-start">
+        {/* Action Button: Natural suitable size */}
+        <div className="pt-1.5 md:pt-2 flex items-center justify-start">
           <Link
             to={`/projects#${project.slug}`}
             className={cn(
               buttonVariants({ variant: 'primary', size: 'default' }),
-              "w-full sm:w-auto flex items-center justify-center font-bold text-xs sm:text-[13px] tracking-wide shadow-sm py-2 px-4 hover:shadow-[0_8px_20px_rgba(16,185,129,0.22)] dark:hover:shadow-[0_6px_16px_rgba(16,185,129,0.14)]"
+              "w-auto inline-flex items-center justify-center font-bold text-xs sm:text-[13px] md:text-sm tracking-wide shadow-sm py-2 md:py-2.5 px-5 md:px-6 hover:shadow-[0_8px_20px_rgba(16,185,129,0.22)] dark:hover:shadow-[0_6px_16px_rgba(16,185,129,0.14)]"
             )}
           >
             <span>{isAr ? 'عرض دراسة الحالة' : 'VIEW CASE STUDY'}</span>
@@ -289,7 +289,7 @@ const DesktopStackedCard = ({
         className="rounded-2xl border border-slate-200/90 dark:border-white/[0.14] bg-background dark:bg-background shadow-[0_4px_20px_-2px_rgba(0,0,0,0.12),0_12px_36px_-4px_rgba(0,0,0,0.18)] dark:shadow-[0_20px_50px_-10px_rgba(0,0,0,0.9)] overflow-hidden relative w-full"
       >
         {/* Desktop 12-col split */}
-        <div className="grid grid-cols-12 gap-5 lg:gap-6 px-5 lg:px-6 pt-3 lg:pt-3.5 pb-4.5 lg:pb-6 items-stretch md:h-[330px] md:min-h-[330px] md:max-h-[330px] lg:min-h-[355px] lg:max-h-[355px] lg:h-[355px]">
+        <div className="grid grid-cols-12 gap-5 lg:gap-6 px-5 lg:px-6 pt-3 lg:pt-3.5 pb-4.5 lg:pb-6 items-stretch xl:min-h-[355px] xl:max-h-[355px] xl:h-[355px]">
           {/* Details Column (5 cols) */}
           <div
             className={`col-span-5 flex flex-col justify-between h-full min-h-0 ${isAr ? 'text-right' : 'text-left'
@@ -433,18 +433,18 @@ const ProjectsSection = () => {
   const totalCount = projects.length;
   const numCards = deckProjects.length;
 
-  // Track height for Desktop: 70vh per incoming card
-  const trackHeight = numCards === 0 ? 'auto' : (numCards === 1 ? 'auto' : `${100 + (numCards - 1) * 70}vh`);
+  // Track height for Desktop & Tablet: original cinematic 70vh per incoming card ensures smooth, unhurried stacking
+  const trackHeight = numCards <= 1 ? 'auto' : `${100 + (numCards - 1) * 70}vh`;
 
   return (
     <section id="projects" className="scroll-mt-24 relative bg-transparent">
       {/* ═══════════════════════════════════════════════════════════════════
-          MOBILE VIEW (< md): Clean, natural vertical flow without sticky lock
+          MOBILE & TABLET VIEW (< xl): Clean, natural in-flow cards without sticky lock
           ═══════════════════════════════════════════════════════════════════ */}
-      <div className="block md:hidden w-full max-w-xl mx-auto px-4 pt-8 pb-12">
-        {/* Section Header */}
-        <div className="mb-6">
-          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight leading-[1.15] text-foreground mb-1">
+      <div className="block xl:hidden w-full max-w-xl sm:max-w-2xl md:max-w-3xl lg:max-w-4xl mx-auto px-4 sm:px-6 md:px-8 py-12 sm:py-14 md:py-16 lg:py-20">
+        {/* Section Header: Centered on all iPads (md: and lg:), aligned start on phones */}
+        <div className="mb-6 sm:mb-8 md:mb-10 text-start md:text-center flex flex-col md:items-center">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight leading-[1.15] text-foreground mb-2 sm:mb-3 md:text-center">
             <SplitText text={displayTitle} delay={35} duration={0.45} />
           </h2>
           {displaySubtitle && (
@@ -453,24 +453,24 @@ const ProjectsSection = () => {
               text={displaySubtitle}
               animateBy="block"
               delay={20}
-              className="text-sm text-muted-foreground leading-relaxed line-clamp-2"
+              className="text-base md:text-lg text-muted-foreground leading-relaxed line-clamp-2 md:line-clamp-3 md:text-center max-w-2xl md:mx-auto"
             />
           )}
         </div>
 
         {/* Cards Vertical List: Rendered naturally one below the other */}
         {loading ? (
-          <div className="h-[280px] rounded-xl bg-card/40 dark:bg-white/[0.02] border border-border/50 animate-pulse flex items-center justify-center">
+          <div className="h-[280px] md:h-[360px] rounded-2xl md:rounded-3xl bg-card/40 dark:bg-white/[0.02] border border-border/50 animate-pulse flex items-center justify-center">
             <Sparkles className="w-8 h-8 text-emerald-500 animate-spin" />
           </div>
         ) : numCards === 0 ? (
-          <div className="py-12 px-4 text-center border border-dashed border-border/70 rounded-xl bg-card/30">
-            <p className="text-muted-foreground text-sm">
+          <div className="py-12 md:py-16 px-4 text-center border border-dashed border-border/70 rounded-2xl bg-card/30">
+            <p className="text-muted-foreground text-sm md:text-base">
               {isAr ? 'لا توجد مشاريع منشورة حالياً.' : 'No projects published yet.'}
             </p>
           </div>
         ) : (
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-6 sm:gap-7 md:gap-8 lg:gap-10">
             {deckProjects.map((project, i) => (
               <MobileProjectCard
                 key={project.id || `mob_p_${i}`}
@@ -482,14 +482,14 @@ const ProjectsSection = () => {
           </div>
         )}
 
-        {/* Bottom Explore Button on Mobile */}
+        {/* Bottom Explore Button on Mobile & Tablet */}
         {totalCount > 0 && (
-          <div className="pt-8 flex justify-center">
+          <div className="pt-8 sm:pt-10 md:pt-14 flex justify-center">
             <Link
               to="/projects"
               className={cn(
                 buttonVariants({ variant: 'primary', size: 'default' }),
-                "w-full sm:w-auto font-bold tracking-wide flex items-center justify-center"
+                "w-auto inline-flex items-center justify-center font-bold tracking-wide px-6 sm:px-8 py-2.5 sm:py-3 md:py-3.5 text-xs sm:text-sm md:text-base shadow-sm hover:shadow-[0_8px_20px_rgba(16,185,129,0.22)]"
               )}
             >
               <span className="relative z-10">{isAr ? 'استكشاف جميع المشاريع' : 'EXPLORE ALL PROJECTS'}</span>
@@ -503,15 +503,15 @@ const ProjectsSection = () => {
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════════
-          DESKTOP VIEW (>= md): Full original sticky deck stacking experience
+          DESKTOP ONLY VIEW (>= xl): Full original sticky deck stacking experience
           ═══════════════════════════════════════════════════════════════════ */}
-      <div className="hidden md:block [--cards-step:38px] lg:[--cards-step:44px]">
+      <div className="hidden xl:block [--cards-step:44px]">
         {/* Outer Scroll Track */}
         <div ref={trackRef} className="relative w-full" style={{ height: trackHeight }}>
-          {/* Sticky Container */}
-          <div className="sticky top-0 h-screen w-full flex flex-col justify-start pt-[80px] lg:pt-[84px] pb-4 overflow-x-clip pointer-events-none">
+          {/* Sticky Container - Pinned cleanly to top:0, full-screen, 100% desktop-grade */}
+          <div className="sticky top-0 h-screen w-full flex flex-col justify-start pt-[84px] pb-6 overflow-x-clip pointer-events-none">
             {/* 1. Header */}
-            <div className="max-w-7xl mx-auto px-6 lg:px-8 pb-2.5 w-full pointer-events-auto">
+            <div className="max-w-7xl mx-auto px-6 lg:px-8 pb-2.5 w-full pointer-events-auto shrink-0">
               <div className="max-w-3xl">
                 <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-[1.15] text-foreground mb-1">
                   <SplitText text={displayTitle} delay={35} duration={0.45} />
@@ -529,7 +529,7 @@ const ProjectsSection = () => {
             </div>
 
             {/* 2. Cards Deck Container */}
-            <div className="relative mt-2 w-full max-w-[980px] mx-auto px-6 flex-1 flex flex-col justify-start">
+            <div className="relative mt-6 w-full max-w-[980px] mx-auto px-6 flex-1 flex flex-col justify-start">
               {loading ? (
                 <div className="h-[320px] flex items-center justify-center px-4">
                   <div className="w-full max-w-[920px] h-[280px] rounded-xl bg-card/40 dark:bg-white/[0.02] border border-border/50 animate-pulse flex items-center justify-center">

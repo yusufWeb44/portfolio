@@ -590,9 +590,9 @@ const PublicLayout = () => {
                 />
               </button>
 
-              {/* Center: Desktop Navigation Links */}
+              {/* Center: Desktop Navigation Links (Visible only on XL desktop >= 1280px; tablets & iPads use compact mobile header) */}
               <nav
-                className="hidden lg:flex items-center gap-1 sm:gap-2"
+                className="hidden xl:flex items-center gap-1 sm:gap-2"
                 aria-label="Main Navigation"
               >
                 {navLinks.map((link) => {
@@ -614,8 +614,8 @@ const PublicLayout = () => {
                 })}
               </nav>
 
-              {/* End: Desktop Action Controls (Theme Toggle, Language) */}
-              <div className="hidden lg:flex items-center gap-2.5 sm:gap-3">
+              {/* End: Desktop Action Controls (Theme Toggle, Language) - XL desktop only */}
+              <div className="hidden xl:flex items-center gap-2.5 sm:gap-3">
                 {/* 1. Theme Toggle (Sun / Moon) */}
                 <button
                   type="button"
@@ -635,8 +635,8 @@ const PublicLayout = () => {
                 <LanguageSwitcher />
               </div>
 
-              {/* Mobile & Tablet Controls: Language + Theme + Hamburger Button */}
-              <div className="flex lg:hidden items-center gap-2">
+              {/* Mobile & Tablet Controls: Language + Theme + Hamburger Button (Visible on < XL screens: Mobile, iPad, Tablets) */}
+              <div className="flex xl:hidden items-center gap-2">
                 <LanguageSwitcher />
 
                 <button
@@ -676,7 +676,7 @@ const PublicLayout = () => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.25 }}
-                className="fixed inset-0 z-[9998] bg-black/70 backdrop-blur-sm lg:hidden"
+                className="fixed inset-0 z-[9998] bg-black/70 backdrop-blur-sm xl:hidden"
                 onClick={() => setMobileMenuOpen(false)}
                 aria-hidden="true"
               />
@@ -688,7 +688,7 @@ const PublicLayout = () => {
                 exit={{ x: currentDirection === 'rtl' ? '100%' : '-100%' }}
                 transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                 className={cn(
-                  "fixed inset-y-0 top-0 bottom-0 z-[9999] w-[82vw] max-w-[320px] sm:max-w-[360px] h-[100dvh] bg-white dark:bg-zinc-950 text-foreground shadow-2xl flex flex-col lg:hidden",
+                  "fixed inset-y-0 top-0 bottom-0 z-[9999] w-[82vw] max-w-[320px] sm:max-w-[360px] h-[100dvh] bg-white dark:bg-zinc-950 text-foreground shadow-2xl flex flex-col xl:hidden",
                   currentDirection === 'rtl'
                     ? "right-0 border-s border-border/70 dark:border-white/10"
                     : "left-0 border-e border-border/70 dark:border-white/10"
