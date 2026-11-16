@@ -61,6 +61,9 @@ export default defineConfig({
             if (id.includes('lucide-react')) {
               return 'vendor-icons';
             }
+            if (id.includes('gsap')) {
+              return 'vendor-gsap';
+            }
             if (id.includes('axios')) {
               return 'vendor-network';
             }

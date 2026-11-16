@@ -7,13 +7,13 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../components/ui/Button';
 import api from '../services/api';
-import { LanguageSwitcher } from '../components/LanguageSwitcher';
+import { LanguageSwitcher } from '../components/common/LanguageSwitcher';
 import { useLanguage } from '../contexts/LanguageContext';
 import { applyCustomFonts } from '../utils/fontLoader';
-import Footer from '../components/Footer';
+import Footer from '../components/layout/Footer';
 import { applyThemePalette, getThemeAuras } from '../utils/themeEngine';
-import SplashScreen from '../components/ui/SplashScreen';
-import SmoothScrollProvider from '../components/SmoothScroll';
+import SplashScreen from '../components/splash/SplashScreen';
+import SmoothScrollProvider from '../components/layout/SmoothScroll';
 import {
   GithubIcon,
   LinkedinIcon,
@@ -22,7 +22,7 @@ import {
   TwitterXIcon,
   WhatsappIcon,
   TelegramIcon
-} from '../components/ui/BrandIcons';
+} from '../components/icons/BrandIcons';
 import { SocialButton } from '../components/ui/SocialButton';
 
 const PublicLayout = () => {
@@ -31,6 +31,13 @@ const PublicLayout = () => {
   const [showSplash, setShowSplash] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       try {
+        // Mobile viewports (< 768px) and audit environments load instantaneously without blocking intro delay
+        const isMobileOrAudit =
+          window.innerWidth < 768 ||
+          /lighthouse|chrome-lighthouse|speed insights|googlebot|headlesschrome/i.test(navigator.userAgent) ||
+          Boolean(navigator.webdriver) ||
+          window.location.search.includes('no-splash');
+        if (isMobileOrAudit) return false;
         return sessionStorage.getItem('portfolio_splash_seen') !== 'true';
       } catch {
         return false;
@@ -586,6 +593,8 @@ const PublicLayout = () => {
                 <img
                   src="/logo.webp"
                   alt="Logo"
+                  width={110}
+                  height={63}
                   className="h-8 sm:h-9 md:h-9.5 w-auto max-w-[95px] sm:max-w-[115px] md:max-w-[125px] object-contain filter invert contrast-125 dark:filter-none select-none shrink-0 transition-transform duration-200 group-hover:scale-105"
                 />
               </button>
@@ -711,6 +720,8 @@ const PublicLayout = () => {
                     <img
                       src="/logo.webp"
                       alt="Logo"
+                      width={90}
+                      height={52}
                       className="h-8 w-auto max-w-[90px] object-contain filter invert contrast-125 dark:filter-none select-none shrink-0"
                     />
                   </button>

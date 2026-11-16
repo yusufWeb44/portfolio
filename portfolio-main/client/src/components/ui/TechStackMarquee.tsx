@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { getTechBrandIcon } from './TechBrandIcons';
+import { getTechBrandIcon } from '../icons/TechBrandIcons';
 
 export const DEFAULT_CORE_STACK = [
   'HTML',

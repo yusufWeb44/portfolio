@@ -8,7 +8,7 @@ import api from '../../services/api';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Textarea } from '../../components/ui/Textarea';
-import { getTechBrandIcon } from '../../components/ui/TechBrandIcons';
+import { getTechBrandIcon } from '../../components/icons/TechBrandIcons';
 
 interface BentoCard {
   id?: string;

@@ -5,7 +5,7 @@ import api from '../../services/api';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Textarea } from '../../components/ui/Textarea';
-import { getServiceIcon } from '../../components/ui/services-card';
+import { getServiceIcon } from '../../components/sections/ServicesSection';
 
 interface Service {
   id: string;

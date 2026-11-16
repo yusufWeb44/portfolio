@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { ArrowUpRight } from 'lucide-react';
 import api from '../services/api';
-import { ServiceCarousel } from '../components/ui/services-card';
+import { ServiceCarousel } from '../components/sections/ServicesSection';
 import { useLanguage } from '../contexts/LanguageContext';
 
 interface Service {

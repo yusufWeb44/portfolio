@@ -1,0 +1,257 @@
+import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import { Layers, TrendingUp, Zap, Cpu, Code2, ShieldCheck, Database, Server, Globe, Sparkles } from 'lucide-react';
+import api from '../../services/api';
+import { useLanguage } from '../../contexts/LanguageContext';
+import TechStackMarquee, { DEFAULT_CORE_STACK } from '../ui/TechStackMarquee';
+import { SplitText, FadeContent, SpotlightCard } from '../react-bits';
+
+/* ─── Animation Variants ─────────────────────────────────────────── */
+const containerVariants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.15,
+    },
+  },
+};
+
+const fadeUpVariants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: 'easeOut' as const },
+  },
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: 'easeOut' as const },
+  },
+};
+
+/* ─── Icon Map ───────────────────────────────────────────────────── */
+const getCardIcon = (iconName: string) => {
+  const iconProps = { className: 'w-5 h-5', 'aria-hidden': true };
+  const lower = (iconName || '').toLowerCase();
+  if (lower.includes('layer') || lower.includes('طبقات')) return <Layers {...iconProps} />;
+  if (lower.includes('trend') || lower.includes('grow') || lower.includes('نمو') || lower.includes('تطور')) return <TrendingUp {...iconProps} />;
+  if (lower.includes('zap') || lower.includes('speed') || lower.includes('perf') || lower.includes('سرعة') || lower.includes('أداء')) return <Zap {...iconProps} />;
+  if (lower.includes('cpu') || lower.includes('معالج') || lower.includes('ذكاء')) return <Cpu {...iconProps} />;
+  if (lower.includes('code') || lower.includes('dev') || lower.includes('برمجة') || lower.includes('كود')) return <Code2 {...iconProps} />;
+  if (lower.includes('shield') || lower.includes('sec') || lower.includes('أمان') || lower.includes('حماية')) return <ShieldCheck {...iconProps} />;
+  if (lower.includes('data') || lower.includes('بيانات') || lower.includes('قواعد')) return <Database {...iconProps} />;
+  if (lower.includes('server') || lower.includes('سيرفر') || lower.includes('خادم')) return <Server {...iconProps} />;
+  if (lower.includes('sparkle') || lower.includes('star') || lower.includes('تميز')) return <Sparkles {...iconProps} />;
+  return <Globe {...iconProps} />;
+};
+
+/* ─── AboutSection ───────────────────────────────────────────────── */
+const AboutSection = () => {
+  const { t, currentLang } = useLanguage();
+  const isAr = currentLang === 'ar';
+
+  const [aboutData, setAboutData] = useState<any>(() => {
+    try {
+      const cached = localStorage.getItem('portfolio_about');
+      return cached ? JSON.parse(cached) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  useEffect(() => {
+    const fetchAbout = async () => {
+      try {
+        const res = await api.get('/about');
+        if (res.data?.success && res.data?.data) {
+          setAboutData(res.data.data);
+          try {
+            localStorage.setItem('portfolio_about', JSON.stringify(res.data.data));
+          } catch {}
+        }
+      } catch (err) {
+        console.warn('Could not load about data', err);
+      }
+    };
+    fetchAbout();
+
+    const handleUpdate = () => fetchAbout();
+    window.addEventListener('portfolio_settings_updated', handleUpdate);
+    return () => window.removeEventListener('portfolio_settings_updated', handleUpdate);
+  }, []);
+
+  const resolveAboutField = (key: string, arVal?: string, enVal?: string, fallback?: string) => {
+    if (isAr) {
+      return t(key, arVal || fallback);
+    }
+    return t(key, enVal || fallback);
+  };
+
+  const displayHeadline = resolveAboutField('about.headline', aboutData?.headlineAr, aboutData?.headline, 'Crafting Scalable Software with Purpose & Precision.');
+  const displayBio1 = isAr ? (aboutData?.bioParagraph1Ar || aboutData?.bioParagraph1) : aboutData?.bioParagraph1;
+  const displayBio2 = isAr ? (aboutData?.bioParagraph2Ar || aboutData?.bioParagraph2) : aboutData?.bioParagraph2;
+
+  const displayCoreStackTitle = isAr ? t('about.coreStack', 'التقنيات الأساسية') : 'Core Stack';
+
+  const coreStack: string[] = (() => {
+    const raw = aboutData?.coreStack || aboutData?.coreStackAr;
+    if (!raw) return [];
+    if (Array.isArray(raw)) return raw;
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    } catch {}
+    return [];
+  })();
+
+  const displayCards: any[] = (() => {
+    const raw = isAr && aboutData?.bentoCardsAr ? aboutData.bentoCardsAr : aboutData?.bentoCards;
+    if (!raw) return [];
+    if (Array.isArray(raw)) return raw;
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    } catch {}
+    return [];
+  })();
+
+  return (
+    <section
+      id="about"
+      className="scroll-mt-24 py-12 sm:py-14 md:py-16 lg:py-20 bg-transparent overflow-hidden"
+      aria-label="About me"
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        {/* ── 12-Column Main Grid on Desktop (xl), Stacked Title + 2-col Cards on Tablets (including iPad Pro) & Mobile ── */}
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 sm:gap-10 xl:gap-16 items-start">
+
+          {/* ── Title & Bio Column: Full-width on mobile/tablets, 5 cols on desktop ── */}
+          <motion.div
+            className={`flex flex-col gap-5 sm:gap-6 xl:gap-7 xl:pt-[54px] ${displayCards.length > 0 ? 'xl:col-span-5' : 'xl:col-span-8'}`}
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-100px' }}
+          >
+            {/* Main Title */}
+            <div>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-foreground tracking-tight leading-[1.22] pb-1">
+                <SplitText
+                  text={displayHeadline}
+                  delay={30}
+                  duration={0.5}
+                />
+              </h2>
+            </div>
+
+            {/* Bio Text */}
+            <FadeContent delay={0.15} blur={false} distance={16} className="space-y-4">
+              {displayBio1 ? (
+                <>
+                  <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
+                    {displayBio1}
+                  </p>
+                  {displayBio2 && (
+                    <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
+                      {displayBio2}
+                    </p>
+                  )}
+                </>
+              ) : (
+                <p className="text-base text-muted-foreground leading-relaxed">
+                  {isAr ? 'يتم تحديث معلومات النبذة التعريفية حالياً.' : 'About content is being updated.'}
+                </p>
+              )}
+            </FadeContent>
+          </motion.div>
+
+          {/* ── Bento Cards Column: Full-width on mobile/tablets, 7 cols on desktop (xl) ── */}
+          {displayCards.length > 0 && (
+            <motion.div
+              className="xl:col-span-7 xl:pt-[54px]"
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: '-100px' }}
+            >
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5 lg:gap-6">
+              {displayCards.map((card, i) => (
+                <motion.div
+                  key={card.id || i}
+                  variants={cardVariants}
+                  className={card.colSpan || (i === 2 && displayCards.length === 3 ? 'sm:col-span-2' : '')}
+                >
+                  <SpotlightCard
+                    spotlightColor="rgba(0, 0, 0, 0.025)"
+                    darkSpotlightColor="rgba(255, 255, 255, 0.007)"
+                    size={360}
+                    darkSize={580}
+                    className={[
+                      'group relative flex flex-col gap-3.5 sm:gap-5 rounded-xl sm:rounded-2xl p-5 sm:p-6 md:p-7 lg:p-8 h-full',
+                      'bg-white/95 dark:bg-zinc-900/60 backdrop-blur-xl',
+                      'border border-zinc-200/90 dark:border-white/[0.08]',
+                      'shadow-[0_1px_2px_rgba(0,0,0,0.03),0_8px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset,0_16px_32px_-12px_rgba(0,0,0,0.4)]',
+                      'hover:border-zinc-300 dark:hover:border-white/[0.18] hover:-translate-y-1',
+                      'transition-all duration-300 ease-out cursor-default',
+                    ].join(' ')}
+                  >
+                    {/* Subtle background tint on hover */}
+                    <div className="absolute inset-0 rounded-xl sm:rounded-2xl bg-gradient-to-br from-emerald-500/0 to-emerald-500/0 group-hover:from-emerald-500/[0.02] dark:group-hover:from-transparent group-hover:to-transparent transition-all duration-500 pointer-events-none" />
+
+                    {/* Card Header */}
+                    <div className="flex items-start justify-between gap-4 relative z-10">
+                      <div className="flex items-baseline gap-2.5 sm:gap-3">
+                        <span className="text-xl sm:text-2xl font-black font-sans tracking-tight text-foreground dark:text-white leading-none select-none shrink-0">
+                          {card.id || String(i + 1).padStart(2, '0')}
+                        </span>
+                        <h3 className="text-base md:text-lg font-bold text-foreground tracking-tight">
+                          {card.title}
+                        </h3>
+                      </div>
+                      <span className="text-muted-foreground/40 group-hover:text-muted-foreground/80 transition-colors duration-300 shrink-0 mt-0.5">
+                        {getCardIcon(card.icon)}
+                      </span>
+                    </div>
+
+                    {/* Card Body */}
+                    <p className="text-sm md:text-base text-muted-foreground leading-relaxed relative z-10">
+                      {card.description}
+                    </p>
+
+                    {/* Bottom subtle accent line */}
+                    <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-500/0 to-transparent group-hover:via-emerald-500/25 dark:group-hover:via-transparent transition-all duration-500 pointer-events-none" />
+                  </SpotlightCard>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        </div>
+
+        {/* ── Core Stack (Infinite Marquee Ticker) ── */}
+        <motion.div
+          variants={fadeUpVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-50px' }}
+          className="mt-10 sm:mt-14 md:mt-18 lg:mt-24 w-full"
+        >
+          <TechStackMarquee
+            technologies={coreStack.length > 0 ? coreStack : DEFAULT_CORE_STACK}
+            title={displayCoreStackTitle}
+          />
+        </motion.div>
+      </div>
+    </section>
+  );
+};
+
+export default AboutSection;
+

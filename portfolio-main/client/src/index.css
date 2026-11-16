@@ -388,4 +388,9 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+  /* Smooth Scroll Surface: Ensures GPU composite and zero forced reflows */
+  .section-surface {
+    contain: paint;
+  }
 }

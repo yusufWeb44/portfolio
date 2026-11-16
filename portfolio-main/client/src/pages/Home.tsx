@@ -13,25 +13,22 @@ import {
   WhatsappIcon,
   TelegramIcon,
 } from '../components/ui/BrandIcons';
-import { useEffect, useState, useMemo, Suspense, startTransition } from 'react';
+import { useEffect, useState, useMemo, startTransition } from 'react';
 import api from '../services/api';
 import { getMediaUrl } from '../utils/mediaUrl';
-import MinimalistHero from '../components/MinimalistHero';
-import type { ExperienceItem } from '../components/ExperienceTimeline';
-import type { CertificateItem } from '../components/CertificatesCarousel';
-import SEO from '../components/SEO';
+import MinimalistHero from '../components/sections/MinimalistHero';
+import AboutSection from '../components/sections/AboutSection';
+import HowItWorks from '../components/sections/HowItWorks';
+import ProjectsSection from '../components/sections/ProjectsSection';
+import SkillsSection from '../components/sections/SkillsSection';
+import ExperienceTimeline, { type ExperienceItem } from '../components/sections/ExperienceTimeline';
+import CertificatesCarousel, { type CertificateItem } from '../components/sections/CertificatesCarousel';
+import { ServiceCarousel } from '../components/sections/ServicesSection';
+import { FAQ } from '../components/sections/FaqSection';
+import ReviewsSection, { type ReviewItem } from '../components/sections/ReviewsSection';
+import SEO from '../components/common/SEO';
 import { useLanguage } from '../contexts/LanguageContext';
 
-// Direct imports for stable section rendering, zero scroll jumps, and immediate anchor availability
-import AboutSection from '../components/AboutSection';
-import HowItWorks from '../components/ui/how-it-works';
-import SkillsSection from '../components/sections/skills';
-import ProjectsSection from '../components/sections/projects';
-import { FAQ } from '../components/ui/faq-tabs';
-import ReviewsSection, { type ReviewItem } from '../components/ReviewsSection';
-import { ServiceCarousel } from '../components/ui/services-card';
-import ExperienceTimeline from '../components/ExperienceTimeline';
-import CertificatesCarousel from '../components/CertificatesCarousel';
 import { buttonVariants, cn } from '../components/ui/Button';
 import { SocialButton } from '../components/ui/SocialButton';
 import { SplitText, BlurText, FadeContent, SpotlightCard } from '../components/react-bits';
@@ -456,6 +453,13 @@ const Home = () => {
         ];
   }, [isAr, settings?.heroStatsAr, settings?.heroStats]);
 
+  // Memoized Hero image to match initial HTML <link rel="preload"> exactly
+  const heroImageSrc = useMemo(() => {
+    if (!settings?.profilePhoto) return '/portfolio_photo.webp';
+    if (settings.profilePhoto.includes('image-1789681613514')) return '/portfolio_photo.webp';
+    return getMediaUrl(settings.profilePhoto);
+  }, [settings?.profilePhoto]);
+
   return (
     <div className="w-full bg-transparent">
       <SEO
@@ -473,7 +477,7 @@ const Home = () => {
           bioText={bio}
           ctaText={ctaText}
           ctaHref="#projects"
-          imageSrc={settings?.profilePhoto ? getMediaUrl(settings.profilePhoto) : '/portfolio_photo.webp'}
+          imageSrc={heroImageSrc}
           githubUrl={githubUrl}
           linkedinUrl={linkedinUrl}
           instagramUrl={instagramUrl}
@@ -486,30 +490,22 @@ const Home = () => {
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 1: ABOUT
       ═══════════════════════════════════════════════════════════════ */}
-      <Suspense fallback={<div className="min-h-[160px]" />}>
-        <AboutSection />
-      </Suspense>
+      <AboutSection />
 
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 1.5: HOW I WORK
       ═══════════════════════════════════════════════════════════════ */}
-      <Suspense fallback={<div className="min-h-[160px]" />}>
-        <HowItWorks />
-      </Suspense>
+      <HowItWorks />
 
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 2: PROJECTS (Horizontal Scroll Carousel)
       ═══════════════════════════════════════════════════════════════ */}
-      <Suspense fallback={<div className="min-h-[200px]" />}>
-        <ProjectsSection />
-      </Suspense>
+      <ProjectsSection />
 
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 3: SKILLS (Horizontal Marquee Pills)
       ═══════════════════════════════════════════════════════════════ */}
-      <Suspense fallback={<div className="min-h-[200px]" />}>
-        <SkillsSection />
-      </Suspense>
+      <SkillsSection />
 
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 4: EXPERIENCE (Vertical Animated Timeline & Certificates)
@@ -535,9 +531,7 @@ const Home = () => {
 
           {/* Vertical Timeline with Scroll Effects */}
           {experiences.length > 0 ? (
-            <Suspense fallback={<div className="min-h-[200px]" />}>
-              <ExperienceTimeline experiences={experiences} />
-            </Suspense>
+            <ExperienceTimeline experiences={experiences} />
           ) : (
             <div className="py-14 text-center border border-dashed border-border/70 rounded-xl bg-card/30 backdrop-blur-md">
               <p className="text-muted-foreground">{isAr ? 'يتم تحديث مسار الخبرات حالياً.' : 'Experience timeline is being updated.'}</p>
@@ -547,25 +541,23 @@ const Home = () => {
 
         {/* Full-width seamless Certificates Carousel */}
         {certificates.length > 0 && (
-          <Suspense fallback={<div className="min-h-[300px]" />}>
-            <CertificatesCarousel
-              certificates={certificates}
-              title={resolveField(
-                'certificates.title',
-                settings?.certificatesTitleAr,
-                settings?.certificatesTitle,
-                isAr ? 'الشهادات والمؤهلات' : 'CERTIFICATES'
-              )}
-              subtitle={resolveField(
-                'certificates.subtitle',
-                settings?.certificatesSubtitleAr,
-                settings?.certificatesSubtitle,
-                isAr
-                  ? 'مؤهلات وشهادات معتمدة توثق الكفاءة التقنية والإنجازات الأكاديمية.'
-                  : 'Recognized industry credentials, academic achievements, and verified technical licenses.'
-              )}
-            />
-          </Suspense>
+          <CertificatesCarousel
+            certificates={certificates}
+            title={resolveField(
+              'certificates.title',
+              settings?.certificatesTitleAr,
+              settings?.certificatesTitle,
+              isAr ? 'الشهادات والمؤهلات' : 'CERTIFICATES'
+            )}
+            subtitle={resolveField(
+              'certificates.subtitle',
+              settings?.certificatesSubtitleAr,
+              settings?.certificatesSubtitle,
+              isAr
+                ? 'مؤهلات وشهادات معتمدة توثق الكفاءة التقنية والإنجازات الأكاديمية.'
+                : 'Recognized industry credentials, academic achievements, and verified technical licenses.'
+            )}
+          />
         )}
       </section>
 
@@ -578,54 +570,52 @@ const Home = () => {
             <p className="text-muted-foreground">{isAr ? 'يتم تحديث الخدمات حالياً.' : 'Services are being updated.'}</p>
           </div>
         ) : (
-          <Suspense fallback={<div className="min-h-[480px]" />}>
-            <ServiceCarousel
-              header={
-                <FadeIn>
-                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-foreground leading-tight mb-1 sm:mb-1.5">
-                    <SplitText
-                      key={`services-title-${isAr ? 'ar' : 'en'}`}
-                      text={resolveField(
-                        'services.title',
-                        settings?.servicesTitleAr,
-                        settings?.servicesTitle,
-                        isAr ? 'ما الذي أقدمه لك.' : 'What I Deliver.'
-                      )}
-                      delay={35}
-                      duration={0.45}
-                    />
-                  </h2>
-                  <div className="max-w-2xl">
-                    <BlurText
-                      key={`services-subtitle-${isAr ? 'ar' : 'en'}`}
-                      text={resolveField(
-                        'services.subtitle',
-                        settings?.servicesSubtitleAr,
-                        settings?.servicesSubtitle,
-                        isAr
-                          ? 'خدمات تطوير برمجيات متكاملة تساعدك على الإطلاق بسرعة، وتفادي الديون التقنية، والتوسع بثقة.'
-                          : 'End-to-end software development services tailored to help you launch faster, eliminate technical debt, and scale reliably.'
-                      )}
-                      animateBy="block"
-                      delay={20}
-                      className="text-base md:text-lg text-muted-foreground leading-relaxed line-clamp-2"
-                    />
-                  </div>
-                </FadeIn>
-              }
-              services={services.map((service, i) => ({
-                id: service.id,
-                number: String(i + 1).padStart(2, '0'),
-                title: isAr ? (service.titleAr || service.title) : service.title,
-                description: isAr ? (service.descriptionAr || service.description) : service.description,
-              }))}
-              whatsappBaseUrl={
-                settings?.whatsappNumber
-                  ? `https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, '')}`
-                  : socialLinks.find(s => s.platform.toLowerCase() === 'whatsapp')?.url
-              }
-            />
-          </Suspense>
+          <ServiceCarousel
+            header={
+              <FadeIn>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-foreground leading-tight mb-1 sm:mb-1.5">
+                  <SplitText
+                    key={`services-title-${isAr ? 'ar' : 'en'}`}
+                    text={resolveField(
+                      'services.title',
+                      settings?.servicesTitleAr,
+                      settings?.servicesTitle,
+                      isAr ? 'ما الذي أقدمه لك.' : 'What I Deliver.'
+                    )}
+                    delay={35}
+                    duration={0.45}
+                  />
+                </h2>
+                <div className="max-w-2xl">
+                  <BlurText
+                    key={`services-subtitle-${isAr ? 'ar' : 'en'}`}
+                    text={resolveField(
+                      'services.subtitle',
+                      settings?.servicesSubtitleAr,
+                      settings?.servicesSubtitle,
+                      isAr
+                        ? 'خدمات تطوير برمجيات متكاملة تساعدك على الإطلاق بسرعة، وتفادي الديون التقنية، والتوسع بثقة.'
+                        : 'End-to-end software development services tailored to help you launch faster, eliminate technical debt, and scale reliably.'
+                    )}
+                    animateBy="block"
+                    delay={20}
+                    className="text-base md:text-lg text-muted-foreground leading-relaxed line-clamp-2"
+                  />
+                </div>
+              </FadeIn>
+            }
+            services={services.map((service, i) => ({
+              id: service.id,
+              number: String(i + 1).padStart(2, '0'),
+              title: isAr ? (service.titleAr || service.title) : service.title,
+              description: isAr ? (service.descriptionAr || service.description) : service.description,
+            }))}
+            whatsappBaseUrl={
+              settings?.whatsappNumber
+                ? `https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, '')}`
+                : socialLinks.find(s => s.platform.toLowerCase() === 'whatsapp')?.url
+            }
+          />
         )}
       </section>
 
@@ -633,53 +623,49 @@ const Home = () => {
           SECTION 6: FAQ
       ═══════════════════════════════════════════════════════════════ */}
       {rawFaqs.length > 0 && (
-        <Suspense fallback={<div className="min-h-[160px]" />}>
-          <FAQ
-            id="faq"
-            title={resolveField('faq.title', settings?.faqTitleAr, settings?.faqTitle, 'Common Questions.')}
-            subtitle={resolveField(
-              'faq.subtitle',
-              settings?.faqSubtitleAr,
-              settings?.faqSubtitle,
-              isAr
-                ? 'إجابات واضحة ومباشرة عن أكثر الأسئلة شيوعاً حول آليات العمل، والتعاقد، والتنفيذ.'
-                : 'Clear and direct answers to the most common questions about workflow, collaboration, and execution.'
-            )}
-            categories={faqCategories}
-            faqData={faqDataMap}
-          />
-        </Suspense>
+        <FAQ
+          id="faq"
+          title={resolveField('faq.title', settings?.faqTitleAr, settings?.faqTitle, 'Common Questions.')}
+          subtitle={resolveField(
+            'faq.subtitle',
+            settings?.faqSubtitleAr,
+            settings?.faqSubtitle,
+            isAr
+              ? 'إجابات واضحة ومباشرة عن أكثر الأسئلة شيوعاً حول آليات العمل، والتعاقد، والتنفيذ.'
+              : 'Clear and direct answers to the most common questions about workflow, collaboration, and execution.'
+          )}
+          categories={faqCategories}
+          faqData={faqDataMap}
+        />
       )}
 
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 6.5: REVIEWS / TESTIMONIALS
       ═══════════════════════════════════════════════════════════════ */}
       {reviews.length > 0 && (
-        <Suspense fallback={<div className="min-h-[300px]" />}>
-          <ReviewsSection
-            reviews={reviews}
-            badge={resolveField(
-              'reviews.badge',
-              settings?.reviewsBadgeAr,
-              settings?.reviewsBadge,
-              isAr ? 'آراء العملاء والشركاء' : 'CLIENT ENDORSEMENTS'
-            )}
-            title={resolveField(
-              'reviews.title',
-              settings?.reviewsTitleAr,
-              settings?.reviewsTitle,
-              isAr ? 'ماذا يقول العملاء والشركاء.' : 'What Clients & Partners Say.'
-            )}
-            subtitle={resolveField(
-              'reviews.subtitle',
-              settings?.reviewsSubtitleAr,
-              settings?.reviewsSubtitle,
-              isAr
-                ? 'شهادات وتجارب حقيقية من مؤسسين وقادة تقنيين تشرفت بالتعاون معهم في بناء وإطلاق مشاريعهم الرقمية.'
-                : 'Authentic feedback and endorsements from founders, engineering leads, and product teams I have collaborated with.'
-            )}
-          />
-        </Suspense>
+        <ReviewsSection
+          reviews={reviews}
+          badge={resolveField(
+            'reviews.badge',
+            settings?.reviewsBadgeAr,
+            settings?.reviewsBadge,
+            isAr ? 'آراء العملاء والشركاء' : 'CLIENT ENDORSEMENTS'
+          )}
+          title={resolveField(
+            'reviews.title',
+            settings?.reviewsTitleAr,
+            settings?.reviewsTitle,
+            isAr ? 'ماذا يقول العملاء والشركاء.' : 'What Clients & Partners Say.'
+          )}
+          subtitle={resolveField(
+            'reviews.subtitle',
+            settings?.reviewsSubtitleAr,
+            settings?.reviewsSubtitle,
+            isAr
+              ? 'شهادات وتجارب حقيقية من مؤسسين وقادة تقنيين تشرفت بالتعاون معهم في بناء وإطلاق مشاريعهم الرقمية.'
+              : 'Authentic feedback and endorsements from founders, engineering leads, and product teams I have collaborated with.'
+          )}
+        />
       )}
 
       {/* ═══════════════════════════════════════════════════════════════

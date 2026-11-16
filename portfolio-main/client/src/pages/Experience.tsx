@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import api from '../services/api';
-import ExperienceTimeline, { type ExperienceItem } from '../components/ExperienceTimeline';
-import CertificatesCarousel, { type CertificateItem } from '../components/CertificatesCarousel';
+import ExperienceTimeline, { type ExperienceItem } from '../components/sections/ExperienceTimeline';
+import CertificatesCarousel, { type CertificateItem } from '../components/sections/CertificatesCarousel';
 import { Loader2 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
