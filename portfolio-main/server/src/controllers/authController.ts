@@ -41,9 +41,13 @@ export const loginAdmin = async (req: Request, res: Response) => {
 };
 
 export const logoutAdmin = async (req: Request, res: Response) => {
-  res.cookie('jwt', '', {
+  const isProd = process.env.NODE_ENV === 'production';
+
+  res.clearCookie('jwt', {
     httpOnly: true,
-    expires: new Date(0),
+    secure: isProd,
+    sameSite: isProd ? 'none' : 'lax',
+    path: '/',
   });
 
   res.status(200).json({ success: true, message: 'Logged out successfully' });

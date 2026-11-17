@@ -10,7 +10,7 @@ const generateToken = (res: Response, userId: string) => {
   }
 
   const tokenSecret = secret || 'dev-fallback-secret-for-local-development-only-replace-in-production';
-  const isProduction = process.env.NODE_ENV === 'production';
+  const isProd = process.env.NODE_ENV === 'production';
 
   const token = jwt.sign({ userId }, tokenSecret, {
     expiresIn: '7d',
@@ -18,8 +18,8 @@ const generateToken = (res: Response, userId: string) => {
 
   res.cookie('jwt', token, {
     httpOnly: true,
-    secure: isProduction, // HTTPS-only in production
-    sameSite: isProduction ? 'strict' : 'lax', // Strict CSRF protection in production
+    secure: isProd,
+    sameSite: isProd ? 'none' : 'lax',
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     path: '/',
   });

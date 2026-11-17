@@ -8,6 +8,8 @@ import path from 'path';
 
 const app = express();
 
+app.set('trust proxy', 1);
+
 // 1. HTTP Security Headers with Helmet
 app.use(
   helmet({
