@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import { useAuthStore } from '../../store/authStore';
@@ -10,7 +10,14 @@ const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { checkAuth } = useAuthStore();
+  const { user, setUser, checkAuth } = useAuthStore();
+
+  // If already authenticated, redirect directly to dashboard
+  useEffect(() => {
+    if (user) {
+      navigate('/admin/dashboard', { replace: true });
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,9 +25,12 @@ const Login = () => {
     setLoading(true);
 
     try {
-      await api.post('/auth/login', { email, password });
-      await checkAuth(); // Update global auth state
-      navigate('/admin/dashboard');
+      const response = await api.post('/auth/login', { email, password });
+      if (response.data?.data) {
+        setUser(response.data.data);
+      }
+      await checkAuth(); // Verify session against /auth/me
+      navigate('/admin/dashboard', { replace: true });
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to login');
     } finally {

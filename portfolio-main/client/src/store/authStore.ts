@@ -4,6 +4,7 @@ import api from '../services/api';
 interface AuthState {
   user: any | null;
   isLoading: boolean;
+  setUser: (user: any) => void;
   checkAuth: () => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -11,6 +12,7 @@ interface AuthState {
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isLoading: true,
+  setUser: (user: any) => set({ user, isLoading: false }),
   checkAuth: async () => {
     try {
       const res = await api.get('/auth/me');
