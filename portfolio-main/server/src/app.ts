@@ -41,25 +41,22 @@ const allowedOrigins = [
   'http://localhost:4173',
   'http://127.0.0.1:5173',
   'http://127.0.0.1:4173',
-  process.env.CLIENT_URL,
+  'https://portfolio-portfolio-main-ruby.vercel.app',
+  process.env.CLIENT_URL?.replace(/\/$/, ''), // إزالة أي / زائدة تلقائياً
 ].filter(Boolean) as string[];
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // In production, enforce strictly against configured client URL
-      if (process.env.NODE_ENV === 'production') {
-        if (!origin || allowedOrigins.includes(origin)) {
-          return callback(null, true);
-        }
-        return callback(new Error('Blocked by CORS policy'));
+      if (!origin) return callback(null, true);
+      const isVercelPreview = /^https:\/\/portfolio-portfolio-main.*\.vercel\.app$/.test(origin);
+      if (allowedOrigins.includes(origin) || isVercelPreview) {
+        return callback(null, true);
       }
-      // In development, permit localhost testing
-      if (!origin || allowedOrigins.includes(origin) || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
+      if (process.env.NODE_ENV !== 'production' && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+        return callback(null, true);
       }
+      return callback(new Error('Blocked by CORS policy'));
     },
     credentials: true,
   })
