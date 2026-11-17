@@ -7,6 +7,7 @@ import { buttonVariants } from '../ui/Button';
 import { SocialButton } from '../ui/SocialButton';
 import { SplitText, BlurText, FadeContent } from '../react-bits';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { resolveImageUrl } from '../../utils/mediaUrl';
 
 /* ─── Animated Count-up for Hero Stats (Zero VDOM Re-render, Direct GPU DOM update) ─── */
 const AnimatedStatValue: React.FC<{ value: string }> = ({ value }) => {
@@ -351,7 +352,7 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
                 style={{ willChange: 'opacity, transform', transform: 'translateZ(0)' }}
               >
                 <img
-                  src={imageSrc}
+                  src={resolveImageUrl(imageSrc)}
                   alt=""
                   aria-label="Profile photo"
                   loading="eager"

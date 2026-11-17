@@ -5,6 +5,7 @@ import {
   Search, Code, Eye, RefreshCw, AlertCircle 
 } from 'lucide-react';
 import api from '../../services/api';
+import { resolveImageUrl } from '../../utils/mediaUrl';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Textarea } from '../../components/ui/Textarea';
@@ -414,7 +415,7 @@ const AdminSeo = () => {
               <div className="h-44 bg-muted flex items-center justify-center relative overflow-hidden">
                 {data.ogImage ? (
                   <img
-                    src={data.ogImage}
+                    src={resolveImageUrl(data.ogImage)}
                     alt="OG Preview"
                     className="w-full h-full object-cover"
                     onError={(e) => {

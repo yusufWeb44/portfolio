@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { ArrowUpRight, MapPin, Download } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import api from '../services/api';
-import { getMediaUrl } from '../utils/mediaUrl';
+import { resolveImageUrl } from '../utils/mediaUrl';
 import { useLanguage } from '../contexts/LanguageContext';
 import { buttonVariants } from '../components/ui/Button';
 
@@ -52,7 +52,7 @@ const About = () => {
 
   const name = settings?.name || 'Yusuf Ayoubi';
   const bio = settings?.bio || t('about.bio1', 'Full-Stack Engineer building digital products that perform, scale, and delight.');
-  const photo = settings?.profilePhoto ? getMediaUrl(settings.profilePhoto) : null;
+  const photo = settings?.profilePhoto ? resolveImageUrl(settings.profilePhoto) : null;
   const email = settings?.email || 'hello@example.com';
 
   const values = [
@@ -157,7 +157,7 @@ const About = () => {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.6 + i * 0.15, duration: 0.6 }}
                   >
-                    <img src={img} alt="" className="w-full h-full object-cover" />
+                    <img src={resolveImageUrl(img)} alt="" className="w-full h-full object-cover" />
                   </motion.div>
                 );
               })}

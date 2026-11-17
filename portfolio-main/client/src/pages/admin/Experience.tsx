@@ -27,6 +27,7 @@ import {
   FileText
 } from 'lucide-react';
 import api from '../../services/api';
+import { resolveImageUrl } from '../../utils/mediaUrl';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Textarea } from '../../components/ui/Textarea';
@@ -911,7 +912,7 @@ const AdminExperience = () => {
                             <span className="text-[11px] font-mono text-muted-foreground">PDF, PNG, JPG</span>
                           </div>
 
-                          {cert.credentialUrl && cert.credentialUrl.startsWith('/uploads/') ? (
+                          {cert.credentialUrl && (cert.credentialUrl.startsWith('/uploads/') || cert.credentialUrl.startsWith('http')) ? (
                             <div className="flex items-center justify-between gap-3 p-2.5 rounded-lg bg-card border border-border/80 shadow-sm">
                               <div className="flex items-center gap-2.5 overflow-hidden">
                                 {cert.credentialUrl.toLowerCase().includes('.pdf') ? (
@@ -920,7 +921,7 @@ const AdminExperience = () => {
                                   </div>
                                 ) : (
                                   <img
-                                    src={`http://localhost:5000${cert.credentialUrl}`}
+                                    src={resolveImageUrl(cert.credentialUrl)}
                                     alt="Cert preview"
                                     className="w-8 h-8 rounded-lg object-cover border border-border flex-shrink-0"
                                   />
@@ -937,7 +938,7 @@ const AdminExperience = () => {
 
                               <div className="flex items-center gap-1.5 flex-shrink-0">
                                 <a
-                                  href={`http://localhost:5000${cert.credentialUrl}`}
+                                  href={resolveImageUrl(cert.credentialUrl)}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground text-xs font-medium inline-flex items-center gap-1"
@@ -1057,7 +1058,7 @@ const AdminExperience = () => {
                     {cert.credentialUrl && (
                       <div className="pt-4 mt-3 border-t border-border/40 flex justify-end">
                         <a
-                          href={cert.credentialUrl}
+                          href={resolveImageUrl(cert.credentialUrl)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground font-medium"

@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import api from '../../services/api';
+import { resolveImageUrl } from '../../utils/mediaUrl';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Textarea } from '../../components/ui/Textarea';
@@ -311,7 +312,6 @@ const Projects = () => {
     setUploadingImage(true);
     try {
       const newUploaded: ProjectImage[] = [];
-      const uploadsUrl = import.meta.env.VITE_UPLOADS_URL || 'http://localhost:5000';
 
       for (let i = 0; i < files.length; i++) {
         const formData = new FormData();
@@ -321,7 +321,7 @@ const Projects = () => {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
 
-        const fullUrl = uploadsUrl + res.data.url;
+        const fullUrl = resolveImageUrl(res.data.url);
         newUploaded.push({
           url: fullUrl,
           isCover: projectImages.length === 0 && newUploaded.length === 0
@@ -881,7 +881,7 @@ const Projects = () => {
                       {/* Image Preview */}
                       <div className="relative aspect-[16/10] w-full overflow-hidden bg-black/20">
                         <img 
-                          src={img.url} 
+                          src={resolveImageUrl(img.url)} 
                           alt={`Screenshot ${idx + 1}`} 
                           className="w-full h-full object-cover" 
                         />

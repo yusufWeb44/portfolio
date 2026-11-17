@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import api from '../../services/api';
+import { resolveImageUrl } from '../../utils/mediaUrl';
 
 export interface SeoData {
   metaTitle: string;
@@ -73,7 +74,7 @@ export const SEO: React.FC<SeoProps> = ({
   const finalAuthor = seo?.author || 'Yusuf Ayoubi';
   const finalOgTitle = seo?.ogTitle || finalTitle;
   const finalOgDescription = seo?.ogDescription || finalDescription;
-  const finalOgImage = image || seo?.ogImage || '/portfolio_photo.png';
+  const finalOgImage = resolveImageUrl(image || seo?.ogImage || '/portfolio_photo.png');
   const finalCanonical = canonical || seo?.canonicalUrl || 'https://yusufayoubi.com';
   const finalRobots = seo?.robots || 'index, follow';
   const finalTwitterHandle = seo?.twitterHandle || '@yusuf';

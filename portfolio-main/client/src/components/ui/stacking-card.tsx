@@ -4,6 +4,7 @@ import { ReactLenis } from 'lenis/react';
 import { useTransform, motion, useScroll, MotionValue } from 'motion/react';
 import { useRef, forwardRef } from 'react';
 import { cn } from '@/lib/utils';
+import { resolveImageUrl } from '../../utils/mediaUrl';
 
 export interface ProjectData {
   title: string;
@@ -90,7 +91,7 @@ export const Card = ({
               className={`w-full h-full`}
               style={{ scale: imageScale }}
             >
-              <img src={url} alt='image' className='absolute inset-0 w-full h-full object-cover' />
+              <img src={resolveImageUrl(url)} alt='image' className='absolute inset-0 w-full h-full object-cover' />
             </motion.div>
           </div>
         </div>
