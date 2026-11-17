@@ -1,14 +1,8 @@
 import multer from 'multer';
 import path from 'path';
 
-const storage = multer.diskStorage({
-  destination(req, file, cb) {
-    cb(null, path.join(__dirname, '../../uploads'));
-  },
-  filename(req, file, cb) {
-    cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
-  }
-});
+// Store uploaded files directly in memory buffer for immediate Cloudinary streaming
+const storage = multer.memoryStorage();
 
 const checkFileType = (file: Express.Multer.File, cb: multer.FileFilterCallback) => {
   const filetypes = /jpg|jpeg|png|webp|avif|pdf/;
