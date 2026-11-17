@@ -18,15 +18,22 @@ export const useAuthStore = create<AuthState>((set) => ({
       const res = await api.get('/auth/me');
       set({ user: res.data.data, isLoading: false });
     } catch (error) {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('admin_token');
+      }
       set({ user: null, isLoading: false });
     }
   },
   logout: async () => {
     try {
       await api.post('/auth/logout');
-      set({ user: null });
     } catch (error) {
       console.error('Logout failed', error);
+    } finally {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('admin_token');
+      }
+      set({ user: null });
     }
   }
 }));

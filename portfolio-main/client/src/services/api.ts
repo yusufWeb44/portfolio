@@ -29,13 +29,33 @@ api.get = function (url: string, config?: any): Promise<any> {
   return promise;
 } as any;
 
-// Clear cache when user mutates data
+// Attach Authorization Bearer token fallback if present in localStorage
 api.interceptors.request.use((config) => {
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem('admin_token');
+    if (token) {
+      config.headers = config.headers || {};
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  }
+
+  // Clear cache when user mutates data
   if (config.method && !['get', 'head', 'options'].includes(config.method.toLowerCase())) {
     inFlightRequests.clear();
   }
   return config;
 });
+
+// Purge stored token if unauthorized
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401 && typeof window !== 'undefined') {
+      localStorage.removeItem('admin_token');
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default api;
 

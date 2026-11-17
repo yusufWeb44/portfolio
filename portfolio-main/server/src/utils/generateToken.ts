@@ -23,6 +23,8 @@ const generateToken = (res: Response, userId: string) => {
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     path: '/',
   });
+
+  return token;
 };
 
 export default generateToken;

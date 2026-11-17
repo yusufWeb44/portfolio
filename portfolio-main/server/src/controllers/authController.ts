@@ -19,10 +19,11 @@ export const loginAdmin = async (req: Request, res: Response) => {
     });
 
     if (admin && (await bcrypt.compare(password, admin.passwordHash))) {
-      generateToken(res, admin.id);
+      const token = generateToken(res, admin.id);
 
       res.status(200).json({
         success: true,
+        token,
         data: {
           id: admin.id,
           email: admin.email,

@@ -26,6 +26,9 @@ const Login = () => {
 
     try {
       const response = await api.post('/auth/login', { email, password });
+      if (response.data?.token) {
+        localStorage.setItem('admin_token', response.data.token);
+      }
       if (response.data?.data) {
         setUser(response.data.data);
       }

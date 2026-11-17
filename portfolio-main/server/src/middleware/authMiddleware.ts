@@ -7,9 +7,14 @@ export interface AuthRequest extends Request {
 }
 
 export const protect = async (req: AuthRequest, res: Response, next: NextFunction) => {
-  let token;
+  let token: string | undefined;
 
-  token = req.cookies.jwt;
+  // Dual-mode authentication: Priority to httpOnly cookie, fallback to Authorization Bearer header
+  if (req.cookies?.jwt) {
+    token = req.cookies.jwt;
+  } else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+    token = req.headers.authorization.split(' ')[1];
+  }
 
   if (token) {
     try {
