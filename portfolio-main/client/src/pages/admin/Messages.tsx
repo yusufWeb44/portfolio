@@ -14,6 +14,15 @@ interface Message {
   createdAt: string;
 }
 
+// Secure mailto URL sanitizer: prevents protocol injection attacks
+const safeMailtoHref = (email: string): string => {
+  const clean = email.trim();
+  if (/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(clean)) {
+    return `mailto:${clean}`;
+  }
+  return '#';
+};
+
 const Messages = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
@@ -139,7 +148,7 @@ const Messages = () => {
                     <h2 className="text-2xl font-bold tracking-tight mb-2">{selectedMessage.subject}</h2>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <span className="font-medium text-foreground">{selectedMessage.name}</span>
-                      <span>&lt;<a href={`mailto:${selectedMessage.email}`} className="hover:underline">{selectedMessage.email}</a>&gt;</span>
+                      <span>&lt;<a href={safeMailtoHref(selectedMessage.email)} className="hover:underline">{selectedMessage.email}</a>&gt;</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">

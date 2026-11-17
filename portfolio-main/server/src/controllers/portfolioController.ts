@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { z } from 'zod';
 import prisma from '../utils/prisma';
 import { syncSettingsToTranslation } from '../utils/translationSync';
 
@@ -295,9 +296,86 @@ export const getMessages = async (req: Request, res: Response) => {
   res.json({ success: true, data: messages });
 };
 
+// Strict input validation schema for contact messages
+const contactMessageServerSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, 'Name must be at least 2 characters')
+    .max(100, 'Name cannot exceed 100 characters'),
+  email: z
+    .string()
+    .trim()
+    .email('Please provide a valid email address')
+    .max(255, 'Email cannot exceed 255 characters'),
+  subject: z
+    .string()
+    .trim()
+    .min(3, 'Subject must be at least 3 characters')
+    .max(150, 'Subject cannot exceed 150 characters'),
+  content: z
+    .string()
+    .trim()
+    .min(10, 'Message must be at least 10 characters')
+    .max(3000, 'Message cannot exceed 3000 characters'),
+  hp_company: z.string().optional(),
+  website: z.string().optional(),
+  clientTimestamp: z.number().optional(),
+});
+
+// Neutralize HTML tags and script protocols to prevent Stored XSS
+const sanitizeText = (input: string): string => {
+  return input
+    .replace(/[<>]/g, '')
+    .replace(/javascript:/gi, '')
+    .replace(/vbscript:/gi, '')
+    .replace(/data:/gi, '')
+    .trim();
+};
+
 export const createMessage = async (req: Request, res: Response) => {
-  // Public endpoint
-  const msg = await prisma.message.create({ data: req.body });
+  // 1. Zod input validation
+  const parseResult = contactMessageServerSchema.safeParse(req.body);
+  if (!parseResult.success) {
+    const errorDetails = (parseResult.error.issues || []).map((e: any) => e.message).join(', ');
+    return res.status(400).json({
+      success: false,
+      message: `Invalid form submission: ${errorDetails}`,
+      errors: parseResult.error.format(),
+    });
+  }
+
+  const { name, email, subject, content, hp_company, website, clientTimestamp } = parseResult.data;
+
+  // 2. Honeypot check (traps automated bots that fill hidden fields)
+  if (hp_company || website) {
+    // Return a fake 201 success response so the bot does not adapt, but do NOT persist to database
+    return res.status(201).json({
+      success: true,
+      data: { id: 'bot-filtered' },
+      message: 'Message received successfully',
+    });
+  }
+
+  // 3. Time-based heuristic check (humans take at least 1.5s to fill a form)
+  if (clientTimestamp && Date.now() - clientTimestamp < 1500) {
+    return res.status(201).json({
+      success: true,
+      data: { id: 'bot-filtered' },
+      message: 'Message received successfully',
+    });
+  }
+
+  // 4. Sanitize and whitelist only valid fields to avoid Mass Assignment & Stored XSS
+  const msg = await prisma.message.create({
+    data: {
+      name: sanitizeText(name),
+      email: email.toLowerCase().trim(),
+      subject: sanitizeText(subject),
+      content: sanitizeText(content),
+    },
+  });
+
   res.status(201).json({ success: true, data: msg });
 };
 

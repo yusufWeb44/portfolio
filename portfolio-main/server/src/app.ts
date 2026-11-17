@@ -8,7 +8,34 @@ import path from 'path';
 
 const app = express();
 
-// Security and utility middlewares
+// 1. HTTP Security Headers with Helmet
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+        fontSrc: ["'self'", 'https://fonts.gstatic.com', 'data:'],
+        imgSrc: ["'self'", 'data:', 'blob:', 'http:', 'https:'],
+        connectSrc: ["'self'", 'http:', 'https:'],
+        frameAncestors: ["'none'"],
+        objectSrc: ["'none'"],
+        baseUri: ["'self'"],
+        formAction: ["'self'"],
+        upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : null,
+      },
+    },
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: 'cross-origin' }, // Allows uploaded images to be safely consumed
+    xFrameOptions: { action: 'deny' }, // Anti-Clickjacking
+    xContentTypeOptions: true, // Anti-MIME sniffing
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+    hidePoweredBy: true, // Prevents framework fingerprinting
+  })
+);
+
+// 2. Cross-Origin Resource Sharing (CORS) Hardening
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:4173',
@@ -17,18 +44,30 @@ const allowedOrigins = [
   process.env.CLIENT_URL,
 ].filter(Boolean) as string[];
 
-app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps, curl) or allowed origins or any localhost port
-    if (!origin || allowedOrigins.includes(origin) || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-}));
-app.use(express.json());
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // In production, enforce strictly against configured client URL
+      if (process.env.NODE_ENV === 'production') {
+        if (!origin || allowedOrigins.includes(origin)) {
+          return callback(null, true);
+        }
+        return callback(new Error('Blocked by CORS policy'));
+      }
+      // In development, permit localhost testing
+      if (!origin || allowedOrigins.includes(origin) || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+  })
+);
+
+// 3. Payload size limiting against Denial-of-Service (DoS)
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use(cookieParser());
 
 import fs from 'fs';

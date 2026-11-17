@@ -1,6 +1,10 @@
 import 'dotenv/config';
+import { validateEnv } from './utils/validateEnv';
 import app from './app';
 import { reconcileInitialTranslations } from './utils/translationSync';
+
+// Perform pre-flight environment security validation
+validateEnv();
 
 const PORT = process.env.PORT || 5000;
 // Trigger server reload for updated Prisma schema

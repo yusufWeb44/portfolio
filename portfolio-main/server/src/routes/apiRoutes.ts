@@ -1,5 +1,6 @@
 import express from 'express';
 import { protect } from '../middleware/authMiddleware';
+import { contactRateLimiter } from '../middleware/rateLimiter';
 import {
   getSettings, updateSettings,
   getSkills, createSkill, updateSkill, deleteSkill,
@@ -121,9 +122,9 @@ router.route('/services/:id')
   .put(protect, updateService)
   .delete(protect, deleteService);
 
-// Messages (Public can create, Admin can read/update/delete)
+// Messages (Public can create with rate limiter, Admin can read/update/delete)
 router.get('/messages', protect, getMessages);
-router.post('/messages', createMessage);
+router.post('/messages', contactRateLimiter({ windowMs: 15 * 60 * 1000, max: 5 }), createMessage);
 router.put('/messages/:id', protect, updateMessage);
 router.delete('/messages/:id', protect, deleteMessage);
 

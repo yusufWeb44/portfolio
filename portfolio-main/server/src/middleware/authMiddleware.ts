@@ -13,7 +13,8 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
 
   if (token) {
     try {
-      const decoded: any = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
+      const secret = process.env.JWT_SECRET || 'dev-fallback-secret-for-local-development-only-replace-in-production';
+      const decoded: any = jwt.verify(token, secret);
 
       req.user = await prisma.adminUser.findUnique({
         where: { id: decoded.userId },
