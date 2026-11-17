@@ -4,6 +4,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import api from '../../services/api';
+import { resolveImageUrl } from '../../utils/mediaUrl';
 import {
   GithubIcon,
   LinkedinIcon,
@@ -242,11 +243,14 @@ export const Footer: React.FC<FooterProps> = ({ settings, socialLinks = [], scro
                 aria-label="Home"
               >
                 <img
-                  src="/logo.webp"
+                  src={resolveImageUrl(settings?.logoUrl) || '/logo.webp'}
                   alt={brandName}
                   width={120}
                   height={69}
                   className="h-9 sm:h-10 w-auto max-w-[120px] object-contain filter invert contrast-125 dark:filter-none select-none transition-transform duration-300 group-hover:scale-105"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/logo.webp';
+                  }}
                 />
               </button>
               <div className="flex flex-col">

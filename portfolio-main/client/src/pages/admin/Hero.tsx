@@ -617,19 +617,19 @@ const AdminHero = () => {
 
           {/* Profile Photo Card */}
           <div className="bg-card border border-border rounded-xl p-6 text-center space-y-4">
-            <h2 className="text-lg font-bold">Profile Photo</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-base font-bold">Profile Photo (الصورة الشخصية)</h2>
+              <span className="text-[10px] font-mono text-emerald-500 uppercase tracking-wider bg-emerald-500/10 px-2 py-0.5 rounded">Cloudinary</span>
+            </div>
             <div className="relative w-40 h-40 mx-auto rounded-full overflow-hidden border-2 border-border/80 shadow-md group bg-muted">
-              {heroData.profilePhoto ? (
-                <img 
-                  src={getMediaUrl(heroData.profilePhoto)} 
-                  alt="Profile" 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                  <ImageIcon size={40} />
-                </div>
-              )}
+              <img 
+                src={resolveImageUrl(heroData.profilePhoto) || '/portfolio_photo.webp'} 
+                alt="Profile" 
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = '/portfolio_photo.webp';
+                }}
+              />
             </div>
 
             <label className="cursor-pointer inline-block">

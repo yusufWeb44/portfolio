@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import { useAuthStore } from '../../store/authStore';
 import { Lock, Mail } from 'lucide-react';
+import { resolveImageUrl } from '../../utils/mediaUrl';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -46,9 +47,18 @@ const Login = () => {
       <div className="w-full max-w-md p-8 bg-card rounded-xl border border-border shadow-lg">
         <div className="mb-8 text-center flex flex-col items-center">
           <img
-            src="/logo.webp"
+            src={resolveImageUrl(() => {
+              try {
+                return JSON.parse(localStorage.getItem('portfolio_settings') || '{}')?.logoUrl;
+              } catch {
+                return '';
+              }
+            }()) || '/logo.webp'}
             alt="Logo"
             className="h-10 sm:h-12 w-auto mb-4 object-contain filter invert contrast-125 dark:filter-none select-none"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = '/logo.webp';
+            }}
           />
           <h1 className="text-2xl font-bold tracking-tight mb-2">Admin Login</h1>
           <p className="text-muted-foreground text-sm">Enter your credentials to access the dashboard</p>

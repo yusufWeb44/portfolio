@@ -455,9 +455,9 @@ const Home = () => {
 
   // Memoized Hero image to match initial HTML <link rel="preload"> exactly
   const heroImageSrc = useMemo(() => {
-    if (!settings?.profilePhoto) return '/portfolio_photo.webp';
-    if (settings.profilePhoto.includes('image-1789681613514')) return '/portfolio_photo.webp';
-    return getMediaUrl(settings.profilePhoto);
+    const resolved = resolveImageUrl(settings?.profilePhoto);
+    if (!resolved || resolved.includes('image-1789681613514')) return '/portfolio_photo.webp';
+    return resolved;
   }, [settings?.profilePhoto]);
 
   return (

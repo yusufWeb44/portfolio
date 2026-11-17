@@ -24,6 +24,7 @@ import {
   TelegramIcon
 } from '../components/icons/BrandIcons';
 import { SocialButton } from '../components/ui/SocialButton';
+import { resolveImageUrl } from '../utils/mediaUrl';
 
 const PublicLayout = () => {
   const { t, currentLang, currentDirection } = useLanguage();
@@ -522,6 +523,8 @@ const PublicLayout = () => {
     ? (settings?.nameAr ? settings.nameAr.split(' ')[0] : 'يوسف')
     : (settings?.name ? settings.name.split(' ')[0] : 'Yousef');
 
+  const logoSrc = resolveImageUrl(settings?.logoUrl) || '/logo.webp';
+
   return (
     <SmoothScrollProvider>
       <div className="min-h-screen flex flex-col relative bg-background text-foreground font-sans selection:bg-foreground selection:text-background">
@@ -591,11 +594,14 @@ const PublicLayout = () => {
                 aria-label="Home"
               >
                 <img
-                  src="/logo.webp"
+                  src={logoSrc}
                   alt="Logo"
                   width={110}
                   height={63}
                   className="h-8 sm:h-9 md:h-9.5 w-auto max-w-[95px] sm:max-w-[115px] md:max-w-[125px] object-contain filter invert contrast-125 dark:filter-none select-none shrink-0 transition-transform duration-200 group-hover:scale-105"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/logo.webp';
+                  }}
                 />
               </button>
 
@@ -718,11 +724,14 @@ const PublicLayout = () => {
                     className="flex items-center cursor-pointer bg-transparent border-none p-0 focus:outline-none"
                   >
                     <img
-                      src="/logo.webp"
+                      src={logoSrc}
                       alt="Logo"
                       width={90}
                       height={52}
                       className="h-8 w-auto max-w-[90px] object-contain filter invert contrast-125 dark:filter-none select-none shrink-0"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/logo.webp';
+                      }}
                     />
                   </button>
 

@@ -8,12 +8,34 @@ import {
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { Helmet } from 'react-helmet-async';
+import { resolveImageUrl } from '../utils/mediaUrl';
 
 const AdminLayout = () => {
   const { user, isLoading, checkAuth, logout } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [logoUrl, setLogoUrl] = useState<string>(() => {
+    try {
+      const cached = localStorage.getItem('portfolio_settings');
+      return cached ? JSON.parse(cached)?.logoUrl || '' : '';
+    } catch {
+      return '';
+    }
+  });
+
+  useEffect(() => {
+    const handleSync = () => {
+      try {
+        const cached = localStorage.getItem('portfolio_settings');
+        if (cached) {
+          setLogoUrl(JSON.parse(cached)?.logoUrl || '');
+        }
+      } catch {}
+    };
+    window.addEventListener('portfolio_settings_updated', handleSync);
+    return () => window.removeEventListener('portfolio_settings_updated', handleSync);
+  }, []);
 
   useEffect(() => {
     checkAuth();
@@ -63,9 +85,12 @@ const AdminLayout = () => {
       <div className="p-5 border-b border-border/40 shrink-0">
         <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
           <img
-            src="/logo.webp"
+            src={resolveImageUrl(logoUrl) || '/logo.webp'}
             alt="Logo"
             className="h-8 w-auto object-contain filter invert contrast-125 dark:filter-none select-none"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = '/logo.webp';
+            }}
           />
           <div>
             <span className="font-bold tracking-tight text-base block leading-none">Yusuf CMS</span>

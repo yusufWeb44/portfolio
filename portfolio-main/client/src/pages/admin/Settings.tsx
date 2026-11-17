@@ -28,6 +28,7 @@ interface PortfolioSettings {
   availabilityAr?: string;
   email: string;
   profilePhoto?: string;
+  logoUrl?: string;
   typewriterWords?: string;
   typewriterWordsAr?: string;
   whatsappNumber?: string;
@@ -160,6 +161,7 @@ const Settings = () => {
     availability: '',
     email: '',
     profilePhoto: '',
+    logoUrl: '',
     primaryThemeColor: 'emerald',
     fontFamilyEn: 'Geist',
     fontUrlEn: '',
@@ -173,6 +175,7 @@ const Settings = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   useEffect(() => {
@@ -274,14 +277,53 @@ const Settings = () => {
       const photoUrl = res.data.url;
       const updated = { ...settings, profilePhoto: photoUrl };
       setSettings(updated);
-      await api.put('/settings', updated);
-      showToast("Profile photo uploaded and saved");
+      await api.put('/settings', { profilePhoto: photoUrl });
+      try {
+        const local = JSON.parse(localStorage.getItem('portfolio_settings') || '{}');
+        local.profilePhoto = photoUrl;
+        localStorage.setItem('portfolio_settings', JSON.stringify(local));
+        window.dispatchEvent(new Event('portfolio_settings_updated'));
+      } catch {}
+      showToast("Profile photo uploaded and saved to Cloudinary!");
     } catch (error: any) {
       console.error('Failed to upload image:', error);
       const msg = error.response?.data?.message || "Failed to upload image";
       showToast(msg, "error");
     } finally {
       setUploadingPhoto(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    setUploadingLogo(true);
+    try {
+      const res = await api.post('/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      const logoUrl = res.data.url;
+      const updated = { ...settings, logoUrl };
+      setSettings(updated);
+      await api.put('/settings', { logoUrl });
+      try {
+        const local = JSON.parse(localStorage.getItem('portfolio_settings') || '{}');
+        local.logoUrl = logoUrl;
+        localStorage.setItem('portfolio_settings', JSON.stringify(local));
+        window.dispatchEvent(new Event('portfolio_settings_updated'));
+      } catch {}
+      showToast("Website logo uploaded and saved to Cloudinary!");
+    } catch (error: any) {
+      console.error('Failed to upload logo:', error);
+      const msg = error.response?.data?.message || "Failed to upload logo";
+      showToast(msg, "error");
+    } finally {
+      setUploadingLogo(false);
       e.target.value = '';
     }
   };
@@ -503,26 +545,58 @@ const Settings = () => {
 
           {/* Photo & Social Links Column */}
           <div className="space-y-6">
+            {/* Website Logo Card (Cloudinary) */}
             <div className="bg-card border border-border rounded-xl overflow-hidden p-6 text-center">
-              <h2 className="text-lg font-bold mb-4">Profile Photo</h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-base font-bold">Website Logo (شعار الموقع)</h2>
+                <span className="text-[10px] font-mono text-emerald-500 uppercase tracking-wider bg-emerald-500/10 px-2 py-0.5 rounded">Cloudinary</span>
+              </div>
+              <div className="relative w-full h-24 mx-auto mb-4 rounded-xl overflow-hidden border border-border/80 group bg-muted/40 flex items-center justify-center p-3">
+                <img 
+                  src={resolveImageUrl(settings.logoUrl) || '/logo.webp'} 
+                  alt="Website Logo" 
+                  className="max-h-16 w-auto object-contain filter invert contrast-125 dark:filter-none select-none transition-transform duration-200 group-hover:scale-105"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/logo.webp';
+                  }}
+                />
+              </div>
+              <label className="cursor-pointer">
+                <Button variant="outline" size="sm" asChild disabled={uploadingLogo}>
+                  <span>
+                    {uploadingLogo ? 'Uploading to Cloudinary...' : 'Change Logo (رفع شعار جديد)'}
+                    <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
+                  </span>
+                </Button>
+              </label>
+              <p className="text-xs text-muted-foreground mt-2">WEBP, PNG, SVG or JPG (transparent recommended).</p>
+            </div>
+
+            {/* Profile Photo Card */}
+            <div className="bg-card border border-border rounded-xl overflow-hidden p-6 text-center">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-base font-bold">Profile Photo (الصورة الشخصية)</h2>
+                <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">Hero &amp; About</span>
+              </div>
               <div className="relative w-36 h-36 mx-auto mb-4 rounded-full overflow-hidden border-2 border-border group bg-muted">
-                {settings.profilePhoto ? (
-                  <img src={getMediaUrl(settings.profilePhoto)} alt="Profile" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                    <ImageIcon size={32} />
-                  </div>
-                )}
+                <img 
+                  src={resolveImageUrl(settings.profilePhoto) || '/portfolio_photo.webp'} 
+                  alt="Profile" 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/portfolio_photo.webp';
+                  }}
+                />
               </div>
               <label className="cursor-pointer">
                 <Button variant="outline" size="sm" asChild disabled={uploadingPhoto}>
                   <span>
-                    {uploadingPhoto ? 'Uploading...' : 'Change Photo'}
+                    {uploadingPhoto ? 'Uploading to Cloudinary...' : 'Change Photo (تغيير الصورة)'}
                     <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
                   </span>
                 </Button>
               </label>
-              <p className="text-xs text-muted-foreground mt-2">WEBP, PNG or JPG.</p>
+              <p className="text-xs text-muted-foreground mt-2">Syncs directly with Hero section and About page.</p>
             </div>
 
             {/* Social Links Card */}
