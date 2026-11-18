@@ -2,14 +2,14 @@ import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { 
   Save, Loader2, Check, Plus, Trash2, 
-  ArrowUp, ArrowDown, Image as ImageIcon, Sparkles, 
+  ArrowUp, ArrowDown, Sparkles, 
   BarChart3, RefreshCw, Eye
 } from 'lucide-react';
 import api from '../../services/api';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Textarea } from '../../components/ui/Textarea';
-import { getMediaUrl } from '../../utils/mediaUrl';
+import { resolveImageUrl } from '../../utils/mediaUrl';
 
 export interface StatItem {
   id: string;
@@ -621,13 +621,15 @@ const AdminHero = () => {
               <h2 className="text-base font-bold">Profile Photo (الصورة الشخصية)</h2>
               <span className="text-[10px] font-mono text-emerald-500 uppercase tracking-wider bg-emerald-500/10 px-2 py-0.5 rounded">Cloudinary</span>
             </div>
-            <div className="relative w-40 h-40 mx-auto rounded-full overflow-hidden border-2 border-border/80 shadow-md group bg-muted">
+            <div className="relative w-40 h-40 mx-auto rounded-full overflow-hidden border-2 border-border/80 shadow-md group bg-muted flex items-center justify-center">
               <img 
                 src={resolveImageUrl(heroData.profilePhoto) || '/portfolio_photo.webp'} 
-                alt="Profile" 
+                alt="" 
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = '/portfolio_photo.webp';
+                  const el = e.currentTarget as HTMLImageElement;
+                  el.onerror = null;
+                  el.src = '/portfolio_photo.webp';
                 }}
               />
             </div>

@@ -207,7 +207,104 @@ export const defaultEnTranslations: Record<string, string> = {
   "common.filter": "Filter",
   "common.search": "Search",
   "common.remote": "Remote / Worldwide",
-  "common.fullStackEngineer": "Full-Stack Engineer"
+  "common.fullStackEngineer": "Full-Stack Engineer",
+
+  // Admin CMS Navigation & UI
+  "admin.overview": "Overview",
+  "admin.heroSection": "Hero Section",
+  "admin.generalSettings": "General Settings",
+  "admin.aboutSection": "About Section",
+  "admin.workflow": "Workflow Steps",
+  "admin.projects": "Projects",
+  "admin.skills": "Skills",
+  "admin.experience": "Experience",
+  "admin.certificates": "Certificates",
+  "admin.services": "Services",
+  "admin.faqs": "FAQs",
+  "admin.reviews": "Reviews & Feedback",
+  "admin.footer": "Footer Section",
+  "admin.messages": "Messages",
+  "admin.seo": "SEO Hub",
+  "admin.translations": "Translations",
+  "admin.security": "Security & Password",
+  "admin.portfolioContent": "Portfolio Content",
+  "admin.growthSettings": "System & Preferences",
+  "admin.backToPublic": "Back to public site",
+  "admin.signOut": "Sign out",
+  "admin.administrator": "Administrator",
+  "admin.controlCenter": "Admin Control Center",
+  "admin.theme": "Theme",
+  "admin.lightMode": "Light Mode",
+  "admin.darkMode": "Dark Mode",
+  "admin.language": "Language",
+  "admin.arabic": "العربية",
+  "admin.english": "English",
+  "admin.profile": "Admin Profile",
+  "admin.updateEmail": "Update Admin Email",
+  "admin.changeEmail": "Change Email Address",
+  "admin.currentEmail": "Current Email",
+  "admin.newEmail": "New Email Address",
+  "admin.securitySettings": "Security & 2FA"
+};
+
+export const defaultArTranslations: Record<string, string> = {
+  // Admin CMS Navigation & UI
+  "admin.overview": "نظرة عامة",
+  "admin.heroSection": "قسم الواجهة (الهيرو)",
+  "admin.generalSettings": "الإعدادات العامة",
+  "admin.aboutSection": "نبذة عني",
+  "admin.workflow": "منهجية وسير العمل",
+  "admin.projects": "المشاريع والأعمال",
+  "admin.skills": "المهارات والتقنيات",
+  "admin.experience": "الخبرات والمسار المهني",
+  "admin.certificates": "الشهادات والاعتمادات",
+  "admin.services": "الخدمات المقدمة",
+  "admin.faqs": "الأسئلة الشائعة",
+  "admin.reviews": "التقييمات والآراء",
+  "admin.footer": "تذييل الموقع (الفوتر)",
+  "admin.messages": "صندوق الرسائل",
+  "admin.seo": "تحسين محركات البحث SEO",
+  "admin.translations": "نظام اللغات والترجمة",
+  "admin.security": "الأمان وكلمات المرور",
+  "admin.portfolioContent": "محتوى الموقع",
+  "admin.growthSettings": "النظام والتفضيلات",
+  "admin.backToPublic": "العودة للموقع العام",
+  "admin.signOut": "تسجيل الخروج",
+  "admin.administrator": "المدير العام",
+  "admin.controlCenter": "مركز التحكم والإدارة",
+  "admin.theme": "المظهر",
+  "admin.lightMode": "الوضع الفاتح",
+  "admin.darkMode": "الوضع الداكن",
+  "admin.language": "اللغة",
+  "admin.arabic": "العربية",
+  "admin.english": "English",
+  "admin.profile": "الملف الشخصي",
+  "admin.updateEmail": "تحديث البريد الإلكتروني",
+  "admin.changeEmail": "تغيير البريد الإلكتروني للمدير",
+  "admin.currentEmail": "البريد الإلكتروني الحالي",
+  "admin.newEmail": "البريد الإلكتروني الجديد",
+  "admin.securitySettings": "الأمان والمصادقة",
+
+  "nav.about": "عني",
+  "nav.workflow": "منهجية العمل",
+  "nav.projects": "المشاريع",
+  "nav.skills": "المهارات",
+  "nav.experience": "الخبرات",
+  "nav.services": "الخدمات",
+  "nav.faq": "الأسئلة الشائعة",
+  "nav.reviews": "الآراء والتقييمات",
+  "nav.contact": "تواصل معي",
+  "nav.startProject": "ابدأ مشروعاً",
+  "nav.contactUs": "تواصل معنا",
+
+  "common.loading": "جاري التحميل...",
+  "common.back": "رجوع",
+  "common.close": "إغلاق",
+  "common.viewDetails": "عرض التفاصيل",
+  "common.filter": "تصفية",
+  "common.search": "بحث",
+  "common.remote": "عن بُعد / عالمياً",
+  "common.fullStackEngineer": "مهندس برمجيات وتطبيقات متكاملة"
 };
 
 export const flattenTranslations = (obj: any, prefix = ''): Record<string, string> => {
@@ -232,7 +329,8 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return localStorage.getItem('portfolio_lang') || 'en';
   });
   const [translationsMap, setTranslationsMap] = useState<Record<string, Record<string, any>>>({
-    en: defaultEnTranslations
+    en: defaultEnTranslations,
+    ar: defaultArTranslations,
   });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -252,7 +350,10 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         }));
         setAvailableLanguages(langs);
 
-        const newMap: Record<string, Record<string, any>> = { en: defaultEnTranslations };
+        const newMap: Record<string, Record<string, any>> = {
+          en: defaultEnTranslations,
+          ar: defaultArTranslations,
+        };
         langs.forEach((l) => {
           try {
             const raw = typeof l.data === 'string' ? JSON.parse(l.data) : (l.data || {});

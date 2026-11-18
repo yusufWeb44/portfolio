@@ -33,6 +33,7 @@ const AdminReviews = lazy(() => import('./pages/admin/Reviews'));
 const AdminFooter = lazy(() => import('./pages/admin/Footer'));
 const AdminSeo = lazy(() => import('./pages/admin/Seo'));
 const AdminTranslations = lazy(() => import('./pages/admin/Translations'));
+const AdminSecurity = lazy(() => import('./pages/admin/Security'));
 
 const PageLoader = () => (
   <div className="min-h-[60vh] flex items-center justify-center">
@@ -81,6 +82,7 @@ function App() {
               <Route path="messages" element={<AdminMessages />} />
               <Route path="seo" element={<AdminSeo />} />
               <Route path="translations" element={<AdminTranslations />} />
+              <Route path="security" element={<AdminSecurity />} />
             </Route>
           </Routes>
         </Suspense>

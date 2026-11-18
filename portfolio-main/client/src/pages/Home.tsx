@@ -15,7 +15,7 @@ import {
 } from '../components/ui/BrandIcons';
 import { useEffect, useState, useMemo, startTransition } from 'react';
 import api from '../services/api';
-import { getMediaUrl } from '../utils/mediaUrl';
+import { resolveImageUrl } from '../utils/mediaUrl';
 import MinimalistHero from '../components/sections/MinimalistHero';
 import AboutSection from '../components/sections/AboutSection';
 import HowItWorks from '../components/sections/HowItWorks';
