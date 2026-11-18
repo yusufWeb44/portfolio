@@ -9,6 +9,7 @@ import { resolveImageUrl } from '../../utils/mediaUrl';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Textarea } from '../../components/ui/Textarea';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface SeoData {
   siteName: string;
@@ -41,6 +42,8 @@ const defaultSeo: SeoData = {
 };
 
 const AdminSeo = () => {
+  const { currentLang, currentDirection } = useLanguage();
+  const isAr = currentLang === 'ar';
   const [data, setData] = useState<SeoData>(defaultSeo);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -126,11 +129,11 @@ const AdminSeo = () => {
   }
 
   return (
-    <div className="relative min-h-[80vh] pb-20">
-      <Helmet><title>SEO &amp; Social Hub | Admin</title></Helmet>
+    <div className="relative min-h-[80vh] pb-20" dir={currentDirection}>
+      <Helmet><title>{isAr ? 'مركز إعدادات SEO والأرشفة | لوحة التحكم' : 'SEO & Social Hub | Admin'}</title></Helmet>
 
       {toast && (
-        <div className={`fixed bottom-5 right-5 z-50 px-4 py-3 rounded-lg shadow-xl border flex items-center gap-2 animate-in slide-in-from-bottom-5 ${
+        <div className={`fixed bottom-5 ${isAr ? 'left-5' : 'right-5'} z-50 px-4 py-3 rounded-lg shadow-xl border flex items-center gap-2 animate-in slide-in-from-bottom-5 ${
           toast.type === 'success' ? 'bg-card border-green-500/50 text-foreground' : 'bg-destructive text-destructive-foreground'
         }`}>
           {toast.type === 'success' && <Check size={16} className="text-green-500" />}
@@ -141,64 +144,68 @@ const AdminSeo = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">100% Controllable SEO Hub</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            {isAr ? 'مركز إعدادات وتحسين محركات البحث (SEO Hub)' : '100% Controllable SEO Hub'}
+          </h1>
           <p className="text-muted-foreground text-sm mt-1">
-            Configure metadata, OpenGraph cards, Twitter previews, robot indexation, and Schema.org JSON-LD.
+            {isAr
+              ? 'تهيئة البيانات الوصفية، بطاقات المشاركة على منصات التواصل (OpenGraph)، فهرسة عناكب البحث، وبيانات Schema.org المنظمة.'
+              : 'Configure metadata, OpenGraph cards, Twitter previews, robot indexation, and Schema.org JSON-LD.'}
           </p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" onClick={fetchSeo} disabled={saving}>
-            <RefreshCw size={16} className="mr-1.5" />
-            Reload
+          <Button variant="outline" onClick={fetchSeo} disabled={saving} className="gap-1.5">
+            <RefreshCw size={16} />
+            {isAr ? 'إعادة تحميل' : 'Reload'}
           </Button>
-          <Button onClick={handleSave} disabled={saving} className="min-w-[120px]">
-            {saving ? <Loader2 size={16} className="animate-spin mr-1.5" /> : <Save size={16} className="mr-1.5" />}
-            Save SEO
+          <Button onClick={handleSave} disabled={saving} className="min-w-[120px] gap-1.5">
+            {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+            {isAr ? 'حفظ إعدادات SEO' : 'Save SEO'}
           </Button>
         </div>
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-border mb-6">
+      <div className="flex items-center gap-2 border-b border-border mb-6 overflow-x-auto pb-1">
         <button
           onClick={() => setActiveTab('general')}
-          className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-all flex items-center gap-2 ${
+          className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-all flex items-center gap-2 whitespace-nowrap ${
             activeTab === 'general'
               ? 'border-primary text-primary font-bold'
               : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
-          <Globe size={16} /> Meta &amp; Indexing
+          <Globe size={16} /> {isAr ? 'البيانات الوصفية والأرشفة' : 'Meta & Indexing'}
         </button>
         <button
           onClick={() => setActiveTab('social')}
-          className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-all flex items-center gap-2 ${
+          className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-all flex items-center gap-2 whitespace-nowrap ${
             activeTab === 'social'
               ? 'border-primary text-primary font-bold'
               : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
-          <Share2 size={16} /> OpenGraph &amp; Social
+          <Share2 size={16} /> {isAr ? 'المشاركة الاجتماعية (OpenGraph)' : 'OpenGraph & Social'}
         </button>
         <button
           onClick={() => setActiveTab('schema')}
-          className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-all flex items-center gap-2 ${
+          className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-all flex items-center gap-2 whitespace-nowrap ${
             activeTab === 'schema'
               ? 'border-primary text-primary font-bold'
               : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
-          <Code size={16} /> Structured Data
+          <Code size={16} /> {isAr ? 'البيانات المنظمة (Schema.org)' : 'Structured Data'}
         </button>
         <button
           onClick={() => setActiveTab('preview')}
-          className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-all flex items-center gap-2 ${
+          className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-all flex items-center gap-2 whitespace-nowrap ${
             activeTab === 'preview'
               ? 'border-primary text-primary font-bold'
               : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
-          <Eye size={16} /> Live Previews
+          <Eye size={16} /> {isAr ? 'معاينة حية للمظهر' : 'Live Previews'}
         </button>
       </div>
 
@@ -206,10 +213,12 @@ const AdminSeo = () => {
       {activeTab === 'general' && (
         <div className="space-y-6">
           <div className="p-6 bg-card rounded-xl border border-border space-y-4">
-            <h2 className="text-lg font-semibold">Standard Meta Tags</h2>
+            <h2 className="text-lg font-semibold">{isAr ? 'علامات الميتا القياسية (Standard Meta Tags)' : 'Standard Meta Tags'}</h2>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">Site / Brand Name</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                  {isAr ? 'اسم الموقع / المنصة' : 'Site / Brand Name'}
+                </label>
                 <Input
                   value={data.siteName}
                   onChange={e => setData({ ...data, siteName: e.target.value })}
@@ -217,7 +226,9 @@ const AdminSeo = () => {
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">Canonical Base URL</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                  {isAr ? 'رابط الموقع الأساسي (Canonical URL)' : 'Canonical Base URL'}
+                </label>
                 <Input
                   value={data.canonicalUrl}
                   onChange={e => setData({ ...data, canonicalUrl: e.target.value })}
@@ -228,7 +239,7 @@ const AdminSeo = () => {
 
             <div>
               <label className="text-xs font-semibold text-muted-foreground block mb-1">
-                Default Page Title <span className="font-normal text-muted-foreground">({data.defaultTitle.length} chars)</span>
+                {isAr ? 'عنوان الصفحة الافتراضي (Default Title)' : 'Default Page Title'} <span className="font-normal text-muted-foreground">({data.defaultTitle.length} {isAr ? 'حرف' : 'chars'})</span>
               </label>
               <Input
                 value={data.defaultTitle}
@@ -239,43 +250,51 @@ const AdminSeo = () => {
 
             <div>
               <label className="text-xs font-semibold text-muted-foreground block mb-1">
-                Meta Description <span className="font-normal text-muted-foreground">({data.defaultDescription.length} chars — ideal 140-160)</span>
+                {isAr ? 'الوصف الوصفي (Meta Description)' : 'Meta Description'} <span className="font-normal text-muted-foreground">({data.defaultDescription.length} {isAr ? 'حرف — المثالي 140-160' : 'chars — ideal 140-160'})</span>
               </label>
               <Textarea
                 value={data.defaultDescription}
                 onChange={e => setData({ ...data, defaultDescription: e.target.value })}
                 rows={3}
-                placeholder="High-converting description that appears on search engines..."
+                placeholder={isAr ? 'وصف جذاب ومهني يظهر في نتائج محركات البحث...' : 'High-converting description that appears on search engines...'}
               />
             </div>
 
             <div className="grid md:grid-cols-2 gap-4 pt-2">
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">Title Template</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                  {isAr ? 'قالب عنوان الصفحات الفرعية' : 'Title Template'}
+                </label>
                 <Input
                   value={data.titleTemplate}
                   onChange={e => setData({ ...data, titleTemplate: e.target.value })}
                   placeholder="%s | Yusuf Ayoubi"
                 />
-                <p className="text-[11px] text-muted-foreground mt-1">Use %s where the specific page title will be injected.</p>
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  {isAr ? 'استخدم %s حيث سيتم استبدالها بعنوان الصفحة المحددة.' : 'Use %s where the specific page title will be injected.'}
+                </p>
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">Robots Directives</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                  {isAr ? 'توجيهات عناكب الأرشفة (Robots)' : 'Robots Directives'}
+                </label>
                 <select
                   value={data.robots}
                   onChange={e => setData({ ...data, robots: e.target.value })}
                   className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
                 >
-                  <option value="index, follow">index, follow (Recommended for production)</option>
-                  <option value="noindex, follow">noindex, follow</option>
-                  <option value="noindex, nofollow">noindex, nofollow (Block all crawlers)</option>
+                  <option value="index, follow">{isAr ? 'index, follow (موصى به للموقع الفعلي)' : 'index, follow (Recommended for production)'}</option>
+                  <option value="noindex, follow">{isAr ? 'noindex, follow (عدم الأرشفة مع تتبع الروابط)' : 'noindex, follow'}</option>
+                  <option value="noindex, nofollow">{isAr ? 'noindex, nofollow (حجب تام لعناكب البحث)' : 'noindex, nofollow (Block all crawlers)'}</option>
                 </select>
               </div>
             </div>
 
             <div>
-              <label className="text-xs font-semibold text-muted-foreground block mb-1">Keywords (comma-separated)</label>
+              <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                {isAr ? 'الكلمات الدلالية المفتاحية (Keywords - مفصولة بفواصل)' : 'Keywords (comma-separated)'}
+              </label>
               <Input
                 value={data.keywords}
                 onChange={e => setData({ ...data, keywords: e.target.value })}
@@ -290,20 +309,26 @@ const AdminSeo = () => {
       {activeTab === 'social' && (
         <div className="space-y-6">
           <div className="p-6 bg-card rounded-xl border border-border space-y-4">
-            <h2 className="text-lg font-semibold">Social Sharing &amp; Cards (OpenGraph / X)</h2>
+            <h2 className="text-lg font-semibold">{isAr ? 'بطاقات المشاركة الاجتماعية (OpenGraph / X)' : 'Social Sharing & Cards (OpenGraph / X)'}</h2>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">OpenGraph Image URL</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                  {isAr ? 'رابط صورة المشاركة (OpenGraph Image)' : 'OpenGraph Image URL'}
+                </label>
                 <Input
                   value={data.ogImage}
                   onChange={e => setData({ ...data, ogImage: e.target.value })}
                   placeholder="/og-image.png or full https:// URL"
                 />
-                <p className="text-[11px] text-muted-foreground mt-1">Recommended dimension: 1200 x 630 px</p>
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  {isAr ? 'المقاس الموصى به: 1200 × 630 بكسل' : 'Recommended dimension: 1200 x 630 px'}
+                </p>
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">Twitter / X Handle</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                  {isAr ? 'معرف حساب منصة X (تويتر سابقاً)' : 'Twitter / X Handle'}
+                </label>
                 <Input
                   value={data.twitterHandle}
                   onChange={e => setData({ ...data, twitterHandle: e.target.value })}
@@ -312,14 +337,16 @@ const AdminSeo = () => {
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">Twitter Card Format</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                  {isAr ? 'نمط بطاقة المشاركة (Twitter Card)' : 'Twitter Card Format'}
+                </label>
                 <select
                   value={data.twitterCardType}
                   onChange={e => setData({ ...data, twitterCardType: e.target.value })}
                   className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
                 >
-                  <option value="summary_large_image">Large Image Card (summary_large_image)</option>
-                  <option value="summary">Small Thumbnail Card (summary)</option>
+                  <option value="summary_large_image">{isAr ? 'صورة كبيرة بارزة (summary_large_image)' : 'Large Image Card (summary_large_image)'}</option>
+                  <option value="summary">{isAr ? 'صورة مصغرة جانبية (summary)' : 'Small Thumbnail Card (summary)'}</option>
                 </select>
               </div>
             </div>
@@ -331,28 +358,32 @@ const AdminSeo = () => {
       {activeTab === 'schema' && (
         <div className="space-y-6">
           <div className="p-6 bg-card rounded-xl border border-border space-y-4">
-            <h2 className="text-lg font-semibold">Schema.org JSON-LD Structured Data</h2>
+            <h2 className="text-lg font-semibold">{isAr ? 'البيانات المنظمة Schema.org JSON-LD' : 'Schema.org JSON-LD Structured Data'}</h2>
             <p className="text-xs text-muted-foreground">
-              Structured metadata helps Google understand your professional credentials, knowledge graphs, and services.
+              {isAr
+                ? 'تساعد البيانات المنظمة محرك بحث Google على فهم هويتك المهنية، مؤهلاتك، وخدماتك وربطها بالرسم البياني المعرفي (Knowledge Graph).'
+                : 'Structured metadata helps Google understand your professional credentials, knowledge graphs, and services.'}
             </p>
 
             <div className="max-w-md">
-              <label className="text-xs font-semibold text-muted-foreground block mb-1">Primary Entity Type</label>
+              <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                {isAr ? 'نوع الكيان الأساسي (Entity Type)' : 'Primary Entity Type'}
+              </label>
               <select
                 value={data.schemaType}
                 onChange={e => setData({ ...data, schemaType: e.target.value })}
                 className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
               >
-                <option value="Person">Person (Freelancer / Independent Engineer)</option>
-                <option value="ProfessionalService">ProfessionalService (Consultant / Agency)</option>
-                <option value="Organization">Organization (Company / Studio)</option>
+                <option value="Person">{isAr ? 'شخص مستقل / مهندس حر (Person)' : 'Person (Freelancer / Independent Engineer)'}</option>
+                <option value="ProfessionalService">{isAr ? 'خدمات احترافية / استشارات (ProfessionalService)' : 'ProfessionalService (Consultant / Agency)'}</option>
+                <option value="Organization">{isAr ? 'شركة أو مؤسسة (Organization)' : 'Organization (Company / Studio)'}</option>
               </select>
             </div>
 
             <div>
               <div className="flex justify-between items-center mb-1">
                 <label className="text-xs font-semibold text-muted-foreground block">
-                  Custom JSON-LD Override (Optional)
+                  {isAr ? 'كود JSON-LD مخصص اختياري (Custom Override)' : 'Custom JSON-LD Override (Optional)'}
                 </label>
                 {jsonError && (
                   <span className="text-xs text-destructive flex items-center gap-1">
@@ -371,7 +402,9 @@ const AdminSeo = () => {
                 placeholder={`{\n  "@context": "https://schema.org",\n  "@type": "Person",\n  "name": "${data.siteName}",\n  "jobTitle": "Full-Stack Engineer"\n}`}
               />
               <p className="text-[11px] text-muted-foreground mt-1">
-                Leave empty to automatically generate standard Schema.org tags based on your settings.
+                {isAr
+                  ? 'اتركه فارغاً ليتم توليد علامات Schema.org التلقائية القياسية وفقاً لبياناتك.'
+                  : 'Leave empty to automatically generate standard Schema.org tags based on your settings.'}
               </p>
             </div>
           </div>
@@ -385,7 +418,7 @@ const AdminSeo = () => {
           <div className="p-6 bg-card rounded-xl border border-border space-y-4">
             <div className="flex items-center gap-2">
               <Search className="w-5 h-5 text-blue-500" />
-              <h2 className="text-base font-bold">Google Search Result Preview</h2>
+              <h2 className="text-base font-bold">{isAr ? 'معاينة نتيجة البحث في Google' : 'Google Search Result Preview'}</h2>
             </div>
 
             <div className="p-4 rounded-xl bg-white dark:bg-[#1f1f1f] border border-border/80 max-w-2xl font-sans">
@@ -408,7 +441,7 @@ const AdminSeo = () => {
           <div className="p-6 bg-card rounded-xl border border-border space-y-4">
             <div className="flex items-center gap-2">
               <Share2 className="w-5 h-5 text-emerald-500" />
-              <h2 className="text-base font-bold">WhatsApp &amp; Social Card Preview</h2>
+              <h2 className="text-base font-bold">{isAr ? 'معاينة بطاقة المشاركة في WhatsApp ومنصات التواصل' : 'WhatsApp & Social Card Preview'}</h2>
             </div>
 
             <div className="max-w-md rounded-xl overflow-hidden border border-border/80 bg-background shadow-lg">
@@ -423,7 +456,7 @@ const AdminSeo = () => {
                     }}
                   />
                 ) : (
-                  <div className="text-muted-foreground text-xs font-mono">No Image Configured</div>
+                  <div className="text-muted-foreground text-xs font-mono">{isAr ? 'لم يتم تحديد صورة' : 'No Image Configured'}</div>
                 )}
               </div>
               <div className="p-4 space-y-1.5 bg-card">

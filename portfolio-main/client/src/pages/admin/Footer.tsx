@@ -10,6 +10,7 @@ import api from '../../services/api';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Textarea } from '../../components/ui/Textarea';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface QuickLinkItem {
   id: string;
@@ -115,11 +116,17 @@ const defaultFooter: FooterData = {
 };
 
 const AdminFooter = () => {
+  const { currentLang, currentDirection } = useLanguage();
+  const isAr = currentLang === 'ar';
   const [data, setData] = useState<FooterData>(defaultFooter);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [activeLangTab, setActiveLangTab] = useState<'ar' | 'en'>('ar');
+  const [activeLangTab, setActiveLangTab] = useState<'ar' | 'en'>(isAr ? 'ar' : 'en');
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  useEffect(() => {
+    setActiveLangTab(currentLang === 'ar' ? 'ar' : 'en');
+  }, [currentLang]);
 
   useEffect(() => {
     fetchFooter();
@@ -288,15 +295,15 @@ const AdminFooter = () => {
   }
 
   return (
-    <>
+    <div dir={currentDirection}>
       <Helmet>
-        <title>Footer Section CMS | Yusuf Admin</title>
+        <title>{isAr ? 'إدارة الفوتر | لوحة التحكم' : 'Footer Section CMS | Yusuf Admin'}</title>
       </Helmet>
 
       {/* Toast Notification */}
       {toast && (
         <div
-          className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl border text-sm font-medium shadow-xl transition-all duration-300 animate-in fade-in slide-in-from-bottom-4 ${
+          className={`fixed bottom-6 ${isAr ? 'left-6' : 'right-6'} z-50 flex items-center gap-2 px-4 py-3 rounded-xl border text-sm font-medium shadow-xl transition-all duration-300 animate-in fade-in slide-in-from-bottom-4 ${
             toast.type === 'success'
               ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
               : 'bg-red-500/10 border-red-500/30 text-red-600 dark:text-red-400'
@@ -312,13 +319,17 @@ const AdminFooter = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-border/40">
           <div>
             <div className="flex items-center gap-2.5">
-              <h1 className="text-2xl font-bold tracking-tight">إدارة الفوتر (Footer CMS)</h1>
+              <h1 className="text-2xl font-bold tracking-tight">
+                {isAr ? 'إدارة الفوتر (Footer CMS)' : 'Footer CMS Management'}
+              </h1>
               <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                4 أعمدة ديناميكية
+                {isAr ? '4 أعمدة ديناميكية' : '4 Dynamic Columns'}
               </span>
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              تحكم كامل في جميع أعمدة الفوتر، خدماتك، الروابط السريعة، معلومات التواصل، وحقوق النشر بدون أي تعديل بالكود.
+              {isAr
+                ? 'تحكم كامل في جميع أعمدة الفوتر، خدماتك، الروابط السريعة، معلومات التواصل، وحقوق النشر بدون أي تعديل بالكود.'
+                : 'Complete control over footer columns, services, quick links, contact details, and copyright copy without touching code.'}
             </p>
           </div>
 
@@ -331,7 +342,7 @@ const AdminFooter = () => {
               className="text-xs gap-1.5"
             >
               <RefreshCw className="w-3.5 h-3.5" />
-              تحديث
+              {isAr ? 'تحديث' : 'Refresh'}
             </Button>
             <Button
               onClick={handleSave}
@@ -341,12 +352,12 @@ const AdminFooter = () => {
               {saving ? (
                 <>
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  جاري الحفظ...
+                  {isAr ? 'جاري الحفظ...' : 'Saving...'}
                 </>
               ) : (
                 <>
                   <Save className="w-3.5 h-3.5" />
-                  حفظ التعديلات
+                  {isAr ? 'حفظ التعديلات' : 'Save Changes'}
                 </>
               )}
             </Button>
@@ -365,7 +376,7 @@ const AdminFooter = () => {
               }`}
             >
               <span className="text-base leading-none">🇸🇦</span>
-              <span>المحتوى العربي (الأساسي)</span>
+              <span>{isAr ? 'المحتوى العربي (الأساسي)' : 'Arabic Content (Primary)'}</span>
             </button>
             <button
               onClick={() => setActiveLangTab('en')}
@@ -376,7 +387,7 @@ const AdminFooter = () => {
               }`}
             >
               <span className="text-base leading-none">🇬🇧</span>
-              <span>English Content</span>
+              <span>{isAr ? 'المحتوى الإنجليزي' : 'English Content'}</span>
             </button>
           </div>
         </div>
@@ -389,10 +400,14 @@ const AdminFooter = () => {
                 <span className="w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs font-bold font-mono">
                   01
                 </span>
-                <h2 className="text-sm font-bold tracking-tight">العمود الأول: الهوية والنبذة (Brand & Identity)</h2>
+                <h2 className="text-sm font-bold tracking-tight">
+                  {isAr ? 'العمود الأول: الهوية والنبذة (Brand & Identity)' : 'Column 01: Brand & Identity'}
+                </h2>
               </div>
               <p className="text-xs text-muted-foreground">
-                اللوغو يظهر تلقائياً بدون إطار بحجم مناسب، مع الاسم والنبذة التعبيرية عن خبراتك وأزرار السوشيال ميديا.
+                {isAr
+                  ? 'اللوغو يظهر تلقائياً بدون إطار بحجم مناسب، مع الاسم والنبذة التعبيرية عن خبراتك وأزرار السوشيال ميديا.'
+                  : 'Logo renders cleanly at optimum scale alongside your name, professional bio, and social media connectivity.'}
               </p>
             </div>
             <label className="flex items-center gap-2 text-xs font-medium cursor-pointer shrink-0">
@@ -402,7 +417,7 @@ const AdminFooter = () => {
                 onChange={(e) => setData({ ...data, showSocialLinks: e.target.checked })}
                 className="w-4 h-4 rounded border-border text-emerald-600 focus:ring-emerald-500"
               />
-              <span>إظهار أزرار السوشيال</span>
+              <span>{isAr ? 'إظهار أزرار السوشيال' : 'Show Social Media Icons'}</span>
             </label>
           </div>
 
@@ -410,7 +425,7 @@ const AdminFooter = () => {
             <div className="space-y-4 pt-2">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-foreground/80">الاسم / اسم المنصة (عربي)</label>
+                  <label className="text-xs font-semibold text-foreground/80">{isAr ? 'الاسم / اسم المنصة (عربي)' : 'Brand Name (Arabic)'}</label>
                   <Input
                     value={data.brandNameAr}
                     onChange={(e) => setData({ ...data, brandNameAr: e.target.value })}
@@ -419,7 +434,7 @@ const AdminFooter = () => {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-foreground/80">المسمى المهني / الشارة (عربي)</label>
+                  <label className="text-xs font-semibold text-foreground/80">{isAr ? 'المسمى المهني / الشارة (عربي)' : 'Role / Badge (Arabic)'}</label>
                   <Input
                     value={data.brandRoleAr}
                     onChange={(e) => setData({ ...data, brandRoleAr: e.target.value })}
@@ -429,7 +444,7 @@ const AdminFooter = () => {
                 </div>
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-foreground/80">نبذة الفوتر التعريفية (عربي)</label>
+                <label className="text-xs font-semibold text-foreground/80">{isAr ? 'نبذة الفوتر التعريفية (عربي)' : 'Footer Bio (Arabic)'}</label>
                 <Textarea
                   value={data.brandDescriptionAr}
                   onChange={(e) => setData({ ...data, brandDescriptionAr: e.target.value })}
@@ -443,7 +458,7 @@ const AdminFooter = () => {
             <div className="space-y-4 pt-2">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-foreground/80">Brand Name (English)</label>
+                  <label className="text-xs font-semibold text-foreground/80">{isAr ? 'الاسم بالإنجليزية (Brand Name)' : 'Brand Name (English)'}</label>
                   <Input
                     value={data.brandName}
                     onChange={(e) => setData({ ...data, brandName: e.target.value })}
@@ -451,7 +466,7 @@ const AdminFooter = () => {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-foreground/80">Role / Badge (English)</label>
+                  <label className="text-xs font-semibold text-foreground/80">{isAr ? 'المسمى المهني بالإنجليزية' : 'Role / Badge (English)'}</label>
                   <Input
                     value={data.brandRole}
                     onChange={(e) => setData({ ...data, brandRole: e.target.value })}
@@ -460,7 +475,7 @@ const AdminFooter = () => {
                 </div>
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-foreground/80">Footer Description / Bio (English)</label>
+                <label className="text-xs font-semibold text-foreground/80">{isAr ? 'النبذة التعريفية بالإنجليزية' : 'Footer Description / Bio (English)'}</label>
                 <Textarea
                   value={data.brandDescription}
                   onChange={(e) => setData({ ...data, brandDescription: e.target.value })}
@@ -477,10 +492,12 @@ const AdminFooter = () => {
               <div>
                 <h3 className="text-xs font-bold text-foreground flex items-center gap-2">
                   <Share2 className="w-3.5 h-3.5 text-emerald-500" />
-                  <span>روابط منصات التواصل الاجتماعي (Social Media Links)</span>
+                  <span>{isAr ? 'روابط منصات التواصل الاجتماعي (Social Media Links)' : 'Social Media Profiles'}</span>
                 </h3>
                 <p className="text-[11px] text-muted-foreground mt-0.5">
-                  تحكم كامل في منصات التواصل الظاهرة في الفوتر (انستغرام، لينكدإن، جيت هاب، إكس...). يمكنك إضافة وتعديل وحذف وتفعيل أي منصة.
+                  {isAr
+                    ? 'تحكم كامل في منصات التواصل الظاهرة في الفوتر (انستغرام، لينكدإن، جيت هاب، إكس...). يمكنك إضافة وتعديل وحذف وتفعيل أي منصة.'
+                    : 'Manage active social channels in your footer. Add, reorder, toggle, or delete any profile.'}
                 </p>
               </div>
 
@@ -492,7 +509,7 @@ const AdminFooter = () => {
                 className="text-xs gap-1.5 border-dashed shrink-0"
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>إضافة منصة جديدة</span>
+                <span>{isAr ? 'إضافة منصة جديدة' : 'Add Platform'}</span>
               </Button>
             </div>
 
@@ -510,27 +527,27 @@ const AdminFooter = () => {
                   <div className="flex-1 grid grid-cols-1 sm:grid-cols-12 gap-2.5 w-full items-center">
                     {/* Platform Select */}
                     <div className="sm:col-span-4">
-                      <span className="text-[10px] text-muted-foreground block mb-0.5">المنصة (Platform)</span>
+                      <span className="text-[10px] text-muted-foreground block mb-0.5">{isAr ? 'المنصة (Platform)' : 'Platform'}</span>
                       <select
                         value={social.platform}
                         onChange={(e) => handleUpdateSocialLink(social.id, 'platform', e.target.value)}
                         className="w-full h-8 px-2.5 rounded-lg border border-border bg-background text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-emerald-500 font-medium"
                       >
-                        <option value="Instagram">Instagram (انستغرام)</option>
-                        <option value="LinkedIn">LinkedIn (لينكدإن)</option>
-                        <option value="GitHub">GitHub (جيت هاب)</option>
-                        <option value="X">X (Twitter / إكس)</option>
-                        <option value="WhatsApp">WhatsApp (واتساب)</option>
-                        <option value="Telegram">Telegram (تلغرام)</option>
-                        <option value="Facebook">Facebook (فيسبوك)</option>
-                        <option value="Email">Email (البريد)</option>
-                        <option value="Website">Website / Other (رابط آخر)</option>
+                        <option value="Instagram">Instagram {isAr ? '(انستغرام)' : ''}</option>
+                        <option value="LinkedIn">LinkedIn {isAr ? '(لينكدإن)' : ''}</option>
+                        <option value="GitHub">GitHub {isAr ? '(جيت هاب)' : ''}</option>
+                        <option value="X">X (Twitter) {isAr ? '(إكس)' : ''}</option>
+                        <option value="WhatsApp">WhatsApp {isAr ? '(واتساب)' : ''}</option>
+                        <option value="Telegram">Telegram {isAr ? '(تلغرام)' : ''}</option>
+                        <option value="Facebook">Facebook {isAr ? '(فيسبوك)' : ''}</option>
+                        <option value="Email">Email {isAr ? '(البريد)' : ''}</option>
+                        <option value="Website">Website / Other {isAr ? '(رابط آخر)' : ''}</option>
                       </select>
                     </div>
 
                     {/* URL Input */}
                     <div className="sm:col-span-8">
-                      <span className="text-[10px] text-muted-foreground block mb-0.5">رابط الحساب (Profile / Channel URL)</span>
+                      <span className="text-[10px] text-muted-foreground block mb-0.5">{isAr ? 'رابط الحساب (URL)' : 'Profile / Channel URL'}</span>
                       <Input
                         value={social.url}
                         onChange={(e) => handleUpdateSocialLink(social.id, 'url', e.target.value)}
@@ -548,14 +565,14 @@ const AdminFooter = () => {
                         onChange={(e) => handleUpdateSocialLink(social.id, 'isEnabled', e.target.checked)}
                         className="w-3.5 h-3.5 rounded border-border text-emerald-600 focus:ring-emerald-500"
                       />
-                      <span>مفعل</span>
+                      <span>{isAr ? 'مفعل' : 'Active'}</span>
                     </label>
 
                     <button
                       type="button"
                       onClick={() => handleDeleteSocialLink(social.id)}
                       className="p-1.5 text-muted-foreground hover:text-red-500 transition-colors rounded-lg hover:bg-red-500/10 cursor-pointer"
-                      title="حذف المنصة"
+                      title={isAr ? 'حذف المنصة' : 'Delete Platform'}
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -565,7 +582,7 @@ const AdminFooter = () => {
 
               {(!data.customSocialLinks || data.customSocialLinks.length === 0) && (
                 <div className="p-4 rounded-xl border border-dashed border-border/60 text-center space-y-2">
-                  <p className="text-xs text-muted-foreground">لا توجد منصات تواصل مضافة حالياً.</p>
+                  <p className="text-xs text-muted-foreground">{isAr ? 'لا توجد منصات تواصل مضافة حالياً.' : 'No social platforms configured.'}</p>
                   <Button
                     type="button"
                     variant="outline"
@@ -574,7 +591,7 @@ const AdminFooter = () => {
                     className="text-xs gap-1.5"
                   >
                     <Plus className="w-3.5 h-3.5" />
-                    إضافة منصة (انستغرام، لينكدإن...)
+                    {isAr ? 'إضافة منصة (انستغرام، لينكدإن...)' : 'Add Platform (Instagram, LinkedIn...)'}
                   </Button>
                 </div>
               )}
@@ -582,7 +599,7 @@ const AdminFooter = () => {
           </div>
         </div>
 
-        {/* CARD 2: Services Column (Column 2 - Replaces Masarat) */}
+        {/* CARD 2: Services Column (Column 2) */}
         <div className="p-6 rounded-2xl border border-border/60 bg-card/40 space-y-5">
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-1">
@@ -590,10 +607,14 @@ const AdminFooter = () => {
                 <span className="w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs font-bold font-mono">
                   02
                 </span>
-                <h2 className="text-sm font-bold tracking-tight">العمود الثاني: خدماتي (Services Column)</h2>
+                <h2 className="text-sm font-bold tracking-tight">
+                  {isAr ? 'العمود الثاني: خدماتي (Services Column)' : 'Column 02: Services Column'}
+                </h2>
               </div>
               <p className="text-xs text-muted-foreground">
-                بديل المسارات التخصصية بالصورة. يعرض خدماتك الحالية تلقائياً من قاعدة البيانات مع زر &quot;جميع الخدمات ←&quot;.
+                {isAr
+                  ? 'يعرض خدماتك الحالية تلقائياً من قاعدة البيانات مع زر "جميع الخدمات ←".'
+                  : 'Renders your active service offerings automatically with a "View all services →" action.'}
               </p>
             </div>
             <label className="flex items-center gap-2 text-xs font-medium cursor-pointer shrink-0">
@@ -603,14 +624,14 @@ const AdminFooter = () => {
                 onChange={(e) => setData({ ...data, showServicesCol: e.target.checked })}
                 className="w-4 h-4 rounded border-border text-emerald-600 focus:ring-emerald-500"
               />
-              <span>تفعيل العمود</span>
+              <span>{isAr ? 'تفعيل العمود' : 'Enable Column'}</span>
             </label>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-foreground/80">
-                {activeLangTab === 'ar' ? 'عنوان العمود (عربي)' : 'Column Title (English)'}
+                {activeLangTab === 'ar' ? (isAr ? 'عنوان العمود (عربي)' : 'Column Title (AR)') : (isAr ? 'عنوان العمود (EN)' : 'Column Title (EN)')}
               </label>
               <Input
                 value={activeLangTab === 'ar' ? data.servicesTitleAr : data.servicesTitle}
@@ -625,7 +646,7 @@ const AdminFooter = () => {
 
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-foreground/80">
-                {activeLangTab === 'ar' ? 'نص زر المزيد (عربي)' : 'Action Link Text (English)'}
+                {activeLangTab === 'ar' ? (isAr ? 'نص زر المزيد (عربي)' : 'Action Link Text (AR)') : (isAr ? 'نص زر المزيد (EN)' : 'Action Link Text (EN)')}
               </label>
               <Input
                 value={activeLangTab === 'ar' ? data.servicesLinkTextAr : data.servicesLinkText}
@@ -639,7 +660,7 @@ const AdminFooter = () => {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-foreground/80">عدد الخدمات المعروضة</label>
+              <label className="text-xs font-semibold text-foreground/80">{isAr ? 'عدد الخدمات المعروضة' : 'Number of Displayed Services'}</label>
               <Input
                 type="number"
                 min={1}
@@ -654,14 +675,16 @@ const AdminFooter = () => {
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
               <span>
-                الخدمات تُجلب آلياً وبشكل مترجم من قسم <strong>الخدمات (Services)</strong> في لوحة التحكم.
+                {isAr
+                  ? 'الخدمات تُجلب آلياً وبشكل مترجم من قسم الخدمات (Services) في لوحة التحكم.'
+                  : 'Services are fetched and translated automatically from the Services CMS.'}
               </span>
             </div>
             <a
               href="/admin/services"
               className="text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1 font-semibold"
             >
-              <span>تعديل قائمة الخدمات</span>
+              <span>{isAr ? 'تعديل قائمة الخدمات' : 'Manage Services'}</span>
               <ArrowUpRight className="w-3.5 h-3.5" />
             </a>
           </div>
@@ -675,10 +698,14 @@ const AdminFooter = () => {
                 <span className="w-6 h-6 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xs font-bold font-mono">
                   03
                 </span>
-                <h2 className="text-sm font-bold tracking-tight">العمود الثالث: روابط سريعة (Quick Links Column)</h2>
+                <h2 className="text-sm font-bold tracking-tight">
+                  {isAr ? 'العمود الثالث: روابط سريعة (Quick Links Column)' : 'Column 03: Quick Links'}
+                </h2>
               </div>
               <p className="text-xs text-muted-foreground">
-                قائمة روابط للتنقل السريع بين أقسام الموقع. يمكنك إضافة، تعديل، حذف وتفعيل أي رابط.
+                {isAr
+                  ? 'قائمة روابط للتنقل السريع بين أقسام الموقع. يمكنك إضافة، تعديل، حذف وتفعيل أي رابط.'
+                  : 'Quick navigation links between portfolio sections with anchor links.'}
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -689,7 +716,7 @@ const AdminFooter = () => {
                   onChange={(e) => setData({ ...data, showQuickLinksCol: e.target.checked })}
                   className="w-4 h-4 rounded border-border text-emerald-600 focus:ring-emerald-500"
                 />
-                <span>تفعيل العمود</span>
+                <span>{isAr ? 'تفعيل العمود' : 'Enable Column'}</span>
               </label>
               <Button
                 variant="outline"
@@ -698,14 +725,14 @@ const AdminFooter = () => {
                 className="text-xs gap-1.5 border-dashed"
               >
                 <Plus className="w-3.5 h-3.5" />
-                إضافة رابط
+                {isAr ? 'إضافة رابط' : 'Add Link'}
               </Button>
             </div>
           </div>
 
           <div className="space-y-1.5 pt-2 max-w-sm">
             <label className="text-xs font-semibold text-foreground/80">
-              {activeLangTab === 'ar' ? 'عنوان العمود (عربي)' : 'Column Title (English)'}
+              {activeLangTab === 'ar' ? (isAr ? 'عنوان العمود (عربي)' : 'Column Title (AR)') : (isAr ? 'عنوان العمود (EN)' : 'Column Title (EN)')}
             </label>
             <Input
               value={activeLangTab === 'ar' ? data.quickLinksTitleAr : data.quickLinksTitle}
@@ -731,7 +758,7 @@ const AdminFooter = () => {
 
                 <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-2.5 w-full">
                   <div>
-                    <span className="text-[10px] text-muted-foreground block mb-0.5">النص بالعربية</span>
+                    <span className="text-[10px] text-muted-foreground block mb-0.5">{isAr ? 'النص بالعربية' : 'Arabic Label'}</span>
                     <Input
                       value={link.labelAr}
                       onChange={(e) => handleUpdateQuickLink(link.id, 'labelAr', e.target.value)}
@@ -742,7 +769,7 @@ const AdminFooter = () => {
                   </div>
 
                   <div>
-                    <span className="text-[10px] text-muted-foreground block mb-0.5">Label (English)</span>
+                    <span className="text-[10px] text-muted-foreground block mb-0.5">{isAr ? 'النص بالإنجليزية' : 'English Label'}</span>
                     <Input
                       value={link.label}
                       onChange={(e) => handleUpdateQuickLink(link.id, 'label', e.target.value)}
@@ -752,7 +779,7 @@ const AdminFooter = () => {
                   </div>
 
                   <div>
-                    <span className="text-[10px] text-muted-foreground block mb-0.5">الرابط / القسم Anchor</span>
+                    <span className="text-[10px] text-muted-foreground block mb-0.5">{isAr ? 'الرابط / Section URL' : 'Link / Section URL'}</span>
                     <Input
                       value={link.url}
                       onChange={(e) => handleUpdateQuickLink(link.id, 'url', e.target.value)}
@@ -770,13 +797,13 @@ const AdminFooter = () => {
                       onChange={(e) => handleUpdateQuickLink(link.id, 'isEnabled', e.target.checked)}
                       className="w-3.5 h-3.5 rounded border-border text-emerald-600 focus:ring-emerald-500"
                     />
-                    <span>مفعل</span>
+                    <span>{isAr ? 'مفعل' : 'Active'}</span>
                   </label>
 
                   <button
                     onClick={() => handleDeleteQuickLink(link.id)}
                     className="p-1.5 text-muted-foreground hover:text-red-500 transition-colors rounded-lg hover:bg-red-500/10 cursor-pointer"
-                    title="حذف الرابط"
+                    title={isAr ? 'حذف الرابط' : 'Delete Link'}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -794,10 +821,14 @@ const AdminFooter = () => {
                 <span className="w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs font-bold font-mono">
                   04
                 </span>
-                <h2 className="text-sm font-bold tracking-tight">العمود الرابع: الدعم والتواصل (Support & Contact)</h2>
+                <h2 className="text-sm font-bold tracking-tight">
+                  {isAr ? 'العمود الرابع: الدعم والتواصل (Support & Contact)' : 'Column 04: Support & Contact'}
+                </h2>
               </div>
               <p className="text-xs text-muted-foreground">
-                معلومات التواصل المباشرة مرتبة: البريد الإلكتروني، رقم الهاتف، والموقع الجغرافي بالسطر الأخير.
+                {isAr
+                  ? 'معلومات التواصل المباشرة مرتبة: البريد الإلكتروني، رقم الهاتف، والموقع الجغرافي بالسطر الأخير.'
+                  : 'Direct contact info: email, telephone/WhatsApp, and geographical location.'}
               </p>
             </div>
             <label className="flex items-center gap-2 text-xs font-medium cursor-pointer shrink-0">
@@ -807,7 +838,7 @@ const AdminFooter = () => {
                 onChange={(e) => setData({ ...data, showContactCol: e.target.checked })}
                 className="w-4 h-4 rounded border-border text-emerald-600 focus:ring-emerald-500"
               />
-              <span>تفعيل العمود</span>
+              <span>{isAr ? 'تفعيل العمود' : 'Enable Column'}</span>
             </label>
           </div>
 
@@ -815,7 +846,7 @@ const AdminFooter = () => {
             {/* Title */}
             <div className="space-y-1.5 md:col-span-2">
               <label className="text-xs font-semibold text-foreground/80">
-                {activeLangTab === 'ar' ? 'عنوان العمود (عربي)' : 'Column Title (English)'}
+                {activeLangTab === 'ar' ? (isAr ? 'عنوان العمود (عربي)' : 'Column Title (AR)') : (isAr ? 'عنوان العمود (EN)' : 'Column Title (EN)')}
               </label>
               <Input
                 value={activeLangTab === 'ar' ? data.contactTitleAr : data.contactTitle}
@@ -832,7 +863,7 @@ const AdminFooter = () => {
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-foreground/80 flex items-center gap-1.5">
                 <Mail className="w-3.5 h-3.5 text-muted-foreground" />
-                <span>البريد الإلكتروني (Email)</span>
+                <span>{isAr ? 'البريد الإلكتروني (Email)' : 'Contact Email'}</span>
               </label>
               <Input
                 type="email"
@@ -846,7 +877,7 @@ const AdminFooter = () => {
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-foreground/80 flex items-center gap-1.5">
                 <Phone className="w-3.5 h-3.5 text-muted-foreground" />
-                <span>رقم الهاتف / واتساب (Phone / WhatsApp)</span>
+                <span>{isAr ? 'رقم الهاتف / واتساب (Phone / WhatsApp)' : 'Phone / WhatsApp'}</span>
               </label>
               <Input
                 value={data.contactPhone}
@@ -860,7 +891,9 @@ const AdminFooter = () => {
               <label className="text-xs font-semibold text-foreground/80 flex items-center gap-1.5">
                 <MapPin className="w-3.5 h-3.5 text-muted-foreground" />
                 <span>
-                  {activeLangTab === 'ar' ? 'الموقع الجغرافي / العنوان (السطر الأخير بالعمود)' : 'Location / Address (Last Line in Column)'}
+                  {activeLangTab === 'ar'
+                    ? (isAr ? 'الموقع الجغرافي / المدينة (عربي)' : 'Location / Address (AR)')
+                    : (isAr ? 'الموقع الجغرافي / المدينة (EN)' : 'Location / Address (EN)')}
                 </span>
               </label>
               <Input
@@ -884,10 +917,14 @@ const AdminFooter = () => {
                 <span className="w-6 h-6 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center text-xs font-bold font-mono">
                   05
                 </span>
-                <h2 className="text-sm font-bold tracking-tight">الشريط السفلي وحقوق النشر (Bottom Bar)</h2>
+                <h2 className="text-sm font-bold tracking-tight">
+                  {isAr ? 'الشريط السفلي وحقوق النشر (Bottom Bar)' : 'Column 05: Bottom Bar & Copyright'}
+                </h2>
               </div>
               <p className="text-xs text-muted-foreground">
-                حقوق الملكية مع إبراز السنة واسم المنصة باللون الذهبي كما في التصميم، مع استبعاد روابط الخصوصية والشروط بناءً على طلبك.
+                {isAr
+                  ? 'حقوق الملكية الفكرية وشعار الجودة مع زر العودة للأعلى.'
+                  : 'Copyright notice and quality tagline with back-to-top floating trigger.'}
               </p>
             </div>
             <label className="flex items-center gap-2 text-xs font-medium cursor-pointer shrink-0">
@@ -897,14 +934,14 @@ const AdminFooter = () => {
                 onChange={(e) => setData({ ...data, showBackToTop: e.target.checked })}
                 className="w-4 h-4 rounded border-border text-emerald-600 focus:ring-emerald-500"
               />
-              <span>زر العودة للأعلى ↑</span>
+              <span>{isAr ? 'زر العودة للأعلى ↑' : 'Back to top button ↑'}</span>
             </label>
           </div>
 
           <div className="space-y-4 pt-2">
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-foreground/80">
-                {activeLangTab === 'ar' ? 'نص حقوق النشر (عربي)' : 'Copyright Text (English)'}
+                {activeLangTab === 'ar' ? (isAr ? 'نص حقوق النشر (عربي)' : 'Copyright Text (AR)') : (isAr ? 'نص حقوق النشر (EN)' : 'Copyright Text (EN)')}
               </label>
               <Input
                 value={activeLangTab === 'ar' ? data.copyrightTextAr : data.copyrightText}
@@ -919,7 +956,7 @@ const AdminFooter = () => {
 
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-foreground/80">
-                {activeLangTab === 'ar' ? 'الشعار الإضافي / عبارة الجودة (عربي)' : 'Secondary Tagline (English)'}
+                {activeLangTab === 'ar' ? (isAr ? 'الشعار الإضافي / عبارة الجودة (عربي)' : 'Secondary Tagline (AR)') : (isAr ? 'الشعار الإضافي / عبارة الجودة (EN)' : 'Secondary Tagline (EN)')}
               </label>
               <Input
                 value={activeLangTab === 'ar' ? data.secondaryBadgeAr : data.secondaryBadge}
@@ -938,7 +975,7 @@ const AdminFooter = () => {
         <div className="sticky bottom-6 z-40 p-4 rounded-2xl border border-border/80 bg-background/90 backdrop-blur-md shadow-2xl flex items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <span className="w-2 h-2 rounded-full bg-emerald-500" />
-            <span>جميع التغييرات تحفظ في قاعدة البيانات وتنعكس مباشرة على الموقع.</span>
+            <span>{isAr ? 'جميع التغييرات تُحفظ في قاعدة البيانات وتنعكس مباشرة على الموقع.' : 'All changes are saved to the database and reflected immediately on the live portfolio.'}</span>
           </div>
 
           <Button
@@ -949,18 +986,18 @@ const AdminFooter = () => {
             {saving ? (
               <>
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                جاري الحفظ...
+                {isAr ? 'جاري الحفظ...' : 'Saving...'}
               </>
             ) : (
               <>
                 <Save className="w-3.5 h-3.5" />
-                حفظ التعديلات الآن
+                {isAr ? 'حفظ التعديلات الآن' : 'Save Changes Now'}
               </>
             )}
           </Button>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

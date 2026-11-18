@@ -9,7 +9,8 @@ import api from '../../services/api';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Textarea } from '../../components/ui/Textarea';
-import { getMediaUrl } from '../../utils/mediaUrl';
+import { resolveImageUrl } from '../../utils/mediaUrl';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface CertificateItem {
   id: string;
@@ -37,6 +38,8 @@ const PUBLIC_PRESETS = [
 ];
 
 const AdminCertificates = () => {
+  const { currentLang, currentDirection } = useLanguage();
+  const isAr = currentLang === 'ar';
   const [certificates, setCertificates] = useState<CertificateItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
@@ -218,8 +221,8 @@ const AdminCertificates = () => {
   };
 
   return (
-    <div className="relative min-h-[80vh] pb-20 space-y-8">
-      <Helmet><title>Certificates | Admin CMS</title></Helmet>
+    <div className="relative min-h-[80vh] pb-20 space-y-8" dir={currentDirection}>
+      <Helmet><title>{isAr ? 'الشهادات والمؤهلات | لوحة الإدارة' : 'Certificates | Admin CMS'}</title></Helmet>
 
       {toast && (
         <div className={`fixed bottom-5 right-5 z-50 px-4 py-3 rounded-xl shadow-2xl border flex items-center gap-2 animate-in slide-in-from-bottom-5 ${
@@ -233,19 +236,23 @@ const AdminCertificates = () => {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight">Certificates &amp; Credentials</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight">
+            {isAr ? 'الشهادات والمؤهلات المهنية' : 'Certificates & Credentials'}
+          </h1>
           <p className="text-muted-foreground text-sm mt-1">
-            Control the section title, subtitle, and upload certificate images displayed on the 3D panoramic carousel.
+            {isAr 
+              ? 'التحكم بعناوين قسم الشهادات ورفع صور الشهادات المعروضة في شريط العرض البانورامي ثلاثي الأبعاد.' 
+              : 'Control the section title, subtitle, and upload certificate images displayed on the 3D panoramic carousel.'}
           </p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" onClick={fetchCertificates} disabled={loading}>
+          <Button variant="outline" onClick={fetchCertificates} disabled={loading} className="cursor-pointer">
             <RefreshCw size={16} className={`mr-1.5 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
+            {isAr ? 'تحديث' : 'Refresh'}
           </Button>
-          <Button onClick={openCreateModal}>
+          <Button onClick={openCreateModal} className="cursor-pointer">
             <Plus size={16} className="mr-1.5" />
-            Upload Certificate
+            {isAr ? 'رفع شهادة جديدة' : 'Upload Certificate'}
           </Button>
         </div>
       </div>
@@ -255,18 +262,20 @@ const AdminCertificates = () => {
         <div className="flex items-center justify-between border-b border-border/70 pb-3">
           <div className="flex items-center gap-2.5">
             <Sparkles className="w-5 h-5 text-emerald-500" />
-            <h2 className="text-base font-bold text-foreground">Section Header (Title &amp; Subtitle)</h2>
+            <h2 className="text-base font-bold text-foreground">
+              {isAr ? 'عناوين قسم الشهادات بالصفحة الرئيسية' : 'Section Header (Title & Subtitle)'}
+            </h2>
           </div>
-          <Button type="submit" size="sm" disabled={savingHeader}>
+          <Button type="submit" size="sm" disabled={savingHeader} className="cursor-pointer">
             {savingHeader ? <Loader2 size={14} className="animate-spin mr-1.5" /> : <Save size={14} className="mr-1.5" />}
-            Save Header
+            {isAr ? 'حفظ العناوين' : 'Save Header'}
           </Button>
         </div>
 
         <div className="grid md:grid-cols-2 gap-4">
           {/* Title EN & AR */}
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-muted-foreground">Section Title (English)</label>
+            <label className="text-xs font-semibold text-muted-foreground">{isAr ? 'عنوان القسم (بالإنجليزية)' : 'Section Title (English)'}</label>
             <Input
               value={headerSettings.certificatesTitle}
               onChange={(e) => setHeaderSettings({ ...headerSettings, certificatesTitle: e.target.value })}
@@ -274,18 +283,18 @@ const AdminCertificates = () => {
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-muted-foreground">Section Title (Arabic)</label>
+            <label className="text-xs font-semibold text-muted-foreground">{isAr ? 'عنوان القسم (بالعربية)' : 'Section Title (Arabic)'}</label>
             <Input
               value={headerSettings.certificatesTitleAr}
               onChange={(e) => setHeaderSettings({ ...headerSettings, certificatesTitleAr: e.target.value })}
-              placeholder="e.g. الشهادات والمؤهلات"
+              placeholder="مثال: الشهادات والمؤهلات"
               dir="rtl"
             />
           </div>
 
           {/* Subtitle EN & AR */}
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-muted-foreground">Section Subtitle (English)</label>
+            <label className="text-xs font-semibold text-muted-foreground">{isAr ? 'الوصف التوضيحي (بالإنجليزية)' : 'Section Subtitle (English)'}</label>
             <Textarea
               value={headerSettings.certificatesSubtitle}
               onChange={(e) => setHeaderSettings({ ...headerSettings, certificatesSubtitle: e.target.value })}
@@ -294,11 +303,11 @@ const AdminCertificates = () => {
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-muted-foreground">Section Subtitle (Arabic)</label>
+            <label className="text-xs font-semibold text-muted-foreground">{isAr ? 'الوصف التوضيحي (بالعربية)' : 'Section Subtitle (Arabic)'}</label>
             <Textarea
               value={headerSettings.certificatesSubtitleAr}
               onChange={(e) => setHeaderSettings({ ...headerSettings, certificatesSubtitleAr: e.target.value })}
-              placeholder="e.g. مؤهلات وشهادات معتمدة توثق الكفاءة التقنية والإنجازات الأكاديمية."
+              placeholder="مثال: مؤهلات وشهادات معتمدة توثق الكفاءة التقنية والإنجازات الأكاديمية."
               rows={2}
               dir="rtl"
             />
@@ -311,7 +320,7 @@ const AdminCertificates = () => {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold flex items-center gap-2">
             <Award className="w-5 h-5 text-amber-500" />
-            Uploaded Certificates ({certificates.length})
+            {isAr ? `الشهادات المرفوعة (${certificates.length})` : `Uploaded Certificates (${certificates.length})`}
           </h2>
         </div>
 
@@ -322,18 +331,18 @@ const AdminCertificates = () => {
         ) : certificates.length === 0 ? (
           <div className="p-12 text-center rounded-2xl border border-dashed border-border bg-card/40">
             <Award className="w-12 h-12 mx-auto text-muted-foreground mb-3 opacity-50" />
-            <h3 className="text-lg font-bold">No certificates uploaded yet</h3>
+            <h3 className="text-lg font-bold">{isAr ? 'لم يتم رفع أي شهادات بعد' : 'No certificates uploaded yet'}</h3>
             <p className="text-muted-foreground text-sm mt-1 mb-5">
-              Upload your certificate images to display on the 3D curved panoramic carousel.
+              {isAr ? 'ارفع صور شهاداتك لتظهر في شريط العرض ثلاثي الأبعاد بالبورتفوليو.' : 'Upload your certificate images to display on the 3D curved panoramic carousel.'}
             </p>
-            <Button onClick={openCreateModal}>
-              <Plus size={15} className="mr-1.5" /> Upload First Certificate
+            <Button onClick={openCreateModal} className="cursor-pointer">
+              <Plus size={15} className="mr-1.5" /> {isAr ? 'رفع أول شهادة' : 'Upload First Certificate'}
             </Button>
           </div>
         ) : (
           <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
             {certificates.map((cert, index) => {
-              const previewUrl = cert.imageUrl ? getMediaUrl(cert.imageUrl) : (cert.credentialUrl ? getMediaUrl(cert.credentialUrl) : null);
+              const previewUrl = cert.imageUrl ? resolveImageUrl(cert.imageUrl) : (cert.credentialUrl ? resolveImageUrl(cert.credentialUrl) : null);
 
               return (
                 <div
@@ -351,7 +360,7 @@ const AdminCertificates = () => {
                     ) : (
                       <div className="p-6 text-center text-muted-foreground">
                         <Award className="w-10 h-10 mx-auto mb-2 text-amber-500 opacity-60" />
-                        <p className="text-xs">No image attached</p>
+                        <p className="text-xs">{isAr ? 'لا توجد صورة مرفقة' : 'No image attached'}</p>
                       </div>
                     )}
                     <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-950/80 text-white backdrop-blur-md border border-white/10 shadow">
@@ -362,18 +371,18 @@ const AdminCertificates = () => {
                   {/* Clean Action Footer */}
                   <div className="px-4 py-2.5 border-t border-border/50 bg-muted/20 flex items-center justify-between">
                     <span className="text-xs text-muted-foreground font-mono truncate max-w-[120px]">
-                      {cert.imageUrl ? cert.imageUrl.split('/').pop() : 'Certificate'}
+                      {cert.imageUrl ? cert.imageUrl.split('/').pop() : (isAr ? 'شهادة' : 'Certificate')}
                     </span>
                     <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="sm" onClick={() => openEditModal(cert)} title="Change Image">
-                        <Edit2 size={13} className="mr-1" /> Replace
+                      <Button variant="ghost" size="sm" onClick={() => openEditModal(cert)} title={isAr ? 'استبدال الصورة' : 'Change Image'} className="cursor-pointer">
+                        <Edit2 size={13} className="mr-1" /> {isAr ? 'استبدال' : 'Replace'}
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="text-destructive hover:bg-destructive/10 h-8 w-8"
+                        className="text-destructive hover:bg-destructive/10 h-8 w-8 cursor-pointer"
                         onClick={() => handleDelete(cert.id)}
-                        title="Delete certificate"
+                        title={isAr ? 'حذف الشهادة' : 'Delete certificate'}
                       >
                         <Trash2 size={14} />
                       </Button>
@@ -394,7 +403,9 @@ const AdminCertificates = () => {
             <div className="flex justify-between items-center px-5 sm:px-6 py-4 border-b border-border shrink-0 bg-card">
               <h2 className="text-base sm:text-lg font-bold flex items-center gap-2">
                 <Upload className="w-5 h-5 text-emerald-500" />
-                {editingCert ? 'Replace Certificate Image' : 'Upload Certificate Image'}
+                {editingCert 
+                  ? (isAr ? 'استبدال صورة الشهادة' : 'Replace Certificate Image') 
+                  : (isAr ? 'رفع صورة شهادة جديدة' : 'Upload Certificate Image')}
               </h2>
               <button
                 type="button"
@@ -411,10 +422,10 @@ const AdminCertificates = () => {
                 {/* Certificate Preview or Dropzone */}
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-foreground flex items-center justify-between">
-                    <span>Certificate File (WebP / PNG / JPG)</span>
+                    <span>{isAr ? 'ملف الشهادة (WebP / PNG / JPG)' : 'Certificate File (WebP / PNG / JPG)'}</span>
                     {uploadingImage && (
                       <span className="text-xs text-emerald-500 flex items-center gap-1 font-normal">
-                        <Loader2 size={12} className="animate-spin" /> Uploading...
+                        <Loader2 size={12} className="animate-spin" /> {isAr ? 'جاري الرفع...' : 'Uploading...'}
                       </span>
                     )}
                   </label>
@@ -423,7 +434,7 @@ const AdminCertificates = () => {
                     <div className="relative w-full rounded-xl overflow-hidden border border-border bg-slate-900/40 dark:bg-black/40 flex flex-col items-center justify-center p-2.5">
                       <div className="relative max-h-[190px] sm:max-h-[220px] w-full flex items-center justify-center overflow-hidden rounded-lg">
                         <img
-                          src={getMediaUrl(formData.imageUrl)}
+                          src={resolveImageUrl(formData.imageUrl)}
                           alt="Certificate Preview"
                           className="max-h-[180px] sm:max-h-[210px] w-auto max-w-full object-contain rounded border border-white/10 shadow-md"
                         />
@@ -435,19 +446,19 @@ const AdminCertificates = () => {
                           size="sm"
                           onClick={() => fileInputRef.current?.click()}
                           disabled={uploadingImage}
-                          className="text-xs h-7 px-2.5"
+                          className="text-xs h-7 px-2.5 cursor-pointer"
                         >
                           <Upload size={12} className="mr-1" />
-                          Change Image
+                          {isAr ? 'تغيير الصورة' : 'Change Image'}
                         </Button>
                         <Button
                           type="button"
                           variant="ghost"
                           size="sm"
                           onClick={() => setFormData({ ...formData, imageUrl: '' })}
-                          className="text-xs h-7 px-2.5 text-destructive hover:bg-destructive/10"
+                          className="text-xs h-7 px-2.5 text-destructive hover:bg-destructive/10 cursor-pointer"
                         >
-                          Remove
+                          {isAr ? 'إزالة' : 'Remove'}
                         </Button>
                       </div>
                     </div>
@@ -457,8 +468,8 @@ const AdminCertificates = () => {
                       className="border-2 border-dashed border-border/80 hover:border-emerald-500/60 rounded-xl p-6 text-center cursor-pointer transition-all bg-muted/20 hover:bg-muted/30"
                     >
                       <Upload className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
-                      <p className="text-xs font-semibold text-foreground">Click to browse and upload certificate</p>
-                      <p className="text-[11px] text-muted-foreground mt-0.5">PNG, WebP, JPG up to 15MB</p>
+                      <p className="text-xs font-semibold text-foreground">{isAr ? 'انقر لاختيار ورفع صورة الشهادة' : 'Click to browse and upload certificate'}</p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">{isAr ? 'PNG أو WebP أو JPG حتى 15 ميجابايت' : 'PNG, WebP, JPG up to 15MB'}</p>
                     </div>
                   )}
 
@@ -474,7 +485,7 @@ const AdminCertificates = () => {
                 {/* Direct Path Input */}
                 <div className="space-y-1.5 pt-1">
                   <label className="text-[11px] font-medium text-muted-foreground block">
-                    Or enter file path / URL directly:
+                    {isAr ? 'أو أدخل مسار / رابط الصورة مباشرة:' : 'Or enter file path / URL directly:'}
                   </label>
                   <Input
                     value={formData.imageUrl}
@@ -487,7 +498,7 @@ const AdminCertificates = () => {
                 {/* Preset Pills */}
                 <div className="space-y-1.5 pt-1">
                   <span className="text-[11px] font-medium text-muted-foreground block">
-                    Or select from preset assets:
+                    {isAr ? 'أو اختر من النماذج الجاهزة:' : 'Or select from preset assets:'}
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     {PUBLIC_PRESETS.map((p) => (
@@ -508,14 +519,14 @@ const AdminCertificates = () => {
                 </div>
               </div>
 
-              {/* Modal Footer (Pinned at bottom, always visible) */}
+              {/* Modal Footer */}
               <div className="flex items-center justify-end gap-3 px-5 sm:px-6 py-3.5 border-t border-border bg-card shrink-0">
-                <Button type="button" variant="outline" size="sm" onClick={() => setIsModalOpen(false)}>
-                  Cancel
+                <Button type="button" variant="outline" size="sm" onClick={() => setIsModalOpen(false)} className="cursor-pointer">
+                  {isAr ? 'إلغاء' : 'Cancel'}
                 </Button>
-                <Button type="submit" size="sm" disabled={saving || uploadingImage || !formData.imageUrl}>
+                <Button type="submit" size="sm" disabled={saving || uploadingImage || !formData.imageUrl} className="cursor-pointer">
                   {saving ? <Loader2 size={14} className="animate-spin mr-1.5" /> : <Check size={14} className="mr-1.5" />}
-                  {editingCert ? 'Save Image' : 'Add Certificate'}
+                  {editingCert ? (isAr ? 'حفظ الصورة' : 'Save Image') : (isAr ? 'إضافة الشهادة' : 'Add Certificate')}
                 </Button>
               </div>
             </form>

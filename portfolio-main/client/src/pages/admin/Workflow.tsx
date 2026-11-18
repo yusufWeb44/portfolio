@@ -8,6 +8,7 @@ import api from '../../services/api';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Textarea } from '../../components/ui/Textarea';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface WorkflowStep {
   id: string;
@@ -37,6 +38,8 @@ const COLOR_PRESETS = [
 ];
 
 const AdminWorkflow = () => {
+  const { currentLang, currentDirection } = useLanguage();
+  const isAr = currentLang === 'ar';
   const [steps, setSteps] = useState<WorkflowStep[]>([]);
   const [sectionSettings, setSectionSettings] = useState({
     workflowBadge: 'Workflow & Methodology',
@@ -237,11 +240,11 @@ const AdminWorkflow = () => {
   };
 
   return (
-    <div className="relative min-h-[80vh] pb-20">
-      <Helmet><title>Workflow & Methodology | Admin</title></Helmet>
+    <div className="relative min-h-[80vh] pb-20" dir={currentDirection}>
+      <Helmet><title>{isAr ? 'منهجية ومراحل العمل | لوحة التحكم' : 'Workflow & Methodology | Admin'}</title></Helmet>
 
       {toast && (
-        <div className={`fixed bottom-5 right-5 z-50 px-4 py-3 rounded-lg shadow-xl border flex items-center gap-2 animate-in slide-in-from-bottom-5 ${
+        <div className={`fixed bottom-5 ${isAr ? 'left-5' : 'right-5'} z-50 px-4 py-3 rounded-lg shadow-xl border flex items-center gap-2 animate-in slide-in-from-bottom-5 ${
           toast.type === 'success' ? 'bg-card border-green-500/50 text-foreground' : 'bg-destructive text-destructive-foreground'
         }`}>
           {toast.type === 'success' && <Check size={16} className="text-green-500" />}
@@ -252,19 +255,23 @@ const AdminWorkflow = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Engineering Workflow Steps</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            {isAr ? 'مراحل ومنهجية العمل الهندسية' : 'Engineering Workflow Steps'}
+          </h1>
           <p className="text-muted-foreground text-sm mt-1">
-            Manage the sticky-note steps, 3D pushpin colors, card tilt angles, and zigzag flow.
+            {isAr
+              ? 'إدارة بطاقات الملاحظات، ألوان الدبابيس ثلاثية الأبعاد، زوايا الميلان، وتدفق الخطوات المتعرج.'
+              : 'Manage the sticky-note steps, 3D pushpin colors, card tilt angles, and zigzag flow.'}
           </p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" onClick={fetchWorkflow} disabled={loading}>
-            <RefreshCw size={16} className={`mr-1.5 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
+          <Button variant="outline" onClick={fetchWorkflow} disabled={loading} className="gap-1.5">
+            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+            {isAr ? 'تحديث' : 'Refresh'}
           </Button>
-          <Button onClick={openCreateModal}>
-            <Plus size={16} className="mr-1.5" />
-            Add Step
+          <Button onClick={openCreateModal} className="gap-1.5">
+            <Plus size={16} />
+            {isAr ? 'إضافة خطوة' : 'Add Step'}
           </Button>
         </div>
       </div>
@@ -275,10 +282,12 @@ const AdminWorkflow = () => {
           <div>
             <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
               <Sparkles size={18} className="text-emerald-400" />
-              Workflow Section Headings &amp; Copywriting
+              {isAr ? 'عناوين ونصوص سكشن المنهجية' : 'Workflow Section Headings & Copywriting'}
             </h2>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Edit the badge, main title, and subtitle shown at the top of the workflow section on the public site.
+              {isAr
+                ? 'تعديل الشارة، العنوان الرئيسي، والوصف التوضيحي الظاهر أعلى قسم المنهجية في الموقع العام.'
+                : 'Edit the badge, main title, and subtitle shown at the top of the workflow section on the public site.'}
             </p>
           </div>
           <Button 
@@ -287,13 +296,15 @@ const AdminWorkflow = () => {
             className="gap-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs h-9 px-4 shrink-0"
           >
             {savingSettings ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
-            Save Section Text
+            {isAr ? 'حفظ نصوص السكشن' : 'Save Section Text'}
           </Button>
         </div>
 
         <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-semibold text-muted-foreground block mb-1">Badge Text (EN)</label>
+            <label className="text-xs font-semibold text-muted-foreground block mb-1">
+              {isAr ? 'شارة القسم (EN)' : 'Badge Text (EN)'}
+            </label>
             <Input 
               value={sectionSettings.workflowBadge} 
               onChange={e => setSectionSettings({ ...sectionSettings, workflowBadge: e.target.value })}
@@ -301,19 +312,24 @@ const AdminWorkflow = () => {
             />
           </div>
           <div>
-            <label className="text-xs font-semibold text-muted-foreground block mb-1">شارة القسم (عربي)</label>
+            <label className="text-xs font-semibold text-muted-foreground block mb-1">
+              {isAr ? 'شارة القسم (عربي)' : 'Badge Text (AR)'}
+            </label>
             <Input 
               value={sectionSettings.workflowBadgeAr} 
               onChange={e => setSectionSettings({ ...sectionSettings, workflowBadgeAr: e.target.value })}
               placeholder="المنهجية ومراحل العمل"
               dir="rtl"
+              className="font-arabic"
             />
           </div>
         </div>
 
         <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-semibold text-muted-foreground block mb-1">Main Heading (EN)</label>
+            <label className="text-xs font-semibold text-muted-foreground block mb-1">
+              {isAr ? 'العنوان الرئيسي (EN)' : 'Main Heading (EN)'}
+            </label>
             <Input 
               value={sectionSettings.workflowTitle} 
               onChange={e => setSectionSettings({ ...sectionSettings, workflowTitle: e.target.value })}
@@ -321,19 +337,24 @@ const AdminWorkflow = () => {
             />
           </div>
           <div>
-            <label className="text-xs font-semibold text-muted-foreground block mb-1">العنوان الرئيسي (عربي)</label>
+            <label className="text-xs font-semibold text-muted-foreground block mb-1">
+              {isAr ? 'العنوان الرئيسي (عربي)' : 'Main Heading (AR)'}
+            </label>
             <Input 
               value={sectionSettings.workflowTitleAr} 
               onChange={e => setSectionSettings({ ...sectionSettings, workflowTitleAr: e.target.value })}
               placeholder="كيف أهندس وأبني المنتجات الرقمية"
               dir="rtl"
+              className="font-arabic"
             />
           </div>
         </div>
 
         <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-semibold text-muted-foreground block mb-1">Subtitle / Description (EN)</label>
+            <label className="text-xs font-semibold text-muted-foreground block mb-1">
+              {isAr ? 'الوصف التوضيحي (EN)' : 'Subtitle / Description (EN)'}
+            </label>
             <Input 
               value={sectionSettings.workflowSubtitle} 
               onChange={e => setSectionSettings({ ...sectionSettings, workflowSubtitle: e.target.value })}
@@ -341,12 +362,15 @@ const AdminWorkflow = () => {
             />
           </div>
           <div>
-            <label className="text-xs font-semibold text-muted-foreground block mb-1">الوصف التوضيحي (عربي)</label>
+            <label className="text-xs font-semibold text-muted-foreground block mb-1">
+              {isAr ? 'الوصف التوضيحي (عربي)' : 'Subtitle / Description (AR)'}
+            </label>
             <Input 
               value={sectionSettings.workflowSubtitleAr} 
               onChange={e => setSectionSettings({ ...sectionSettings, workflowSubtitleAr: e.target.value })}
               placeholder="منهجية تطوير وتصميم هندسية متكاملة تضمن أعلى معايير الجودة والأداء."
               dir="rtl"
+              className="font-arabic"
             />
           </div>
         </div>
@@ -360,12 +384,12 @@ const AdminWorkflow = () => {
       ) : steps.length === 0 ? (
         <div className="p-12 text-center rounded-xl border border-dashed border-border bg-card/40">
           <Pin className="w-10 h-10 mx-auto text-muted-foreground mb-3 opacity-50" />
-          <h3 className="text-lg font-semibold">No steps found</h3>
+          <h3 className="text-lg font-semibold">{isAr ? 'لا توجد خطوات مضافة بعد' : 'No steps found'}</h3>
           <p className="text-muted-foreground text-sm mt-1 mb-4">
-            Add steps to display your engineering methodology on the public site.
+            {isAr ? 'أضف خطوات لعرض منهجيتك الهندسية في الموقع العام.' : 'Add steps to display your engineering methodology on the public site.'}
           </p>
-          <Button onClick={openCreateModal}>
-            <Plus size={14} className="mr-1.5" /> Add First Step
+          <Button onClick={openCreateModal} className="gap-1.5">
+            <Plus size={14} /> {isAr ? 'إضافة أول خطوة' : 'Add First Step'}
           </Button>
         </div>
       ) : (
@@ -384,6 +408,7 @@ const AdminWorkflow = () => {
                     disabled={idx === 0}
                     onClick={() => handleMove(idx, 'up')}
                     className="p-1 rounded hover:bg-muted text-muted-foreground disabled:opacity-30"
+                    title={isAr ? 'تحريك لأعلى' : 'Move up'}
                   >
                     <ArrowUp size={14} />
                   </button>
@@ -391,6 +416,7 @@ const AdminWorkflow = () => {
                     disabled={idx === steps.length - 1}
                     onClick={() => handleMove(idx, 'down')}
                     className="p-1 rounded hover:bg-muted text-muted-foreground disabled:opacity-30"
+                    title={isAr ? 'تحريك لأسفل' : 'Move down'}
                   >
                     <ArrowDown size={14} />
                   </button>
@@ -421,11 +447,11 @@ const AdminWorkflow = () => {
                       className="px-2 py-0.5 rounded text-[10px] font-mono uppercase font-bold"
                       style={{ background: step.paperBg, color: '#1a1a2e', border: `1px solid ${step.paperEdge}` }}
                     >
-                      Side: {step.side} | Tilt: {step.tilt}°
+                      {isAr ? `الجهة: ${step.side === 'left' ? 'يسار' : 'يمين'} | الميلان: ${step.tilt}°` : `Side: ${step.side} | Tilt: ${step.tilt}°`}
                     </span>
                     {!step.isEnabled && (
                       <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-muted text-muted-foreground">
-                        Disabled
+                        {isAr ? 'معطل' : 'Disabled'}
                       </span>
                     )}
                   </div>
@@ -446,7 +472,7 @@ const AdminWorkflow = () => {
                   variant="ghost" 
                   size="icon" 
                   onClick={() => handleToggleActive(step)}
-                  title={step.isEnabled ? 'Disable step' : 'Enable step'}
+                  title={step.isEnabled ? (isAr ? 'إخفاء الخطوة' : 'Disable step') : (isAr ? 'إظهار الخطوة' : 'Enable step')}
                 >
                   {step.isEnabled ? <Eye size={16} className="text-emerald-500" /> : <EyeOff size={16} className="text-muted-foreground" />}
                 </Button>
@@ -454,14 +480,16 @@ const AdminWorkflow = () => {
                   variant="outline" 
                   size="sm" 
                   onClick={() => openEditModal(step)}
+                  className="gap-1"
                 >
-                  <Edit2 size={14} className="mr-1" /> Edit
+                  <Edit2 size={14} /> {isAr ? 'تعديل' : 'Edit'}
                 </Button>
                 <Button 
                   variant="ghost" 
                   size="icon" 
                   className="text-destructive hover:bg-destructive/10"
                   onClick={() => handleDelete(step.id)}
+                  title={isAr ? 'حذف' : 'Delete'}
                 >
                   <Trash2 size={16} />
                 </Button>
@@ -474,11 +502,13 @@ const AdminWorkflow = () => {
       {/* Create / Edit Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-card border border-border rounded-xl shadow-2xl max-w-xl w-full p-6 space-y-5 max-h-[90vh] overflow-y-auto">
+          <div className="bg-card border border-border rounded-xl shadow-2xl max-w-xl w-full p-6 space-y-5 max-h-[90vh] overflow-y-auto" dir={currentDirection}>
             <div className="flex justify-between items-center pb-3 border-b border-border">
               <h2 className="text-lg font-bold flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-primary" />
-                {editingStep ? `Edit Step #${editingStep.num}` : 'Create Workflow Step'}
+                {editingStep
+                  ? (isAr ? `تعديل الخطوة رقم #${editingStep.num}` : `Edit Step #${editingStep.num}`)
+                  : (isAr ? 'إضافة خطوة عمل جديدة' : 'Create Workflow Step')}
               </h2>
               <button 
                 onClick={() => setIsModalOpen(false)}
@@ -491,7 +521,9 @@ const AdminWorkflow = () => {
             <form onSubmit={handleSaveStep} className="space-y-4">
               <div className="grid grid-cols-4 gap-3">
                 <div className="col-span-1">
-                  <label className="text-xs font-semibold text-muted-foreground block mb-1">Step #</label>
+                  <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                    {isAr ? 'رقم الخطوة' : 'Step #'}
+                  </label>
                   <Input 
                     value={formData.num} 
                     onChange={e => setFormData({ ...formData, num: e.target.value })} 
@@ -500,7 +532,9 @@ const AdminWorkflow = () => {
                   />
                 </div>
                 <div className="col-span-3">
-                  <label className="text-xs font-semibold text-muted-foreground block mb-1">Step Title (EN)</label>
+                  <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                    {isAr ? 'عنوان الخطوة (EN)' : 'Step Title (EN)'}
+                  </label>
                   <Input 
                     value={formData.title} 
                     onChange={e => setFormData({ ...formData, title: e.target.value })} 
@@ -511,18 +545,23 @@ const AdminWorkflow = () => {
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">عنوان الخطوة (بالعربي)</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                  {isAr ? 'عنوان الخطوة (عربي)' : 'Step Title (AR)'}
+                </label>
                 <Input 
                   value={formData.titleAr} 
                   onChange={e => setFormData({ ...formData, titleAr: e.target.value })} 
                   placeholder="مثال: تحليل واستكشاف المتطلبات"
                   dir="rtl"
+                  className="font-arabic"
                 />
               </div>
 
               <div className="grid md:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-semibold text-muted-foreground block mb-1">Description (EN)</label>
+                  <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                    {isAr ? 'التفاصيل (EN)' : 'Description (EN)'}
+                  </label>
                   <Textarea 
                     value={formData.description} 
                     onChange={e => setFormData({ ...formData, description: e.target.value })} 
@@ -532,20 +571,25 @@ const AdminWorkflow = () => {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-muted-foreground block mb-1">تفاصيل ومحتوى الخطوة (بالعربي)</label>
+                  <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                    {isAr ? 'تفاصيل ومحتوى الخطوة (عربي)' : 'Description (AR)'}
+                  </label>
                   <Textarea 
                     value={formData.descriptionAr} 
                     onChange={e => setFormData({ ...formData, descriptionAr: e.target.value })} 
                     placeholder="شرح وتفاصيل المرحلة بالعربية..."
                     rows={3}
                     dir="rtl"
+                    className="font-arabic"
                   />
                 </div>
               </div>
 
               {/* Color Preset Palette */}
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1.5">Color Presets</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1.5">
+                  {isAr ? 'قوالب الألوان الجاهزة (Color Presets)' : 'Color Presets'}
+                </label>
                 <div className="flex flex-wrap gap-2">
                   {COLOR_PRESETS.map((preset) => (
                     <button
@@ -566,7 +610,9 @@ const AdminWorkflow = () => {
               {/* Advanced Custom Styling */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 rounded-lg bg-muted/40 border border-border/60">
                 <div>
-                  <label className="text-[11px] font-semibold text-muted-foreground block mb-1">Pin Color</label>
+                  <label className="text-[11px] font-semibold text-muted-foreground block mb-1">
+                    {isAr ? 'لون الدبوس' : 'Pin Color'}
+                  </label>
                   <div className="flex items-center gap-1.5">
                     <input 
                       type="color" 
@@ -579,19 +625,23 @@ const AdminWorkflow = () => {
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-semibold text-muted-foreground block mb-1">Side Position</label>
+                  <label className="text-[11px] font-semibold text-muted-foreground block mb-1">
+                    {isAr ? 'جهة المحاذاة' : 'Side Position'}
+                  </label>
                   <select
                     value={formData.side}
                     onChange={e => setFormData({ ...formData, side: e.target.value as 'left' | 'right' })}
                     className="w-full h-8 px-2 text-xs rounded border border-input bg-background"
                   >
-                    <option value="left">Left</option>
-                    <option value="right">Right</option>
+                    <option value="left">{isAr ? 'يسار (Left)' : 'Left'}</option>
+                    <option value="right">{isAr ? 'يمين (Right)' : 'Right'}</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-semibold text-muted-foreground block mb-1">Tilt Angle (°)</label>
+                  <label className="text-[11px] font-semibold text-muted-foreground block mb-1">
+                    {isAr ? 'زاوية الميلان (°)' : 'Tilt Angle (°)'}
+                  </label>
                   <Input 
                     type="number"
                     step="0.1"
@@ -602,7 +652,9 @@ const AdminWorkflow = () => {
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-semibold text-muted-foreground block mb-1">Paper Tint</label>
+                  <label className="text-[11px] font-semibold text-muted-foreground block mb-1">
+                    {isAr ? 'لون الورقة' : 'Paper Tint'}
+                  </label>
                   <div className="flex items-center gap-1.5">
                     <input 
                       type="color" 
@@ -617,11 +669,11 @@ const AdminWorkflow = () => {
 
               <div className="flex justify-end gap-3 pt-4 border-t border-border">
                 <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>
-                  Cancel
+                  {isAr ? 'إلغاء' : 'Cancel'}
                 </Button>
-                <Button type="submit" disabled={saving}>
-                  {saving ? <Loader2 size={16} className="animate-spin mr-1.5" /> : <SaveIcon />}
-                  {editingStep ? 'Update Step' : 'Create Step'}
+                <Button type="submit" disabled={saving} className="gap-1.5">
+                  {saving ? <Loader2 size={16} className="animate-spin" /> : <SaveIcon />}
+                  {editingStep ? (isAr ? 'تحديث الخطوة' : 'Update Step') : (isAr ? 'إنشاء الخطوة' : 'Create Step')}
                 </Button>
               </div>
             </form>

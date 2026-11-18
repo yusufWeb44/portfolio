@@ -3,6 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { Loader2, Mail, MailOpen, Trash2, Search } from 'lucide-react';
 import api from '../../services/api';
 import { Input } from '../../components/ui/Input';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface Message {
   id: string;
@@ -24,6 +25,8 @@ const safeMailtoHref = (email: string): string => {
 };
 
 const Messages = () => {
+  const { currentLang, currentDirection } = useLanguage();
+  const isAr = currentLang === 'ar';
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -57,7 +60,7 @@ const Messages = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm("Delete this message?")) return;
+    if (!window.confirm(isAr ? 'هل أنت متأكد من رغبتك في حذف هذه الرسالة نهائياً؟' : 'Delete this message?')) return;
     try {
       await api.delete(`/messages/${id}`);
       setMessages(messages.filter(m => m.id !== id));
@@ -75,21 +78,25 @@ const Messages = () => {
   );
 
   return (
-    <div className="relative min-h-[80vh] flex flex-col">
+    <div className="relative min-h-[80vh] flex flex-col" dir={currentDirection}>
       <Helmet>
-        <title>Messages | Admin Dashboard</title>
+        <title>{isAr ? 'صندوق الرسائل والوارد | لوحة التحكم' : 'Messages | Admin Dashboard'}</title>
       </Helmet>
 
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Messages</h1>
-          <p className="text-muted-foreground text-sm">Inbox and inquiries from the contact form.</p>
+          <h1 className="text-3xl font-bold tracking-tight">
+            {isAr ? 'رسائل واستفسارات التواصل' : 'Messages'}
+          </h1>
+          <p className="text-muted-foreground text-sm">
+            {isAr ? 'صندوق الوارد والاستفسارات الواردة من نموذج التواصل في الموقع.' : 'Inbox and inquiries from the contact form.'}
+          </p>
         </div>
         <div className="relative w-full sm:w-64">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+          <Search className={`absolute ${isAr ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4`} />
           <Input 
-            placeholder="Search messages..." 
-            className="pl-9 bg-card border-border h-9"
+            placeholder={isAr ? 'بحث في الرسائل...' : 'Search messages...'} 
+            className={`${isAr ? 'pr-9' : 'pl-9'} bg-card border-border h-9`}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -104,11 +111,11 @@ const Messages = () => {
         <div className="flex-1 flex flex-col lg:flex-row gap-6 bg-card border border-border rounded-xl overflow-hidden h-[calc(100vh-200px)] min-h-[500px]">
           
           {/* Inbox List */}
-          <div className="w-full lg:w-1/3 border-r border-border overflow-y-auto bg-background/50 flex flex-col">
+          <div className={`w-full lg:w-1/3 ${isAr ? 'border-l' : 'border-r'} border-border overflow-y-auto bg-background/50 flex flex-col`}>
             {filteredMessages.length === 0 ? (
               <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-muted-foreground">
                 <MailOpen size={48} className="mb-4 opacity-20" />
-                <p>No messages found.</p>
+                <p>{isAr ? 'لا توجد رسائل مطابقة.' : 'No messages found.'}</p>
               </div>
             ) : (
               filteredMessages.map(msg => (
@@ -124,8 +131,8 @@ const Messages = () => {
                     <span className={`text-sm truncate ${!msg.isRead ? 'font-bold text-foreground' : 'font-medium text-foreground/80'}`}>
                       {msg.name}
                     </span>
-                    <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">
-                      {new Date(msg.createdAt).toLocaleDateString()}
+                    <span className={`text-xs text-muted-foreground whitespace-nowrap ${isAr ? 'mr-2' : 'ml-2'}`}>
+                      {new Date(msg.createdAt).toLocaleDateString(isAr ? 'ar-EG' : 'en-US')}
                     </span>
                   </div>
                   <span className={`text-sm truncate w-full mb-1 ${!msg.isRead ? 'font-semibold text-foreground' : 'text-foreground/70'}`}>
@@ -153,14 +160,14 @@ const Messages = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     <button 
-                      title={selectedMessage.isRead ? "Mark as unread" : "Mark as read"}
+                      title={selectedMessage.isRead ? (isAr ? 'تحديد كغير مقروء' : 'Mark as unread') : (isAr ? 'تحديد كمقروء' : 'Mark as read')}
                       onClick={() => handleToggleRead(selectedMessage)}
                       className="p-2 text-muted-foreground hover:bg-muted rounded-md transition-colors"
                     >
                       {selectedMessage.isRead ? <Mail size={16} /> : <MailOpen size={16} />}
                     </button>
                     <button 
-                      title="Delete message"
+                      title={isAr ? 'حذف الرسالة' : 'Delete message'}
                       onClick={() => handleDelete(selectedMessage.id)}
                       className="p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-md transition-colors"
                     >
@@ -177,7 +184,7 @@ const Messages = () => {
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-muted-foreground">
                 <Mail size={48} className="mb-4 opacity-20" />
-                <p>Select a message to read.</p>
+                <p>{isAr ? 'اختر رسالة من القائمة الجانبية لقراءتها.' : 'Select a message to read.'}</p>
               </div>
             )}
           </div>

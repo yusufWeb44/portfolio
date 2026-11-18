@@ -23,6 +23,7 @@ import { resolveImageUrl } from '../../utils/mediaUrl';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Textarea } from '../../components/ui/Textarea';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface ProjectImage {
   id?: string;
@@ -67,6 +68,8 @@ const POPULAR_TECH_SUGGESTIONS = [
 ];
 
 const Projects = () => {
+  const { currentLang, currentDirection } = useLanguage();
+  const isAr = currentLang === 'ar';
   const [projects, setProjects] = useState<Project[]>([]);
   const [dbTechnologies, setDbTechnologies] = useState<Technology[]>([]);
   const [sectionSettings, setSectionSettings] = useState({
@@ -443,9 +446,9 @@ const Projects = () => {
   }
 
   return (
-    <div className="relative min-h-screen pb-20">
+    <div className="relative min-h-screen pb-20" dir={currentDirection}>
       <Helmet>
-        <title>Projects | Admin Dashboard</title>
+        <title>{isAr ? 'المشاريع والأعمال | لوحة الإدارة' : 'Projects | Admin Dashboard'}</title>
       </Helmet>
 
       {/* Toast Notification */}
@@ -460,11 +463,15 @@ const Projects = () => {
         <>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight mb-2">Projects</h1>
-              <p className="text-muted-foreground">Manage your portfolio case studies.</p>
+              <h1 className="text-3xl font-bold tracking-tight mb-2">
+                {isAr ? 'المشاريع ودراسات الحالة' : 'Projects'}
+              </h1>
+              <p className="text-muted-foreground">
+                {isAr ? 'إدارة وتوثيق المشاريع البرمجية ودراسات الحالة ونماذج الأعمال.' : 'Manage your portfolio case studies.'}
+              </p>
             </div>
-            <Button onClick={handleCreateNew} className="gap-2 bg-emerald-600 hover:bg-emerald-500 text-white">
-              <Plus size={16} /> New Project
+            <Button onClick={handleCreateNew} className="gap-2 bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer">
+              <Plus size={16} /> {isAr ? 'مشروع جديد' : 'New Project'}
             </Button>
           </div>
 
@@ -474,25 +481,27 @@ const Projects = () => {
               <div>
                 <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
                   <FolderKanban size={18} className="text-emerald-400" />
-                  Projects Section Headings &amp; Subtitle
+                  {isAr ? 'عناوين ووصف قسم المشاريع' : 'Projects Section Headings & Subtitle'}
                 </h2>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Edit the badge, main heading, and subtitle shown at the top of the Projects section on the homepage.
+                  {isAr 
+                    ? 'تعديل الشارة، العنوان الرئيسي، والوصف المعروض أعلى قسم المشاريع في الصفحة الرئيسية.' 
+                    : 'Edit the badge, main heading, and subtitle shown at the top of the Projects section on the homepage.'}
                 </p>
               </div>
               <Button 
                 onClick={handleSaveSectionSettings} 
                 disabled={savingSettings}
-                className="gap-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs h-9 px-4 shrink-0"
+                className="gap-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs h-9 px-4 shrink-0 cursor-pointer"
               >
                 {savingSettings ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
-                Save Section Text
+                {isAr ? 'حفظ نصوص السكشن' : 'Save Section Text'}
               </Button>
             </div>
 
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">Badge Text (EN)</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'شارة القسم (EN)' : 'Badge Text (EN)'}</label>
                 <Input 
                   value={sectionSettings.projectsBadge} 
                   onChange={e => setSectionSettings({ ...sectionSettings, projectsBadge: e.target.value })}
@@ -500,7 +509,7 @@ const Projects = () => {
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">شارة القسم (عربي)</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'شارة القسم (AR)' : 'Section Badge (AR)'}</label>
                 <Input 
                   value={sectionSettings.projectsBadgeAr} 
                   onChange={e => setSectionSettings({ ...sectionSettings, projectsBadgeAr: e.target.value })}
@@ -512,7 +521,7 @@ const Projects = () => {
 
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">Main Heading (EN)</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'العنوان الرئيسي (EN)' : 'Main Heading (EN)'}</label>
                 <Input 
                   value={sectionSettings.projectsTitle} 
                   onChange={e => setSectionSettings({ ...sectionSettings, projectsTitle: e.target.value })}
@@ -520,7 +529,7 @@ const Projects = () => {
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">العنوان الرئيسي (عربي)</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'العنوان الرئيسي (AR)' : 'Main Heading (AR)'}</label>
                 <Input 
                   value={sectionSettings.projectsTitleAr} 
                   onChange={e => setSectionSettings({ ...sectionSettings, projectsTitleAr: e.target.value })}
@@ -532,7 +541,7 @@ const Projects = () => {
 
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">Subtitle / Description (EN)</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'الوصف التوضيحي (EN)' : 'Subtitle / Description (EN)'}</label>
                 <Input 
                   value={sectionSettings.projectsSubtitle} 
                   onChange={e => setSectionSettings({ ...sectionSettings, projectsSubtitle: e.target.value })}
@@ -540,7 +549,7 @@ const Projects = () => {
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">الوصف التوضيحي (عربي)</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'الوصف التوضيحي (AR)' : 'Subtitle (AR)'}</label>
                 <Input 
                   value={sectionSettings.projectsSubtitleAr} 
                   onChange={e => setSectionSettings({ ...sectionSettings, projectsSubtitleAr: e.target.value })}
@@ -554,23 +563,23 @@ const Projects = () => {
           {projects.length === 0 ? (
             <div className="bg-card border border-border border-dashed rounded-xl p-12 text-center">
               <FolderKanban className="mx-auto h-12 w-12 text-muted-foreground/50 mb-4" />
-              <h3 className="text-lg font-medium text-foreground mb-2">No projects found</h3>
-              <p className="text-muted-foreground mb-6">Get started by creating your first project case study.</p>
-              <Button onClick={handleCreateNew}>Create Project</Button>
+              <h3 className="text-lg font-medium text-foreground mb-2">{isAr ? 'لا توجد مشاريع مضافة حتى الآن' : 'No projects found'}</h3>
+              <p className="text-muted-foreground mb-6">{isAr ? 'ابدأ بإضافة أول دراسة حالة أو مشروع رقمي إلى البورتفوليو.' : 'Get started by creating your first project case study.'}</p>
+              <Button onClick={handleCreateNew}>{isAr ? 'إضافة مشروع جديد' : 'Create Project'}</Button>
             </div>
           ) : (
             <div className="bg-card border border-border rounded-xl overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left">
+                <table className="w-full text-sm text-start">
                   <thead className="text-xs text-muted-foreground uppercase bg-muted/50 border-b border-border">
                     <tr>
-                      <th className="px-4 py-4 font-medium text-center w-28">الترتيب / Order</th>
-                      <th className="px-6 py-4 font-medium">Project</th>
-                      <th className="px-6 py-4 font-medium">Role</th>
-                      <th className="px-6 py-4 font-medium text-center">الرئيسية ⭐</th>
-                      <th className="px-6 py-4 font-medium">Status</th>
-                      <th className="px-6 py-4 font-medium">Year</th>
-                      <th className="px-6 py-4 font-medium text-right">Actions</th>
+                      <th className="px-4 py-4 font-medium text-center w-28">{isAr ? 'الترتيب' : 'Order'}</th>
+                      <th className="px-6 py-4 font-medium">{isAr ? 'المشروع' : 'Project'}</th>
+                      <th className="px-6 py-4 font-medium">{isAr ? 'الدور التقني' : 'Role'}</th>
+                      <th className="px-6 py-4 font-medium text-center">{isAr ? 'المميزة ⭐' : 'Featured ⭐'}</th>
+                      <th className="px-6 py-4 font-medium">{isAr ? 'الحالة' : 'Status'}</th>
+                      <th className="px-6 py-4 font-medium">{isAr ? 'السنة' : 'Year'}</th>
+                      <th className="px-6 py-4 font-medium text-end">{isAr ? 'الإجراءات' : 'Actions'}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -583,7 +592,9 @@ const Projects = () => {
                                 #{index + 1}
                               </span>
                               <span className="text-[10px] text-muted-foreground font-medium mt-0.5 whitespace-nowrap">
-                                {index === 0 ? 'الأول' : index === 1 ? 'الثاني' : index === 2 ? 'الثالث' : index === 3 ? 'الرابع' : index === 4 ? 'الخامس' : `${index + 1}`}
+                                {isAr 
+                                  ? (index === 0 ? 'الأول' : index === 1 ? 'الثاني' : index === 2 ? 'الثالث' : index === 3 ? 'الرابع' : index === 4 ? 'الخامس' : `${index + 1}`)
+                                  : (index === 0 ? '1st' : index === 1 ? '2nd' : index === 2 ? '3rd' : `${index + 1}th`)}
                               </span>
                             </div>
                             <div className="flex flex-col gap-0.5 ml-1">
@@ -591,7 +602,7 @@ const Projects = () => {
                                 type="button"
                                 disabled={index === 0}
                                 onClick={() => handleMoveUp(index)}
-                                title="تحريك لأعلى (تقديم الترتيب ليظهر قبله)"
+                                title={isAr ? 'تحريك لأعلى' : 'Move up'}
                                 className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-20 disabled:cursor-not-allowed transition-colors cursor-pointer"
                               >
                                 <ChevronUp size={14} />
@@ -600,7 +611,7 @@ const Projects = () => {
                                 type="button"
                                 disabled={index === projects.length - 1}
                                 onClick={() => handleMoveDown(index)}
-                                title="تحريك لأسفل (تأخير الترتيب ليظهر بعده)"
+                                title={isAr ? 'تحريك لأسفل' : 'Move down'}
                                 className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-20 disabled:cursor-not-allowed transition-colors cursor-pointer"
                               >
                                 <ChevronDown size={14} />
@@ -621,13 +632,13 @@ const Projects = () => {
                         </td>
                         <td className="px-6 py-4">
                           <span className="text-xs font-mono px-2.5 py-1 rounded-md bg-muted/60 text-muted-foreground max-w-[200px] truncate block">
-                            {project.role || 'No role set'}
+                            {project.role || (isAr ? 'لم يُحدد' : 'No role set')}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-center">
                           <button
                             onClick={() => handleToggleFeatured(project)}
-                            title={project.isFeatured ? "معروض في الصفحة الرئيسية (اضغط لإزالته)" : "اضغط لعرضه في الصفحة الرئيسية ⭐"}
+                            title={project.isFeatured ? (isAr ? 'معروض في الرئيسية (انقر للإلغاء)' : 'Featured on homepage (click to remove)') : (isAr ? 'إبراز في الصفحة الرئيسية ⭐' : 'Feature on homepage ⭐')}
                             className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
                               project.isFeatured
                                 ? 'bg-amber-500/15 border-amber-500/40 text-amber-500 hover:bg-amber-500/25'
@@ -647,11 +658,11 @@ const Projects = () => {
                             }`}
                           >
                             {project.isPublished ? <Eye size={12} /> : <EyeOff size={12} />}
-                            {project.isPublished ? 'Published' : 'Draft'}
+                            {project.isPublished ? (isAr ? 'منشور' : 'Published') : (isAr ? 'مسودة' : 'Draft')}
                           </button>
                         </td>
                         <td className="px-6 py-4 text-muted-foreground">{project.year || '-'}</td>
-                        <td className="px-6 py-4 text-right">
+                        <td className="px-6 py-4 text-end">
                           <div className="flex justify-end gap-2">
                             <Button variant="ghost" size="icon" onClick={() => handleEdit(project)}>
                               <Edit2 size={16} />
@@ -674,22 +685,30 @@ const Projects = () => {
           <div className="flex items-center gap-4 mb-8">
             <button 
               onClick={() => setView('list')}
-              className="p-2 -ml-2 rounded-full hover:bg-muted text-muted-foreground transition-colors"
+              className="p-2 -ml-2 rounded-full hover:bg-muted text-muted-foreground transition-colors cursor-pointer"
             >
-              <ArrowLeft size={20} />
+              <ArrowLeft size={20} className={isAr ? "rotate-180" : ""} />
             </button>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">{view === 'create' ? 'Create Project' : 'Edit Project'}</h1>
+              <h1 className="text-2xl font-bold tracking-tight">
+                {view === 'create' 
+                  ? (isAr ? 'إضافة مشروع جديد' : 'Create Project') 
+                  : (isAr ? 'تعديل بيانات المشروع' : 'Edit Project')}
+              </h1>
             </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Basic Info */}
             <div className="bg-card border border-border rounded-xl p-6">
-              <h2 className="text-lg font-bold mb-6">Basic Information (المعلومات الأساسية باللغتين)</h2>
+              <h2 className="text-lg font-bold mb-6">
+                {isAr ? 'المعلومات الأساسية للمشروع' : 'Basic Information'}
+              </h2>
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Title (English) <span className="text-destructive">*</span></label>
+                  <label className="text-sm font-medium">
+                    {isAr ? 'عنوان المشروع (بالإنجليزية)' : 'Title (English)'} <span className="text-destructive">*</span>
+                  </label>
                   <Input 
                     value={currentProject.title || ''} 
                     onChange={e => setCurrentProject({...currentProject, title: e.target.value})}
@@ -698,7 +717,7 @@ const Projects = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">عنوان المشروع (بالعربية)</label>
+                  <label className="text-sm font-medium">{isAr ? 'عنوان المشروع (بالعربية)' : 'Title (Arabic)'}</label>
                   <Input 
                     value={currentProject.titleAr || ''} 
                     onChange={e => setCurrentProject({...currentProject, titleAr: e.target.value})}
@@ -707,7 +726,9 @@ const Projects = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Slug <span className="text-muted-foreground font-normal">(auto-generated if empty)</span></label>
+                  <label className="text-sm font-medium">
+                    Slug <span className="text-muted-foreground font-normal">({isAr ? 'يتم التوليد تلقائياً إذا تُرك فارغاً' : 'auto-generated if empty'})</span>
+                  </label>
                   <Input 
                     value={currentProject.slug || ''} 
                     onChange={e => setCurrentProject({...currentProject, slug: e.target.value})}
@@ -715,7 +736,7 @@ const Projects = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Category (English)</label>
+                  <label className="text-sm font-medium">{isAr ? 'التصنيف (بالإنجليزية)' : 'Category (English)'}</label>
                   <Input 
                     value={currentProject.category || ''} 
                     onChange={e => setCurrentProject({...currentProject, category: e.target.value})}
@@ -723,7 +744,7 @@ const Projects = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">التصنيف (بالعربية)</label>
+                  <label className="text-sm font-medium">{isAr ? 'التصنيف (بالعربية)' : 'Category (Arabic)'}</label>
                   <Input 
                     value={currentProject.categoryAr || ''} 
                     onChange={e => setCurrentProject({...currentProject, categoryAr: e.target.value})}
@@ -732,7 +753,7 @@ const Projects = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Year</label>
+                  <label className="text-sm font-medium">{isAr ? 'سنة التنفيذ' : 'Year'}</label>
                   <Input 
                     value={currentProject.year || ''} 
                     onChange={e => setCurrentProject({...currentProject, year: e.target.value})}
@@ -741,9 +762,9 @@ const Projects = () => {
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium">ترتيب العرض / Display Order</label>
+                    <label className="text-sm font-medium">{isAr ? 'ترتيب الظهور' : 'Display Order'}</label>
                     <span className="text-xs font-mono font-semibold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 border border-emerald-500/30">
-                      {currentProject.order === 1 ? '🥇 الأول' : currentProject.order === 2 ? '🥈 الثاني' : currentProject.order === 3 ? '🥉 الثالث' : currentProject.order ? `#${currentProject.order}` : 'تلقائي'}
+                      {currentProject.order === 1 ? (isAr ? '🥇 الأول' : '1st') : currentProject.order === 2 ? (isAr ? '🥈 الثاني' : '2nd') : currentProject.order === 3 ? (isAr ? '🥉 الثالث' : '3rd') : currentProject.order ? `#${currentProject.order}` : (isAr ? 'تلقائي' : 'Auto')}
                     </span>
                   </div>
                   <Input 
@@ -751,14 +772,14 @@ const Projects = () => {
                     min={1}
                     value={currentProject.order ?? ''} 
                     onChange={e => setCurrentProject({...currentProject, order: parseInt(e.target.value) || 0})}
-                    placeholder="1 = الأول، 2 = الثاني..."
+                    placeholder="1, 2, 3..."
                   />
                   <p className="text-[11px] text-muted-foreground">
-                    الرقم 1 يظهر أولاً في الموقع، يليه 2 ثم 3 وهكذا.
+                    {isAr ? 'الرقم 1 يظهر أولاً في الموقع، يليه 2 ثم 3 وهكذا.' : 'Number 1 appears first on the website, followed by 2, 3, etc.'}
                   </p>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Role in Project (English)</label>
+                  <label className="text-sm font-medium">{isAr ? 'الدور في المشروع (بالإنجليزية)' : 'Role in Project (English)'}</label>
                   <Input 
                     value={currentProject.role || ''} 
                     onChange={e => setCurrentProject({...currentProject, role: e.target.value})}
@@ -766,7 +787,7 @@ const Projects = () => {
                   />
                 </div>
                 <div className="space-y-2 md:col-span-2">
-                  <label className="text-sm font-medium">دورك في المشروع (بالعربية)</label>
+                  <label className="text-sm font-medium">{isAr ? 'دورك في المشروع (بالعربية)' : 'Role in Project (Arabic)'}</label>
                   <Input 
                     value={currentProject.roleAr || ''} 
                     onChange={e => setCurrentProject({...currentProject, roleAr: e.target.value})}
@@ -777,7 +798,9 @@ const Projects = () => {
               </div>
               <div className="mt-6 grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Short Description (English) <span className="text-destructive">*</span></label>
+                  <label className="text-sm font-medium">
+                    {isAr ? 'الوصف المختصر (بالإنجليزية)' : 'Short Description (English)'} <span className="text-destructive">*</span>
+                  </label>
                   <Textarea 
                     value={currentProject.description || ''} 
                     onChange={e => setCurrentProject({...currentProject, description: e.target.value})}
@@ -787,7 +810,7 @@ const Projects = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">الوصف المختصر (بالعربية)</label>
+                  <label className="text-sm font-medium">{isAr ? 'الوصف المختصر (بالعربية)' : 'Short Description (Arabic)'}</label>
                   <Textarea 
                     value={currentProject.descriptionAr || ''} 
                     onChange={e => setCurrentProject({...currentProject, descriptionAr: e.target.value})}
@@ -803,13 +826,15 @@ const Projects = () => {
             <div className="bg-card border border-border rounded-xl p-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
                 <div>
-                  <h2 className="text-lg font-bold">Project Images &amp; Slider Showcase</h2>
+                  <h2 className="text-lg font-bold">{isAr ? 'معرض صور ولقطات شاشة المشروع' : 'Project Images & Slider Showcase'}</h2>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Upload or add multiple screenshots. The first 3–4 images will be displayed in the interactive slider on the portfolio.
+                    {isAr 
+                      ? 'ارفع لقطات الشاشة. الصور الأولى سيتم عرضها في سلايدر المشروع التفاعلي بالبورتفوليو.' 
+                      : 'Upload or add multiple screenshots. The first 3–4 images will be displayed in the interactive slider on the portfolio.'}
                   </p>
                 </div>
                 <span className="text-xs font-mono font-semibold px-3 py-1 rounded-full bg-muted border border-border">
-                  {projectImages.length} {projectImages.length === 1 ? 'image' : 'images'}
+                  {projectImages.length} {isAr ? 'صور' : (projectImages.length === 1 ? 'image' : 'images')}
                 </span>
               </div>
 
@@ -825,13 +850,15 @@ const Projects = () => {
                     disabled={uploadingImage}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed z-10"
                   />
-                  <Button type="button" variant="outline" disabled={uploadingImage} className="gap-2">
+                  <Button type="button" variant="outline" disabled={uploadingImage} className="gap-2 cursor-pointer">
                     {uploadingImage ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageIcon size={16} />}
-                    {uploadingImage ? 'Uploading Image(s)...' : 'Upload Screenshot(s)'}
+                    {uploadingImage 
+                      ? (isAr ? 'جاري الرفع إلى السحابة...' : 'Uploading Image(s)...') 
+                      : (isAr ? 'رفع لقطات من الجهاز' : 'Upload Screenshot(s)')}
                   </Button>
                 </div>
 
-                <span className="text-xs text-muted-foreground hidden md:inline">or</span>
+                <span className="text-xs text-muted-foreground hidden md:inline">{isAr ? 'أو' : 'or'}</span>
 
                 {/* Direct image URL */}
                 <div className="flex items-center gap-2 flex-1 w-full max-w-lg">
@@ -844,16 +871,16 @@ const Projects = () => {
                         handleAddDirectImageUrl();
                       }
                     }}
-                    placeholder="Paste image URL (https://...)"
+                    placeholder={isAr ? 'ألصق رابط صورة مباشر (https://...)' : 'Paste image URL (https://...)'}
                     className="text-xs"
                   />
                   <Button 
                     type="button" 
                     variant="outline" 
                     onClick={handleAddDirectImageUrl} 
-                    className="shrink-0 text-xs"
+                    className="shrink-0 text-xs cursor-pointer"
                   >
-                    Add URL
+                    {isAr ? 'إضافة الرابط' : 'Add URL'}
                   </Button>
                 </div>
               </div>
@@ -862,9 +889,9 @@ const Projects = () => {
               {projectImages.length === 0 ? (
                 <div className="py-12 text-center border border-dashed border-border/80 rounded-xl mt-6 bg-muted/20">
                   <ImageIcon className="mx-auto w-10 h-10 text-muted-foreground/40 mb-2" />
-                  <p className="text-sm font-medium text-foreground">No screenshots added yet</p>
+                  <p className="text-sm font-medium text-foreground">{isAr ? 'لم تتم إضافة أي لقطات شاشة بعد' : 'No screenshots added yet'}</p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Upload images from your device or paste image URLs above.
+                    {isAr ? 'ارفع صوراً من جهازك أو ألصق روابط الصور في الحقل أعلاه.' : 'Upload images from your device or paste image URLs above.'}
                   </p>
                 </div>
               ) : (
@@ -890,7 +917,7 @@ const Projects = () => {
                         {img.isCover && (
                           <div className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-emerald-500 text-white font-mono text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 shadow-md">
                             <Star size={10} className="fill-white" />
-                            <span>Cover</span>
+                            <span>{isAr ? 'الغلاف' : 'Cover'}</span>
                           </div>
                         )}
 
@@ -903,23 +930,21 @@ const Projects = () => {
                       {/* Image Actions Bar */}
                       <div className="p-2.5 bg-card flex items-center justify-between gap-1 border-t border-border/50 text-xs">
                         <div className="flex items-center gap-1">
-                          {/* Reorder Left */}
                           <button
                             type="button"
                             disabled={idx === 0}
                             onClick={() => handleMoveImage(idx, 'left')}
-                            className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-20 disabled:hover:bg-transparent"
-                            title="Move left"
+                            className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-20 disabled:hover:bg-transparent cursor-pointer"
+                            title={isAr ? 'تحريك يساراً' : 'Move left'}
                           >
                             <ChevronLeft size={14} />
                           </button>
-                          {/* Reorder Right */}
                           <button
                             type="button"
                             disabled={idx === projectImages.length - 1}
                             onClick={() => handleMoveImage(idx, 'right')}
-                            className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-20 disabled:hover:bg-transparent"
-                            title="Move right"
+                            className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-20 disabled:hover:bg-transparent cursor-pointer"
+                            title={isAr ? 'تحريك يميناً' : 'Move right'}
                           >
                             <ChevronRight size={14} />
                           </button>
@@ -930,16 +955,16 @@ const Projects = () => {
                             <button
                               type="button"
                               onClick={() => handleSetCover(idx)}
-                              className="px-2 py-1 rounded text-[11px] font-medium text-muted-foreground hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors"
+                              className="px-2 py-1 rounded text-[11px] font-medium text-muted-foreground hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors cursor-pointer"
                             >
-                              Set Cover
+                              {isAr ? 'تعيين كغلاف' : 'Set Cover'}
                             </button>
                           )}
                           <button
                             type="button"
                             onClick={() => handleRemoveImage(idx)}
-                            className="p-1 rounded text-destructive hover:bg-destructive/10 transition-colors"
-                            title="Remove image"
+                            className="p-1 rounded text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
+                            title={isAr ? 'حذف الصورة' : 'Remove image'}
                           >
                             <Trash2 size={13} />
                           </button>
@@ -951,13 +976,13 @@ const Projects = () => {
               )}
             </div>
 
-            {/* Links & Technologies (Manual Free Entry + Quick Suggestions) */}
+            {/* Links & Technologies */}
             <div className="bg-card border border-border rounded-xl p-6">
-              <h2 className="text-lg font-bold mb-6">Links &amp; Technologies</h2>
+              <h2 className="text-lg font-bold mb-6">{isAr ? 'الروابط والتقنيات البرمجية' : 'Links & Technologies'}</h2>
               
               <div className="grid md:grid-cols-2 gap-6 mb-8">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Live Demo URL</label>
+                  <label className="text-sm font-medium">{isAr ? 'رابط المعاينة المباشرة (Live Demo)' : 'Live Demo URL'}</label>
                   <Input 
                     value={currentProject.liveDemo || ''} 
                     onChange={e => setCurrentProject({...currentProject, liveDemo: e.target.value})}
@@ -965,7 +990,7 @@ const Projects = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">GitHub URL</label>
+                  <label className="text-sm font-medium">{isAr ? 'رابط مستودع GitHub' : 'GitHub URL'}</label>
                   <Input 
                     value={currentProject.github || ''} 
                     onChange={e => setCurrentProject({...currentProject, github: e.target.value})}
@@ -978,10 +1003,10 @@ const Projects = () => {
               <div className="space-y-4 pt-4 border-t border-border/60">
                 <div className="flex items-center justify-between">
                   <label className="text-sm font-medium">
-                    Technologies &amp; Languages Used
+                    {isAr ? 'التقنيات والمكتبات المستخدمة' : 'Technologies & Languages Used'}
                   </label>
                   <span className="text-xs text-muted-foreground font-mono">
-                    {selectedTechNames.length} selected
+                    {selectedTechNames.length} {isAr ? 'محددة' : 'selected'}
                   </span>
                 </div>
 
@@ -991,16 +1016,16 @@ const Projects = () => {
                     value={techInput}
                     onChange={(e) => setTechInput(e.target.value)}
                     onKeyDown={handleKeyDownTech}
-                    placeholder="Type ANY technology name (e.g. Next.js, Python, Flutter, Docker) and press Enter..."
+                    placeholder={isAr ? 'اكتب اسم أي تقنية (مثل: Next.js, Python, Flutter, Docker) ثم اضغط Enter...' : 'Type ANY technology name (e.g. Next.js, Python, Flutter, Docker) and press Enter...'}
                     className="flex-1"
                   />
                   <Button 
                     type="button" 
                     variant="outline" 
                     onClick={() => handleAddTech()}
-                    className="shrink-0 gap-1.5"
+                    className="shrink-0 gap-1.5 cursor-pointer"
                   >
-                    <Plus size={15} /> Add
+                    <Plus size={15} /> {isAr ? 'إضافة' : 'Add'}
                   </Button>
                 </div>
 
@@ -1008,7 +1033,7 @@ const Projects = () => {
                 {selectedTechNames.length > 0 ? (
                   <div className="p-4 rounded-xl border border-border bg-muted/20 space-y-2">
                     <p className="text-xs font-mono font-semibold uppercase tracking-wider text-muted-foreground">
-                      Selected for this project:
+                      {isAr ? 'التقنيات المضافة لهذا المشروع:' : 'Selected for this project:'}
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {selectedTechNames.map((techName) => (
@@ -1031,14 +1056,14 @@ const Projects = () => {
                   </div>
                 ) : (
                   <p className="text-xs text-amber-500/90 font-mono">
-                    ⚠️ No technologies added yet. Type above or click from suggestions below.
+                    {isAr ? '⚠️ لم تتم إضافة أي تقنيات بعد. اكتب أعلاه أو اختر من الاقتراحات السريعة بالأسفل.' : '⚠️ No technologies added yet. Type above or click from suggestions below.'}
                   </p>
                 )}
 
                 {/* Quick Add Suggestions */}
                 <div className="space-y-2 pt-2">
                   <span className="text-xs font-medium text-muted-foreground">
-                    Quick Suggestions (click to add/toggle):
+                    {isAr ? 'اقتراحات سريعة (انقر للإضافة أو الإزالة):' : 'Quick Suggestions (click to add/toggle):'}
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     {Array.from(new Set([
@@ -1086,7 +1111,9 @@ const Projects = () => {
                     onChange={e => setCurrentProject({...currentProject, isPublished: e.target.checked})}
                     className="w-4 h-4 rounded border-border text-foreground focus:ring-foreground accent-foreground cursor-pointer"
                   />
-                  <label htmlFor="publish" className="text-sm font-medium cursor-pointer">Published</label>
+                  <label htmlFor="publish" className="text-sm font-medium cursor-pointer">
+                    {isAr ? 'نشر المشروع (مرئي للزوار)' : 'Published'}
+                  </label>
                 </div>
 
                 <div className="flex items-center gap-2.5">
@@ -1099,15 +1126,19 @@ const Projects = () => {
                   />
                   <label htmlFor="isFeatured" className="text-sm font-medium cursor-pointer flex items-center gap-1.5">
                     <Star size={14} className={currentProject.isFeatured ? "fill-amber-400 text-amber-400" : "text-muted-foreground"} />
-                    <span>Featured on Homepage</span>
+                    <span>{isAr ? 'عرض في الصفحة الرئيسية' : 'Featured on Homepage'}</span>
                   </label>
                 </div>
               </div>
               
               <div className="flex gap-3">
-                <Button type="button" variant="ghost" onClick={() => setView('list')} disabled={saving}>Cancel</Button>
+                <Button type="button" variant="ghost" onClick={() => setView('list')} disabled={saving}>
+                  {isAr ? 'إلغاء' : 'Cancel'}
+                </Button>
                 <Button type="submit" disabled={saving}>
-                  {saving ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...</> : 'Save Project'}
+                  {saving 
+                    ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {isAr ? 'جاري الحفظ...' : 'Saving...'}</> 
+                    : (isAr ? 'حفظ المشروع' : 'Save Project')}
                 </Button>
               </div>
             </div>

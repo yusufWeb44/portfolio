@@ -27,7 +27,8 @@ const TEMPLATE_KEYS = defaultEnTranslations;
 
 
 const AdminTranslations = () => {
-  const { refreshLanguages } = useLanguage();
+  const { refreshLanguages, currentLang, currentDirection } = useLanguage();
+  const isAr = currentLang === 'ar';
   const [languages, setLanguages] = useState<TranslationItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeLang, setActiveLang] = useState<TranslationItem | null>(null);
@@ -314,11 +315,11 @@ const AdminTranslations = () => {
   );
 
   return (
-    <div className="relative min-h-[80vh] pb-20">
-      <Helmet><title>Translations Hub | Admin</title></Helmet>
+    <div className="relative min-h-[80vh] pb-20" dir={currentDirection}>
+      <Helmet><title>{isAr ? 'مركز إدارة اللغات والترجمة | لوحة التحكم' : 'Translations Hub | Admin'}</title></Helmet>
 
       {toast && (
-        <div className={`fixed bottom-5 right-5 z-50 px-4 py-3 rounded-lg shadow-xl border flex items-center gap-2 animate-in slide-in-from-bottom-5 ${
+        <div className={`fixed bottom-5 ${isAr ? 'left-5' : 'right-5'} z-50 px-4 py-3 rounded-lg shadow-xl border flex items-center gap-2 animate-in slide-in-from-bottom-5 ${
           toast.type === 'success' ? 'bg-card border-green-500/50 text-foreground' : 'bg-destructive text-destructive-foreground'
         }`}>
           {toast.type === 'success' && <Check size={16} className="text-green-500" />}
@@ -329,9 +330,13 @@ const AdminTranslations = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Translations &amp; Localization Hub</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            {isAr ? 'مركز إدارة اللغات والترجمات' : 'Translations & Localization Hub'}
+          </h1>
           <p className="text-muted-foreground text-sm mt-1">
-            Easily upload a JSON file or visually edit translations with automatic RTL/LTR direction switching.
+            {isAr
+              ? 'رفع ملفات JSON أو التعديل البصري المباشر للمفاتيح والعبارات مع دعم التبديل التلقائي لاتجاه الخط (RTL / LTR).'
+              : 'Easily upload a JSON file or visually edit translations with automatic RTL/LTR direction switching.'}
           </p>
         </div>
         <div className="flex gap-2.5 flex-wrap">
@@ -342,17 +347,17 @@ const AdminTranslations = () => {
             accept=".json,application/json"
             className="hidden"
           />
-          <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={saving || !activeLang}>
-            <Upload size={15} className="mr-1.5" />
-            Upload JSON
+          <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={saving || !activeLang} className="gap-1.5">
+            <Upload size={15} />
+            {isAr ? 'رفع ملف JSON' : 'Upload JSON'}
           </Button>
-          <Button variant="outline" onClick={handleDownloadTemplate} disabled={!activeLang}>
-            <Download size={15} className="mr-1.5" />
-            Download JSON
+          <Button variant="outline" onClick={handleDownloadTemplate} disabled={!activeLang} className="gap-1.5">
+            <Download size={15} />
+            {isAr ? 'تنزيل ملف JSON' : 'Download JSON'}
           </Button>
-          <Button onClick={handleSaveTranslations} disabled={saving || !activeLang} className="min-w-[120px]">
-            {saving ? <Loader2 size={15} className="animate-spin mr-1.5" /> : <CheckCircle2 size={15} className="mr-1.5" />}
-            Save Changes
+          <Button onClick={handleSaveTranslations} disabled={saving || !activeLang} className="min-w-[120px] gap-1.5">
+            {saving ? <Loader2 size={15} className="animate-spin" /> : <CheckCircle2 size={15} />}
+            {isAr ? 'حفظ التعديلات' : 'Save Changes'}
           </Button>
         </div>
       </div>
@@ -365,179 +370,186 @@ const AdminTranslations = () => {
         <>
           {/* Language Selector Bar */}
           <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-card border border-border mb-6 overflow-x-auto">
-
-        <div className="flex items-center gap-2">
-          {languages.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => selectLanguage(item)}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-medium transition-all ${
-                activeLang?.id === item.id
-                  ? 'bg-foreground text-background font-bold shadow-sm'
-                  : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground'
-              }`}
-            >
-              <span>{item.flag || '🌐'}</span>
-              <span>{item.name}</span>
-              <span className="text-[10px] font-mono opacity-80 uppercase">({item.lang})</span>
-              {item.isDefault && <Star size={12} className="text-amber-400 fill-amber-400" />}
-            </button>
-          ))}
-        </div>
-
-        <Button size="sm" variant="secondary" onClick={() => setIsAddModalOpen(true)}>
-          <Plus size={14} className="mr-1" /> Add Language
-        </Button>
-      </div>
-
-      {activeLang && (
-        <div className="space-y-6">
-          {/* Language Status Bar */}
-          <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl border border-border bg-card">
-            <div className="flex items-center gap-3">
-              <span className="text-2xl">{activeLang.flag || '🌐'}</span>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="font-bold text-base">{activeLang.name} ({activeLang.lang})</h3>
-                  {activeLang.isDefault ? (
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20">
-                      Default Language
-                    </span>
-                  ) : (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 text-[11px] px-2 text-muted-foreground hover:text-foreground"
-                      onClick={() => handleSetDefault(activeLang)}
-                    >
-                      Make Default
-                    </Button>
-                  )}
-                  <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-muted text-muted-foreground">
-                    Direction: {activeLang.isRtl ? 'RTL (Right-to-Left)' : 'LTR (Left-to-Right)'}
-                  </span>
-                </div>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Contains {Object.keys(currentDictionary).length} localized strings
-                </p>
-              </div>
-            </div>
-
             <div className="flex items-center gap-2">
-              <div className="flex rounded-lg border border-border overflow-hidden">
+              {languages.map((item) => (
                 <button
-                  onClick={() => setEditorMode('visual')}
-                  className={`px-3 py-1.5 text-xs font-medium ${editorMode === 'visual' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground'}`}
+                  key={item.id}
+                  onClick={() => selectLanguage(item)}
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-medium transition-all ${
+                    activeLang?.id === item.id
+                      ? 'bg-foreground text-background font-bold shadow-sm'
+                      : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground'
+                  }`}
                 >
-                  Visual Editor
+                  <span>{item.flag || '🌐'}</span>
+                  <span>{item.name}</span>
+                  <span className="text-[10px] font-mono opacity-80 uppercase">({item.lang})</span>
+                  {item.isDefault && <Star size={12} className="text-amber-400 fill-amber-400" />}
                 </button>
-                <button
-                  onClick={() => setEditorMode('raw')}
-                  className={`px-3 py-1.5 text-xs font-medium flex items-center gap-1 ${editorMode === 'raw' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground'}`}
-                >
-                  <FileJson size={13} /> Raw JSON
-                </button>
-              </div>
-
-              {!activeLang.isDefault && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-destructive hover:bg-destructive/10"
-                  onClick={() => handleDeleteLanguage(activeLang)}
-                >
-                  <Trash2 size={16} />
-                </Button>
-              )}
+              ))}
             </div>
+
+            <Button size="sm" variant="secondary" onClick={() => setIsAddModalOpen(true)} className="gap-1">
+              <Plus size={14} /> {isAr ? 'إضافة لغة' : 'Add Language'}
+            </Button>
           </div>
 
-          {/* Visual Editor */}
-          {editorMode === 'visual' && (
-            <div className="p-6 bg-card rounded-xl border border-border space-y-4">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                <div className="relative w-full sm:w-80">
-                  <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    value={searchFilter}
-                    onChange={e => setSearchFilter(e.target.value)}
-                    placeholder="Search translation keys or text..."
-                    className="pl-9 h-9 text-xs"
-                  />
+          {activeLang && (
+            <div className="space-y-6">
+              {/* Language Status Bar */}
+              <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl border border-border bg-card">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{activeLang.flag || '🌐'}</span>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-bold text-base">{activeLang.name} ({activeLang.lang})</h3>
+                      {activeLang.isDefault ? (
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                          {isAr ? 'اللغة الافتراضية' : 'Default Language'}
+                        </span>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 text-[11px] px-2 text-muted-foreground hover:text-foreground"
+                          onClick={() => handleSetDefault(activeLang)}
+                        >
+                          {isAr ? 'تعيين كافتراضية' : 'Make Default'}
+                        </Button>
+                      )}
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-muted text-muted-foreground">
+                        {isAr
+                          ? `اتجاه الكتابة: ${activeLang.isRtl ? 'من اليمين لليسار (RTL)' : 'من اليسار لليمين (LTR)'}`
+                          : `Direction: ${activeLang.isRtl ? 'RTL (Right-to-Left)' : 'LTR (Left-to-Right)'}`}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {isAr
+                        ? `تحتوي على ${Object.keys(currentDictionary).length} عبارة ومفتاح ترجمة`
+                        : `Contains ${Object.keys(currentDictionary).length} localized strings`}
+                    </p>
+                  </div>
                 </div>
-                <span className="text-xs text-muted-foreground">
-                  Showing {filteredKeys.length} of {Object.keys(currentDictionary).length} keys
-                </span>
+
+                <div className="flex items-center gap-2">
+                  <div className="flex rounded-lg border border-border overflow-hidden">
+                    <button
+                      onClick={() => setEditorMode('visual')}
+                      className={`px-3 py-1.5 text-xs font-medium ${editorMode === 'visual' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground'}`}
+                    >
+                      {isAr ? 'المحرر البصري' : 'Visual Editor'}
+                    </button>
+                    <button
+                      onClick={() => setEditorMode('raw')}
+                      className={`px-3 py-1.5 text-xs font-medium flex items-center gap-1 ${editorMode === 'raw' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground'}`}
+                    >
+                      <FileJson size={13} /> {isAr ? 'محرر JSON المباشر' : 'Raw JSON'}
+                    </button>
+                  </div>
+
+                  {!activeLang.isDefault && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-destructive hover:bg-destructive/10"
+                      onClick={() => handleDeleteLanguage(activeLang)}
+                      title={isAr ? 'حذف اللغة' : 'Delete Language'}
+                    >
+                      <Trash2 size={16} />
+                    </Button>
+                  )}
+                </div>
               </div>
 
-              <div className="space-y-3 pt-2">
-                {filteredKeys.map((key) => (
-                  <div key={key} className="p-3.5 rounded-lg border border-border/80 bg-background/50 grid md:grid-cols-3 gap-3 items-center">
-                    <div className="space-y-0.5">
-                      <span className="font-mono text-xs font-bold text-primary">{key}</span>
-                      <p className="text-[11px] text-muted-foreground line-clamp-1">
-                        Default: {TEMPLATE_KEYS[key] || '—'}
-                      </p>
-                    </div>
-                    <div className="md:col-span-2">
+              {/* Visual Editor */}
+              {editorMode === 'visual' && (
+                <div className="p-6 bg-card rounded-xl border border-border space-y-4">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <div className="relative w-full sm:w-80">
+                      <Search size={15} className={`absolute ${isAr ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 text-muted-foreground`} />
                       <Input
-                        value={currentDictionary[key] ?? ''}
-                        onChange={e => handleVisualKeyChange(key, e.target.value)}
-                        dir={activeLang.isRtl ? 'rtl' : 'ltr'}
-                        className="h-9 text-xs"
+                        value={searchFilter}
+                        onChange={e => setSearchFilter(e.target.value)}
+                        placeholder={isAr ? 'بحث في مفاتيح أو نصوص الترجمة...' : 'Search translation keys or text...'}
+                        className={`${isAr ? 'pr-9' : 'pl-9'} h-9 text-xs`}
                       />
                     </div>
+                    <span className="text-xs text-muted-foreground">
+                      {isAr
+                        ? `عرض ${filteredKeys.length} من أصل ${Object.keys(currentDictionary).length} مفتاح`
+                        : `Showing ${filteredKeys.length} of ${Object.keys(currentDictionary).length} keys`}
+                    </span>
                   </div>
-                ))}
-              </div>
+
+                  <div className="space-y-3 pt-2">
+                    {filteredKeys.map((key) => (
+                      <div key={key} className="p-3.5 rounded-lg border border-border/80 bg-background/50 grid md:grid-cols-3 gap-3 items-center">
+                        <div className="space-y-0.5">
+                          <span className="font-mono text-xs font-bold text-primary">{key}</span>
+                          <p className="text-[11px] text-muted-foreground line-clamp-1">
+                            {isAr ? 'القيمة الافتراضية:' : 'Default:'} {TEMPLATE_KEYS[key] || '—'}
+                          </p>
+                        </div>
+                        <div className="md:col-span-2">
+                          <Input
+                            value={currentDictionary[key] ?? ''}
+                            onChange={e => handleVisualKeyChange(key, e.target.value)}
+                            dir={activeLang.isRtl ? 'rtl' : 'ltr'}
+                            className="h-9 text-xs"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Raw JSON Editor */}
+              {editorMode === 'raw' && (
+                <div className="p-6 bg-card rounded-xl border border-border space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-sm font-semibold flex items-center gap-1.5">
+                      <FileJson size={16} className="text-primary" />
+                      {isAr ? 'هيكل بيانات JSON المباشر' : 'Raw JSON Payload'}
+                    </h3>
+                    {jsonError && (
+                      <span className="text-xs text-destructive flex items-center gap-1">
+                        <AlertCircle size={13} /> {jsonError}
+                      </span>
+                    )}
+                  </div>
+
+                  <Textarea
+                    value={rawJson}
+                    onChange={e => {
+                      setRawJson(e.target.value);
+                      try {
+                        JSON.parse(e.target.value);
+                        setJsonError(null);
+                      } catch (err: any) {
+                        setJsonError(err.message);
+                      }
+                    }}
+                    rows={20}
+                    className="font-mono text-xs leading-relaxed"
+                    placeholder="{ ... }"
+                    dir="ltr"
+                  />
+                </div>
+              )}
             </div>
           )}
-
-          {/* Raw JSON Editor */}
-          {editorMode === 'raw' && (
-            <div className="p-6 bg-card rounded-xl border border-border space-y-4">
-              <div className="flex justify-between items-center">
-                <h3 className="text-sm font-semibold flex items-center gap-1.5">
-                  <FileJson size={16} className="text-primary" />
-                  Raw JSON Payload
-                </h3>
-                {jsonError && (
-                  <span className="text-xs text-destructive flex items-center gap-1">
-                    <AlertCircle size={13} /> {jsonError}
-                  </span>
-                )}
-              </div>
-
-              <Textarea
-                value={rawJson}
-                onChange={e => {
-                  setRawJson(e.target.value);
-                  try {
-                    JSON.parse(e.target.value);
-                    setJsonError(null);
-                  } catch (err: any) {
-                    setJsonError(err.message);
-                  }
-                }}
-                rows={20}
-                className="font-mono text-xs leading-relaxed"
-                placeholder="{ ... }"
-              />
-            </div>
-          )}
-        </div>
-      )}
         </>
       )}
 
       {/* Add Language Modal */}
       {isAddModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-card border border-border rounded-xl shadow-2xl max-w-md w-full p-6 space-y-5">
+          <div className="bg-card border border-border rounded-xl shadow-2xl max-w-md w-full p-6 space-y-5" dir={currentDirection}>
             <div className="flex justify-between items-center pb-3 border-b border-border">
               <h2 className="text-lg font-bold flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-primary" />
-                Add New Language
+                {isAr ? 'إضافة لغة جديدة' : 'Add New Language'}
               </h2>
               <button
                 onClick={() => setIsAddModalOpen(false)}
@@ -550,7 +562,9 @@ const AdminTranslations = () => {
             <form onSubmit={handleAddLanguage} className="space-y-4">
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="text-xs font-semibold text-muted-foreground block mb-1">Code</label>
+                  <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                    {isAr ? 'رمز اللغة' : 'Code'}
+                  </label>
                   <Input
                     value={newLangForm.lang}
                     onChange={e => setNewLangForm({ ...newLangForm, lang: e.target.value.toLowerCase() })}
@@ -560,7 +574,9 @@ const AdminTranslations = () => {
                   />
                 </div>
                 <div className="col-span-2">
-                  <label className="text-xs font-semibold text-muted-foreground block mb-1">Language Name</label>
+                  <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                    {isAr ? 'اسم اللغة' : 'Language Name'}
+                  </label>
                   <Input
                     value={newLangForm.name}
                     onChange={e => setNewLangForm({ ...newLangForm, name: e.target.value })}
@@ -572,7 +588,9 @@ const AdminTranslations = () => {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-semibold text-muted-foreground block mb-1">Flag Emoji</label>
+                  <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                    {isAr ? 'إيموجي العلم' : 'Flag Emoji'}
+                  </label>
                   <Input
                     value={newLangForm.flag}
                     onChange={e => setNewLangForm({ ...newLangForm, flag: e.target.value })}
@@ -587,18 +605,18 @@ const AdminTranslations = () => {
                       onChange={e => setNewLangForm({ ...newLangForm, isRtl: e.target.checked })}
                       className="rounded border-input text-primary w-4 h-4"
                     />
-                    <span>RTL (Right to Left)</span>
+                    <span>{isAr ? 'من اليمين لليسار (RTL)' : 'RTL (Right to Left)'}</span>
                   </label>
                 </div>
               </div>
 
               <div className="flex justify-end gap-3 pt-4 border-t border-border">
                 <Button type="button" variant="outline" onClick={() => setIsAddModalOpen(false)}>
-                  Cancel
+                  {isAr ? 'إلغاء' : 'Cancel'}
                 </Button>
-                <Button type="submit" disabled={saving}>
-                  {saving ? <Loader2 size={16} className="animate-spin mr-1.5" /> : <Plus size={16} className="mr-1.5" />}
-                  Create Language
+                <Button type="submit" disabled={saving} className="gap-1.5">
+                  {saving ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+                  {isAr ? 'إضافة اللغة' : 'Create Language'}
                 </Button>
               </div>
             </form>

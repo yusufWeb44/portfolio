@@ -4,6 +4,7 @@ import { Plus, Trash2, Loader2, Check, Search, Save } from 'lucide-react';
 import api from '../../services/api';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface Skill {
   id: string;
@@ -37,6 +38,8 @@ interface SectionSettings {
 }
 
 const Skills = () => {
+  const { currentLang, currentDirection } = useLanguage();
+  const isAr = currentLang === 'ar';
   const [skills, setSkills] = useState<Skill[]>([]);
   const [sectionSettings, setSectionSettings] = useState<SectionSettings>({
     skillsBadge: 'SKILLS & EXPERTISE',
@@ -210,8 +213,8 @@ const Skills = () => {
   });
 
   return (
-    <div className="relative min-h-[80vh] space-y-8 pb-20">
-      <Helmet><title>Skills & Marquee | Admin</title></Helmet>
+    <div className="relative min-h-[80vh] space-y-8 pb-20" dir={currentDirection}>
+      <Helmet><title>{isAr ? 'المهارات وشريط التقنيات | لوحة الإدارة' : 'Skills & Marquee | Admin'}</title></Helmet>
 
       {toast && (
         <div className={`fixed bottom-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg border flex items-center gap-2 animate-in slide-in-from-bottom-5 ${toast.type === 'success' ? 'bg-card border-green-500/50 text-foreground' : 'bg-destructive text-destructive-foreground'}`}>
@@ -224,11 +227,12 @@ const Skills = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2.5">
-            <span>Skills & Marquee</span>
-            <span className="text-base text-muted-foreground font-normal">(إدارة مهارات الشريط المتحرك)</span>
+            <span>{isAr ? 'المهارات وشريط التقنيات المتحرك' : 'Skills & Marquee'}</span>
           </h1>
           <p className="text-muted-foreground text-sm mt-1">
-            إدارة بويضات المهارات الأفقية المتحركة، الأيقونات البرمجية، التصنيفات، ونصوص نوافذ الهوفر التفاعلية.
+            {isAr 
+              ? 'إدارة كبسولات المهارات الأفقية المتحركة، الأيقونات البرمجية، التصنيفات، ونصوص نوافذ الهوفر التفاعلية.' 
+              : 'Manage interactive marquee skill capsules, icons, categories, and hover tooltip narratives.'}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -238,10 +242,10 @@ const Skills = () => {
             className="gap-2 bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm cursor-pointer"
           >
             {savingAll ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />} 
-            Save All Skills
+            {isAr ? 'حفظ كافة المهارات' : 'Save All Skills'}
           </Button>
           <Button onClick={handleAdd} className="gap-2 bg-foreground text-background hover:bg-foreground/90 shadow-sm cursor-pointer">
-            <Plus size={16} /> Add Skill
+            <Plus size={16} /> {isAr ? 'إضافة مهارة' : 'Add Skill'}
           </Button>
         </div>
       </div>
@@ -250,31 +254,35 @@ const Skills = () => {
       <div className="bg-card border border-border/80 rounded-2xl p-6 space-y-6 shadow-sm">
         <div className="flex justify-between items-center border-b border-border pb-4">
           <div>
-            <h2 className="text-lg font-bold text-foreground">Skills Section Narrative (العناوين والفقرات باللغتين)</h2>
+            <h2 className="text-lg font-bold text-foreground">
+              {isAr ? 'نصوص وسرد قسم المهارات' : 'Skills Section Narrative'}
+            </h2>
             <p className="text-xs text-muted-foreground mt-0.5">
-              تعديل الشعار، العناوين الرئيسية، الفقرات، والنقاط البارزة المعروضة في الجانب الأيسر من قسم المهارات.
+              {isAr 
+                ? 'تعديل الشارة، العناوين الرئيسية، الفقرات، والنقاط البارزة المعروضة في قسم المهارات بالصفحة الرئيسية.' 
+                : 'Edit badge, main heading, paragraphs, and key architectural points shown on the homepage.'}
             </p>
           </div>
           <Button 
             onClick={handleSaveSectionSettings} 
             disabled={savingSettings}
-            className="gap-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs h-9 px-4 shrink-0"
+            className="gap-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs h-9 px-4 shrink-0 cursor-pointer"
           >
             {savingSettings ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
-            Save Section Text
+            {isAr ? 'حفظ نصوص السكشن' : 'Save Section Text'}
           </Button>
         </div>
 
         <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-semibold text-muted-foreground block mb-1">Badge Text (EN)</label>
+            <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'شارة القسم (EN)' : 'Badge Text (EN)'}</label>
             <Input 
               value={sectionSettings.skillsBadge} 
               onChange={e => setSectionSettings({ ...sectionSettings, skillsBadge: e.target.value })}
             />
           </div>
           <div>
-            <label className="text-xs font-semibold text-muted-foreground block mb-1">شعار السكشن (AR)</label>
+            <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'شارة القسم (AR)' : 'Section Badge (AR)'}</label>
             <Input 
               value={sectionSettings.skillsBadgeAr || ''} 
               onChange={e => setSectionSettings({ ...sectionSettings, skillsBadgeAr: e.target.value })}
@@ -285,14 +293,14 @@ const Skills = () => {
 
         <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-semibold text-muted-foreground block mb-1">Main Heading (EN)</label>
+            <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'العنوان الرئيسي (EN)' : 'Main Heading (EN)'}</label>
             <Input 
               value={sectionSettings.skillsTitle} 
               onChange={e => setSectionSettings({ ...sectionSettings, skillsTitle: e.target.value })}
             />
           </div>
           <div>
-            <label className="text-xs font-semibold text-muted-foreground block mb-1">العنوان الرئيسي (AR)</label>
+            <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'العنوان الرئيسي (AR)' : 'Main Heading (AR)'}</label>
             <Input 
               value={sectionSettings.skillsTitleAr || ''} 
               onChange={e => setSectionSettings({ ...sectionSettings, skillsTitleAr: e.target.value })}
@@ -303,7 +311,7 @@ const Skills = () => {
 
         <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-semibold text-muted-foreground block mb-1">Paragraph 1 (EN)</label>
+            <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'الفقرة الأولى (EN)' : 'Paragraph 1 (EN)'}</label>
             <textarea 
               rows={3}
               value={sectionSettings.skillsParagraph1} 
@@ -312,7 +320,7 @@ const Skills = () => {
             />
           </div>
           <div>
-            <label className="text-xs font-semibold text-muted-foreground block mb-1">الفقرة 1 (AR)</label>
+            <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'الفقرة الأولى (AR)' : 'Paragraph 1 (AR)'}</label>
             <textarea 
               rows={3}
               value={sectionSettings.skillsParagraph1Ar || ''} 
@@ -325,7 +333,7 @@ const Skills = () => {
 
         <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-semibold text-muted-foreground block mb-1">Paragraph 2 (EN)</label>
+            <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'الفقرة الثانية (EN)' : 'Paragraph 2 (EN)'}</label>
             <textarea 
               rows={3}
               value={sectionSettings.skillsParagraph2 || ''} 
@@ -334,7 +342,7 @@ const Skills = () => {
             />
           </div>
           <div>
-            <label className="text-xs font-semibold text-muted-foreground block mb-1">الفقرة 2 (AR)</label>
+            <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'الفقرة الثانية (AR)' : 'Paragraph 2 (AR)'}</label>
             <textarea 
               rows={3}
               value={sectionSettings.skillsParagraph2Ar || ''} 
@@ -349,12 +357,12 @@ const Skills = () => {
         <div className="border-t border-border/70 pt-5 space-y-4">
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" />
-            <h3 className="text-sm font-bold text-foreground">Bullet Point 1 (النقطة البارزة الأولى)</h3>
+            <h3 className="text-sm font-bold text-foreground">{isAr ? 'النقطة البارزة الأولى' : 'Bullet Point 1'}</h3>
           </div>
 
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-semibold text-muted-foreground block mb-1">Point 1 Title (EN)</label>
+              <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'عنوان النقطة 1 (EN)' : 'Point 1 Title (EN)'}</label>
               <Input 
                 value={sectionSettings.skillsPoint1Title || ''} 
                 onChange={e => setSectionSettings({ ...sectionSettings, skillsPoint1Title: e.target.value })}
@@ -362,7 +370,7 @@ const Skills = () => {
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-muted-foreground block mb-1">عنوان النقطة 1 (AR)</label>
+              <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'عنوان النقطة 1 (AR)' : 'Point 1 Title (AR)'}</label>
               <Input 
                 value={sectionSettings.skillsPoint1TitleAr || ''} 
                 onChange={e => setSectionSettings({ ...sectionSettings, skillsPoint1TitleAr: e.target.value })}
@@ -374,7 +382,7 @@ const Skills = () => {
 
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-semibold text-muted-foreground block mb-1">Point 1 Description (EN)</label>
+              <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'وصف النقطة 1 (EN)' : 'Point 1 Description (EN)'}</label>
               <textarea 
                 rows={2}
                 value={sectionSettings.skillsPoint1Text || ''} 
@@ -384,7 +392,7 @@ const Skills = () => {
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-muted-foreground block mb-1">وصف النقطة 1 (AR)</label>
+              <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'وصف النقطة 1 (AR)' : 'Point 1 Description (AR)'}</label>
               <textarea 
                 rows={2}
                 value={sectionSettings.skillsPoint1TextAr || ''} 
@@ -401,12 +409,12 @@ const Skills = () => {
         <div className="border-t border-border/70 pt-5 space-y-4">
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" />
-            <h3 className="text-sm font-bold text-foreground">Bullet Point 2 (النقطة البارزة الثانية)</h3>
+            <h3 className="text-sm font-bold text-foreground">{isAr ? 'النقطة البارزة الثانية' : 'Bullet Point 2'}</h3>
           </div>
 
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-semibold text-muted-foreground block mb-1">Point 2 Title (EN)</label>
+              <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'عنوان النقطة 2 (EN)' : 'Point 2 Title (EN)'}</label>
               <Input 
                 value={sectionSettings.skillsPoint2Title || ''} 
                 onChange={e => setSectionSettings({ ...sectionSettings, skillsPoint2Title: e.target.value })}
@@ -414,7 +422,7 @@ const Skills = () => {
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-muted-foreground block mb-1">عنوان النقطة 2 (AR)</label>
+              <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'عنوان النقطة 2 (AR)' : 'Point 2 Title (AR)'}</label>
               <Input 
                 value={sectionSettings.skillsPoint2TitleAr || ''} 
                 onChange={e => setSectionSettings({ ...sectionSettings, skillsPoint2TitleAr: e.target.value })}
@@ -426,7 +434,7 @@ const Skills = () => {
 
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-semibold text-muted-foreground block mb-1">Point 2 Description (EN)</label>
+              <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'وصف النقطة 2 (EN)' : 'Point 2 Description (EN)'}</label>
               <textarea 
                 rows={2}
                 value={sectionSettings.skillsPoint2Text || ''} 
@@ -436,7 +444,7 @@ const Skills = () => {
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-muted-foreground block mb-1">وصف النقطة 2 (AR)</label>
+              <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'وصف النقطة 2 (AR)' : 'Point 2 Description (AR)'}</label>
               <textarea 
                 rows={2}
                 value={sectionSettings.skillsPoint2TextAr || ''} 
@@ -457,7 +465,7 @@ const Skills = () => {
           <Input 
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Search skills by name, Arabic name or description..."
+            placeholder={isAr ? 'ابحث عن مهارة بالاسم أو الوصف...' : 'Search skills by name or description...'}
             className="pl-9 h-9 text-xs"
           />
         </div>
@@ -472,20 +480,20 @@ const Skills = () => {
                   : 'bg-card/60 text-muted-foreground border-border/60 hover:text-foreground'
               }`}
             >
-              {cat}
+              {cat === 'ALL' ? (isAr ? 'الكل' : 'ALL') : cat}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Skills List with Modern Capsule Preview & Clean Controls */}
+      {/* Skills List */}
       {loading ? (
         <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin w-8 h-8 text-muted-foreground" /></div>
       ) : (
         <div className="space-y-4">
           {filteredSkills.length === 0 ? (
             <div className="p-12 text-center text-muted-foreground bg-card rounded-xl border border-border">
-              No skills match your search or filter.
+              {isAr ? 'لا توجد مهارات تطابق البحث أو التصنيف المحدد.' : 'No skills match your search or filter.'}
             </div>
           ) : (
             filteredSkills.map((skill) => (
@@ -507,7 +515,7 @@ const Skills = () => {
                         }}
                         className="w-4 h-4 rounded border-border text-emerald-500 accent-emerald-500 cursor-pointer"
                       />
-                      <span>Active in Marquee (تفعيل في الشريط)</span>
+                      <span>{isAr ? 'تفعيل في الشريط' : 'Active in Marquee'}</span>
                     </label>
                     <Button 
                       onClick={() => handleSaveSkill(skill)}
@@ -516,7 +524,7 @@ const Skills = () => {
                       className="h-8 px-3 gap-1.5 text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-semibold shadow-sm cursor-pointer"
                     >
                       {savingSkillId === skill.id ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
-                      Save
+                      {isAr ? 'حفظ' : 'Save'}
                     </Button>
                     <Button 
                       variant="ghost" 
@@ -532,7 +540,7 @@ const Skills = () => {
                 {/* Skill Name, Category & Order */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
                   <div className="md:col-span-1">
-                    <label className="text-[11px] font-semibold text-muted-foreground block mb-1">Name (EN)</label>
+                    <label className="text-[11px] font-semibold text-muted-foreground block mb-1">{isAr ? 'الاسم (EN)' : 'Name (EN)'}</label>
                     <Input 
                       value={skill.name} 
                       onChange={e => handleFieldChange(skill.id, 'name', e.target.value)}
@@ -541,7 +549,7 @@ const Skills = () => {
                     />
                   </div>
                   <div className="md:col-span-1">
-                    <label className="text-[11px] font-semibold text-muted-foreground block mb-1">اسم المهارة (AR)</label>
+                    <label className="text-[11px] font-semibold text-muted-foreground block mb-1">{isAr ? 'الاسم (AR)' : 'Name (AR)'}</label>
                     <Input 
                       value={skill.nameAr || ''} 
                       onChange={e => handleFieldChange(skill.id, 'nameAr', e.target.value)}
@@ -551,7 +559,7 @@ const Skills = () => {
                     />
                   </div>
                   <div className="md:col-span-1">
-                    <label className="text-[11px] font-semibold text-muted-foreground block mb-1">Category (EN)</label>
+                    <label className="text-[11px] font-semibold text-muted-foreground block mb-1">{isAr ? 'التصنيف (EN)' : 'Category (EN)'}</label>
                     <Input 
                       value={skill.category} 
                       onChange={e => handleFieldChange(skill.id, 'category', e.target.value)}
@@ -560,7 +568,7 @@ const Skills = () => {
                     />
                   </div>
                   <div className="md:col-span-1">
-                    <label className="text-[11px] font-semibold text-muted-foreground block mb-1">التصنيف (AR)</label>
+                    <label className="text-[11px] font-semibold text-muted-foreground block mb-1">{isAr ? 'التصنيف (AR)' : 'Category (AR)'}</label>
                     <Input 
                       value={skill.categoryAr || ''} 
                       onChange={e => handleFieldChange(skill.id, 'categoryAr', e.target.value)}
@@ -570,7 +578,7 @@ const Skills = () => {
                     />
                   </div>
                   <div className="md:col-span-1">
-                    <label className="text-[11px] font-semibold text-muted-foreground block mb-1">Order (الترتيب)</label>
+                    <label className="text-[11px] font-semibold text-muted-foreground block mb-1">{isAr ? 'الترتيب' : 'Order'}</label>
                     <Input 
                       type="number"
                       value={skill.order ?? 0} 
@@ -585,27 +593,27 @@ const Skills = () => {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <label className="text-[11px] font-semibold text-emerald-400 block mb-1">
-                      Hover Tooltip Description (English)
+                      {isAr ? 'نص الهوفر التفاعلي (بالإنجليزية)' : 'Hover Tooltip Description (English)'}
                     </label>
                     <textarea 
                       value={skill.description || ''} 
                       onChange={e => handleFieldChange(skill.id, 'description', e.target.value)}
                       onBlur={() => handleSaveSkill(skill)}
                       rows={2}
-                      placeholder="Interactive hover description shown when hovering over the skill pill..."
+                      placeholder={isAr ? 'نص يظهر في نافذة الهوفر عند تمرير الفأرة...' : 'Interactive hover description shown when hovering over the skill pill...'}
                       className="w-full text-xs p-2.5 rounded-lg bg-background/50 border border-border/60 text-muted-foreground focus:text-foreground focus:outline-none focus:ring-1 focus:ring-emerald-500/50 resize-none leading-relaxed"
                     />
                   </div>
                   <div>
                     <label className="text-[11px] font-semibold text-emerald-400 block mb-1">
-                      نص نافذة الهوفر التفاعلية (بالعربية - Hover Tooltip)
+                      {isAr ? 'نص الهوفر التفاعلي (بالعربية)' : 'Hover Tooltip Description (Arabic)'}
                     </label>
                     <textarea 
                       value={skill.descriptionAr || ''} 
                       onChange={e => handleFieldChange(skill.id, 'descriptionAr', e.target.value)}
                       onBlur={() => handleSaveSkill(skill)}
                       rows={2}
-                      placeholder="نص وصفي يظهر في نافذة الهوفر عند مرور مؤشر الماوس فوق البويضة..."
+                      placeholder={isAr ? 'نص وصفي يظهر في نافذة الهوفر عند مرور مؤشر الماوس فوق البويضة...' : 'Hover description shown in Arabic...'}
                       className="w-full text-xs p-2.5 rounded-lg bg-background/50 border border-border/60 text-muted-foreground focus:text-foreground focus:outline-none focus:ring-1 focus:ring-emerald-500/50 resize-none leading-relaxed"
                       dir="rtl"
                     />
@@ -616,9 +624,9 @@ const Skills = () => {
                 <div className="flex justify-between items-center pt-2 border-t border-border/40">
                   <span className="text-[11px] text-muted-foreground">
                     {savingSkillId === skill.id ? (
-                      <span className="text-emerald-400 flex items-center gap-1.5"><Loader2 size={12} className="animate-spin" /> جاري حفظ التعديلات...</span>
+                      <span className="text-emerald-400 flex items-center gap-1.5"><Loader2 size={12} className="animate-spin" /> {isAr ? 'جاري حفظ التعديلات...' : 'Saving changes...'}</span>
                     ) : (
-                      <span>يتم حفظ الحقول تلقائياً عند مغادرة الحقل أو الضغط على زر الحفظ</span>
+                      <span>{isAr ? 'يتم حفظ الحقول تلقائياً عند مغادرة الحقل أو الضغط على زر الحفظ' : 'Fields save automatically on blur or via save button'}</span>
                     )}
                   </span>
                   <Button 
@@ -628,7 +636,7 @@ const Skills = () => {
                     className="gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs h-8 px-4 font-semibold shadow-sm cursor-pointer"
                   >
                     {savingSkillId === skill.id ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
-                    حفظ المهارة (Save)
+                    {isAr ? 'حفظ المهارة' : 'Save Skill'}
                   </Button>
                 </div>
               </div>

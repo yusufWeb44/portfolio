@@ -31,6 +31,7 @@ import { resolveImageUrl } from '../../utils/mediaUrl';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Textarea } from '../../components/ui/Textarea';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface ExperienceItem {
   id: string;
@@ -101,6 +102,8 @@ const CERT_ICONS = [
 
 
 const AdminExperience = () => {
+  const { currentLang, currentDirection } = useLanguage();
+  const isAr = currentLang === 'ar';
   const [activeTab, setActiveTab] = useState<'timeline' | 'certificates'>('timeline');
   const [experiences, setExperiences] = useState<ExperienceItem[]>([]);
   const [certificates, setCertificates] = useState<CertificateItem[]>([]);
@@ -357,8 +360,8 @@ const AdminExperience = () => {
   };
 
   return (
-    <div className="relative min-h-[85vh] pb-16">
-      <Helmet><title>Experience & Certifications | Admin</title></Helmet>
+    <div className="relative min-h-[85vh] pb-16" dir={currentDirection}>
+      <Helmet><title>{isAr ? 'الخبرات والمسيرة المهنية | لوحة الإدارة' : 'Experience & Certifications | Admin'}</title></Helmet>
 
       {/* Floating Toast Notification */}
       {toast && (
@@ -374,10 +377,12 @@ const AdminExperience = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
-            Experience & Credentials
+            {isAr ? 'الخبرات والمسيرة المهنية' : 'Experience & Credentials'}
           </h1>
           <p className="text-muted-foreground text-sm mt-1">
-            Manage your interactive vertical timeline and horizontal certifications carousel.
+            {isAr 
+              ? 'إدارة الخط الزمني الرأسي للمسيرة الأكاديمية والمهنية، وبطاقات الشهادات والمؤهلات.' 
+              : 'Manage your interactive vertical timeline and horizontal certifications carousel.'}
           </p>
         </div>
 
@@ -392,7 +397,7 @@ const AdminExperience = () => {
             }`}
           >
             <Briefcase size={15} />
-            Career &amp; Education
+            {isAr ? 'المسيرة الأكاديمية والمهنية' : 'Career & Education'}
           </button>
           <button
             onClick={() => setActiveTab('certificates')}
@@ -403,7 +408,7 @@ const AdminExperience = () => {
             }`}
           >
             <Award size={16} />
-            <span>Certificates ({certificates.length})</span>
+            <span>{isAr ? `الشهادات (${certificates.length})` : `Certificates (${certificates.length})`}</span>
           </button>
         </div>
       </div>
@@ -411,42 +416,40 @@ const AdminExperience = () => {
       {loading ? (
         <div className="flex flex-col items-center justify-center h-72 gap-3">
           <Loader2 className="animate-spin w-8 h-8 text-amber-500" />
-          <p className="text-xs font-mono text-muted-foreground">Loading experience data...</p>
+          <p className="text-xs font-mono text-muted-foreground">{isAr ? 'جاري تحميل بيانات الخبرات...' : 'Loading experience data...'}</p>
         </div>
       ) : activeTab === 'timeline' ? (
-        /* ══════════════════════════════════════════════════════════════
-           TAB 1: TIMELINE MILESTONES (University & Career)
-        ══════════════════════════════════════════════════════════════ */
+        /* TAB 1: TIMELINE MILESTONES */
         <div className="space-y-6">
           {/* Quick Add Presets Bar */}
           <div className="flex flex-wrap items-center justify-between gap-3 p-4 bg-card/60 backdrop-blur-md rounded-2xl border border-border/80">
             <div className="text-xs font-mono font-semibold text-muted-foreground uppercase tracking-wider">
-              Add New Timeline Milestone
+              {isAr ? 'إضافة محطة جديدة إلى الخط الزمني' : 'Add New Timeline Milestone'}
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <Button 
                 variant="outline" 
                 size="sm" 
                 onClick={() => handleAddExperience('education')}
-                className="gap-1.5 text-xs border-amber-500/40 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10"
+                className="gap-1.5 text-xs border-amber-500/40 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 cursor-pointer"
               >
-                <GraduationCap size={15} /> + University / Education
+                <GraduationCap size={15} /> {isAr ? '+ دراسة / جامعة' : '+ University / Education'}
               </Button>
               <Button 
                 variant="outline" 
                 size="sm" 
                 onClick={() => handleAddExperience('work')}
-                className="gap-1.5 text-xs border-blue-500/40 text-blue-600 dark:text-blue-400 hover:bg-blue-500/10"
+                className="gap-1.5 text-xs border-blue-500/40 text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 cursor-pointer"
               >
-                <Briefcase size={15} /> + Career Role
+                <Briefcase size={15} /> {isAr ? '+ دور وظيفي' : '+ Career Role'}
               </Button>
               <Button 
                 variant="outline" 
                 size="sm" 
                 onClick={() => handleAddExperience('milestone')}
-                className="gap-1.5 text-xs border-purple-500/40 text-purple-600 dark:text-purple-400 hover:bg-purple-500/10"
+                className="gap-1.5 text-xs border-purple-500/40 text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 cursor-pointer"
               >
-                <Sparkles size={15} /> + Milestone
+                <Sparkles size={15} /> {isAr ? '+ إنجاز / محطة' : '+ Milestone'}
               </Button>
             </div>
           </div>
@@ -454,8 +457,8 @@ const AdminExperience = () => {
           {experiences.length === 0 ? (
             <div className="bg-card border border-dashed border-border rounded-2xl p-16 text-center text-muted-foreground">
               <GraduationCap size={40} className="mx-auto mb-3 text-muted-foreground/50" />
-              <p className="font-semibold text-base">No timeline milestones yet</p>
-              <p className="text-xs text-muted-foreground mt-1">Start by adding your university degree or career milestones.</p>
+              <p className="font-semibold text-base">{isAr ? 'لا توجد محطات في الخط الزمني بعد' : 'No timeline milestones yet'}</p>
+              <p className="text-xs text-muted-foreground mt-1">{isAr ? 'ابدأ بإضافة دراستك الجامعية أو محطاتك المهنية.' : 'Start by adding your university degree or career milestones.'}</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -468,7 +471,7 @@ const AdminExperience = () => {
                     key={exp.id} 
                     className="bg-card/70 dark:bg-white/[0.02] backdrop-blur-xl border border-border/80 rounded-2xl p-6 transition-all duration-200 hover:border-border hover:shadow-md relative group"
                   >
-                    {/* Header Row: Index number, Category Badge, Reorder & Delete */}
+                    {/* Header Row */}
                     <div className="flex items-center justify-between gap-4 mb-5 pb-4 border-b border-border/50">
                       <div className="flex items-center gap-3">
                         <span className="w-7 h-7 rounded-full bg-muted flex items-center justify-center font-mono font-bold text-xs text-muted-foreground">
@@ -480,47 +483,47 @@ const AdminExperience = () => {
                           <button
                             type="button"
                             onClick={() => handleUpdateExperience(exp.id, 'type', 'education')}
-                            className={`px-2.5 py-1 rounded-md text-xs font-semibold flex items-center gap-1 transition-all ${
+                            className={`px-2.5 py-1 rounded-md text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer ${
                               exp.type === 'education'
                                 ? 'bg-amber-500 text-white shadow-sm'
                                 : 'text-muted-foreground hover:text-foreground'
                             }`}
                           >
-                            <GraduationCap size={13} /> University / Education
+                            <GraduationCap size={13} /> {isAr ? 'دراسة / جامعة' : 'University / Education'}
                           </button>
                           <button
                             type="button"
                             onClick={() => handleUpdateExperience(exp.id, 'type', 'work')}
-                            className={`px-2.5 py-1 rounded-md text-xs font-semibold flex items-center gap-1 transition-all ${
+                            className={`px-2.5 py-1 rounded-md text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer ${
                               exp.type === 'work' || !exp.type
                                 ? 'bg-blue-500 text-white shadow-sm'
                                 : 'text-muted-foreground hover:text-foreground'
                             }`}
                           >
-                            <Briefcase size={13} /> Work
+                            <Briefcase size={13} /> {isAr ? 'وظيفة / عمل' : 'Work'}
                           </button>
                           <button
                             type="button"
                             onClick={() => handleUpdateExperience(exp.id, 'type', 'milestone')}
-                            className={`px-2.5 py-1 rounded-md text-xs font-semibold flex items-center gap-1 transition-all ${
+                            className={`px-2.5 py-1 rounded-md text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer ${
                               exp.type === 'milestone'
                                 ? 'bg-purple-500 text-white shadow-sm'
                                 : 'text-muted-foreground hover:text-foreground'
                             }`}
                           >
-                            <Sparkles size={13} /> Milestone
+                            <Sparkles size={13} /> {isAr ? 'إنجاز' : 'Milestone'}
                           </button>
                         </div>
                       </div>
 
-                      {/* Controls: Move Up, Move Down, Delete */}
+                      {/* Controls */}
                       <div className="flex items-center gap-1.5">
                         <button
                           type="button"
                           onClick={() => handleMoveExperience(index, 'up')}
                           disabled={isFirst}
-                          title="Move milestone up"
-                          className="p-1.5 rounded-lg border border-border/60 hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:pointer-events-none transition-all"
+                          title={isAr ? 'تحريك لأعلى' : 'Move up'}
+                          className="p-1.5 rounded-lg border border-border/60 hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer"
                         >
                           <ChevronUp size={16} />
                         </button>
@@ -528,16 +531,16 @@ const AdminExperience = () => {
                           type="button"
                           onClick={() => handleMoveExperience(index, 'down')}
                           disabled={isLast}
-                          title="Move milestone down"
-                          className="p-1.5 rounded-lg border border-border/60 hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:pointer-events-none transition-all"
+                          title={isAr ? 'تحريك لأسفل' : 'Move down'}
+                          className="p-1.5 rounded-lg border border-border/60 hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer"
                         >
                           <ChevronDown size={16} />
                         </button>
                         <button
                           type="button"
                           onClick={() => handleDeleteExperience(exp.id)}
-                          title="Delete milestone"
-                          className="p-1.5 rounded-lg border border-destructive/20 hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all ml-1"
+                          title={isAr ? 'حذف المحطة' : 'Delete milestone'}
+                          className="p-1.5 rounded-lg border border-destructive/20 hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all ml-1 cursor-pointer"
                         >
                           <Trash2 size={16} />
                         </button>
@@ -758,22 +761,22 @@ const AdminExperience = () => {
           <div className="flex flex-wrap items-center justify-between gap-3 p-4 bg-card/60 backdrop-blur-md rounded-2xl border border-border/80">
             <div>
               <div className="text-xs font-mono font-semibold text-muted-foreground uppercase tracking-wider">
-                Certifications & Industry Licenses
+                {isAr ? 'الشهادات والمؤهلات المهنية' : 'Certifications & Industry Licenses'}
               </div>
               <p className="text-xs text-muted-foreground mt-0.5">
-                These render in the horizontal swipeable cards section underneath the timeline.
+                {isAr ? 'تظهر هذه البطاقات في شريط التمرير الأفقي أسفل الخط الزمني بالصفحة الرئيسية.' : 'These render in the horizontal swipeable cards section underneath the timeline.'}
               </p>
             </div>
-            <Button onClick={handleAddCertificate} className="gap-2">
-              <Plus size={16} /> Add Certificate Card
+            <Button onClick={handleAddCertificate} className="gap-2 cursor-pointer">
+              <Plus size={16} /> {isAr ? 'إضافة بطاقة شهادة' : 'Add Certificate Card'}
             </Button>
           </div>
 
           {certificates.length === 0 ? (
             <div className="bg-card border border-dashed border-border rounded-2xl p-16 text-center text-muted-foreground">
               <Award size={40} className="mx-auto mb-3 text-muted-foreground/50" />
-              <p className="font-semibold text-base">No certificates published yet</p>
-              <p className="text-xs text-muted-foreground mt-1">Add recognized certifications from AWS, Google, Meta, Scrum, etc.</p>
+              <p className="font-semibold text-base">{isAr ? 'لا توجد شهادات منشورة بعد' : 'No certificates published yet'}</p>
+              <p className="text-xs text-muted-foreground mt-1">{isAr ? 'أضف شهاداتك المعتمدة من AWS، جوجل، ميتا، إلخ.' : 'Add recognized certifications from AWS, Google, Meta, Scrum, etc.'}</p>
             </div>
           ) : (
             <div className="grid md:grid-cols-2 gap-5">

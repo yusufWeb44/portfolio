@@ -8,12 +8,12 @@ import {
   Terminal, 
   Wrench,
   ArrowUpRight,
-  Clock,
   Eye,
   EyeOff
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface Stats {
   projects: { total: number; published: number; draft: number };
@@ -25,6 +25,8 @@ interface Stats {
 }
 
 const Dashboard = () => {
+  const { currentLang, currentDirection } = useLanguage();
+  const isAr = currentLang === 'ar';
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -69,23 +71,23 @@ const Dashboard = () => {
 
   const statCards = stats ? [
     {
-      title: 'Projects',
+      title: isAr ? 'المشاريع' : 'Projects',
       value: stats.projects.total,
       icon: <FolderKanban className="text-muted-foreground" size={20} />,
       link: '/admin/projects',
       details: (
         <div className="flex items-center gap-4 text-xs mt-4 pt-4 border-t border-border">
           <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
-            <Eye size={14} /> {stats.projects.published} Published
+            <Eye size={14} /> {stats.projects.published} {isAr ? 'منشورة' : 'Published'}
           </span>
           <span className="flex items-center gap-1 text-yellow-600 dark:text-yellow-400">
-            <EyeOff size={14} /> {stats.projects.draft} Drafts
+            <EyeOff size={14} /> {stats.projects.draft} {isAr ? 'مسودات' : 'Drafts'}
           </span>
         </div>
       )
     },
     {
-      title: 'Messages',
+      title: isAr ? 'الرسائل' : 'Messages',
       value: stats.messages.total,
       icon: <MessageSquare className="text-muted-foreground" size={20} />,
       link: '/admin/messages',
@@ -93,50 +95,46 @@ const Dashboard = () => {
         <div className="flex items-center gap-4 text-xs mt-4 pt-4 border-t border-border">
           <span className={stats.messages.unread > 0 ? "flex items-center gap-1 text-blue-600 dark:text-blue-400 font-bold" : "flex items-center gap-1 text-muted-foreground"}>
             <div className={`w-2 h-2 rounded-full ${stats.messages.unread > 0 ? 'bg-blue-500 animate-pulse' : 'bg-muted-foreground'}`}></div>
-            {stats.messages.unread} Unread
+            {stats.messages.unread} {isAr ? 'غير مقروءة' : 'Unread'}
           </span>
         </div>
       )
     },
     {
-      title: 'Experience & Certs',
+      title: isAr ? 'الخبرات والشهادات' : 'Experience & Certs',
       value: stats.experience + stats.certificates,
       icon: <Briefcase className="text-muted-foreground" size={20} />,
       link: '/admin/experience',
       details: (
-        <div className="flex items-center gap-3 text-xs mt-4 pt-4 border-t border-border text-muted-foreground">
-          <span className="flex items-center gap-1">
-            <Clock size={14} /> {stats.experience} Milestones
-          </span>
+        <div className="flex items-center gap-4 text-xs mt-4 pt-4 border-t border-border text-muted-foreground">
+          <span>{stats.experience} {isAr ? 'محطة' : 'Milestones'}</span>
           <span>•</span>
-          <span className="flex items-center gap-1">
-            {stats.certificates} Certificates
-          </span>
+          <span>{stats.certificates} {isAr ? 'شهادة' : 'Certificates'}</span>
         </div>
       )
     },
     {
-      title: 'Skills',
+      title: isAr ? 'المهارات والتقنيات' : 'Skills',
       value: stats.skills,
       icon: <Terminal className="text-muted-foreground" size={20} />,
       link: '/admin/skills',
       details: (
         <div className="flex items-center gap-4 text-xs mt-4 pt-4 border-t border-border text-muted-foreground">
           <span className="flex items-center gap-1">
-            Tracked technologies
+            {isAr ? 'تقنية مسجلة' : 'Tracked technologies'}
           </span>
         </div>
       )
     },
     {
-      title: 'Services',
+      title: isAr ? 'الخدمات' : 'Services',
       value: stats.services,
       icon: <Wrench className="text-muted-foreground" size={20} />,
       link: '/admin/services',
       details: (
         <div className="flex items-center gap-4 text-xs mt-4 pt-4 border-t border-border text-muted-foreground">
           <span className="flex items-center gap-1">
-            Service offerings
+            {isAr ? 'خدمات معروضة' : 'Service offerings'}
           </span>
         </div>
       )
@@ -144,14 +142,18 @@ const Dashboard = () => {
   ] : [];
 
   return (
-    <div>
+    <div dir={currentDirection}>
       <Helmet>
-        <title>Overview | Admin Dashboard</title>
+        <title>{isAr ? 'نظرة عامة | لوحة الإدارة' : 'Overview | Admin Dashboard'}</title>
       </Helmet>
 
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight mb-2">Overview</h1>
-        <p className="text-muted-foreground">Welcome back to your portfolio command center.</p>
+        <h1 className="text-3xl font-bold tracking-tight mb-2">
+          {isAr ? 'نظرة عامة' : 'Overview'}
+        </h1>
+        <p className="text-muted-foreground">
+          {isAr ? 'مرحباً بك مجدداً في مركز القيادة وإدارة محتوى البورتفوليو.' : 'Welcome back to your portfolio command center.'}
+        </p>
       </div>
 
       {loading ? (
@@ -192,7 +194,6 @@ const Dashboard = () => {
                 <span className="sr-only">Go to {card.title}</span>
               </Link>
               
-              {/* Subtle hover indicator */}
               <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0 duration-300">
                 <ArrowUpRight size={16} className="text-muted-foreground" />
               </div>
@@ -201,19 +202,21 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* Placeholder for recent activity or quick actions */}
+      {/* Quick actions */}
       <div className="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 bg-card border border-border rounded-xl p-6">
-          <h2 className="text-lg font-bold tracking-tight mb-4">Quick Actions</h2>
+          <h2 className="text-lg font-bold tracking-tight mb-4">
+            {isAr ? 'إجراءات سريعة' : 'Quick Actions'}
+          </h2>
           <div className="flex flex-wrap gap-4">
             <Link to="/admin/projects" className="inline-flex items-center justify-center h-10 px-4 rounded-md bg-foreground text-background text-sm font-medium hover:opacity-90 transition-opacity">
-              + New Project
+              {isAr ? '+ إضافة مشروع جديد' : '+ New Project'}
             </Link>
             <Link to="/admin/hero" className="inline-flex items-center justify-center h-10 px-4 rounded-md border border-border bg-background text-foreground text-sm font-medium hover:bg-muted transition-colors">
-              Hero & Stats
+              {isAr ? 'قسم الواجهة والإحصائيات' : 'Hero & Stats'}
             </Link>
             <Link to="/admin/settings" className="inline-flex items-center justify-center h-10 px-4 rounded-md border border-border bg-background text-foreground text-sm font-medium hover:bg-muted transition-colors">
-              General Settings
+              {isAr ? 'الإعدادات العامة والمظهر' : 'General Settings'}
             </Link>
           </div>
         </div>

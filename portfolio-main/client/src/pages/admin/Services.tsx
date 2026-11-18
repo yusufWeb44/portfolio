@@ -6,6 +6,7 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Textarea } from '../../components/ui/Textarea';
 import { getServiceIcon } from '../../components/sections/ServicesSection';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface Service {
   id: string;
@@ -17,6 +18,8 @@ interface Service {
 }
 
 const Services = () => {
+  const { currentLang, currentDirection } = useLanguage();
+  const isAr = currentLang === 'ar';
   const [services, setServices] = useState<Service[]>([]);
   const [sectionSettings, setSectionSettings] = useState({
     servicesBadge: 'Consulting & Offerings',
@@ -52,9 +55,9 @@ const Services = () => {
     setSavingSettings(true);
     try {
       await api.put('/settings', sectionSettings);
-      showToast("Services section headings updated successfully!");
+      showToast(isAr ? 'تم حفظ عناوين قسم الخدمات بنجاح!' : 'Services section headings updated successfully!');
     } catch {
-      showToast("Failed to update services headings", "error");
+      showToast(isAr ? 'فشل حفظ عناوين الخدمات' : 'Failed to update services headings', 'error');
     } finally {
       setSavingSettings(false);
     }
@@ -65,7 +68,7 @@ const Services = () => {
       const res = await api.get('/services');
       setServices(res.data.data || []);
     } catch {
-      showToast("Failed to fetch services", "error");
+      showToast(isAr ? 'فشل جلب الخدمات' : 'Failed to fetch services', 'error');
     } finally {
       setLoading(false);
     }
@@ -80,14 +83,16 @@ const Services = () => {
     try {
       const newService = { 
         title: 'Full-Stack Web Development', 
+        titleAr: 'تطوير تطبيقات الويب المتكاملة',
         description: 'Custom scalable web applications built with modern frontend frameworks and robust backend architectures.', 
+        descriptionAr: 'تطبيقات ويب قابلة للتوسع مبنية بأحدث أطر عمل الواجهات الأمامية ومعماريات خوادم متينة.',
         isEnabled: true 
       };
       const res = await api.post('/services', newService);
       setServices([...services, res.data.data]);
-      showToast("Service added successfully");
+      showToast(isAr ? 'تمت إضافة الخدمة بنجاح' : 'Service added successfully');
     } catch (error) {
-      showToast("Failed to add service", "error");
+      showToast(isAr ? 'فشل إضافة الخدمة' : 'Failed to add service', 'error');
     }
   };
 
@@ -99,28 +104,28 @@ const Services = () => {
     setSavingId(service.id);
     try {
       await api.put(`/services/${service.id}`, service);
-      showToast("Service saved successfully");
+      showToast(isAr ? 'تم حفظ الخدمة بنجاح' : 'Service saved successfully');
     } catch (error) {
-      showToast("Failed to save service", "error");
+      showToast(isAr ? 'فشل حفظ الخدمة' : 'Failed to save service', 'error');
     } finally {
       setSavingId(null);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm("Delete this service?")) return;
+    if (!window.confirm(isAr ? 'هل أنت متأكد من حذف هذه الخدمة؟' : 'Delete this service?')) return;
     try {
       await api.delete(`/services/${id}`);
       setServices(services.filter(s => s.id !== id));
-      showToast("Service removed");
+      showToast(isAr ? 'تم حذف الخدمة' : 'Service removed');
     } catch (error) {
-      showToast("Failed to remove service", "error");
+      showToast(isAr ? 'فشل حذف الخدمة' : 'Failed to remove service', 'error');
     }
   };
 
   return (
-    <div className="relative min-h-[80vh] pb-16">
-      <Helmet><title>Services | Admin</title></Helmet>
+    <div className="relative min-h-[80vh] pb-16" dir={currentDirection}>
+      <Helmet><title>{isAr ? 'الخدمات والاستشارات | لوحة الإدارة' : 'Services | Admin'}</title></Helmet>
 
       {toast && (
         <div className={`fixed bottom-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg border flex items-center gap-2 animate-in slide-in-from-bottom-5 ${toast.type === 'success' ? 'bg-card border-green-500/50 text-foreground' : 'bg-destructive text-destructive-foreground'}`}>
@@ -131,13 +136,17 @@ const Services = () => {
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Services &amp; Offerings</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            {isAr ? 'الخدمات والاستشارات البرمجية' : 'Services & Offerings'}
+          </h1>
           <p className="text-muted-foreground text-sm mt-1">
-            Control the services displayed in the horizontal interactive carousel on your portfolio.
+            {isAr 
+              ? 'التحكم بالخدمات المعروضة في شريط التمرير التفاعلي بالبورتفوليو.' 
+              : 'Control the services displayed in the horizontal interactive carousel on your portfolio.'}
           </p>
         </div>
-        <Button onClick={handleAdd} className="gap-2 bg-emerald-600 hover:bg-emerald-500 text-white">
-          <Plus size={16} /> Add Service
+        <Button onClick={handleAdd} className="gap-2 bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer">
+          <Plus size={16} /> {isAr ? 'إضافة خدمة' : 'Add Service'}
         </Button>
       </div>
 
@@ -146,25 +155,27 @@ const Services = () => {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-border/60 pb-4">
           <div>
             <h2 className="text-lg font-bold text-foreground">
-              Services Section Headings &amp; Subtitle
+              {isAr ? 'عناوين ووصف قسم الخدمات' : 'Services Section Headings & Subtitle'}
             </h2>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Edit the badge, main heading, and subtitle shown at the top of the Services section.
+              {isAr 
+                ? 'تعديل الشارة، العنوان الرئيسي، والوصف المعروض أعلى قسم الخدمات بالصفحة الرئيسية.' 
+                : 'Edit the badge, main heading, and subtitle shown at the top of the Services section.'}
             </p>
           </div>
           <Button 
             onClick={handleSaveSectionSettings} 
             disabled={savingSettings}
-            className="gap-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs h-9 px-4 shrink-0"
+            className="gap-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs h-9 px-4 shrink-0 cursor-pointer"
           >
             {savingSettings ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
-            Save Section Text
+            {isAr ? 'حفظ نصوص السكشن' : 'Save Section Text'}
           </Button>
         </div>
 
         <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-semibold text-muted-foreground block mb-1">Badge Text (EN)</label>
+            <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'شارة القسم (EN)' : 'Badge Text (EN)'}</label>
             <Input 
               value={sectionSettings.servicesBadge} 
               onChange={e => setSectionSettings({ ...sectionSettings, servicesBadge: e.target.value })}
@@ -172,7 +183,7 @@ const Services = () => {
             />
           </div>
           <div>
-            <label className="text-xs font-semibold text-muted-foreground block mb-1">شارة القسم (عربي)</label>
+            <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'شارة القسم (AR)' : 'Section Badge (AR)'}</label>
             <Input 
               value={sectionSettings.servicesBadgeAr} 
               onChange={e => setSectionSettings({ ...sectionSettings, servicesBadgeAr: e.target.value })}
@@ -184,7 +195,7 @@ const Services = () => {
 
         <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-semibold text-muted-foreground block mb-1">Main Heading (EN)</label>
+            <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'العنوان الرئيسي (EN)' : 'Main Heading (EN)'}</label>
             <Input 
               value={sectionSettings.servicesTitle} 
               onChange={e => setSectionSettings({ ...sectionSettings, servicesTitle: e.target.value })}
@@ -192,7 +203,7 @@ const Services = () => {
             />
           </div>
           <div>
-            <label className="text-xs font-semibold text-muted-foreground block mb-1">العنوان الرئيسي (عربي)</label>
+            <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'العنوان الرئيسي (AR)' : 'Main Heading (AR)'}</label>
             <Input 
               value={sectionSettings.servicesTitleAr} 
               onChange={e => setSectionSettings({ ...sectionSettings, servicesTitleAr: e.target.value })}
@@ -204,7 +215,7 @@ const Services = () => {
 
         <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-semibold text-muted-foreground block mb-1">Subtitle / Description (EN)</label>
+            <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'الوصف التوضيحي (EN)' : 'Subtitle / Description (EN)'}</label>
             <Input 
               value={sectionSettings.servicesSubtitle} 
               onChange={e => setSectionSettings({ ...sectionSettings, servicesSubtitle: e.target.value })}
@@ -212,7 +223,7 @@ const Services = () => {
             />
           </div>
           <div>
-            <label className="text-xs font-semibold text-muted-foreground block mb-1">الوصف التوضيحي (عربي)</label>
+            <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'الوصف التوضيحي (AR)' : 'Subtitle / Description (AR)'}</label>
             <Input 
               value={sectionSettings.servicesSubtitleAr} 
               onChange={e => setSectionSettings({ ...sectionSettings, servicesSubtitleAr: e.target.value })}
@@ -231,10 +242,10 @@ const Services = () => {
         <div className="grid gap-6">
           {services.length === 0 ? (
             <div className="bg-card border border-border border-dashed rounded-xl p-12 text-center text-muted-foreground">
-              <p className="text-base font-semibold mb-2">No services added yet</p>
-              <p className="text-sm mb-4">Add your first service to show in the carousel.</p>
-              <Button onClick={handleAdd} variant="outline" className="gap-2">
-                <Plus size={15} /> Add First Service
+              <p className="text-base font-semibold mb-2">{isAr ? 'لم تتم إضافة أي خدمات بعد' : 'No services added yet'}</p>
+              <p className="text-sm mb-4">{isAr ? 'أضف أول خدمة برمجية لعرضها في شريط الخدمات.' : 'Add your first service to show in the carousel.'}</p>
+              <Button onClick={handleAdd} variant="outline" className="gap-2 cursor-pointer">
+                <Plus size={15} /> {isAr ? 'إضافة أول خدمة' : 'Add First Service'}
               </Button>
             </div>
           ) : (
@@ -257,14 +268,14 @@ const Services = () => {
                       <div>
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-mono font-bold text-emerald-500 uppercase">
-                            Service #{String(index + 1).padStart(2, '0')}
+                            {isAr ? `الخدمة #${String(index + 1).padStart(2, '0')}` : `Service #${String(index + 1).padStart(2, '0')}`}
                           </span>
                           <span className={`text-[11px] font-mono px-2 py-0.5 rounded-full ${service.isEnabled ? 'bg-emerald-500/10 text-emerald-400' : 'bg-muted text-muted-foreground'}`}>
-                            {service.isEnabled ? 'Active' : 'Disabled'}
+                            {service.isEnabled ? (isAr ? 'نشط' : 'Active') : (isAr ? 'معطل' : 'Disabled')}
                           </span>
                         </div>
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          Icon automatically selected based on service title
+                          {isAr ? 'يتم تحديد الأيقونة تلقائياً بحسب عنوان الخدمة' : 'Icon automatically selected based on service title'}
                         </p>
                       </div>
                     </div>
@@ -272,8 +283,8 @@ const Services = () => {
                     {/* Delete button */}
                     <button 
                       onClick={() => handleDelete(service.id)}
-                      className="text-muted-foreground hover:text-destructive p-2 rounded-lg hover:bg-destructive/10 transition-colors ml-auto"
-                      title="Delete service"
+                      className="text-muted-foreground hover:text-destructive p-2 rounded-lg hover:bg-destructive/10 transition-colors ml-auto cursor-pointer"
+                      title={isAr ? 'حذف الخدمة' : 'Delete service'}
                     >
                       <Trash2 size={16} />
                     </button>
@@ -284,7 +295,7 @@ const Services = () => {
                     <div className="grid md:grid-cols-2 gap-4">
                       <div className="space-y-1.5">
                         <label className="text-xs font-mono font-bold uppercase tracking-wider text-muted-foreground">
-                          Service Title (English)
+                          {isAr ? 'عنوان الخدمة (بالإنجليزية)' : 'Service Title (English)'}
                         </label>
                         <Input 
                           value={service.title} 
@@ -295,7 +306,7 @@ const Services = () => {
                       </div>
                       <div className="space-y-1.5">
                         <label className="text-xs font-mono font-bold uppercase tracking-wider text-muted-foreground">
-                          عنوان الخدمة (بالعربية)
+                          {isAr ? 'عنوان الخدمة (بالعربية)' : 'Service Title (Arabic)'}
                         </label>
                         <Input 
                           value={service.titleAr || ''} 
@@ -310,7 +321,7 @@ const Services = () => {
                     <div className="grid md:grid-cols-2 gap-4">
                       <div className="space-y-1.5">
                         <label className="text-xs font-mono font-bold uppercase tracking-wider text-muted-foreground">
-                          Description (English)
+                          {isAr ? 'شرح وتفاصيل الخدمة (بالإنجليزية)' : 'Description (English)'}
                         </label>
                         <Textarea 
                           value={service.description} 
@@ -321,7 +332,7 @@ const Services = () => {
                       </div>
                       <div className="space-y-1.5">
                         <label className="text-xs font-mono font-bold uppercase tracking-wider text-muted-foreground">
-                          شرح وتفاصيل الخدمة (بالعربية)
+                          {isAr ? 'شرح وتفاصيل الخدمة (بالعربية)' : 'Description (Arabic)'}
                         </label>
                         <Textarea 
                           value={service.descriptionAr || ''} 
@@ -341,16 +352,16 @@ const Services = () => {
                           onChange={e => handleFieldChange(service.id, 'isEnabled', e.target.checked)}
                           className="rounded border-border text-foreground focus:ring-foreground accent-emerald-500 w-4 h-4 cursor-pointer"
                         />
-                        <span>Show on portfolio (تفعيل الخدمة)</span>
+                        <span>{isAr ? 'تفعيل وعرض في البورتفوليو' : 'Show on portfolio'}</span>
                       </label>
 
                       <Button 
                         onClick={() => handleSaveService(service)}
                         disabled={isSaving}
-                        className="gap-2 text-xs h-9 px-4"
+                        className="gap-2 text-xs h-9 px-4 cursor-pointer"
                       >
                         {isSaving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
-                        <span>{isSaving ? 'Saving...' : 'Save Changes'}</span>
+                        <span>{isSaving ? (isAr ? 'جاري الحفظ...' : 'Saving...') : (isAr ? 'حفظ التغييرات' : 'Save Changes')}</span>
                       </Button>
                     </div>
                   </div>

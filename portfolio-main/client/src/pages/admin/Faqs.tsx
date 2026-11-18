@@ -8,6 +8,7 @@ import api from '../../services/api';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Textarea } from '../../components/ui/Textarea';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface FaqItem {
   id: string;
@@ -29,6 +30,8 @@ const CATEGORY_MAP: Record<string, string> = {
 };
 
 const AdminFaqs = () => {
+  const { currentLang, currentDirection } = useLanguage();
+  const isAr = currentLang === 'ar';
   const [faqs, setFaqs] = useState<FaqItem[]>([]);
   const [sectionSettings, setSectionSettings] = useState({
     faqBadge: 'Got a question?',
@@ -212,8 +215,8 @@ const AdminFaqs = () => {
   });
 
   return (
-    <div className="relative min-h-[80vh] pb-20">
-      <Helmet><title>FAQs Management | Admin</title></Helmet>
+    <div className="relative min-h-[80vh] pb-20" dir={currentDirection}>
+      <Helmet><title>{isAr ? 'الأسئلة الشائعة | لوحة الإدارة' : 'FAQs Management | Admin'}</title></Helmet>
 
       {toast && (
         <div className={`fixed bottom-5 right-5 z-50 px-4 py-3 rounded-lg shadow-xl border flex items-center gap-2 animate-in slide-in-from-bottom-5 ${
@@ -227,19 +230,23 @@ const AdminFaqs = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">FAQ Questions &amp; Answers</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            {isAr ? 'الأسئلة الشائعة والإجابات' : 'FAQ Questions & Answers'}
+          </h1>
           <p className="text-muted-foreground text-sm mt-1">
-            Manage questions, answers, and categories displayed in the interactive FAQ tabs on your site.
+            {isAr 
+              ? 'إدارة الأسئلة والإجابات وتصنيفاتها المعروضة في تبويبات الأسئلة الشائعة على الموقع.' 
+              : 'Manage questions, answers, and categories displayed in the interactive FAQ tabs on your site.'}
           </p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" onClick={fetchFaqs} disabled={loading}>
+          <Button variant="outline" onClick={fetchFaqs} disabled={loading} className="cursor-pointer">
             <RefreshCw size={16} className={`mr-1.5 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
+            {isAr ? 'تحديث' : 'Refresh'}
           </Button>
-          <Button onClick={openCreateModal}>
+          <Button onClick={openCreateModal} className="cursor-pointer">
             <Plus size={16} className="mr-1.5" />
-            Add Question
+            {isAr ? 'إضافة سؤال' : 'Add Question'}
           </Button>
         </div>
       </div>
@@ -250,25 +257,27 @@ const AdminFaqs = () => {
           <div>
             <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
               <MessageCircleQuestion size={18} className="text-emerald-400" />
-              FAQ Section Headings &amp; Subtitle
+              {isAr ? 'عناوين ووصف قسم الأسئلة الشائعة' : 'FAQ Section Headings & Subtitle'}
             </h2>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Edit the badge, main heading, and subtitle shown at the top of the FAQ section on the public site.
+              {isAr 
+                ? 'تعديل الشارة، العنوان الرئيسي، والوصف المعروض أعلى قسم الأسئلة بالصفحة الرئيسية.' 
+                : 'Edit the badge, main heading, and subtitle shown at the top of the FAQ section on the public site.'}
             </p>
           </div>
           <Button 
             onClick={handleSaveSectionSettings} 
             disabled={savingSettings}
-            className="gap-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs h-9 px-4 shrink-0"
+            className="gap-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs h-9 px-4 shrink-0 cursor-pointer"
           >
             {savingSettings ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
-            Save Section Text
+            {isAr ? 'حفظ نصوص السكشن' : 'Save Section Text'}
           </Button>
         </div>
 
         <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-semibold text-muted-foreground block mb-1">Badge Text (EN)</label>
+            <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'شارة القسم (EN)' : 'Badge Text (EN)'}</label>
             <Input 
               value={sectionSettings.faqBadge} 
               onChange={e => setSectionSettings({ ...sectionSettings, faqBadge: e.target.value })}
@@ -276,7 +285,7 @@ const AdminFaqs = () => {
             />
           </div>
           <div>
-            <label className="text-xs font-semibold text-muted-foreground block mb-1">شارة القسم (عربي)</label>
+            <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'شارة القسم (AR)' : 'Section Badge (AR)'}</label>
             <Input 
               value={sectionSettings.faqBadgeAr} 
               onChange={e => setSectionSettings({ ...sectionSettings, faqBadgeAr: e.target.value })}
@@ -288,7 +297,7 @@ const AdminFaqs = () => {
 
         <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-semibold text-muted-foreground block mb-1">Main Heading (EN)</label>
+            <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'العنوان الرئيسي (EN)' : 'Main Heading (EN)'}</label>
             <Input 
               value={sectionSettings.faqTitle} 
               onChange={e => setSectionSettings({ ...sectionSettings, faqTitle: e.target.value })}
@@ -296,7 +305,7 @@ const AdminFaqs = () => {
             />
           </div>
           <div>
-            <label className="text-xs font-semibold text-muted-foreground block mb-1">العنوان الرئيسي (عربي)</label>
+            <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'العنوان الرئيسي (AR)' : 'Main Heading (AR)'}</label>
             <Input 
               value={sectionSettings.faqTitleAr} 
               onChange={e => setSectionSettings({ ...sectionSettings, faqTitleAr: e.target.value })}
@@ -308,7 +317,7 @@ const AdminFaqs = () => {
 
         <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-semibold text-muted-foreground block mb-1">Subtitle / Description (EN)</label>
+            <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'الوصف التوضيحي (EN)' : 'Subtitle / Description (EN)'}</label>
             <Input 
               value={sectionSettings.faqSubtitle} 
               onChange={e => setSectionSettings({ ...sectionSettings, faqSubtitle: e.target.value })}
@@ -316,7 +325,7 @@ const AdminFaqs = () => {
             />
           </div>
           <div>
-            <label className="text-xs font-semibold text-muted-foreground block mb-1">الوصف التوضيحي (عربي)</label>
+            <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'الوصف التوضيحي (AR)' : 'Subtitle / Description (AR)'}</label>
             <Input 
               value={sectionSettings.faqSubtitleAr} 
               onChange={e => setSectionSettings({ ...sectionSettings, faqSubtitleAr: e.target.value })}
@@ -333,19 +342,19 @@ const AdminFaqs = () => {
         <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-none">
           <button
             onClick={() => setSelectedCategory('all')}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
+            className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors cursor-pointer ${
               selectedCategory === 'all'
                 ? 'bg-foreground text-background font-bold'
                 : 'bg-muted text-muted-foreground hover:text-foreground'
             }`}
           >
-            All ({faqs.length})
+            {isAr ? `الكل (${faqs.length})` : `All (${faqs.length})`}
           </button>
           {allCategories.map(cat => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
+              className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors cursor-pointer ${
                 selectedCategory === cat
                   ? 'bg-foreground text-background font-bold'
                   : 'bg-muted text-muted-foreground hover:text-foreground'
@@ -362,7 +371,7 @@ const AdminFaqs = () => {
           <Input
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Search FAQs..."
+            placeholder={isAr ? 'البحث في الأسئلة...' : 'Search FAQs...'}
             className="pl-9 h-9 text-xs"
           />
         </div>
@@ -376,12 +385,14 @@ const AdminFaqs = () => {
       ) : filteredFaqs.length === 0 ? (
         <div className="p-12 text-center rounded-xl border border-dashed border-border bg-card/40">
           <HelpCircle className="w-10 h-10 mx-auto text-muted-foreground mb-3 opacity-50" />
-          <h3 className="text-lg font-semibold">No questions found</h3>
+          <h3 className="text-lg font-semibold">{isAr ? 'لم يتم العثور على أي أسئلة' : 'No questions found'}</h3>
           <p className="text-muted-foreground text-sm mt-1 mb-4">
-            {searchQuery ? 'Try changing your search keyword' : 'Add common questions to help prospective clients'}
+            {searchQuery 
+              ? (isAr ? 'جرب تغيير كلمة البحث' : 'Try changing your search keyword') 
+              : (isAr ? 'أضف الأسئلة الشائعة لمساعدة العملاء المحتملين' : 'Add common questions to help prospective clients')}
           </p>
-          <Button onClick={openCreateModal}>
-            <Plus size={14} className="mr-1.5" /> Add First Question
+          <Button onClick={openCreateModal} className="cursor-pointer">
+            <Plus size={14} className="mr-1.5" /> {isAr ? 'إضافة أول سؤال' : 'Add First Question'}
           </Button>
         </div>
       ) : (
@@ -400,7 +411,7 @@ const AdminFaqs = () => {
                   </span>
                   {!faq.isEnabled && (
                     <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-muted text-muted-foreground">
-                      Hidden
+                      {isAr ? 'مخفي' : 'Hidden'}
                     </span>
                   )}
                 </div>
@@ -425,7 +436,8 @@ const AdminFaqs = () => {
                   variant="ghost"
                   size="icon"
                   onClick={() => handleToggleActive(faq)}
-                  title={faq.isEnabled ? 'Hide FAQ' : 'Show FAQ'}
+                  title={faq.isEnabled ? (isAr ? 'إخفاء السؤال' : 'Hide FAQ') : (isAr ? 'إظهار السؤال' : 'Show FAQ')}
+                  className="cursor-pointer"
                 >
                   {faq.isEnabled ? <Eye size={16} className="text-emerald-500" /> : <EyeOff size={16} className="text-muted-foreground" />}
                 </Button>
@@ -433,14 +445,16 @@ const AdminFaqs = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => openEditModal(faq)}
+                  className="cursor-pointer"
                 >
-                  <Edit2 size={14} className="mr-1" /> Edit
+                  <Edit2 size={14} className="mr-1" /> {isAr ? 'تعديل' : 'Edit'}
                 </Button>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="text-destructive hover:bg-destructive/10"
+                  className="text-destructive hover:bg-destructive/10 cursor-pointer"
                   onClick={() => handleDelete(faq.id)}
+                  title={isAr ? 'حذف السؤال' : 'Delete FAQ'}
                 >
                   <Trash2 size={16} />
                 </Button>
@@ -457,11 +471,11 @@ const AdminFaqs = () => {
             <div className="flex justify-between items-center pb-3 border-b border-border">
               <h2 className="text-lg font-bold flex items-center gap-2">
                 <MessageCircleQuestion className="w-5 h-5 text-primary" />
-                {editingFaq ? 'Edit FAQ' : 'Add New FAQ'}
+                {editingFaq ? (isAr ? 'تعديل السؤال الشائع' : 'Edit FAQ') : (isAr ? 'إضافة سؤال شائع جديد' : 'Add New FAQ')}
               </h2>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="text-muted-foreground hover:text-foreground text-sm"
+                className="text-muted-foreground hover:text-foreground text-sm cursor-pointer"
               >
                 ✕
               </button>
@@ -469,27 +483,31 @@ const AdminFaqs = () => {
 
             <form onSubmit={handleSaveFaq} className="space-y-4">
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">Category</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                  {isAr ? 'التصنيف' : 'Category'}
+                </label>
                 <select
                   value={formData.category}
                   onChange={e => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+                  className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm cursor-pointer"
                 >
-                  <option value="services">Services &amp; Scope (الخدمات والنطاق)</option>
-                  <option value="process">Process &amp; Timeline (منهجية العمل والوقت)</option>
-                  <option value="tech">Tech Stack (التقنيات والتطوير)</option>
-                  <option value="collab">Working Together (التعاون والتواصل)</option>
-                  <option value="other">Custom Category...</option>
+                  <option value="services">{isAr ? 'الخدمات والنطاق (Services & Scope)' : 'Services & Scope'}</option>
+                  <option value="process">{isAr ? 'منهجية العمل والوقت (Process & Timeline)' : 'Process & Timeline'}</option>
+                  <option value="tech">{isAr ? 'التقنيات والتطوير (Tech Stack)' : 'Tech Stack'}</option>
+                  <option value="collab">{isAr ? 'التعاون والتواصل (Working Together)' : 'Working Together'}</option>
+                  <option value="other">{isAr ? 'تصنيف مخصص...' : 'Custom Category...'}</option>
                 </select>
               </div>
 
               {formData.category === 'other' && (
                 <div>
-                  <label className="text-xs font-semibold text-muted-foreground block mb-1">Custom Category Name</label>
+                  <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                    {isAr ? 'اسم التصنيف المخصص' : 'Custom Category Name'}
+                  </label>
                   <Input
                     value={formData.customCategory}
                     onChange={e => setFormData({ ...formData, customCategory: e.target.value })}
-                    placeholder="e.g. pricing, deployment..."
+                    placeholder={isAr ? 'مثال: الأسعار، النشر السحابي...' : 'e.g. pricing, deployment...'}
                     required
                   />
                 </div>
@@ -497,7 +515,7 @@ const AdminFaqs = () => {
 
               <div className="space-y-3">
                 <div>
-                  <label className="text-xs font-semibold text-muted-foreground block mb-1">Question (EN)</label>
+                  <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'السؤال (بالإنجليزية)' : 'Question (EN)'}</label>
                   <Input
                     value={formData.question}
                     onChange={e => setFormData({ ...formData, question: e.target.value })}
@@ -506,7 +524,7 @@ const AdminFaqs = () => {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-muted-foreground block mb-1">السؤال (بالعربي)</label>
+                  <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'السؤال (بالعربية)' : 'Question (AR)'}</label>
                   <Input
                     value={formData.questionAr}
                     onChange={e => setFormData({ ...formData, questionAr: e.target.value })}
@@ -518,7 +536,7 @@ const AdminFaqs = () => {
 
               <div className="space-y-3">
                 <div>
-                  <label className="text-xs font-semibold text-muted-foreground block mb-1">Answer (EN)</label>
+                  <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'الإجابة (بالإنجليزية)' : 'Answer (EN)'}</label>
                   <Textarea
                     value={formData.answer}
                     onChange={e => setFormData({ ...formData, answer: e.target.value })}
@@ -528,7 +546,7 @@ const AdminFaqs = () => {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-muted-foreground block mb-1">الإجابة والتوضيح (بالعربي)</label>
+                  <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'الإجابة (بالعربية)' : 'Answer (AR)'}</label>
                   <Textarea
                     value={formData.answerAr}
                     onChange={e => setFormData({ ...formData, answerAr: e.target.value })}
@@ -540,12 +558,12 @@ const AdminFaqs = () => {
               </div>
 
               <div className="flex justify-end gap-3 pt-4 border-t border-border">
-                <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>
-                  Cancel
+                <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} className="cursor-pointer">
+                  {isAr ? 'إلغاء' : 'Cancel'}
                 </Button>
-                <Button type="submit" disabled={saving}>
+                <Button type="submit" disabled={saving} className="cursor-pointer">
                   {saving ? <Loader2 size={16} className="animate-spin mr-1.5" /> : <Check size={16} className="mr-1.5" />}
-                  {editingFaq ? 'Save Changes' : 'Create FAQ'}
+                  {editingFaq ? (isAr ? 'حفظ التعديلات' : 'Save Changes') : (isAr ? 'إضافة السؤال' : 'Create FAQ')}
                 </Button>
               </div>
             </form>

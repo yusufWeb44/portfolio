@@ -10,6 +10,7 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Textarea } from '../../components/ui/Textarea';
 import { resolveImageUrl } from '../../utils/mediaUrl';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 export interface StatItem {
   id: string;
@@ -58,6 +59,8 @@ const parseListToInput = (val: any): string => {
 };
 
 const AdminHero = () => {
+  const { currentLang, currentDirection } = useLanguage();
+  const isAr = currentLang === 'ar';
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
@@ -303,9 +306,9 @@ const AdminHero = () => {
   }
 
   return (
-    <div className="relative min-h-screen pb-24">
+    <div className="relative min-h-screen pb-24" dir={currentDirection}>
       <Helmet>
-        <title>Hero Section & Statistics | Admin Dashboard</title>
+        <title>{isAr ? 'قسم الواجهة والإحصائيات | لوحة الإدارة' : 'Hero Section & Statistics | Admin Dashboard'}</title>
       </Helmet>
 
       {/* Floating Toast */}
@@ -325,21 +328,25 @@ const AdminHero = () => {
             <span className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
               <Sparkles size={20} />
             </span>
-            <h1 className="text-3xl font-bold tracking-tight">Hero Section & Statistics</h1>
+            <h1 className="text-3xl font-bold tracking-tight">
+              {isAr ? 'قسم الواجهة (الهيرو) والإحصائيات' : 'Hero Section & Statistics'}
+            </h1>
           </div>
           <p className="text-muted-foreground text-sm mt-1">
-            Complete bilingual control over your Homepage Hero, Headline, Bio, Call to Action, Specialties, and Stats bar.
+            {isAr 
+              ? 'تحكم كامل بنصوص الواجهة، العنوان الرئيسي، النبذة التعريفية، الأزرار، التخصصات، وشريط الإحصائيات باللغتين.'
+              : 'Complete bilingual control over your Homepage Hero, Headline, Bio, Call to Action, Specialties, and Stats bar.'}
           </p>
         </div>
         <div className="flex items-center gap-3">
           <Button onClick={() => handleSave()} disabled={saving} className="min-w-[140px]">
             {saving ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {isAr ? 'جاري الحفظ...' : 'Saving...'}
               </>
             ) : (
               <>
-                <Save className="mr-2 h-4 w-4" /> Save Changes
+                <Save className="mr-2 h-4 w-4" /> {isAr ? 'حفظ التغييرات' : 'Save Changes'}
               </>
             )}
           </Button>
@@ -354,8 +361,14 @@ const AdminHero = () => {
           <div className="bg-card border border-border rounded-xl p-6 space-y-6">
             <div className="border-b border-border pb-4 flex justify-between items-center">
               <div>
-                <h2 className="text-lg font-bold">Hero Text & Copywriting</h2>
-                <p className="text-sm text-muted-foreground">Main headline, intro bio, and action button displayed in the hero section.</p>
+                <h2 className="text-lg font-bold">
+                  {isAr ? 'نصوص الواجهة وصياغة المحتوى' : 'Hero Text & Copywriting'}
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  {isAr 
+                    ? 'العنوان الرئيسي، النبذة التعريفية وزر الحث على اتخاذ إجراء في الهيرو سكشن.' 
+                    : 'Main headline, intro bio, and action button displayed in the hero section.'}
+                </p>
               </div>
             </div>
 
@@ -451,13 +464,21 @@ const AdminHero = () => {
           {/* Card 2: Roles / Specialties (Typewriter Marquee) */}
           <div className="bg-card border border-border rounded-xl p-6 space-y-6">
             <div className="border-b border-border pb-4">
-              <h2 className="text-lg font-bold">Hero Specialties & Typewriter Roles</h2>
-              <p className="text-sm text-muted-foreground">Animated rotating roles displayed near your photo/headline (separated by commas).</p>
+              <h2 className="text-lg font-bold">
+                {isAr ? 'الأدوار والتخصصات المتحركة (Typewriter)' : 'Hero Specialties & Typewriter Roles'}
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                {isAr 
+                  ? 'الأدوار التخصصية التي تدور وتتحرك بجوار صورتك وعنوانك (مفصولة بفواصل).' 
+                  : 'Animated rotating roles displayed near your photo/headline (separated by commas).'}
+              </p>
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Specialties (English, comma-separated)</label>
+                <label className="text-sm font-medium">
+                  {isAr ? 'التخصصات (بالإنجليزية، مفصولة بفواصل)' : 'Specialties (English, comma-separated)'}
+                </label>
                 <Input 
                   value={heroData.typewriterWords || ''} 
                   onChange={e => setHeroData({ ...heroData, typewriterWords: e.target.value })}
@@ -472,7 +493,9 @@ const AdminHero = () => {
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">التخصصات (بالعربية، مفصولة بفواصل)</label>
+                <label className="text-sm font-medium">
+                  {isAr ? 'التخصصات (بالعربية، مفصولة بفواصل)' : 'Specialties (Arabic, comma-separated)'}
+                </label>
                 <Input 
                   value={heroData.typewriterWordsAr || ''} 
                   onChange={e => setHeroData({ ...heroData, typewriterWordsAr: e.target.value })}
@@ -490,33 +513,39 @@ const AdminHero = () => {
             </div>
           </div>
 
-          {/* Card 3: 📊 HERO STATISTICS & METRICS (The User's specific request!) */}
+          {/* Card 3: 📊 HERO STATISTICS & METRICS */}
           <div className="bg-card border border-border rounded-xl p-6 space-y-6">
             <div className="border-b border-border pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2">
                   <BarChart3 className="text-emerald-500" size={20} />
-                  <h2 className="text-lg font-bold">Hero Statistics Bar (إحصائيات الهيرو)</h2>
+                  <h2 className="text-lg font-bold">
+                    {isAr ? 'شريط إحصائيات الهيرو (Hero Statistics Bar)' : 'Hero Statistics Bar'}
+                  </h2>
                 </div>
                 <p className="text-sm text-muted-foreground mt-0.5">
-                  Full control over the stat counters shown at the bottom of the hero section.
+                  {isAr 
+                    ? 'تحكم كامل بعدادات الأرقام والإحصائيات المعروضة أسفل الواجهة الرئيسية.' 
+                    : 'Full control over the stat counters shown at the bottom of the hero section.'}
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <Button size="sm" variant="outline" onClick={handleResetDefaultStats} title="Reset to standard stats">
-                  <RefreshCw size={13} className="mr-1.5" /> Defaults
+                <Button size="sm" variant="outline" onClick={handleResetDefaultStats} title={isAr ? 'استعادة الافتراضي' : 'Reset to standard stats'}>
+                  <RefreshCw size={13} className={isAr ? 'ml-1.5' : 'mr-1.5'} /> {isAr ? 'الافتراضي' : 'Defaults'}
                 </Button>
                 <Button size="sm" onClick={handleAddStat}>
-                  <Plus size={14} className="mr-1.5" /> Add Stat
+                  <Plus size={14} className={isAr ? 'ml-1.5' : 'mr-1.5'} /> {isAr ? 'إضافة إحصائية' : 'Add Stat'}
                 </Button>
               </div>
             </div>
 
             {stats.length === 0 ? (
               <div className="text-center py-8 border border-dashed border-border rounded-lg bg-muted/20">
-                <p className="text-sm text-muted-foreground mb-3">No stats added yet. Add your first statistic to showcase your achievements.</p>
+                <p className="text-sm text-muted-foreground mb-3">
+                  {isAr ? 'لم يتم إضافة إحصائيات بعد. أضف أول إحصائية لإبراز إنجازاتك.' : 'No stats added yet. Add your first statistic to showcase your achievements.'}
+                </p>
                 <Button size="sm" onClick={handleAddStat}>
-                  <Plus size={14} className="mr-1.5" /> Add First Stat
+                  <Plus size={14} className={isAr ? 'ml-1.5' : 'mr-1.5'} /> {isAr ? 'إضافة أول إحصائية' : 'Add First Stat'}
                 </Button>
               </div>
             ) : (
@@ -618,7 +647,9 @@ const AdminHero = () => {
           {/* Profile Photo Card */}
           <div className="bg-card border border-border rounded-xl p-6 text-center space-y-4">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-bold">Profile Photo (الصورة الشخصية)</h2>
+              <h2 className="text-base font-bold">
+                {isAr ? 'الصورة الشخصية (Cloudinary)' : 'Profile Photo (الصورة الشخصية)'}
+              </h2>
               <span className="text-[10px] font-mono text-emerald-500 uppercase tracking-wider bg-emerald-500/10 px-2 py-0.5 rounded">Cloudinary</span>
             </div>
             <div className="relative w-40 h-40 mx-auto rounded-full overflow-hidden border-2 border-border/80 shadow-md group bg-muted flex items-center justify-center">
@@ -639,16 +670,18 @@ const AdminHero = () => {
                 <span>
                   {uploadingPhoto ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Uploading...
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {isAr ? 'جاري الرفع...' : 'Uploading...'}
                     </>
                   ) : (
-                    'Change Profile Photo'
+                    isAr ? 'تغيير الصورة الشخصية' : 'Change Profile Photo'
                   )}
                   <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
                 </span>
               </Button>
             </label>
-            <p className="text-xs text-muted-foreground">Recommended square format (WEBP, PNG, JPG).</p>
+            <p className="text-xs text-muted-foreground">
+              {isAr ? 'صيغة مربعة موصى بها (WEBP, PNG, JPG).' : 'Recommended square format (WEBP, PNG, JPG).'}
+            </p>
           </div>
 
           {/* Interactive Live Preview of Hero & Stats */}
@@ -656,7 +689,9 @@ const AdminHero = () => {
             <div className="flex items-center justify-between border-b border-border pb-3">
               <div className="flex items-center gap-1.5">
                 <Eye size={16} className="text-emerald-500" />
-                <h3 className="font-bold text-sm">Live Hero Preview</h3>
+                <h3 className="font-bold text-sm">
+                  {isAr ? 'معاينة حية للواجهة' : 'Live Hero Preview'}
+                </h3>
               </div>
               <div className="flex items-center rounded-lg border border-border p-0.5 bg-muted/40 text-xs">
                 <button

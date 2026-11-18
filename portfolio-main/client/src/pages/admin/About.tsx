@@ -9,6 +9,7 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Textarea } from '../../components/ui/Textarea';
 import { getTechBrandIcon } from '../../components/icons/TechBrandIcons';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface BentoCard {
   id?: string;
@@ -78,6 +79,8 @@ const defaultAbout: AboutData = {
 };
 
 const AdminAbout = () => {
+  const { currentLang, currentDirection } = useLanguage();
+  const isAr = currentLang === 'ar';
   const [data, setData] = useState<AboutData>(defaultAbout);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -239,11 +242,11 @@ const AdminAbout = () => {
   }
 
   return (
-    <div className="relative min-h-[80vh] pb-20">
-      <Helmet><title>About Section | Admin</title></Helmet>
+    <div className="relative min-h-[80vh] pb-20" dir={currentDirection}>
+      <Helmet><title>{isAr ? 'سكشن النبذة والتعريف | لوحة التحكم' : 'About Section | Admin'}</title></Helmet>
 
       {toast && (
-        <div className={`fixed bottom-5 right-5 z-50 px-4 py-3 rounded-lg shadow-xl border flex items-center gap-2 animate-in slide-in-from-bottom-5 ${
+        <div className={`fixed bottom-5 ${isAr ? 'left-5' : 'right-5'} z-50 px-4 py-3 rounded-lg shadow-xl border flex items-center gap-2 animate-in slide-in-from-bottom-5 ${
           toast.type === 'success' ? 'bg-card border-green-500/50 text-foreground' : 'bg-destructive text-destructive-foreground'
         }`}>
           {toast.type === 'success' && <Check size={16} className="text-green-500" />}
@@ -254,19 +257,23 @@ const AdminAbout = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">About Section Management (إدارة سكشن النبذة)</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            {isAr ? 'إدارة سكشن النبذة الشخصية (About)' : 'About Section Management'}
+          </h1>
           <p className="text-muted-foreground text-sm mt-1">
-            Complete bilingual control over badge, headline, bio paragraphs, core stack, and bento philosophy cards.
+            {isAr
+              ? 'تحكم كامل ثنائي اللغة بالشعار، العنوان الرئيسي، فقرات السيرة الذاتية، التقنيات الأساسية، وبطاقات البنتو التفاعلية.'
+              : 'Complete bilingual control over badge, headline, bio paragraphs, core stack, and bento philosophy cards.'}
           </p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" onClick={fetchAbout} disabled={saving}>
-            <RefreshCw size={16} className="mr-1.5" />
-            Reload
+          <Button variant="outline" onClick={fetchAbout} disabled={saving} className="gap-1.5">
+            <RefreshCw size={16} />
+            {isAr ? 'إعادة تحميل' : 'Reload'}
           </Button>
-          <Button onClick={handleSave} disabled={saving} className="min-w-[130px]">
-            {saving ? <Loader2 size={16} className="animate-spin mr-1.5" /> : <Save size={16} className="mr-1.5" />}
-            Save Changes
+          <Button onClick={handleSave} disabled={saving} className="min-w-[130px] gap-1.5">
+            {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+            {isAr ? 'حفظ التعديلات' : 'Save Changes'}
           </Button>
         </div>
       </div>
@@ -276,12 +283,12 @@ const AdminAbout = () => {
         <div className="p-6 bg-card rounded-xl border border-border space-y-4">
           <h2 className="text-lg font-semibold flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-emerald-500" />
-            Section Headers (العناوين والشعارات)
+            {isAr ? 'عناوين وشعارات السكشن' : 'Section Headers & Titles'}
           </h2>
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">
-                Badge Label (EN)
+                {isAr ? 'شارة القسم (EN)' : 'Badge Label (EN)'}
               </label>
               <Input
                 value={data.badge}
@@ -291,20 +298,21 @@ const AdminAbout = () => {
             </div>
             <div>
               <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">
-                شعار السكشن (AR)
+                {isAr ? 'شارة القسم (عربي)' : 'Badge Label (AR)'}
               </label>
               <Input
                 value={data.badgeAr || ''}
                 onChange={e => setData({ ...data, badgeAr: e.target.value })}
                 placeholder="نبذة عني"
                 dir="rtl"
+                className="font-arabic"
               />
             </div>
           </div>
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">
-                Main Headline (EN)
+                {isAr ? 'العنوان الرئيسي (EN)' : 'Main Headline (EN)'}
               </label>
               <Input
                 value={data.headline}
@@ -314,13 +322,14 @@ const AdminAbout = () => {
             </div>
             <div>
               <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">
-                الهيدلاين الرئيسي (AR)
+                {isAr ? 'العنوان الرئيسي (عربي)' : 'Main Headline (AR)'}
               </label>
               <Input
                 value={data.headlineAr || ''}
                 onChange={e => setData({ ...data, headlineAr: e.target.value })}
                 placeholder="بناء برمجيات قابلة للتوسع بدقة واحترافية."
                 dir="rtl"
+                className="font-arabic"
               />
             </div>
           </div>
@@ -328,14 +337,18 @@ const AdminAbout = () => {
 
         {/* Bio Paragraphs */}
         <div className="p-6 bg-card rounded-xl border border-border space-y-6">
-          <h2 className="text-lg font-semibold">Bio Paragraphs (الفقرات التعريفية)</h2>
+          <h2 className="text-lg font-semibold">
+            {isAr ? 'الفقرات التعريفية والسيرة الذاتية' : 'Bio Paragraphs'}
+          </h2>
           
           {/* Paragraph 1 */}
           <div className="space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Paragraph 1 (الفقرة الأولى)</h3>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              {isAr ? 'الفقرة الأولى (Paragraph 1)' : 'Paragraph 1'}
+            </h3>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs text-muted-foreground block mb-1">English</label>
+                <label className="text-xs text-muted-foreground block mb-1">{isAr ? 'الإنجليزية (EN)' : 'English'}</label>
                 <Textarea
                   value={data.bioParagraph1}
                   onChange={e => setData({ ...data, bioParagraph1: e.target.value })}
@@ -343,12 +356,13 @@ const AdminAbout = () => {
                 />
               </div>
               <div>
-                <label className="text-xs text-muted-foreground block mb-1">العربية</label>
+                <label className="text-xs text-muted-foreground block mb-1">{isAr ? 'العربية (AR)' : 'Arabic'}</label>
                 <Textarea
                   value={data.bioParagraph1Ar || ''}
                   onChange={e => setData({ ...data, bioParagraph1Ar: e.target.value })}
                   rows={4}
                   dir="rtl"
+                  className="font-arabic"
                 />
               </div>
             </div>
@@ -356,10 +370,12 @@ const AdminAbout = () => {
 
           {/* Paragraph 2 */}
           <div className="space-y-3 pt-3 border-t border-border">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Paragraph 2 (الفقرة الثانية)</h3>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              {isAr ? 'الفقرة الثانية (Paragraph 2)' : 'Paragraph 2'}
+            </h3>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs text-muted-foreground block mb-1">English</label>
+                <label className="text-xs text-muted-foreground block mb-1">{isAr ? 'الإنجليزية (EN)' : 'English'}</label>
                 <Textarea
                   value={data.bioParagraph2}
                   onChange={e => setData({ ...data, bioParagraph2: e.target.value })}
@@ -367,12 +383,13 @@ const AdminAbout = () => {
                 />
               </div>
               <div>
-                <label className="text-xs text-muted-foreground block mb-1">العربية</label>
+                <label className="text-xs text-muted-foreground block mb-1">{isAr ? 'العربية (AR)' : 'Arabic'}</label>
                 <Textarea
                   value={data.bioParagraph2Ar || ''}
                   onChange={e => setData({ ...data, bioParagraph2Ar: e.target.value })}
                   rows={3}
                   dir="rtl"
+                  className="font-arabic"
                 />
               </div>
             </div>
@@ -383,13 +400,17 @@ const AdminAbout = () => {
         <div className="p-6 bg-card rounded-xl border border-border space-y-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
-              <h2 className="text-lg font-semibold">Core Technical Stack (التقنيات الأساسية)</h2>
+              <h2 className="text-lg font-semibold">
+                {isAr ? 'التقنيات الأساسية (Core Technical Stack)' : 'Core Technical Stack'}
+              </h2>
               <p className="text-xs text-muted-foreground">
-                تحكّم بترتيب التقنيات بسهولة باستخدام الأسهم (← / →)، مع ظهور الأيقونة الأصلية تلقائياً.
+                {isAr
+                  ? 'تحكّم بترتيب التقنيات بسهولة باستخدام الأسهم (← / →)، مع ظهور الأيقونة الأصلية لكل تقنية تلقائياً.'
+                  : 'Reorder tech stack chips easily with arrows; official icons render automatically.'}
               </p>
             </div>
             <span className="text-xs font-mono text-muted-foreground bg-muted px-2.5 py-1 rounded-md">
-              {data.coreStack.length} items
+              {data.coreStack.length} {isAr ? 'تقنية' : 'items'}
             </span>
           </div>
 
@@ -403,29 +424,29 @@ const AdminAbout = () => {
                   {getTechBrandIcon(tag, 16)}
                 </span>
                 <span className="font-semibold">{tag}</span>
-                <div className="flex items-center gap-0.5 border-l border-border pl-1.5 ml-0.5">
+                <div className={`flex items-center gap-0.5 ${isAr ? 'border-r border-border pr-1.5 mr-0.5' : 'border-l border-border pl-1.5 ml-0.5'}`}>
                   <button
                     type="button"
                     onClick={() => handleMoveStackTag(index, 'prev')}
                     disabled={index === 0}
-                    title="Move Earlier (تقديم للأمام)"
+                    title={isAr ? 'تحريك للأمام' : 'Move Earlier'}
                     className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-20 disabled:cursor-not-allowed cursor-pointer transition-colors"
                   >
-                    <ArrowLeft size={12} />
+                    <ArrowLeft size={12} className={isAr ? 'rotate-180' : ''} />
                   </button>
                   <button
                     type="button"
                     onClick={() => handleMoveStackTag(index, 'next')}
                     disabled={index === data.coreStack.length - 1}
-                    title="Move Later (تأخير للخلف)"
+                    title={isAr ? 'تحريك للخلف' : 'Move Later'}
                     className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-20 disabled:cursor-not-allowed cursor-pointer transition-colors"
                   >
-                    <ArrowRight size={12} />
+                    <ArrowRight size={12} className={isAr ? 'rotate-180' : ''} />
                   </button>
                   <button
                     type="button"
                     onClick={() => handleDeleteStackTag(tag)}
-                    title="Delete (حذف)"
+                    title={isAr ? 'حذف' : 'Delete'}
                     className="p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive cursor-pointer transition-colors ml-0.5"
                   >
                     <X size={12} />
@@ -434,7 +455,9 @@ const AdminAbout = () => {
               </div>
             ))}
             {data.coreStack.length === 0 && (
-              <p className="text-xs text-muted-foreground italic py-1">لا توجد تقنيات مضافة حالياً.</p>
+              <p className="text-xs text-muted-foreground italic py-1">
+                {isAr ? 'لا توجد تقنيات مضافة حالياً.' : 'No technologies added yet.'}
+              </p>
             )}
           </div>
           <div className="flex gap-2 max-w-md">
@@ -442,10 +465,10 @@ const AdminAbout = () => {
               value={newStackTag}
               onChange={e => setNewStackTag(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAddStackTag())}
-              placeholder="Add skill (e.g. Next.js, Redis, Docker)..."
+              placeholder={isAr ? 'أضف تقنية (مثال: Next.js, Redis, Docker)...' : 'Add skill (e.g. Next.js, Redis, Docker)...'}
             />
             <Button variant="secondary" onClick={handleAddStackTag}>
-              Add
+              {isAr ? 'إضافة' : 'Add'}
             </Button>
           </div>
         </div>
@@ -454,11 +477,15 @@ const AdminAbout = () => {
         <div className="p-6 bg-card rounded-xl border border-border space-y-4">
           <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-lg font-semibold">Bento Grid Cards (كروت الفلسفة البنتو)</h2>
-              <p className="text-xs text-muted-foreground">Interactive feature cards rendered with bilingual titles and descriptions.</p>
+              <h2 className="text-lg font-semibold">
+                {isAr ? 'بطاقات البنتو الهندسية (Bento Grid Cards)' : 'Bento Grid Cards'}
+              </h2>
+              <p className="text-xs text-muted-foreground">
+                {isAr ? 'بطاقات تفاعلية تعرض ميزاتك وفلسفتك البرمجية بالعربية والإنجليزية.' : 'Interactive feature cards rendered with bilingual titles and descriptions.'}
+              </p>
             </div>
-            <Button size="sm" onClick={handleAddBentoCard}>
-              <Plus size={14} className="mr-1" /> Add Bento Card
+            <Button size="sm" onClick={handleAddBentoCard} className="gap-1">
+              <Plus size={14} /> {isAr ? 'إضافة بطاقة بنتو' : 'Add Bento Card'}
             </Button>
           </div>
 
@@ -466,12 +493,15 @@ const AdminAbout = () => {
             {data.bentoCards.map((card, idx) => (
               <div key={idx} className="p-5 rounded-xl border border-border bg-background/60 space-y-4 relative group">
                 <div className="flex justify-between items-center border-b border-border pb-2">
-                  <span className="text-xs font-mono font-bold text-emerald-500">Bento Card #{idx + 1}</span>
+                  <span className="text-xs font-mono font-bold text-emerald-500">
+                    {isAr ? `بطاقة بنتو #${idx + 1}` : `Bento Card #${idx + 1}`}
+                  </span>
                   <Button
                     variant="ghost"
                     size="icon"
                     className="h-7 w-7 text-destructive hover:bg-destructive/10"
                     onClick={() => handleDeleteBentoCard(idx)}
+                    title={isAr ? 'حذف البطاقة' : 'Delete Card'}
                   >
                     <Trash2 size={14} />
                   </Button>
@@ -479,22 +509,29 @@ const AdminAbout = () => {
 
                 <div className="grid md:grid-cols-3 gap-4">
                   <div>
-                    <label className="text-xs font-semibold text-muted-foreground block mb-1">Title (EN)</label>
+                    <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                      {isAr ? 'العنوان (EN)' : 'Title (EN)'}
+                    </label>
                     <Input
                       value={card.title}
                       onChange={e => handleUpdateBentoCard(idx, 'title', e.target.value)}
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold text-muted-foreground block mb-1">العنوان (AR)</label>
+                    <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                      {isAr ? 'العنوان (عربي)' : 'Title (AR)'}
+                    </label>
                     <Input
                       value={card.titleAr || ''}
                       onChange={e => handleUpdateBentoCard(idx, 'titleAr', e.target.value)}
                       dir="rtl"
+                      className="font-arabic"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold text-muted-foreground block mb-1">Icon</label>
+                    <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                      {isAr ? 'الأيقونة' : 'Icon'}
+                    </label>
                     <select
                       value={card.icon}
                       onChange={e => handleUpdateBentoCard(idx, 'icon', e.target.value)}
@@ -509,7 +546,9 @@ const AdminAbout = () => {
 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-semibold text-muted-foreground block mb-1">Description (EN)</label>
+                    <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                      {isAr ? 'الوصف (EN)' : 'Description (EN)'}
+                    </label>
                     <Textarea
                       value={card.description}
                       onChange={e => handleUpdateBentoCard(idx, 'description', e.target.value)}
@@ -517,12 +556,15 @@ const AdminAbout = () => {
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold text-muted-foreground block mb-1">الوصف (AR)</label>
+                    <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                      {isAr ? 'الوصف (عربي)' : 'Description (AR)'}
+                    </label>
                     <Textarea
                       value={card.descriptionAr || ''}
                       onChange={e => handleUpdateBentoCard(idx, 'descriptionAr', e.target.value)}
                       rows={2}
                       dir="rtl"
+                      className="font-arabic"
                     />
                   </div>
                 </div>
@@ -532,10 +574,10 @@ const AdminAbout = () => {
         </div>
 
         {/* Bottom Save Button */}
-        <div className="flex justify-end pt-4">
-          <Button size="lg" onClick={handleSave} disabled={saving} className="min-w-[150px]">
-            {saving ? <Loader2 size={16} className="animate-spin mr-1.5" /> : <Save size={16} className="mr-1.5" />}
-            Save All Changes
+        <div className={`flex ${isAr ? 'justify-start' : 'justify-end'} pt-4`}>
+          <Button size="lg" onClick={handleSave} disabled={saving} className="min-w-[150px] gap-1.5">
+            {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+            {isAr ? 'حفظ جميع التغييرات' : 'Save All Changes'}
           </Button>
         </div>
       </div>

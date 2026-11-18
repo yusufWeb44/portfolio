@@ -12,6 +12,7 @@ import { Textarea } from '../../components/ui/Textarea';
 import { applyCustomFonts } from '../../utils/fontLoader';
 import { resolveImageUrl } from '../../utils/mediaUrl';
 import { THEME_COLOR_OPTIONS, applyThemePalette } from '../../utils/themeEngine';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface PortfolioSettings {
   name: string;
@@ -171,6 +172,8 @@ const Settings = () => {
     enableGlow: true,
     backgroundPattern: 'subtle-grid',
   });
+  const { currentLang, currentDirection } = useLanguage();
+  const isAr = currentLang === 'ar';
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -367,9 +370,9 @@ const Settings = () => {
   }
 
   return (
-    <div className="relative min-h-screen pb-20">
+    <div className="relative min-h-screen pb-20" dir={currentDirection}>
       <Helmet>
-        <title>Settings & UI Appearance | Admin Dashboard</title>
+        <title>{isAr ? 'الإعدادات العامة والمظهر | لوحة الإدارة' : 'Settings & UI Appearance | Admin Dashboard'}</title>
       </Helmet>
 
       {toast && (
@@ -381,11 +384,25 @@ const Settings = () => {
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight mb-1">Portfolio Settings & UI Control</h1>
-          <p className="text-muted-foreground text-sm">Full control over texts, bilingual content, themes, typography, and card appearances.</p>
+          <h1 className="text-3xl font-bold tracking-tight mb-1">
+            {isAr ? 'إعدادات البورتفوليو والتحكم بالواجهة' : 'Portfolio Settings & UI Control'}
+          </h1>
+          <p className="text-muted-foreground text-sm">
+            {isAr 
+              ? 'تحكم كامل بالنصوص، المحتوى الثنائي، السمات، الخطوط، ومظهر الكروت.' 
+              : 'Full control over texts, bilingual content, themes, typography, and card appearances.'}
+          </p>
         </div>
         <Button onClick={() => handleSaveSettings()} disabled={saving} className="min-w-[140px]">
-          {saving ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...</> : <><Save className="mr-2 h-4 w-4" /> Save Settings</>}
+          {saving ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {isAr ? 'جاري الحفظ...' : 'Saving...'}
+            </>
+          ) : (
+            <>
+              <Save className="mr-2 h-4 w-4" /> {isAr ? 'حفظ الإعدادات' : 'Save Settings'}
+            </>
+          )}
         </Button>
       </div>
 
@@ -399,7 +416,7 @@ const Settings = () => {
               : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
-          General & Contact Info
+          {isAr ? 'الملف الشخصي ومعلومات التواصل' : 'General & Contact Info'}
         </button>
         <button
           onClick={() => setActiveTab('sections')}
@@ -409,7 +426,7 @@ const Settings = () => {
               : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
-          Section Copywriting (EN & AR)
+          {isAr ? 'نصوص أقسام الموقع (EN & AR)' : 'Section Copywriting (EN & AR)'}
         </button>
         <button
           onClick={() => setActiveTab('appearance')}
@@ -420,7 +437,7 @@ const Settings = () => {
           }`}
         >
           <Sparkles size={15} className="text-emerald-500" />
-          Appearance & UI Styling
+          {isAr ? 'المظهر وتنسيق الواجهة' : 'Appearance & UI Styling'}
         </button>
       </div>
 
@@ -430,33 +447,46 @@ const Settings = () => {
           {/* Quick link banner to Hero CMS */}
           <div className="p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-lg bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
-                <Sparkles size={20} />
-              </div>
+              <span className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shrink-0">
+                <Sparkles size={18} />
+              </span>
               <div>
-                <p className="text-sm font-bold text-foreground">Looking to edit your Hero section or Statistics?</p>
-                <p className="text-xs text-muted-foreground">Hero headline, bio, CTA, specialties, and the new stats manager are now in the dedicated Hero section.</p>
+                <p className="text-sm font-bold text-foreground">
+                  {isAr ? 'هل تبحث عن تعديل قسم الهيرو أو الإحصائيات؟' : 'Looking to edit your Hero section or Statistics?'}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {isAr 
+                    ? 'عنوان الهيرو، النبذة، الأزرار، التخصصات وشريط الإحصائيات أصبحت الآن في قسم الهيرو المخصص.'
+                    : 'Hero headline, bio, CTA, specialties, and the new stats manager are now in the dedicated Hero section.'}
+                </p>
               </div>
             </div>
-            <Button size="sm" variant="outline" asChild>
-              <Link to="/admin/hero" className="flex items-center gap-1.5 whitespace-nowrap">
-                Go to Hero Section <ArrowRight size={14} />
-              </Link>
-            </Button>
+            <Link 
+              to="/admin/hero"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-border bg-card text-xs font-semibold hover:bg-muted transition-colors shrink-0 text-foreground"
+            >
+              <span>{isAr ? 'الذهاب لقسم الهيرو' : 'Go to Hero Section'}</span>
+              <ArrowRight size={13} className={isAr ? "rotate-180" : ""} />
+            </Link>
           </div>
-
           <div className="grid lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6">
               <form onSubmit={handleSaveSettings} className="bg-card border border-border rounded-xl overflow-hidden space-y-6 p-6">
                 <div className="border-b border-border pb-4">
-                  <h2 className="text-lg font-bold">General Profile & Contact Information</h2>
-                  <p className="text-sm text-muted-foreground">Personal display identity, communication channels, and footer copy in English and Arabic.</p>
+                  <h2 className="text-lg font-bold">
+                    {isAr ? 'الملف العام ومعلومات التواصل' : 'General Profile & Contact Information'}
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    {isAr 
+                      ? 'الاسم، وسائل وقنوات التواصل، وتذييل الموقع باللغتين العربية والإنجليزية.' 
+                      : 'Personal display identity, communication channels, and footer copy in English and Arabic.'}
+                  </p>
                 </div>
 
               {/* Display Name EN & AR */}
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Display Name (English)</label>
+                  <label className="text-sm font-medium">{isAr ? 'الاسم المعروض (بالإنجليزية)' : 'Display Name (English)'}</label>
                   <Input 
                     value={settings.name || ''} 
                     onChange={e => setSettings({...settings, name: e.target.value})} 
@@ -464,7 +494,7 @@ const Settings = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">الاسم الكامل (بالعربية)</label>
+                  <label className="text-sm font-medium">{isAr ? 'الاسم الكامل (بالعربية)' : 'Full Name (Arabic)'}</label>
                   <Input 
                     value={settings.nameAr || ''} 
                     onChange={e => setSettings({...settings, nameAr: e.target.value})} 
@@ -477,7 +507,7 @@ const Settings = () => {
               {/* Email & WhatsApp Number */}
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Contact Email</label>
+                  <label className="text-sm font-medium">{isAr ? 'البريد الإلكتروني للتواصل' : 'Contact Email'}</label>
                   <Input 
                     type="email"
                     value={settings.email || ''} 
@@ -486,7 +516,7 @@ const Settings = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">WhatsApp Number (e.g. +90 555 123 4567)</label>
+                  <label className="text-sm font-medium">{isAr ? 'رقم الواتساب (مثال: 4567 123 555 90+)' : 'WhatsApp Number (e.g. +90 555 123 4567)'}</label>
                   <Input 
                     value={settings.whatsappNumber || ''} 
                     onChange={e => setSettings({...settings, whatsappNumber: e.target.value})} 
@@ -495,12 +525,10 @@ const Settings = () => {
                 </div>
               </div>
 
-
-
               {/* Location EN & AR */}
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Location (English)</label>
+                  <label className="text-sm font-medium">{isAr ? 'الموقع الجغرافي (بالإنجليزية)' : 'Location (English)'}</label>
                   <Input 
                     value={settings.location || ''} 
                     onChange={e => setSettings({...settings, location: e.target.value})} 
@@ -508,7 +536,7 @@ const Settings = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">الموقع الجغرافي (بالعربية)</label>
+                  <label className="text-sm font-medium">{isAr ? 'الموقع الجغرافي (بالعربية)' : 'Location (Arabic)'}</label>
                   <Input 
                     value={settings.locationAr || ''} 
                     onChange={e => setSettings({...settings, locationAr: e.target.value})} 
@@ -521,7 +549,7 @@ const Settings = () => {
               {/* Footer Text EN & AR */}
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Footer Text (English)</label>
+                  <label className="text-sm font-medium">{isAr ? 'نص التذييل (بالإنجليزية)' : 'Footer Text (English)'}</label>
                   <Textarea 
                     value={settings.footerText || ''} 
                     onChange={e => setSettings({...settings, footerText: e.target.value})} 
@@ -530,7 +558,7 @@ const Settings = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">نص التذييل (بالعربية)</label>
+                  <label className="text-sm font-medium">{isAr ? 'نص التذييل (بالعربية)' : 'Footer Text (Arabic)'}</label>
                   <Textarea 
                     value={settings.footerTextAr || ''} 
                     onChange={e => setSettings({...settings, footerTextAr: e.target.value})} 
@@ -548,7 +576,7 @@ const Settings = () => {
             {/* Website Logo Card (Cloudinary) */}
             <div className="bg-card border border-border rounded-xl overflow-hidden p-6 text-center">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-base font-bold">Website Logo (شعار الموقع)</h2>
+                <h2 className="text-base font-bold">{isAr ? 'شعار الموقع (Logo)' : 'Website Logo'}</h2>
                 <span className="text-[10px] font-mono text-emerald-500 uppercase tracking-wider bg-emerald-500/10 px-2 py-0.5 rounded">Cloudinary</span>
               </div>
               <div className="relative w-full h-24 mx-auto mb-4 rounded-xl overflow-hidden border border-border/80 group bg-muted/40 flex items-center justify-center p-3">
@@ -566,19 +594,23 @@ const Settings = () => {
               <label className="cursor-pointer">
                 <Button variant="outline" size="sm" asChild disabled={uploadingLogo}>
                   <span>
-                    {uploadingLogo ? 'Uploading to Cloudinary...' : 'Change Logo (رفع شعار جديد)'}
+                    {uploadingLogo 
+                      ? (isAr ? 'جاري الرفع إلى Cloudinary...' : 'Uploading to Cloudinary...') 
+                      : (isAr ? 'رفع شعار جديد' : 'Change Logo')}
                     <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
                   </span>
                 </Button>
               </label>
-              <p className="text-xs text-muted-foreground mt-2">WEBP, PNG, SVG or JPG (transparent recommended).</p>
+              <p className="text-xs text-muted-foreground mt-2">
+                {isAr ? 'صيغ WEBP أو PNG أو SVG أو JPG (يُفضل خلفية شفافة).' : 'WEBP, PNG, SVG or JPG (transparent recommended).'}
+              </p>
             </div>
 
             {/* Profile Photo Card */}
             <div className="bg-card border border-border rounded-xl overflow-hidden p-6 text-center">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-base font-bold">Profile Photo (الصورة الشخصية)</h2>
-                <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">Hero &amp; About</span>
+                <h2 className="text-base font-bold">{isAr ? 'الصورة الشخصية' : 'Profile Photo'}</h2>
+                <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">{isAr ? 'الهيرو ومن أنا' : 'Hero & About'}</span>
               </div>
               <div className="relative w-36 h-36 mx-auto mb-4 rounded-full overflow-hidden border-2 border-border group bg-muted flex items-center justify-center">
                 <img 
@@ -595,24 +627,30 @@ const Settings = () => {
               <label className="cursor-pointer">
                 <Button variant="outline" size="sm" asChild disabled={uploadingPhoto}>
                   <span>
-                    {uploadingPhoto ? 'Uploading to Cloudinary...' : 'Change Photo (تغيير الصورة)'}
+                    {uploadingPhoto 
+                      ? (isAr ? 'جاري الرفع إلى Cloudinary...' : 'Uploading to Cloudinary...') 
+                      : (isAr ? 'تغيير الصورة الشخصية' : 'Change Photo')}
                     <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
                   </span>
                 </Button>
               </label>
-              <p className="text-xs text-muted-foreground mt-2">Syncs directly with Hero section and About page.</p>
+              <p className="text-xs text-muted-foreground mt-2">
+                {isAr ? 'متزامنة مباشرة مع قسم الهيرو وصفحة من أنا.' : 'Syncs directly with Hero section and About page.'}
+              </p>
             </div>
 
             {/* Social Links Card */}
             <div className="bg-card border border-border rounded-xl overflow-hidden p-6 space-y-4">
               <div className="flex justify-between items-center border-b border-border pb-3">
-                <h2 className="text-lg font-bold">Social Links</h2>
+                <h2 className="text-lg font-bold">{isAr ? 'روابط التواصل الاجتماعي' : 'Social Links'}</h2>
                 <Button size="sm" variant="outline" onClick={handleAddLink}>
-                  <Plus size={14} className="mr-1" /> Add
+                  <Plus size={14} className="mr-1" /> {isAr ? 'إضافة رابط' : 'Add'}
                 </Button>
               </div>
               {socialLinks.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">No social links added.</p>
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  {isAr ? 'لم تتم إضافة أي روابط بعد.' : 'No social links added.'}
+                </p>
               ) : (
                 socialLinks.map(link => (
                   <div key={link.id} className="p-3 border border-border/50 rounded-lg bg-background relative group space-y-2">
@@ -623,7 +661,7 @@ const Settings = () => {
                       <Trash2 size={14} />
                     </button>
                     <div>
-                      <label className="text-[10px] text-muted-foreground font-semibold uppercase">Platform</label>
+                      <label className="text-[10px] text-muted-foreground font-semibold uppercase">{isAr ? 'المنصة' : 'Platform'}</label>
                       <input 
                         className="w-full bg-transparent border-none p-0 text-sm font-medium focus:ring-0 outline-none" 
                         value={link.platform} 
@@ -631,7 +669,7 @@ const Settings = () => {
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] text-muted-foreground font-semibold uppercase">URL</label>
+                      <label className="text-[10px] text-muted-foreground font-semibold uppercase">{isAr ? 'الرابط' : 'URL'}</label>
                       <input 
                         className="w-full bg-transparent border-none p-0 text-xs text-muted-foreground focus:ring-0 outline-none" 
                         value={link.url} 
@@ -652,17 +690,17 @@ const Settings = () => {
         <div className="space-y-8 max-w-5xl">
           {/* Projects Section */}
           <div className="p-6 bg-card rounded-xl border border-border space-y-4">
-            <h2 className="text-lg font-bold text-foreground">Projects Section (قسم المشاريع)</h2>
+            <h2 className="text-lg font-bold text-foreground">{isAr ? 'قسم المشاريع' : 'Projects Section'}</h2>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">Badge Text (EN)</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'شارة القسم (EN)' : 'Badge Text (EN)'}</label>
                 <Input
                   value={settings.projectsBadge ?? 'Featured Case Studies'}
                   onChange={e => setSettings({ ...settings, projectsBadge: e.target.value })}
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">شعار السكشن (AR)</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'شارة القسم (AR)' : 'Section Badge (AR)'}</label>
                 <Input
                   value={settings.projectsBadgeAr ?? 'أعمال مختارة ودراسات حالة'}
                   onChange={e => setSettings({ ...settings, projectsBadgeAr: e.target.value })}
@@ -672,14 +710,14 @@ const Settings = () => {
             </div>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">Main Title (EN)</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'العنوان الرئيسي (EN)' : 'Main Title (EN)'}</label>
                 <Input
                   value={settings.projectsTitle ?? 'Selected Work.'}
                   onChange={e => setSettings({ ...settings, projectsTitle: e.target.value })}
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">العنوان الرئيسي (AR)</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'العنوان الرئيسي (AR)' : 'Main Title (AR)'}</label>
                 <Input
                   value={settings.projectsTitleAr ?? 'المشاريع المميزة.'}
                   onChange={e => setSettings({ ...settings, projectsTitleAr: e.target.value })}
@@ -689,14 +727,14 @@ const Settings = () => {
             </div>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">Subtitle (EN)</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'الوصف الفرعي (EN)' : 'Subtitle (EN)'}</label>
                 <Input
                   value={settings.projectsSubtitle ?? ''}
                   onChange={e => setSettings({ ...settings, projectsSubtitle: e.target.value })}
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">الوصف الفرعي (AR)</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'الوصف الفرعي (AR)' : 'Subtitle (AR)'}</label>
                 <Input
                   value={settings.projectsSubtitleAr ?? ''}
                   onChange={e => setSettings({ ...settings, projectsSubtitleAr: e.target.value })}
@@ -708,17 +746,17 @@ const Settings = () => {
 
           {/* Workflow Section */}
           <div className="p-6 bg-card rounded-xl border border-border space-y-4">
-            <h2 className="text-lg font-bold text-foreground">Workflow Section (قسم سير العمل)</h2>
+            <h2 className="text-lg font-bold text-foreground">{isAr ? 'قسم سير العمل والمنهجية' : 'Workflow Section'}</h2>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">Badge Text (EN)</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'شارة القسم (EN)' : 'Badge Text (EN)'}</label>
                 <Input
                   value={settings.workflowBadge ?? 'Workflow & Methodology'}
                   onChange={e => setSettings({ ...settings, workflowBadge: e.target.value })}
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">شعار السكشن (AR)</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'شارة القسم (AR)' : 'Section Badge (AR)'}</label>
                 <Input
                   value={settings.workflowBadgeAr ?? 'منهجية وسير العمل'}
                   onChange={e => setSettings({ ...settings, workflowBadgeAr: e.target.value })}
@@ -728,14 +766,14 @@ const Settings = () => {
             </div>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">Main Title (EN)</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'العنوان الرئيسي (EN)' : 'Main Title (EN)'}</label>
                 <Input
                   value={settings.workflowTitle ?? 'How I Engineer Digital Products'}
                   onChange={e => setSettings({ ...settings, workflowTitle: e.target.value })}
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">العنوان الرئيسي (AR)</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'العنوان الرئيسي (AR)' : 'Main Title (AR)'}</label>
                 <Input
                   value={settings.workflowTitleAr ?? 'كيف أطور وأبني الحلول الرقمية'}
                   onChange={e => setSettings({ ...settings, workflowTitleAr: e.target.value })}
@@ -747,17 +785,17 @@ const Settings = () => {
 
           {/* Skills Section */}
           <div className="p-6 bg-card rounded-xl border border-border space-y-4">
-            <h2 className="text-lg font-bold text-foreground">Skills Section (قسم المهارات)</h2>
+            <h2 className="text-lg font-bold text-foreground">{isAr ? 'قسم المهارات والقدرات' : 'Skills Section'}</h2>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">Badge Text (EN)</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'شارة القسم (EN)' : 'Badge Text (EN)'}</label>
                 <Input
                   value={settings.skillsBadge ?? 'SKILLS & EXPERTISE'}
                   onChange={e => setSettings({ ...settings, skillsBadge: e.target.value })}
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">شعار السكشن (AR)</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'شارة القسم (AR)' : 'Section Badge (AR)'}</label>
                 <Input
                   value={settings.skillsBadgeAr ?? 'المهارات والقدرات التقنية'}
                   onChange={e => setSettings({ ...settings, skillsBadgeAr: e.target.value })}
@@ -767,14 +805,14 @@ const Settings = () => {
             </div>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">Main Title (EN)</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'العنوان الرئيسي (EN)' : 'Main Title (EN)'}</label>
                 <Input
                   value={settings.skillsTitle ?? 'Engineered Core Capabilities'}
                   onChange={e => setSettings({ ...settings, skillsTitle: e.target.value })}
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">العنوان الرئيسي (AR)</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'العنوان الرئيسي (AR)' : 'Main Title (AR)'}</label>
                 <Input
                   value={settings.skillsTitleAr ?? 'القدرات الهندسية الأساسية'}
                   onChange={e => setSettings({ ...settings, skillsTitleAr: e.target.value })}
@@ -784,7 +822,7 @@ const Settings = () => {
             </div>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">Paragraph 1 (EN)</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'الفقرة الأولى (EN)' : 'Paragraph 1 (EN)'}</label>
                 <Textarea
                   value={settings.skillsParagraph1 ?? ''}
                   onChange={e => setSettings({ ...settings, skillsParagraph1: e.target.value })}
@@ -792,7 +830,7 @@ const Settings = () => {
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">الفقرة 1 (AR)</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'الفقرة الأولى (AR)' : 'Paragraph 1 (AR)'}</label>
                 <Textarea
                   value={settings.skillsParagraph1Ar ?? ''}
                   onChange={e => setSettings({ ...settings, skillsParagraph1Ar: e.target.value })}
@@ -805,17 +843,17 @@ const Settings = () => {
 
           {/* Experience Section */}
           <div className="p-6 bg-card rounded-xl border border-border space-y-4">
-            <h2 className="text-lg font-bold text-foreground">Experience Section (قسم الخبرات)</h2>
+            <h2 className="text-lg font-bold text-foreground">{isAr ? 'قسم الخبرات والمسيرة' : 'Experience Section'}</h2>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">Badge Text (EN)</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'شارة القسم (EN)' : 'Badge Text (EN)'}</label>
                 <Input
                   value={settings.experienceBadge ?? 'Career History & Academic Journey'}
                   onChange={e => setSettings({ ...settings, experienceBadge: e.target.value })}
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">شعار السكشن (AR)</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'شارة القسم (AR)' : 'Section Badge (AR)'}</label>
                 <Input
                   value={settings.experienceBadgeAr ?? 'المسيرة المهنية والمحطات'}
                   onChange={e => setSettings({ ...settings, experienceBadgeAr: e.target.value })}
@@ -825,14 +863,14 @@ const Settings = () => {
             </div>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">Main Title (EN)</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'العنوان الرئيسي (EN)' : 'Main Title (EN)'}</label>
                 <Input
                   value={settings.experienceTitle ?? 'Experience.'}
                   onChange={e => setSettings({ ...settings, experienceTitle: e.target.value })}
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">العنوان الرئيسي (AR)</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'العنوان الرئيسي (AR)' : 'Main Title (AR)'}</label>
                 <Input
                   value={settings.experienceTitleAr ?? 'الخبرات والمؤهلات.'}
                   onChange={e => setSettings({ ...settings, experienceTitleAr: e.target.value })}
@@ -844,17 +882,17 @@ const Settings = () => {
 
           {/* Services Section */}
           <div className="p-6 bg-card rounded-xl border border-border space-y-4">
-            <h2 className="text-lg font-bold text-foreground">Services Section (قسم الخدمات)</h2>
+            <h2 className="text-lg font-bold text-foreground">{isAr ? 'قسم الخدمات البرمجية' : 'Services Section'}</h2>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">Badge Text (EN)</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'شارة القسم (EN)' : 'Badge Text (EN)'}</label>
                 <Input
                   value={settings.servicesBadge ?? 'Consulting & Offerings'}
                   onChange={e => setSettings({ ...settings, servicesBadge: e.target.value })}
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">شعار السكشن (AR)</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'شارة القسم (AR)' : 'Section Badge (AR)'}</label>
                 <Input
                   value={settings.servicesBadgeAr ?? 'الخدمات والاستشارات'}
                   onChange={e => setSettings({ ...settings, servicesBadgeAr: e.target.value })}
@@ -864,14 +902,14 @@ const Settings = () => {
             </div>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">Main Title (EN)</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'العنوان الرئيسي (EN)' : 'Main Title (EN)'}</label>
                 <Input
                   value={settings.servicesTitle ?? 'Services.'}
                   onChange={e => setSettings({ ...settings, servicesTitle: e.target.value })}
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">العنوان الرئيسي (AR)</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'العنوان الرئيسي (AR)' : 'Main Title (AR)'}</label>
                 <Input
                   value={settings.servicesTitleAr ?? 'ما الذي أقدمه لك.'}
                   onChange={e => setSettings({ ...settings, servicesTitleAr: e.target.value })}
@@ -883,17 +921,17 @@ const Settings = () => {
 
           {/* FAQ & Contact Section */}
           <div className="p-6 bg-card rounded-xl border border-border space-y-4">
-            <h2 className="text-lg font-bold text-foreground">FAQ & Contact Headings</h2>
+            <h2 className="text-lg font-bold text-foreground">{isAr ? 'عناوين الأسئلة الشائعة والتواصل' : 'FAQ & Contact Headings'}</h2>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">FAQ Title (EN)</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'عنوان الأسئلة الشائعة (EN)' : 'FAQ Title (EN)'}</label>
                 <Input
                   value={settings.faqTitle ?? 'Common Questions.'}
                   onChange={e => setSettings({ ...settings, faqTitle: e.target.value })}
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">عنوان الأسئلة الشائعة (AR)</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'عنوان الأسئلة الشائعة (AR)' : 'FAQ Title (AR)'}</label>
                 <Input
                   value={settings.faqTitleAr ?? 'الأسئلة الأكثر شيوعاً.'}
                   onChange={e => setSettings({ ...settings, faqTitleAr: e.target.value })}
@@ -903,14 +941,14 @@ const Settings = () => {
             </div>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">Contact Title (EN)</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'عنوان التواصل (EN)' : 'Contact Title (EN)'}</label>
                 <Input
                   value={settings.contactTitle ?? "Have an idea? Let's talk."}
                   onChange={e => setSettings({ ...settings, contactTitle: e.target.value })}
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">عنوان التواصل (AR)</label>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">{isAr ? 'عنوان التواصل (AR)' : 'Contact Title (AR)'}</label>
                 <Input
                   value={settings.contactTitleAr ?? 'لديك فكرة أو مشروع؟ دعنا نتحدث.'}
                   onChange={e => setSettings({ ...settings, contactTitleAr: e.target.value })}
@@ -922,13 +960,15 @@ const Settings = () => {
 
           <div className="flex justify-end pt-4">
             <Button size="lg" onClick={() => handleSaveSettings()} disabled={saving}>
-              {saving ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...</> : <><Save className="mr-2 h-4 w-4" /> Save All Settings</>}
+              {saving 
+                ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {isAr ? 'جاري الحفظ...' : 'Saving...'}</> 
+                : <><Save className="mr-2 h-4 w-4" /> {isAr ? 'حفظ كافة النصوص' : 'Save All Settings'}</>}
             </Button>
           </div>
         </div>
       )}
 
-      {/* TAB 3: Appearance & UI Styling (الثيمات والمظهر والـ UI) */}
+      {/* TAB 3: Appearance & UI Styling */}
       {activeTab === 'appearance' && (
         <div className="space-y-8 max-w-5xl">
           {/* Primary Theme Color Picker */}
@@ -936,8 +976,12 @@ const Settings = () => {
             <div className="flex items-center gap-2">
               <Palette className="text-emerald-500 w-5 h-5" />
               <div>
-                <h2 className="text-lg font-bold text-foreground">Primary Accent Color (لون الثيم الرئيسي)</h2>
-                <p className="text-xs text-muted-foreground">Controls ambient glowing orbs, button glows, and interactive accent highlights across the website.</p>
+                <h2 className="text-lg font-bold text-foreground">{isAr ? 'لون الثيم الرئيسي والتمييز' : 'Primary Accent Color'}</h2>
+                <p className="text-xs text-muted-foreground">
+                  {isAr 
+                    ? 'يتحكم في هالات التوهج المحيطية، وألوان الأزرار التفاعلية، والنقاط البارزة عبر الموقع.' 
+                    : 'Controls ambient glowing orbs, button glows, and interactive accent highlights across the website.'}
+                </p>
               </div>
             </div>
 
@@ -959,7 +1003,7 @@ const Settings = () => {
                     <span className={`w-8 h-8 rounded-full ${color.class} flex items-center justify-center shadow-md`}>
                       {isSelected && <Check size={16} className="text-white" />}
                     </span>
-                    <span className="text-xs font-semibold">{color.nameAr || color.name}</span>
+                    <span className="text-xs font-semibold">{isAr ? (color.nameAr || color.name) : color.name}</span>
                   </button>
                 );
               })}
@@ -971,9 +1015,11 @@ const Settings = () => {
             <div className="flex items-center gap-2">
               <Type className="text-emerald-500 w-5 h-5" />
               <div>
-                <h2 className="text-lg font-bold text-foreground">Custom Typography & Fonts (تخصيص الخطوط)</h2>
+                <h2 className="text-lg font-bold text-foreground">{isAr ? 'تخصيص الخطوط والطباعة' : 'Custom Typography & Fonts'}</h2>
                 <p className="text-xs text-muted-foreground">
-                  خصص الخطوط المستقلة لكل من واجهة الموقع العربية والإنجليزية. اختر من الخطوط الجاهزة بنقرة واحدة أو اكتب اسم أي خط من Google Fonts ليتم تطبيقه فوراً.
+                  {isAr 
+                    ? 'خصص الخطوط المستقلة لكل من واجهة الموقع العربية والإنجليزية. اختر من الخطوط الجاهزة بنقرة واحدة أو اكتب اسم أي خط من Google Fonts ليتم تطبيقه فوراً.'
+                    : 'Configure independent fonts for both Arabic and English interfaces. Pick popular fonts or enter any Google Fonts family name.'}
                 </p>
               </div>
             </div>
@@ -982,20 +1028,24 @@ const Settings = () => {
             <div className="p-4 rounded-xl border border-blue-500/20 bg-blue-500/5 text-xs text-muted-foreground flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
               <div className="flex items-center gap-2 text-foreground font-medium">
                 <Sparkles className="w-4 h-4 text-blue-500 shrink-0" />
-                <span>الموقع يمتلك خطين مستقلين: خط للواجهة العربية (RTL) وخط للواجهة الإنجليزية (LTR).</span>
+                <span>
+                  {isAr 
+                    ? 'الموقع يمتلك خطين مستقلين: خط للواجهة العربية (RTL) وخط للواجهة الإنجليزية (LTR).'
+                    : 'The site uses two independent font sets: Arabic (RTL) and English (LTR).'}
+                </span>
               </div>
               <span className="text-[11px] bg-blue-500/10 text-blue-600 dark:text-blue-400 px-2.5 py-1 rounded-md font-semibold">
-                اللغة الافتراضية الحالية للموقع: العربية (Cairo)
+                {isAr ? 'الخط العربي الافتراضي: Cairo' : 'Default Arabic Font: Cairo'}
               </span>
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
-              {/* Arabic Font Configuration (Placed First for RTL priority) */}
+              {/* Arabic Font Configuration */}
               <div className="p-5 rounded-xl border border-border/80 bg-muted/20 space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-bold text-foreground flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                    خط الواجهة العربية (Arabic Font)
+                    {isAr ? 'خط الواجهة العربية' : 'Arabic Font'}
                   </span>
                   <span className="text-[11px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono font-semibold">
                     {settings.fontFamilyAr || 'Cairo'}
@@ -1005,7 +1055,7 @@ const Settings = () => {
                 <div className="space-y-3">
                   <div>
                     <label className="text-xs font-semibold text-foreground/80 block mb-1.5">
-                      اختر خطاً سريعاً (Popular Arabic Fonts):
+                      {isAr ? 'خطوط عربية شائعة:' : 'Popular Arabic Fonts:'}
                     </label>
                     <div className="flex flex-wrap gap-1.5 mb-2.5">
                       {[
@@ -1028,34 +1078,34 @@ const Settings = () => {
                     </div>
 
                     <label className="text-xs font-semibold text-foreground/80 block mb-1.5">
-                      اسم الخط العربي (أو اكتب أي خط يدوي)
+                      {isAr ? 'اسم الخط العربي (أو اكتب اسم أي خط يدوي)' : 'Arabic Font Family Name'}
                     </label>
                     <Input
                       type="text"
                       dir="rtl"
-                      placeholder="مثال: Cairo, Tajawal, Alexandria, Almarai..."
+                      placeholder="Cairo, Tajawal, Alexandria..."
                       value={settings.fontFamilyAr || ''}
                       onChange={e => setSettings({ ...settings, fontFamilyAr: e.target.value })}
-                      className="bg-background text-sm text-right font-medium"
+                      className="bg-background text-sm font-medium"
                     />
-                    <p className="text-[11px] text-muted-foreground mt-1 text-right">
-                      هذا هو الخط الذي يظهر على الموقع بالكامل عند التصفح باللغة العربية.
+                    <p className="text-[11px] text-muted-foreground mt-1">
+                      {isAr ? 'هذا هو الخط الذي يظهر على الموقع بالكامل عند التصفح باللغة العربية.' : 'Applied across the site when viewing in Arabic.'}
                     </p>
                   </div>
 
                   <div>
                     <label className="text-xs font-semibold text-foreground/80 block mb-1.5">
-                      رابط ملف الخط الخارجي (اختياري - Custom CDN / Webfont URL)
+                      {isAr ? 'رابط ملف الخط الخارجي (اختياري - Custom CDN / Webfont URL)' : 'Custom CDN / Webfont URL (Optional)'}
                     </label>
                     <Input
                       type="url"
-                      placeholder="https://fonts.googleapis.com/... أو رابط CDN خارجي"
+                      placeholder="https://fonts.googleapis.com/... or custom CDN"
                       value={settings.fontUrlAr || ''}
                       onChange={e => setSettings({ ...settings, fontUrlAr: e.target.value })}
                       className="bg-background text-sm font-mono text-xs"
                     />
-                    <p className="text-[11px] text-muted-foreground mt-1 text-right">
-                      اتركه فارغاً لجلب الخط تلقائياً من Google Fonts فور كتابة اسمه.
+                    <p className="text-[11px] text-muted-foreground mt-1">
+                      {isAr ? 'اتركه فارغاً لجلب الخط تلقائياً من Google Fonts فور كتابة اسمه.' : 'Leave empty to load automatically from Google Fonts by name.'}
                     </p>
                   </div>
                 </div>
@@ -1063,10 +1113,10 @@ const Settings = () => {
                 {/* Arabic Live Font Preview */}
                 <div className="pt-3 border-t border-border/60">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider text-right">
-                      معاينة حية للخط العربي (Live Preview)
+                    <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                      {isAr ? 'معاينة حية للخط العربي' : 'Arabic Live Font Preview'}
                     </span>
-                    <span className="text-[10px] text-emerald-500 font-medium">مباشر</span>
+                    <span className="text-[10px] text-emerald-500 font-medium">{isAr ? 'مباشر' : 'Live'}</span>
                   </div>
                   <div
                     dir="rtl"
@@ -1088,7 +1138,7 @@ const Settings = () => {
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-bold text-foreground flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-                    English Font (الخط الإنجليزي)
+                    {isAr ? 'خط الواجهة الإنجليزية' : 'English Interface Font'}
                   </span>
                   <span className="text-[11px] px-2 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 font-mono font-semibold">
                     {settings.fontFamilyEn || 'Geist'}
@@ -1098,7 +1148,7 @@ const Settings = () => {
                 <div className="space-y-3">
                   <div>
                     <label className="text-xs font-semibold text-foreground/80 block mb-1.5">
-                      Quick Pick (Popular Latin Fonts):
+                      {isAr ? 'خطوط لاتينية شائعة:' : 'Popular Latin Fonts:'}
                     </label>
                     <div className="flex flex-wrap gap-1.5 mb-2.5">
                       {[
@@ -1121,7 +1171,7 @@ const Settings = () => {
                     </div>
 
                     <label className="text-xs font-semibold text-foreground/80 block mb-1.5">
-                      Font Family Name (اسم الخط)
+                      {isAr ? 'اسم الخط الإنجليزي' : 'English Font Family Name'}
                     </label>
                     <Input
                       type="text"
@@ -1131,13 +1181,13 @@ const Settings = () => {
                       className="bg-background text-sm font-medium"
                     />
                     <p className="text-[11px] text-muted-foreground mt-1">
-                      يُطبق عند تصفح الموقع باللغة الإنجليزية (LTR).
+                      {isAr ? 'يُطبق عند تصفح الموقع باللغة الإنجليزية (LTR).' : 'Applied across the site when viewing in English (LTR).'}
                     </p>
                   </div>
 
                   <div>
                     <label className="text-xs font-semibold text-foreground/80 block mb-1.5">
-                      Custom Webfont / CDN URL (اختياري - رابط ملف الخط)
+                      {isAr ? 'رابط ملف الخط الخارجي (اختياري)' : 'Custom Webfont / CDN URL (Optional)'}
                     </label>
                     <Input
                       type="url"
@@ -1147,7 +1197,7 @@ const Settings = () => {
                       className="bg-background text-sm font-mono text-xs"
                     />
                     <p className="text-[11px] text-muted-foreground mt-1">
-                      اتركه فارغاً ليتم توليد واستدعاء رابط Google Fonts تلقائياً بحسب الاسم.
+                      {isAr ? 'اتركه فارغاً ليتم توليد واستدعاء رابط Google Fonts تلقائياً بحسب الاسم.' : 'Leave empty to generate Google Fonts URL automatically.'}
                     </p>
                   </div>
                 </div>
@@ -1156,9 +1206,9 @@ const Settings = () => {
                 <div className="pt-3 border-t border-border/60">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                      Live Preview (معاينة حية)
+                      {isAr ? 'معاينة حية للخط الإنجليزي' : 'English Live Font Preview'}
                     </span>
-                    <span className="text-[10px] text-blue-500 font-medium">Live</span>
+                    <span className="text-[10px] text-blue-500 font-medium">{isAr ? 'مباشر' : 'Live'}</span>
                   </div>
                   <div
                     className="p-4 rounded-lg bg-background border border-border space-y-2 transition-all shadow-sm"
@@ -1181,8 +1231,10 @@ const Settings = () => {
             <div className="flex items-center gap-2">
               <LayoutGrid className="text-emerald-500 w-5 h-5" />
               <div>
-                <h2 className="text-lg font-bold text-foreground">Card Styles & Background Atmosphere</h2>
-                <p className="text-xs text-muted-foreground">Select how project cards, service cards, and UI containers appear.</p>
+                <h2 className="text-lg font-bold text-foreground">{isAr ? 'أنماط الكروت وأجواء الخلفية' : 'Card Styles & Background Atmosphere'}</h2>
+                <p className="text-xs text-muted-foreground">
+                  {isAr ? 'حدد أسلوب ظهور كروت المشاريع والخدمات وعناصر الواجهة.' : 'Select how project cards, service cards, and UI containers appear.'}
+                </p>
               </div>
             </div>
 
@@ -1195,7 +1247,7 @@ const Settings = () => {
                     key={style.id}
                     type="button"
                     onClick={() => setSettings({ ...settings, cardStyle: style.id })}
-                    className={`p-4 rounded-xl border text-left transition-all flex flex-col justify-between cursor-pointer ${
+                    className={`p-4 rounded-xl border text-start transition-all flex flex-col justify-between cursor-pointer ${
                       isSelected ? 'border-primary bg-accent/15 ring-2 ring-primary/40' : 'border-border bg-card/60 hover:bg-muted'
                     }`}
                   >
@@ -1214,14 +1266,14 @@ const Settings = () => {
             {/* Background Pattern & Glow Toggle */}
             <div className="grid md:grid-cols-2 gap-6 pt-4 border-t border-border">
               <div className="space-y-2">
-                <label className="text-sm font-semibold">Background Pattern Overlay</label>
+                <label className="text-sm font-semibold">{isAr ? 'نمط شبكة الخلفية (Pattern)' : 'Background Pattern Overlay'}</label>
                 <div className="grid grid-cols-1 gap-2">
                   {PATTERNS.map(p => (
                     <button
                       key={p.id}
                       type="button"
                       onClick={() => setSettings({ ...settings, backgroundPattern: p.id })}
-                      className={`p-3 rounded-lg border text-left text-sm transition-all flex justify-between items-center cursor-pointer ${
+                      className={`p-3 rounded-lg border text-start text-sm transition-all flex justify-between items-center cursor-pointer ${
                         (settings.backgroundPattern || 'subtle-grid') === p.id
                           ? 'border-primary bg-accent/15 font-bold text-foreground'
                           : 'border-border text-muted-foreground hover:bg-muted'
@@ -1236,12 +1288,14 @@ const Settings = () => {
 
               {/* Ambient Glow Toggle */}
               <div className="space-y-3">
-                <label className="text-sm font-semibold">Ambient Glow Lighting (التوهج المحيطي)</label>
+                <label className="text-sm font-semibold">{isAr ? 'الإضاءة والتوهج المحيطي' : 'Ambient Glow Lighting'}</label>
                 <div className="p-4 rounded-xl border border-border bg-muted/40 space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-bold">Enable Atmospheric Glowing Orbs</p>
-                      <p className="text-xs text-muted-foreground">Deep GPU-composited glowing atmosphere behind the page.</p>
+                      <p className="text-sm font-bold">{isAr ? 'تفعيل كرات التوهج الضوئي المحيطية' : 'Enable Atmospheric Glowing Orbs'}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {isAr ? 'إضاءة توهج سينمائية معززة ببطاقة الرسوميات خلف محتوى الصفحة.' : 'Deep GPU-composited glowing atmosphere behind the page.'}
+                      </p>
                     </div>
                     <input
                       type="checkbox"
@@ -1259,7 +1313,7 @@ const Settings = () => {
           <div className="p-6 bg-card rounded-xl border border-border space-y-4">
             <div className="flex items-center gap-2">
               <Eye className="text-emerald-500 w-5 h-5" />
-              <h2 className="text-lg font-bold text-foreground">Live UI Component Preview (معاينة حية للمظهر)</h2>
+              <h2 className="text-lg font-bold text-foreground">{isAr ? 'معاينة حية لمظهر العناصر والبطاقات' : 'Live UI Component Preview'}</h2>
             </div>
             <div className="p-8 rounded-2xl bg-background border border-border flex flex-col sm:flex-row gap-6 items-center justify-center">
               <div className={`p-6 rounded-2xl max-w-sm w-full border ${
@@ -1273,15 +1327,17 @@ const Settings = () => {
               }`}>
                 <div className="flex items-center gap-2 mb-3">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                  <span className="text-xs font-mono font-semibold uppercase text-muted-foreground">Sample Card Preview</span>
+                  <span className="text-xs font-mono font-semibold uppercase text-muted-foreground">{isAr ? 'عينة بطاقة تجريبية' : 'Sample Card Preview'}</span>
                 </div>
-                <h3 className="text-lg font-bold mb-2">Modern Digital Solution</h3>
+                <h3 className="text-lg font-bold mb-2">{isAr ? 'حل رقمي حديث ومتطور' : 'Modern Digital Solution'}</h3>
                 <p className="text-xs text-muted-foreground leading-relaxed mb-4">
-                  This preview dynamically reflects your chosen theme color ({settings.primaryThemeColor || 'emerald'}), card style ({settings.cardStyle || 'glassmorphic'}), and font choices.
+                  {isAr 
+                    ? `تعكس هذه المعاينة ديناميكياً لون السمة المختار (${settings.primaryThemeColor || 'emerald'})، ونمط البطاقات (${settings.cardStyle || 'glassmorphic'})، ونوع الخطوط المحددة.`
+                    : `This preview dynamically reflects your chosen theme color (${settings.primaryThemeColor || 'emerald'}), card style (${settings.cardStyle || 'glassmorphic'}), and font choices.`}
                 </p>
                 <div className="flex items-center justify-between pt-2 border-t border-border/50">
-                  <span className="text-xs font-mono font-bold text-emerald-400">Status: Active</span>
-                  <Button size="sm">Explore →</Button>
+                  <span className="text-xs font-mono font-bold text-emerald-400">{isAr ? 'الحالة: نشط' : 'Status: Active'}</span>
+                  <Button size="sm">{isAr ? 'استكشاف ←' : 'Explore →'}</Button>
                 </div>
               </div>
             </div>
@@ -1290,7 +1346,9 @@ const Settings = () => {
           {/* Save Button */}
           <div className="flex justify-end pt-4">
             <Button size="lg" onClick={() => handleSaveSettings()} disabled={saving} className="min-w-[160px]">
-              {saving ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...</> : <><Save className="mr-2 h-4 w-4" /> Save Appearance</>}
+              {saving 
+                ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {isAr ? 'جاري الحفظ...' : 'Saving...'}</> 
+                : <><Save className="mr-2 h-4 w-4" /> {isAr ? 'حفظ إعدادات المظهر' : 'Save Appearance'}</>}
             </Button>
           </div>
         </div>

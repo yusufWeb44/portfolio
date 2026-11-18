@@ -9,7 +9,8 @@ import api from '../../services/api';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Textarea } from '../../components/ui/Textarea';
-import { getMediaUrl } from '../../utils/mediaUrl';
+import { resolveImageUrl } from '../../utils/mediaUrl';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 export interface ReviewItem {
   id: string;
@@ -28,6 +29,8 @@ export interface ReviewItem {
 }
 
 const AdminReviews = () => {
+  const { currentLang, currentDirection } = useLanguage();
+  const isAr = currentLang === 'ar';
   const [reviews, setReviews] = useState<ReviewItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
@@ -261,12 +264,12 @@ const AdminReviews = () => {
   };
 
   return (
-    <div className="relative min-h-[85vh] pb-20">
-      <Helmet><title>Reviews & Testimonials | Admin</title></Helmet>
+    <div className="relative min-h-[85vh] pb-20" dir={currentDirection}>
+      <Helmet><title>{isAr ? 'الآراء والتقييمات | لوحة التحكم' : 'Reviews & Testimonials | Admin'}</title></Helmet>
 
       {/* Floating Toast */}
       {toast && (
-        <div className={`fixed bottom-5 right-5 z-50 px-4 py-3 rounded-xl shadow-xl border flex items-center gap-2.5 animate-in slide-in-from-bottom-5 ${
+        <div className={`fixed bottom-5 ${isAr ? 'left-5' : 'right-5'} z-50 px-4 py-3 rounded-xl shadow-xl border flex items-center gap-2.5 animate-in slide-in-from-bottom-5 ${
           toast.type === 'success' ? 'bg-card border-emerald-500/50 text-foreground' : 'bg-destructive text-destructive-foreground'
         }`}>
           {toast.type === 'success' && <Check size={16} className="text-emerald-500" />}
@@ -282,15 +285,19 @@ const AdminReviews = () => {
               <MessageSquareQuote size={20} />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Reviews & Testimonials</h1>
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+                {isAr ? 'آراء العملاء والشهادات' : 'Reviews & Testimonials'}
+              </h1>
               <p className="text-muted-foreground text-xs sm:text-sm mt-0.5">
-                Manage client testimonials, roles, avatars, and headings displayed in the reviews carousel.
+                {isAr
+                  ? 'إدارة شهادات العملاء، المسميات، الصور الشخصية، وعناوين قسم الآراء في الموقع.'
+                  : 'Manage client testimonials, roles, avatars, and headings displayed in the reviews carousel.'}
               </p>
             </div>
           </div>
         </div>
         <Button onClick={openAddModal} className="gap-2 bg-emerald-600 hover:bg-emerald-500 text-white shrink-0">
-          <Plus size={16} /> Add Testimonial
+          <Plus size={16} /> {isAr ? 'إضافة رأي عميل' : 'Add Testimonial'}
         </Button>
       </div>
 
@@ -299,10 +306,12 @@ const AdminReviews = () => {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-border/60 pb-4">
           <div>
             <h2 className="text-base sm:text-lg font-bold text-foreground">
-              Reviews Section Headings & Subtitle
+              {isAr ? 'عناوين ووصف قسم الآراء' : 'Reviews Section Headings & Subtitle'}
             </h2>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Customize the section badge, main heading, and narrative subtitle in English and Arabic.
+              {isAr
+                ? 'تخصيص شارة القسم، العنوان الرئيسي، والوصف التوضيحي باللغتين العربية والإنجليزية.'
+                : 'Customize the section badge, main heading, and narrative subtitle in English and Arabic.'}
             </p>
           </div>
           <Button
@@ -311,14 +320,16 @@ const AdminReviews = () => {
             className="gap-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs h-9 px-4 shrink-0"
           >
             {savingSettings ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
-            Save Section Headings
+            {isAr ? 'حفظ عناوين القسم' : 'Save Section Headings'}
           </Button>
         </div>
 
         {/* Badge Inputs */}
         <div className="grid md:grid-cols-2 gap-4">
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-muted-foreground block">Badge Text (EN)</label>
+            <label className="text-xs font-semibold text-muted-foreground block">
+              {isAr ? 'شارة القسم (EN)' : 'Badge Text (EN)'}
+            </label>
             <Input
               value={sectionSettings.reviewsBadge}
               onChange={e => setSectionSettings({ ...sectionSettings, reviewsBadge: e.target.value })}
@@ -326,7 +337,9 @@ const AdminReviews = () => {
             />
           </div>
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-muted-foreground block">شارة القسم (عربي)</label>
+            <label className="text-xs font-semibold text-muted-foreground block">
+              {isAr ? 'شارة القسم (عربي)' : 'Badge Text (AR)'}
+            </label>
             <Input
               value={sectionSettings.reviewsBadgeAr}
               onChange={e => setSectionSettings({ ...sectionSettings, reviewsBadgeAr: e.target.value })}
@@ -340,7 +353,9 @@ const AdminReviews = () => {
         {/* Main Title Inputs */}
         <div className="grid md:grid-cols-2 gap-4">
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-muted-foreground block">Main Title (EN)</label>
+            <label className="text-xs font-semibold text-muted-foreground block">
+              {isAr ? 'العنوان الرئيسي (EN)' : 'Main Title (EN)'}
+            </label>
             <Input
               value={sectionSettings.reviewsTitle}
               onChange={e => setSectionSettings({ ...sectionSettings, reviewsTitle: e.target.value })}
@@ -348,7 +363,9 @@ const AdminReviews = () => {
             />
           </div>
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-muted-foreground block">العنوان الرئيسي (عربي)</label>
+            <label className="text-xs font-semibold text-muted-foreground block">
+              {isAr ? 'العنوان الرئيسي (عربي)' : 'Main Title (AR)'}
+            </label>
             <Input
               value={sectionSettings.reviewsTitleAr}
               onChange={e => setSectionSettings({ ...sectionSettings, reviewsTitleAr: e.target.value })}
@@ -362,7 +379,9 @@ const AdminReviews = () => {
         {/* Subtitle Inputs */}
         <div className="grid md:grid-cols-2 gap-4">
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-muted-foreground block">Subtitle (EN)</label>
+            <label className="text-xs font-semibold text-muted-foreground block">
+              {isAr ? 'الوصف التوضيحي (EN)' : 'Subtitle (EN)'}
+            </label>
             <Textarea
               rows={2}
               value={sectionSettings.reviewsSubtitle}
@@ -371,7 +390,9 @@ const AdminReviews = () => {
             />
           </div>
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-muted-foreground block">الوصف التوضيحي (عربي)</label>
+            <label className="text-xs font-semibold text-muted-foreground block">
+              {isAr ? 'الوصف التوضيحي (عربي)' : 'Subtitle (AR)'}
+            </label>
             <Textarea
               rows={2}
               value={sectionSettings.reviewsSubtitleAr}
@@ -387,9 +408,9 @@ const AdminReviews = () => {
       {/* Reviews List Header & Counter */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
-          <span>Active Testimonials</span>
+          <span>{isAr ? 'الآراء النشطة' : 'Active Testimonials'}</span>
           <span className="text-xs font-mono font-semibold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
-            {reviews.length} Total
+            {reviews.length} {isAr ? 'إجمالي' : 'Total'}
           </span>
         </h2>
       </div>
@@ -398,17 +419,19 @@ const AdminReviews = () => {
       {loading ? (
         <div className="py-20 text-center flex flex-col items-center justify-center gap-3">
           <Loader2 size={28} className="animate-spin text-emerald-500" />
-          <p className="text-sm text-muted-foreground">Loading reviews...</p>
+          <p className="text-sm text-muted-foreground">{isAr ? 'جاري تحميل الآراء...' : 'Loading reviews...'}</p>
         </div>
       ) : reviews.length === 0 ? (
         <div className="py-16 text-center border-2 border-dashed border-border/70 rounded-2xl bg-card/30">
           <Quote className="w-12 h-12 mx-auto text-muted-foreground/40 mb-3" />
-          <h3 className="text-base font-bold text-foreground">No testimonials added yet</h3>
+          <h3 className="text-base font-bold text-foreground">{isAr ? 'لا توجد آراء مضافة بعد' : 'No testimonials added yet'}</h3>
           <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto mb-4">
-            Click the button below to add your first client endorsement to the portfolio.
+            {isAr
+              ? 'انقر على الزر أدناه لإضافة أول شهادة أو رأي عميل إلى معرض البورتفوليو.'
+              : 'Click the button below to add your first client endorsement to the portfolio.'}
           </p>
           <Button onClick={openAddModal} className="bg-emerald-600 hover:bg-emerald-500 text-white gap-2">
-            <Plus size={15} /> Add First Testimonial
+            <Plus size={15} /> {isAr ? 'إضافة أول رأي' : 'Add First Testimonial'}
           </Button>
         </div>
       ) : (
@@ -430,7 +453,7 @@ const AdminReviews = () => {
                     <div className="relative w-12 h-12 rounded-full overflow-hidden border border-border/80 bg-muted shrink-0 shadow-xs">
                       {review.avatarUrl ? (
                         <img
-                          src={getMediaUrl(review.avatarUrl)}
+                          src={resolveImageUrl(review.avatarUrl)}
                           alt={review.name}
                           className="w-full h-full object-cover"
                           onError={(e) => {
@@ -467,7 +490,7 @@ const AdminReviews = () => {
                       disabled={index === 0}
                       onClick={() => handleMove(index, 'up')}
                       className="p-1 rounded hover:bg-muted text-muted-foreground disabled:opacity-30 disabled:hover:bg-transparent"
-                      title="Move up"
+                      title={isAr ? 'تحريك لأعلى' : 'Move up'}
                     >
                       <ArrowUp size={14} />
                     </button>
@@ -476,7 +499,7 @@ const AdminReviews = () => {
                       disabled={index === reviews.length - 1}
                       onClick={() => handleMove(index, 'down')}
                       className="p-1 rounded hover:bg-muted text-muted-foreground disabled:opacity-30 disabled:hover:bg-transparent"
-                      title="Move down"
+                      title={isAr ? 'تحريك لأسفل' : 'Move down'}
                     >
                       <ArrowDown size={14} />
                     </button>
@@ -508,7 +531,7 @@ const AdminReviews = () => {
                   }`}
                 >
                   {review.isEnabled ? <Eye size={12} /> : <EyeOff size={12} />}
-                  <span>{review.isEnabled ? 'Visible' : 'Hidden'}</span>
+                  <span>{review.isEnabled ? (isAr ? 'مرئي' : 'Visible') : (isAr ? 'مخفي' : 'Hidden')}</span>
                 </button>
 
                 <div className="flex items-center gap-1.5">
@@ -518,14 +541,14 @@ const AdminReviews = () => {
                     onClick={() => openEditModal(review)}
                     className="h-7 px-2.5 text-xs gap-1"
                   >
-                    <Edit3 size={12} /> Edit
+                    <Edit3 size={12} /> {isAr ? 'تعديل' : 'Edit'}
                   </Button>
                   <Button
                     size="sm"
                     variant="destructive"
                     onClick={() => handleDeleteReview(review.id, review.name)}
                     className="h-7 w-7 p-0 text-xs"
-                    title="Delete"
+                    title={isAr ? 'حذف' : 'Delete'}
                   >
                     <Trash2 size={12} />
                   </Button>
@@ -539,12 +562,12 @@ const AdminReviews = () => {
       {/* Add / Edit Review Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-          <div className="relative w-full max-w-2xl bg-card border border-border rounded-2xl shadow-2xl p-6 sm:p-7 max-h-[92vh] overflow-y-auto">
+          <div className="relative w-full max-w-2xl bg-card border border-border rounded-2xl shadow-2xl p-6 sm:p-7 max-h-[92vh] overflow-y-auto" dir={currentDirection}>
             {/* Modal Header */}
             <div className="flex items-center justify-between border-b border-border/60 pb-4 mb-5">
               <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
                 <Quote size={18} className="text-emerald-500" />
-                <span>{editingReview ? 'Edit Testimonial' : 'Add New Testimonial'}</span>
+                <span>{editingReview ? (isAr ? 'تعديل شهادة العميل' : 'Edit Testimonial') : (isAr ? 'إضافة شهادة عميل جديدة' : 'Add New Testimonial')}</span>
               </h3>
               <button
                 type="button"
@@ -561,7 +584,7 @@ const AdminReviews = () => {
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-xs font-semibold text-foreground block">
-                    Person Name (EN) <span className="text-destructive">*</span>
+                    {isAr ? 'اسم الشخص (EN)' : 'Person Name (EN)'} <span className="text-destructive">*</span>
                   </label>
                   <Input
                     required
@@ -572,7 +595,7 @@ const AdminReviews = () => {
                 </div>
                 <div className="space-y-1">
                   <label className="text-xs font-semibold text-foreground block">
-                    الاسم (عربي)
+                    {isAr ? 'اسم الشخص (عربي)' : 'Person Name (AR)'}
                   </label>
                   <Input
                     value={formData.nameAr}
@@ -588,7 +611,7 @@ const AdminReviews = () => {
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-xs font-semibold text-foreground block">
-                    Role / Position (EN) <span className="text-destructive">*</span>
+                    {isAr ? 'المسمى الوظيفي (EN)' : 'Role / Position (EN)'} <span className="text-destructive">*</span>
                   </label>
                   <Input
                     required
@@ -599,7 +622,7 @@ const AdminReviews = () => {
                 </div>
                 <div className="space-y-1">
                   <label className="text-xs font-semibold text-foreground block">
-                    المسمى الوظيفي / الدور (عربي)
+                    {isAr ? 'المسمى الوظيفي (عربي)' : 'Role / Position (AR)'}
                   </label>
                   <Input
                     value={formData.roleAr}
@@ -615,7 +638,7 @@ const AdminReviews = () => {
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-xs font-semibold text-foreground block">
-                    LinkedIn Profile URL
+                    {isAr ? 'رابط حساب LinkedIn' : 'LinkedIn Profile URL'}
                   </label>
                   <Input
                     value={formData.linkedinUrl}
@@ -625,7 +648,7 @@ const AdminReviews = () => {
                 </div>
                 <div className="space-y-1">
                   <label className="text-xs font-semibold text-foreground block">
-                    GitHub Profile URL
+                    {isAr ? 'رابط حساب GitHub' : 'GitHub Profile URL'}
                   </label>
                   <Input
                     value={formData.githubUrl}
@@ -638,14 +661,14 @@ const AdminReviews = () => {
               {/* Row 4: Avatar Upload & Direct URL */}
               <div className="space-y-2 pt-1 border-t border-border/40">
                 <label className="text-xs font-semibold text-foreground block">
-                  Avatar Image (Photo)
+                  {isAr ? 'الصورة الشخصية (Avatar)' : 'Avatar Image (Photo)'}
                 </label>
                 <div className="flex items-center gap-4">
                   {/* Avatar Preview */}
                   <div className="relative w-14 h-14 rounded-full overflow-hidden border-2 border-border/80 bg-muted shrink-0 shadow-sm">
                     {formData.avatarUrl ? (
                       <img
-                        src={getMediaUrl(formData.avatarUrl)}
+                        src={resolveImageUrl(formData.avatarUrl)}
                         alt="Preview"
                         className="w-full h-full object-cover"
                       />
@@ -668,7 +691,7 @@ const AdminReviews = () => {
                         className="gap-1.5 text-xs h-8"
                       >
                         {uploadingAvatar ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />}
-                        <span>{uploadingAvatar ? 'Uploading...' : 'Upload Avatar'}</span>
+                        <span>{uploadingAvatar ? (isAr ? 'جاري الرفع...' : 'Uploading...') : (isAr ? 'رفع صورة أفاتار' : 'Upload Avatar')}</span>
                       </Button>
                       <input
                         ref={fileInputRef}
@@ -681,7 +704,7 @@ const AdminReviews = () => {
                     <Input
                       value={formData.avatarUrl}
                       onChange={e => setFormData({ ...formData, avatarUrl: e.target.value })}
-                      placeholder="Or enter direct image URL / path..."
+                      placeholder={isAr ? 'أو أدخل رابط الصورة المباشر...' : 'Or enter direct image URL / path...'}
                       className="text-xs h-8"
                     />
                   </div>
@@ -691,7 +714,7 @@ const AdminReviews = () => {
               {/* Row 5: Review Text (EN) */}
               <div className="space-y-1 pt-1 border-t border-border/40">
                 <label className="text-xs font-semibold text-foreground block">
-                  Review / Testimonial (EN) <span className="text-destructive">*</span>
+                  {isAr ? 'نص الرأي والشهادة (EN)' : 'Review / Testimonial (EN)'} <span className="text-destructive">*</span>
                 </label>
                 <Textarea
                   required
@@ -705,7 +728,7 @@ const AdminReviews = () => {
               {/* Row 6: Review Text (AR) */}
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-foreground block">
-                  نص الرأي والشهادة (عربي)
+                  {isAr ? 'نص الرأي والشهادة (عربي)' : 'Review / Testimonial (AR)'}
                 </label>
                 <Textarea
                   rows={3}
@@ -726,11 +749,11 @@ const AdminReviews = () => {
                     onChange={e => setFormData({ ...formData, isEnabled: e.target.checked })}
                     className="rounded border-border text-emerald-500 focus:ring-emerald-500"
                   />
-                  <span>Display on portfolio (Enabled)</span>
+                  <span>{isAr ? 'عرض في الموقع (مفعل)' : 'Display on portfolio (Enabled)'}</span>
                 </label>
 
                 <div className="flex items-center gap-2">
-                  <label className="text-xs font-semibold text-muted-foreground">Order:</label>
+                  <label className="text-xs font-semibold text-muted-foreground">{isAr ? 'الترتيب:' : 'Order:'}</label>
                   <Input
                     type="number"
                     value={formData.order}
@@ -748,7 +771,7 @@ const AdminReviews = () => {
                   onClick={() => setIsModalOpen(false)}
                   disabled={savingReview}
                 >
-                  Cancel
+                  {isAr ? 'إلغاء' : 'Cancel'}
                 </Button>
                 <Button
                   type="submit"
@@ -756,7 +779,7 @@ const AdminReviews = () => {
                   className="bg-emerald-600 hover:bg-emerald-500 text-white gap-1.5"
                 >
                   {savingReview ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
-                  <span>{editingReview ? 'Save Changes' : 'Add Testimonial'}</span>
+                  <span>{editingReview ? (isAr ? 'حفظ التعديلات' : 'Save Changes') : (isAr ? 'إضافة الرأي' : 'Add Testimonial')}</span>
                 </Button>
               </div>
             </form>
