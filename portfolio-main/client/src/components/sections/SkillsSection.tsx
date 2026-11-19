@@ -513,15 +513,23 @@ const SkillsSection = () => {
             {/* Headline */}
             <div>
               <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-foreground tracking-tight leading-[1.15]">
-                {mainTitle === 'Engineered Core Capabilities' ? (
-                  <>
-                    <SplitText text="Engineered Core" delay={30} duration={0.45} />{' '}
-                    <span className="text-emerald-400">
-                      <SplitText text="Capabilities" delay={30} duration={0.45} />
-                    </span>
-                  </>
+                {isMobile ? (
+                  mainTitle === 'Engineered Core Capabilities' ? (
+                    <>Engineered Core <span className="text-emerald-400">Capabilities</span></>
+                  ) : (
+                    String(mainTitle)
+                  )
                 ) : (
-                  <SplitText text={String(mainTitle)} delay={30} duration={0.45} />
+                  mainTitle === 'Engineered Core Capabilities' ? (
+                    <>
+                      <SplitText text="Engineered Core" delay={30} duration={0.45} />{' '}
+                      <span className="text-emerald-400">
+                        <SplitText text="Capabilities" delay={30} duration={0.45} />
+                      </span>
+                    </>
+                  ) : (
+                    <SplitText text={String(mainTitle)} delay={30} duration={0.45} />
+                  )
                 )}
               </h2>
             </div>

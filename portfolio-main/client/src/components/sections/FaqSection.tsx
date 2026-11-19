@@ -28,22 +28,27 @@ interface FAQProps {
   [key: string]: any;
 }
 
-const FAQHeader = ({ title, subtitle }: { title: string; subtitle?: string }) => (
-  <div className="relative z-10 flex flex-col items-start justify-start mb-6 sm:mb-8 md:mb-10">
-    <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight leading-[1.15] text-foreground mb-2 sm:mb-3">
-      <SplitText
-        text={title}
-        delay={35}
-        duration={0.45}
-      />
-    </h2>
-    {subtitle && (
-      <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-2xl">
-        {subtitle}
-      </p>
-    )}
-  </div>
-);
+const FAQHeader = ({ title, subtitle }: { title: string; subtitle?: string }) => {
+  const isMobile = useIsMobile();
+  return (
+    <div className="relative z-10 flex flex-col items-start justify-start mb-6 sm:mb-8 md:mb-10">
+      <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight leading-[1.15] text-foreground mb-2 sm:mb-3">
+        {isMobile ? title : (
+          <SplitText
+            text={title}
+            delay={35}
+            duration={0.45}
+          />
+        )}
+      </h2>
+      {subtitle && (
+        <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-2xl">
+          {subtitle}
+        </p>
+      )}
+    </div>
+  );
+};
 
 /* ─── FAQ Tabs ───────────────────────────────────────────────────── */
 const FAQTabs = ({

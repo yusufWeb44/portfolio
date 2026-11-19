@@ -144,11 +144,15 @@ const AboutSection = () => {
             {/* Main Title */}
             <div>
               <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-foreground tracking-tight leading-[1.22] pb-1">
-                <SplitText
-                  text={displayHeadline}
-                  delay={30}
-                  duration={0.5}
-                />
+                {isMobile ? (
+                  displayHeadline
+                ) : (
+                  <SplitText
+                    text={displayHeadline}
+                    delay={30}
+                    duration={0.5}
+                  />
+                )}
               </h2>
             </div>
 

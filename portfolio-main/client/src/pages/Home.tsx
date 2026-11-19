@@ -514,22 +514,35 @@ const Home = () => {
       ═══════════════════════════════════════════════════════════════ */}
       <section id="experience" className="scroll-mt-24 py-12 sm:py-14 md:py-16 lg:py-20 relative z-10 overflow-x-clip">
         <div className="max-w-7xl mx-auto space-y-8 sm:space-y-10 px-4 sm:px-6 lg:px-8 mb-6 sm:mb-8">
-          <FadeIn>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground leading-[1.15] mb-3 sm:mb-4">
-              <SplitText
-                text={resolveField('experience.title', settings?.experienceTitleAr, settings?.experienceTitle, 'Experience.')}
-                delay={35}
-                duration={0.45}
-              />
-            </h2>
-            <div className="max-w-2xl">
-              <BlurText
-                text={resolveField('experience.subtitle', settings?.experienceSubtitleAr, settings?.experienceSubtitle, 'An interactive roadmap of academic foundations, professional roles, and specialized technical credentials.')}
-                delay={20}
-                className="text-base md:text-lg text-muted-foreground leading-relaxed"
-              />
+          {isMobile ? (
+            <div>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground leading-[1.15] mb-3 sm:mb-4">
+                {resolveField('experience.title', settings?.experienceTitleAr, settings?.experienceTitle, 'Experience.')}
+              </h2>
+              <div className="max-w-2xl">
+                <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
+                  {resolveField('experience.subtitle', settings?.experienceSubtitleAr, settings?.experienceSubtitle, 'An interactive roadmap of academic foundations, professional roles, and specialized technical credentials.')}
+                </p>
+              </div>
             </div>
-          </FadeIn>
+          ) : (
+            <FadeIn>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground leading-[1.15] mb-3 sm:mb-4">
+                <SplitText
+                  text={resolveField('experience.title', settings?.experienceTitleAr, settings?.experienceTitle, 'Experience.')}
+                  delay={35}
+                  duration={0.45}
+                />
+              </h2>
+              <div className="max-w-2xl">
+                <BlurText
+                  text={resolveField('experience.subtitle', settings?.experienceSubtitleAr, settings?.experienceSubtitle, 'An interactive roadmap of academic foundations, professional roles, and specialized technical credentials.')}
+                  delay={20}
+                  className="text-base md:text-lg text-muted-foreground leading-relaxed"
+                />
+              </div>
+            </FadeIn>
+          )}
 
           {/* Vertical Timeline with Scroll Effects */}
           {experiences.length > 0 ? (
@@ -574,37 +587,62 @@ const Home = () => {
         ) : (
           <ServiceCarousel
             header={
-              <FadeIn>
-                <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-foreground leading-tight mb-1 sm:mb-1.5">
-                  <SplitText
-                    key={`services-title-${isAr ? 'ar' : 'en'}`}
-                    text={resolveField(
+              isMobile ? (
+                <div>
+                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-foreground leading-tight mb-1 sm:mb-1.5">
+                    {resolveField(
                       'services.title',
                       settings?.servicesTitleAr,
                       settings?.servicesTitle,
                       isAr ? 'ما الذي أقدمه لك.' : 'What I Deliver.'
                     )}
-                    delay={35}
-                    duration={0.45}
-                  />
-                </h2>
-                <div className="max-w-2xl">
-                  <BlurText
-                    key={`services-subtitle-${isAr ? 'ar' : 'en'}`}
-                    text={resolveField(
-                      'services.subtitle',
-                      settings?.servicesSubtitleAr,
-                      settings?.servicesSubtitle,
-                      isAr
-                        ? 'خدمات تطوير برمجيات متكاملة تساعدك على الإطلاق بسرعة، وتفادي الديون التقنية، والتوسع بثقة.'
-                        : 'End-to-end software development services tailored to help you launch faster, eliminate technical debt, and scale reliably.'
-                    )}
-                    animateBy="block"
-                    delay={20}
-                    className="text-base md:text-lg text-muted-foreground leading-relaxed line-clamp-2"
-                  />
+                  </h2>
+                  <div className="max-w-2xl">
+                    <p className="text-base md:text-lg text-muted-foreground leading-relaxed line-clamp-2">
+                      {resolveField(
+                        'services.subtitle',
+                        settings?.servicesSubtitleAr,
+                        settings?.servicesSubtitle,
+                        isAr
+                          ? 'خدمات تطوير برمجيات متكاملة تساعدك على الإطلاق بسرعة، وتفادي الديون التقنية، والتوسع بثقة.'
+                          : 'End-to-end software development services tailored to help you launch faster, eliminate technical debt, and scale reliably.'
+                      )}
+                    </p>
+                  </div>
                 </div>
-              </FadeIn>
+              ) : (
+                <FadeIn>
+                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-foreground leading-tight mb-1 sm:mb-1.5">
+                    <SplitText
+                      key={`services-title-${isAr ? 'ar' : 'en'}`}
+                      text={resolveField(
+                        'services.title',
+                        settings?.servicesTitleAr,
+                        settings?.servicesTitle,
+                        isAr ? 'ما الذي أقدمه لك.' : 'What I Deliver.'
+                      )}
+                      delay={35}
+                      duration={0.45}
+                    />
+                  </h2>
+                  <div className="max-w-2xl">
+                    <BlurText
+                      key={`services-subtitle-${isAr ? 'ar' : 'en'}`}
+                      text={resolveField(
+                        'services.subtitle',
+                        settings?.servicesSubtitleAr,
+                        settings?.servicesSubtitle,
+                        isAr
+                          ? 'خدمات تطوير برمجيات متكاملة تساعدك على الإطلاق بسرعة، وتفادي الديون التقنية، والتوسع بثقة.'
+                          : 'End-to-end software development services tailored to help you launch faster, eliminate technical debt, and scale reliably.'
+                      )}
+                      animateBy="block"
+                      delay={20}
+                      className="text-base md:text-lg text-muted-foreground leading-relaxed line-clamp-2"
+                    />
+                  </div>
+                </FadeIn>
+              )
             }
             services={services.map((service, i) => ({
               id: service.id,

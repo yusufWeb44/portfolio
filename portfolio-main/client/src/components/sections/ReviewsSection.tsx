@@ -173,27 +173,42 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
         
         {/* ── Section Header (Title & Subtitle) ── */}
         <div className="mb-8 sm:mb-12">
-          <FadeIn distance={14}>
+          {isMobile ? (
             <div className="space-y-2">
               <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[2.6rem] font-extrabold tracking-tight text-foreground leading-[1.15]">
-                <SplitText
-                  key={`reviews-title-${isAr ? 'ar' : 'en'}`}
-                  text={displayTitle}
-                  delay={35}
-                  duration={0.45}
-                />
+                {displayTitle}
               </h2>
-              <div className="max-w-2xl mt-1.5">
-                <BlurText
-                  key={`reviews-sub-${isAr ? 'ar' : 'en'}`}
-                  text={displaySubtitle}
-                  animateBy="block"
-                  delay={20}
-                  className="text-base md:text-lg text-muted-foreground leading-relaxed"
-                />
-              </div>
+              {displaySubtitle && (
+                <div className="max-w-2xl mt-1.5">
+                  <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
+                    {displaySubtitle}
+                  </p>
+                </div>
+              )}
             </div>
-          </FadeIn>
+          ) : (
+            <FadeIn distance={14}>
+              <div className="space-y-2">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[2.6rem] font-extrabold tracking-tight text-foreground leading-[1.15]">
+                  <SplitText
+                    key={`reviews-title-${isAr ? 'ar' : 'en'}`}
+                    text={displayTitle}
+                    delay={35}
+                    duration={0.45}
+                  />
+                </h2>
+                <div className="max-w-2xl mt-1.5">
+                  <BlurText
+                    key={`reviews-sub-${isAr ? 'ar' : 'en'}`}
+                    text={displaySubtitle}
+                    animateBy="block"
+                    delay={20}
+                    className="text-base md:text-lg text-muted-foreground leading-relaxed"
+                  />
+                </div>
+              </div>
+            </FadeIn>
+          )}
         </div>
 
         {/* ── Continuous Carousel Slider Area with Side Navigation Arrows ── */}

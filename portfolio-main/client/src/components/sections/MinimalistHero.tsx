@@ -10,9 +10,15 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { resolveImageUrl } from '../../utils/mediaUrl';
 
-/* ─── Animated Count-up for Hero Stats (Zero VDOM Re-render, Direct GPU DOM update) ─── */
+/* ─── Animated Count-up for Hero Stats (Desktop only; static immediate on mobile for performance) ─── */
 const AnimatedStatValue: React.FC<{ value: string }> = ({ value }) => {
+  const isMobile = useIsMobile();
   const strVal = String(value ?? '');
+
+  if (isMobile) {
+    return <span className="tabular-nums">{strVal}</span>;
+  }
+
   const match = strVal.match(/^([^0-9]*)(\d+)(.*)$/);
 
   if (!match) {
@@ -192,19 +198,29 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
               {/* Headline + Bio */}
               <div>
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-foreground tracking-tight leading-tight mb-3">
-                  <SplitText
-                    text={headlineContent}
-                    delay={30}
-                    duration={0.45}
-                  />
+                  {isMobile ? (
+                    headlineContent
+                  ) : (
+                    <SplitText
+                      text={headlineContent}
+                      delay={30}
+                      duration={0.45}
+                    />
+                  )}
                 </h1>
                 {bioText ? (
-                  <BlurText
-                    text={bioText}
-                    animateBy="block"
-                    delay={20}
-                    className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-xl"
-                  />
+                  isMobile ? (
+                    <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-xl">
+                      {bioText}
+                    </p>
+                  ) : (
+                    <BlurText
+                      text={bioText}
+                      animateBy="block"
+                      delay={20}
+                      className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-xl"
+                    />
+                  )
                 ) : null}
               </div>
 

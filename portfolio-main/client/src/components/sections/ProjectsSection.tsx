@@ -7,6 +7,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { getMediaUrl } from '../../utils/mediaUrl';
 import { buttonVariants, cn } from '../ui/Button';
 import { SplitText, BlurText, SpotlightCard } from '../react-bits';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 /* ─── Data Interfaces ─────────────────────────────────────────────── */
 interface ProjectImage {
@@ -364,6 +365,7 @@ const DesktopStackedCard = ({
    MAIN PROJECTS SECTION COMPONENT
    ═══════════════════════════════════════════════════════════════════ */
 const ProjectsSection = () => {
+  const isMobile = useIsMobile();
   const { t, currentLang } = useLanguage();
   const isAr = currentLang === 'ar';
   const [projects, setProjects] = useState<Project[]>(() => {
@@ -462,16 +464,22 @@ const ProjectsSection = () => {
         {/* Section Header: Centered on all iPads (md: and lg:), aligned start on phones */}
         <div className="mb-6 sm:mb-8 md:mb-10 text-start md:text-center flex flex-col md:items-center">
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight leading-[1.15] text-foreground mb-2 sm:mb-3 md:text-center">
-            <SplitText text={displayTitle} delay={35} duration={0.45} />
+            {isMobile ? displayTitle : <SplitText text={displayTitle} delay={35} duration={0.45} />}
           </h2>
           {displaySubtitle && (
-            <BlurText
-              key={`projects-subtitle-mob-${isAr ? 'ar' : 'en'}`}
-              text={displaySubtitle}
-              animateBy="block"
-              delay={20}
-              className="text-base md:text-lg text-muted-foreground leading-relaxed line-clamp-2 md:line-clamp-3 md:text-center max-w-2xl md:mx-auto"
-            />
+            isMobile ? (
+              <p className="text-base md:text-lg text-muted-foreground leading-relaxed line-clamp-2 md:line-clamp-3 md:text-center max-w-2xl md:mx-auto">
+                {displaySubtitle}
+              </p>
+            ) : (
+              <BlurText
+                key={`projects-subtitle-mob-${isAr ? 'ar' : 'en'}`}
+                text={displaySubtitle}
+                animateBy="block"
+                delay={20}
+                className="text-base md:text-lg text-muted-foreground leading-relaxed line-clamp-2 md:line-clamp-3 md:text-center max-w-2xl md:mx-auto"
+              />
+            )
           )}
         </div>
 

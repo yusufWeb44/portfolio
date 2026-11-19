@@ -772,29 +772,43 @@ const HowItWorks = () => {
 
       <div className="max-w-5xl mx-auto relative z-10">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-60px' }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
-          className="text-center mb-8 sm:mb-10 md:mb-12 px-2"
-        >
-
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-foreground tracking-tight leading-[1.15] mb-3 sm:mb-4">
-            <SplitText
-              text={displayTitle}
-              delay={30}
-              duration={0.5}
-            />
-          </h2>
-          <div className="max-w-2xl mx-auto">
-            <BlurText
-              text={displaySubtitle}
-              delay={20}
-              className="text-base md:text-lg text-muted-foreground leading-relaxed"
-            />
+        {isMobile ? (
+          <div className="text-center mb-8 sm:mb-10 md:mb-12 px-2">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-foreground tracking-tight leading-[1.15] mb-3 sm:mb-4">
+              {displayTitle}
+            </h2>
+            {displaySubtitle && (
+              <div className="max-w-2xl mx-auto">
+                <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
+                  {displaySubtitle}
+                </p>
+              </div>
+            )}
           </div>
-        </motion.div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-60px' }}
+            transition={{ duration: 0.6, ease: 'easeOut' }}
+            className="text-center mb-8 sm:mb-10 md:mb-12 px-2"
+          >
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-foreground tracking-tight leading-[1.15] mb-3 sm:mb-4">
+              <SplitText
+                text={displayTitle}
+                delay={30}
+                duration={0.5}
+              />
+            </h2>
+            <div className="max-w-2xl mx-auto">
+              <BlurText
+                text={displaySubtitle}
+                delay={20}
+                className="text-base md:text-lg text-muted-foreground leading-relaxed"
+              />
+            </div>
+          </motion.div>
+        )}
 
         {/* Cards + connectors interleaved (clean centered column on mobile, unified zig-zag on desktop) */}
         <div className="relative">
