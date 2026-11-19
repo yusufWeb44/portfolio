@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Plus } from 'lucide-react';
 import { cn } from '../ui/Button';
 import { SplitText, SpotlightCard } from '../react-bits';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 /* ─── Types ──────────────────────────────────────────────────────── */
 interface FAQItem {
@@ -85,6 +86,7 @@ const FAQTabs = ({
 
 /* ─── FAQ List ───────────────────────────────────────────────────── */
 const FAQList = ({ faqData, selected }: { faqData: FAQData; selected: string }) => {
+  const isMobile = useIsMobile();
   const questions = faqData[selected] || [];
 
   return (
@@ -92,10 +94,10 @@ const FAQList = ({ faqData, selected }: { faqData: FAQData; selected: string }) 
       <AnimatePresence mode="wait">
         <motion.div
           key={selected || 'empty'}
-          initial={{ opacity: 0, y: 14 }}
+          initial={isMobile ? false : { opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -14 }}
-          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+          exit={isMobile ? { opacity: 1 } : { opacity: 0, y: -14 }}
+          transition={isMobile ? { duration: 0 } : { duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
           className="space-y-3"
         >
           {questions.length > 0 ? (

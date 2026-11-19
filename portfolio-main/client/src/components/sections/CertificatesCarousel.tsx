@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Award } from 'lucide-react';
+import { X, Award, ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { getMediaUrl } from '../../utils/mediaUrl';
+import { useIsMobile } from '../../hooks/useIsMobile';
+import { cn } from '../../lib/utils';
 
 export interface CertificateItem {
   id: string;
@@ -27,7 +29,7 @@ interface CertificatesCarouselProps {
   subtitle?: string | null;
 }
 
-export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({ 
+export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
   certificates,
   title,
   subtitle,
@@ -46,11 +48,74 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
   // Lightbox Modal state
   const [selectedCert, setSelectedCert] = useState<CertificateItem | null>(null);
 
+  const isMobile = useIsMobile();
+
+  // Mobile-only auto-flipping carousel state & touch tracking
+  const [activeMobileIndex, setActiveMobileIndex] = useState(0);
+  const [isMobilePaused, setIsMobilePaused] = useState(false);
+  const touchStartXRef = useRef<number | null>(null);
+  const touchStartYRef = useRef<number | null>(null);
+
+  // Auto-flip timer for mobile: flips to the next certificate periodically ("كل فترة يقلب على وحدة")
+  useEffect(() => {
+    if (!isMobile || certificates.length <= 1 || isMobilePaused || selectedCert !== null) return;
+
+    const interval = setInterval(() => {
+      setActiveMobileIndex((prev) => (prev + 1) % certificates.length);
+    }, 3800);
+
+    return () => clearInterval(interval);
+  }, [isMobile, certificates.length, isMobilePaused, selectedCert]);
+
+  const handleMobileTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      touchStartXRef.current = e.touches[0].clientX;
+      touchStartYRef.current = e.touches[0].clientY;
+      setIsMobilePaused(true);
+    }
+  };
+
+  const handleMobileTouchEnd = (e: React.TouchEvent) => {
+    setIsMobilePaused(false);
+    if (touchStartXRef.current === null) return;
+
+    const deltaX = e.changedTouches[0].clientX - touchStartXRef.current;
+    const deltaY = e.changedTouches[0].clientY - (touchStartYRef.current || 0);
+    touchStartXRef.current = null;
+    touchStartYRef.current = null;
+
+    if (Math.abs(deltaX) > 40 && Math.abs(deltaX) > Math.abs(deltaY) * 1.3) {
+      if (deltaX < 0) {
+        // Swiped left
+        if (isRtl) {
+          setActiveMobileIndex((prev) => (prev === 0 ? certificates.length - 1 : prev - 1));
+        } else {
+          setActiveMobileIndex((prev) => (prev + 1) % certificates.length);
+        }
+      } else {
+        // Swiped right
+        if (isRtl) {
+          setActiveMobileIndex((prev) => (prev + 1) % certificates.length);
+        } else {
+          setActiveMobileIndex((prev) => (prev === 0 ? certificates.length - 1 : prev - 1));
+        }
+      }
+    }
+  };
+
+  const handlePrevMobile = () => {
+    setActiveMobileIndex((prev) => (prev === 0 ? certificates.length - 1 : prev - 1));
+  };
+
+  const handleNextMobile = () => {
+    setActiveMobileIndex((prev) => (prev + 1) % certificates.length);
+  };
+
   // Wheel rotation angle in degrees
   const [rotationAngle, setRotationAngle] = useState(0);
 
   // Track window width for responsive layout
-  const [windowWidth, setWindowWidth] = useState<number>(() => 
+  const [windowWidth, setWindowWidth] = useState<number>(() =>
     typeof window !== 'undefined' ? window.innerWidth : 1440
   );
 
@@ -70,8 +135,8 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
     // Mobile-optimized card dimensions:
     // On mobile (< 480px), scaled to ~185-200px so the carousel looks balanced,
     // neighboring certificates curve gracefully into view, and it doesn't overpower the viewport.
-    const cardWidth = isLg 
-      ? 410 
+    const cardWidth = isLg
+      ? 410
       : (isMd ? 360 : (isSm ? 285 : (isXs ? 230 : (windowWidth < 380 ? 185 : 200))));
     const cardHeight = cardWidth / 1.414;
     const angleStep = isLg ? 22.0 : (isMd ? 22.5 : (isSm ? 23.0 : (isXs ? 24.0 : 25.0)));
@@ -122,7 +187,7 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
   // Keep a repeating list of certificates so the wheel has enough slots for full coverage
   const wheelItems = useMemo(() => {
     if (!certificates || certificates.length === 0) return [];
-    
+
     let list: CertificateItem[] = [...certificates];
     while (list.length < 12) {
       list = [...list, ...certificates];
@@ -135,7 +200,7 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
 
   // Track visibility with IntersectionObserver so continuous loop only runs when in viewport
   const carouselContainerRef = useRef<HTMLDivElement>(null);
-  const [isInView, setIsInView] = useState(false);
+  const [isInView, setIsInView] = useState(true);
 
   useEffect(() => {
     if (!carouselContainerRef.current) return;
@@ -149,9 +214,9 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
     return () => observer.disconnect();
   }, []);
 
-  // Continuous auto-rotation loop (only runs when visible in viewport)
+  // Continuous auto-rotation loop for desktop 3D cylinder (disabled on mobile)
   useEffect(() => {
-    if (wheelItems.length === 0 || !isInView) return;
+    if (isMobile || wheelItems.length === 0 || !isInView) return;
 
     let lastTime = performance.now();
 
@@ -180,7 +245,7 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
     return () => {
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     };
-  }, [wheelItems.length, totalPeriod, isInView]);
+  }, [isMobile, wheelItems.length, totalPeriod, isInView]);
 
   // Global drag cancellation and modal synchronization
   useEffect(() => {
@@ -292,15 +357,126 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
         )}
       </div>
 
-      {/* ── 3D Curved Panoramic Stage ── */}
-      <div 
+      {/* ── MOBILE VIEW (< md): Large Pure Certificate Image Showcase with periodic auto-transition ── */}
+      <div className="block md:hidden w-full px-3 sm:px-4 pt-1 pb-6">
+        <div
+          dir={isRtl ? 'rtl' : 'ltr'}
+          className="relative w-full overflow-hidden"
+          onTouchStart={handleMobileTouchStart}
+          onTouchEnd={handleMobileTouchEnd}
+          onMouseEnter={() => setIsMobilePaused(true)}
+          onMouseLeave={() => setIsMobilePaused(false)}
+        >
+          <div
+            className="flex transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform"
+            style={{
+              transform: isRtl
+                ? `translateX(${activeMobileIndex * 100}%)`
+                : `translateX(-${activeMobileIndex * 100}%)`,
+            }}
+          >
+            {certificates.map((cert, index) => {
+              const certTitle = isRtl ? (cert.titleAr || cert.title) : cert.title;
+              const certIssuer = isRtl ? (cert.issuerAr || cert.issuer) : cert.issuer;
+              const imgSrc = getMediaUrl(cert.imageUrl || cert.credentialUrl);
+
+              return (
+                <div
+                  key={`${cert.id || index}-mob`}
+                  className="w-full shrink-0 px-1 py-1"
+                >
+                  <div className="w-full max-w-[94vw] sm:max-w-[480px] mx-auto">
+                    {/* Pure Large Certificate Image (Sharp Edges, No Border Radius, Focus 100% on Certificate) */}
+                    <div
+                      onClick={() => setSelectedCert(cert)}
+                      className="group relative w-full aspect-[1.414/1] rounded-none overflow-hidden border border-zinc-200/90 dark:border-white/15 bg-white dark:bg-zinc-950 shadow-[0_8px_30px_rgba(0,0,0,0.12)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.85)] cursor-pointer active:scale-[0.99] transition-transform duration-200"
+                    >
+                      {imgSrc ? (
+                        <img
+                          src={imgSrc}
+                          alt={certTitle}
+                          className="w-full h-full object-contain bg-zinc-950 select-none pointer-events-none"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center p-6 bg-gradient-to-br from-zinc-900 to-zinc-950 text-white text-center">
+                          <Award className="w-16 h-16 text-amber-400 mb-3" />
+                          <h4 className="font-bold text-lg">{certTitle}</h4>
+                          <span className="font-mono text-xs text-emerald-400 uppercase tracking-widest mt-1">{certIssuer}</span>
+                        </div>
+                      )}
+
+                      {/* Floating Full-Screen Zoom Button Overlay */}
+                      <div className="absolute bottom-3 end-3 px-3 py-1.5 rounded-lg bg-black/70 backdrop-blur-md text-white text-xs font-mono flex items-center gap-1.5 shadow-lg border border-white/20 pointer-events-none select-none">
+                        <Maximize2 size={13} className="text-emerald-400" />
+                        <span>{isRtl ? 'تكبير' : 'Zoom'}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Mobile Navigation Controls: Prev/Next & Dots (Zero Numbers) */}
+        {certificates.length > 1 && (
+          <div className="flex items-center justify-between max-w-[94vw] sm:max-w-[480px] mx-auto mt-4 px-2">
+            {/* Prev Button */}
+            <button
+              type="button"
+              onClick={isRtl ? handleNextMobile : handlePrevMobile}
+              className="w-9 h-9 rounded-full border border-border/80 dark:border-white/15 bg-card/80 dark:bg-zinc-900/80 text-foreground flex items-center justify-center transition-all active:scale-90 cursor-pointer shadow-xs hover:border-emerald-500/50"
+              aria-label={isRtl ? 'السابق' : 'Previous'}
+            >
+              {isRtl ? <ChevronRight size={18} strokeWidth={1.5} /> : <ChevronLeft size={18} strokeWidth={1.5} />}
+            </button>
+
+            {/* Pagination Line Dots (Zero numbers displayed) */}
+            <div className="flex items-center gap-1.5">
+              {certificates.map((_, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setActiveMobileIndex(idx)}
+                  aria-label={isRtl ? 'شهادة' : 'Certificate'}
+                  className="p-1 focus:outline-none cursor-pointer"
+                >
+                  <span
+                    className={cn(
+                      "block h-1.5 rounded-full transition-all duration-300",
+                      activeMobileIndex === idx
+                        ? "w-6 bg-emerald-500 shadow-xs"
+                        : "w-1.5 bg-border dark:bg-white/20 hover:bg-muted-foreground/50"
+                    )}
+                  />
+                </button>
+              ))}
+            </div>
+
+            {/* Next Button */}
+            <button
+              type="button"
+              onClick={isRtl ? handlePrevMobile : handleNextMobile}
+              className="w-9 h-9 rounded-full border border-border/80 dark:border-white/15 bg-card/80 dark:bg-zinc-900/80 text-foreground flex items-center justify-center transition-all active:scale-90 cursor-pointer shadow-xs hover:border-emerald-500/50"
+              aria-label={isRtl ? 'التالي' : 'Next'}
+            >
+              {isRtl ? <ChevronLeft size={18} strokeWidth={1.5} /> : <ChevronRight size={18} strokeWidth={1.5} />}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* ── DESKTOP & TABLET VIEW (>= md): 3D Curved Panoramic Stage ── */}
+      <div
         ref={carouselContainerRef}
-        style={{ 
+        style={{
           height: `${layout.containerHeight}px`,
           marginTop: `-${layout.bleed}px`,
           marginBottom: `-${layout.bleed}px`,
         }}
-        className="relative w-full overflow-visible flex items-center justify-center cursor-grab active:cursor-grabbing touch-pan-y"
+        className="hidden md:flex relative w-full overflow-visible items-center justify-center cursor-grab active:cursor-grabbing touch-pan-y"
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
@@ -311,8 +487,8 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
           {wheelItems.map((cert, index) => {
             // Calculate card angular position along the periodic cylinder
             const rawAngle = (rotationAngle + index * layout.angleStep) % totalPeriod;
-            const angle = rawAngle > totalPeriod / 2 
-              ? rawAngle - totalPeriod 
+            const angle = rawAngle > totalPeriod / 2
+              ? rawAngle - totalPeriod
               : (rawAngle < -totalPeriod / 2 ? rawAngle + totalPeriod : rawAngle);
             const absAngle = Math.abs(angle);
 

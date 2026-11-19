@@ -7,6 +7,7 @@ import { buttonVariants } from '../ui/Button';
 import { SocialButton } from '../ui/SocialButton';
 import { SplitText, BlurText, FadeContent } from '../react-bits';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useIsMobile } from '../../hooks/useIsMobile';
 import { resolveImageUrl } from '../../utils/mediaUrl';
 
 /* ─── Animated Count-up for Hero Stats (Zero VDOM Re-render, Direct GPU DOM update) ─── */
@@ -146,6 +147,7 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
 }) => {
   const { currentLang, currentDirection } = useLanguage();
   const isRtl = currentDirection === 'rtl' || currentLang === 'ar';
+  const isMobile = useIsMobile();
   const cubicEase = [0.22, 1, 0.36, 1] as any;
 
   const blobPath1 = 'M410.5,317.5Q372,385,299,419.5Q226,454,161.5,410Q97,366,66,298Q35,230,73.5,166Q112,102,181,71.5Q250,41,319,72Q388,103,418.5,176.5Q449,250,410.5,317.5Z';
@@ -182,9 +184,9 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
           {/* ── Left Column (desktop & tablet): Headline, Bio, CTA, Social, Stats ── */}
           <div className="order-2 lg:order-1 lg:col-span-7 xl:col-span-5 flex flex-col items-start z-10 min-w-0">
             <motion.div
-              initial={{ opacity: 0, y: 12 }}
+              initial={isMobile ? false : { opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
+              transition={isMobile ? { duration: 0 } : { duration: 0.3 }}
               className="space-y-5 sm:space-y-6 w-full"
             >
               {/* Headline + Bio */}
@@ -224,9 +226,9 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
                     {resolvedLinks.map((s, i) => (
                       <motion.div
                         key={s.label}
-                        initial={{ opacity: 0, scale: 0.9 }}
+                        initial={isMobile ? false : { opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 0.08 + i * 0.03, duration: 0.2 }}
+                        transition={isMobile ? { duration: 0 } : { delay: 0.08 + i * 0.03, duration: 0.2 }}
                       >
                         <SocialButton
                           href={s.href}
@@ -272,9 +274,9 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
             {words.length > 0 && (
               <div className="lg:hidden w-full flex flex-col mb-1 sm:mb-2.5 px-1">
                 <motion.div
-                  initial={{ opacity: 0, y: -8 }}
+                  initial={isMobile ? false : { opacity: 0, y: -8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.05 }}
+                  transition={isMobile ? { duration: 0 } : { duration: 0.3, delay: 0.05 }}
                   className="flex justify-center items-center min-h-[2.4rem] sm:min-h-[3rem]"
                 >
                   <h2
@@ -302,9 +304,9 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
               {/* Fluid Blob Backdrop — Enlarged to match reference photo, perfectly framing profile */}
               <div className="absolute -top-6 sm:-top-8 md:-top-9 lg:-top-10 xl:-top-11 w-[320px] h-[320px] sm:w-[360px] sm:h-[360px] md:w-[390px] md:h-[390px] lg:w-[400px] lg:h-[400px] xl:w-[450px] xl:h-[450px] z-0 pointer-events-none select-none">
                 <motion.div
-                  initial={{ scale: 0.9, opacity: 0 }}
+                  initial={isMobile ? false : { scale: 0.9, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  transition={{ duration: 0.4, ease: cubicEase }}
+                  transition={isMobile ? { duration: 0 } : { duration: 0.4, ease: cubicEase }}
                   className="w-full h-full relative"
                 >
                   {/* Ambient glow behind blob without expensive filter */}
@@ -345,9 +347,9 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
 
               {/* Profile Image — Completely fluid, continuous feather-soft eased gradient with zero visible steps or lines */}
               <motion.div
-                initial={{ opacity: 0, y: 8 }}
+                initial={isMobile ? false : { opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.35, ease: cubicEase }}
+                transition={isMobile ? { duration: 0 } : { duration: 0.35, ease: cubicEase }}
                 className="relative z-10 flex items-center justify-center pointer-events-none select-none transform-gpu"
                 style={{ willChange: 'opacity, transform', transform: 'translateZ(0)' }}
               >

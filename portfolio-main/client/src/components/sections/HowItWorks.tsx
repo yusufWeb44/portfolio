@@ -163,10 +163,11 @@ const StickyNoteCard = memo(({
   });
 
   // On desktop: first card is driven by IntersectionObserver (subsequent cards by connector line)
-  // On mobile: connector lines are removed, so every card observes viewport entry to reveal
+  // On mobile: all cards are rendered statically and immediately without scroll-blocking observers
   useEffect(() => {
+    if (isMobile) return;
     if (!ref.current) return;
-    if (!isFirst && !isMobile) return;
+    if (!isFirst) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -174,7 +175,7 @@ const StickyNoteCard = memo(({
       },
       {
         root: null,
-        rootMargin: isMobile ? '200000px 0px -10% 0px' : '200000px 0px -22% 0px',
+        rootMargin: '200000px 0px -22% 0px',
         threshold: 0,
       }
     );
@@ -200,43 +201,51 @@ const StickyNoteCard = memo(({
     >
       <motion.div
         className="relative will-change-transform"
-        initial={{
-          opacity: 0,
-          y: -14,
-          scale: 1.035,
-          rotateX: isMobile ? 0 : 18,
-          rotateY: isMobile ? 0 : unpinnedRotateY,
-          rotate: unpinnedSwing,
-        }}
-        animate={
-          isRevealed
-            ? {
-              opacity: 1,
-              y: 0,
-              scale: 1,
-              rotateX: 0,
-              rotateY: 0,
-              rotate: tilt,
-            }
+        initial={
+          isMobile
+            ? false
             : {
-              opacity: 0,
-              y: -10,
-              scale: 0.96,
-              rotateX: isMobile ? 0 : 16,
-              rotateY: isMobile ? 0 : -unpinnedRotateY * 0.8,
-              rotate: tilt + (isVisualLeft ? 4.5 : -4.5),
-            }
+                opacity: 0,
+                y: -14,
+                scale: 1.035,
+                rotateX: 18,
+                rotateY: unpinnedRotateY,
+                rotate: unpinnedSwing,
+              }
+        }
+        animate={
+          isMobile
+            ? {
+                opacity: 1,
+                y: 0,
+                scale: 1,
+                rotateX: 0,
+                rotateY: 0,
+                rotate: tilt,
+              }
+            : isRevealed
+            ? {
+                opacity: 1,
+                y: 0,
+                scale: 1,
+                rotateX: 0,
+                rotateY: 0,
+                rotate: tilt,
+              }
+            : {
+                opacity: 0,
+                y: -10,
+                scale: 0.96,
+                rotateX: 16,
+                rotateY: -unpinnedRotateY * 0.8,
+                rotate: tilt + (isVisualLeft ? 4.5 : -4.5),
+              }
         }
         transition={
-          isRevealed
-            ? isMobile
-              ? {
-                opacity: { duration: 0.22, ease: 'easeOut' },
-                y: { type: 'spring', stiffness: 220, damping: 24, mass: 0.5 },
-                scale: { type: 'spring', stiffness: 220, damping: 24, mass: 0.5 },
-                rotate: { type: 'spring', stiffness: 180, damping: 18, mass: 0.5 },
-              }
-              : {
+          isMobile
+            ? { duration: 0 }
+            : isRevealed
+            ? {
                 opacity: { duration: 0.28, ease: [0.16, 1, 0.3, 1] },
                 y: { type: 'spring', stiffness: 190, damping: 20, mass: 0.75 },
                 scale: { type: 'spring', stiffness: 180, damping: 20, mass: 0.8 },
@@ -245,11 +254,11 @@ const StickyNoteCard = memo(({
                 rotate: { type: 'spring', stiffness: 145, damping: 13, mass: 0.8 },
               }
             : {
-              opacity: { duration: 0.2, ease: 'easeIn' },
-              y: { duration: 0.24, ease: 'easeIn' },
-              scale: { duration: 0.24, ease: 'easeIn' },
-              rotate: { duration: 0.24, ease: 'easeIn' },
-            }
+                opacity: { duration: 0.2, ease: 'easeIn' },
+                y: { duration: 0.24, ease: 'easeIn' },
+                scale: { duration: 0.24, ease: 'easeIn' },
+                rotate: { duration: 0.24, ease: 'easeIn' },
+              }
         }
         style={{
           transformOrigin: '50% 22px',
@@ -799,7 +808,7 @@ const HowItWorks = () => {
                     isMobile={isMobile}
                     isRtl={isRtl}
                     isFirst={i === 0}
-                    isRevealed={Boolean(revealedCards[i])}
+                    isRevealed={isMobile ? true : Boolean(revealedCards[i])}
                     onRevealChange={(revealed) => handleRevealChange(i, revealed)}
                   />
                 </div>

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Layers, TrendingUp, Zap, Cpu, Code2, ShieldCheck, Database, Server, Globe, Sparkles } from 'lucide-react';
 import api from '../../services/api';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useIsMobile } from '../../hooks/useIsMobile';
 import TechStackMarquee, { DEFAULT_CORE_STACK } from '../ui/TechStackMarquee';
 import { SplitText, FadeContent, SpotlightCard } from '../react-bits';
 
@@ -54,6 +55,7 @@ const getCardIcon = (iconName: string) => {
 const AboutSection = () => {
   const { t, currentLang } = useLanguage();
   const isAr = currentLang === 'ar';
+  const isMobile = useIsMobile();
 
   const [aboutData, setAboutData] = useState<any>(() => {
     try {
@@ -134,9 +136,9 @@ const AboutSection = () => {
           {/* ── Title & Bio Column: Full-width on mobile/tablets, 5 cols on desktop ── */}
           <motion.div
             className={`flex flex-col gap-5 sm:gap-6 xl:gap-7 xl:pt-[54px] ${displayCards.length > 0 ? 'xl:col-span-5' : 'xl:col-span-8'}`}
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
+            variants={isMobile ? undefined : containerVariants}
+            initial={isMobile ? false : "hidden"}
+            whileInView={isMobile ? undefined : "visible"}
             viewport={{ once: true, margin: '-100px' }}
           >
             {/* Main Title */}
@@ -175,16 +177,17 @@ const AboutSection = () => {
           {displayCards.length > 0 && (
             <motion.div
               className="xl:col-span-7 xl:pt-[54px]"
-              variants={containerVariants}
-              initial="hidden"
-              whileInView="visible"
+              variants={isMobile ? undefined : containerVariants}
+              initial={isMobile ? false : "hidden"}
+              whileInView={isMobile ? undefined : "visible"}
               viewport={{ once: true, margin: '-100px' }}
             >
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5 lg:gap-6">
               {displayCards.map((card, i) => (
                 <motion.div
                   key={card.id || i}
-                  variants={cardVariants}
+                  variants={isMobile ? undefined : cardVariants}
+                  initial={isMobile ? false : undefined}
                   className={card.colSpan || (i === 2 && displayCards.length === 3 ? 'sm:col-span-2' : '')}
                 >
                   <SpotlightCard
@@ -237,9 +240,9 @@ const AboutSection = () => {
 
         {/* ── Core Stack (Infinite Marquee Ticker) ── */}
         <motion.div
-          variants={fadeUpVariants}
-          initial="hidden"
-          whileInView="visible"
+          variants={isMobile ? undefined : fadeUpVariants}
+          initial={isMobile ? false : "hidden"}
+          whileInView={isMobile ? undefined : "visible"}
           viewport={{ once: true, margin: '-50px' }}
           className="mt-10 sm:mt-14 md:mt-18 lg:mt-24 w-full"
         >

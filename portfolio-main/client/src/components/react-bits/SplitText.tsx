@@ -1,5 +1,6 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { motion, useInView } from 'framer-motion';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 export interface SplitTextProps {
   text: string;
@@ -19,8 +20,9 @@ export interface SplitTextProps {
 /**
  * React Bits - SplitText
  * Clean, modern masked typographic text entrance.
- * Smoothly lifts words from baseline with crisp opacity — zero fuzzy blur, zero layout jitter.
- * Smartly preserves Arabic cursive typography by defaulting to word-level splits.
+ * Smoothly lifts words from baseline with crisp opacity on desktop.
+ * On mobile (< 768px), immediately renders clean static text with ZERO motion DOM overhead,
+ * zero delays, and zero initial hidden states for peak 120fps compositor scrolling.
  */
 export const SplitText: React.FC<SplitTextProps> = ({
   text,
@@ -36,9 +38,29 @@ export const SplitText: React.FC<SplitTextProps> = ({
   rootMargin = '-30px',
   onAnimationComplete,
 }) => {
+  const isMobile = useIsMobile();
   const ref = useRef<HTMLSpanElement>(null);
   const isInView = useInView(ref, { once: true, amount: threshold, margin: rootMargin as any });
   const [isCompleted, setIsCompleted] = useState(false);
+
+  useEffect(() => {
+    if (isMobile) {
+      onAnimationComplete?.();
+    }
+  }, [isMobile, onAnimationComplete]);
+
+  // Mobile bypass: pure static text with zero motion nodes and instant full visibility
+  if (isMobile) {
+    return (
+      <span
+        className={className}
+        style={{ textAlign, wordBreak: 'normal', overflowWrap: 'break-word', opacity: 1 }}
+        aria-label={text}
+      >
+        {text}
+      </span>
+    );
+  }
 
   // Detect Arabic characters to prevent breaking Arabic cursive letters
   const hasArabic = /[\u0600-\u06FF]/.test(text);

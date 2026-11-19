@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 export interface FadeContentProps {
   children: React.ReactNode;
@@ -17,7 +18,9 @@ export interface FadeContentProps {
 
 /**
  * React Bits - FadeContent
- * Smooth scroll-triggered reveal with blur, opacity, and directional offset.
+ * Smooth scroll-triggered reveal with blur, opacity, and directional offset on desktop.
+ * On mobile (< 768px), immediately renders clean static children with ZERO motion overhead,
+ * zero delays, zero blur filters, and instant 100% opacity for silky native 120fps touch scrolling.
  */
 export const FadeContent: React.FC<FadeContentProps> = ({
   children,
@@ -32,8 +35,14 @@ export const FadeContent: React.FC<FadeContentProps> = ({
   className = '',
   rootMargin = '-30px',
 }) => {
+  const isMobile = useIsMobile();
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, amount: threshold, margin: rootMargin as any });
+
+  // Mobile bypass: pure static element with zero motion or opacity lag
+  if (isMobile) {
+    return <div className={className}>{children}</div>;
+  }
 
   const getOffset = () => {
     switch (direction) {

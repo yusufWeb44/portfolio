@@ -1,5 +1,6 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { motion, useInView } from 'framer-motion';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 export interface BlurTextProps {
   text: string;
@@ -18,7 +19,9 @@ export interface BlurTextProps {
 /**
  * React Bits - BlurText
  * Refined, fluid entrance animation for subtitles, captions, and narrative text.
- * Replaces jerky, blurry letter/word pop-ins with a silky, unified slide-up and fade.
+ * Replaces jerky letter/word pop-ins with a silky slide-up on desktop.
+ * On mobile (< 768px), immediately renders clean static text with ZERO motion overhead,
+ * zero delays, and instant 100% opacity.
  */
 export const BlurText: React.FC<BlurTextProps> = ({
   text,
@@ -33,8 +36,27 @@ export const BlurText: React.FC<BlurTextProps> = ({
   easing = [0.16, 1, 0.3, 1],
   onAnimationComplete,
 }) => {
+  const isMobile = useIsMobile();
   const ref = useRef<HTMLParagraphElement>(null);
   const isInView = useInView(ref, { once: true, amount: threshold, margin: rootMargin as any });
+
+  useEffect(() => {
+    if (isMobile) {
+      onAnimationComplete?.();
+    }
+  }, [isMobile, onAnimationComplete]);
+
+  // Mobile bypass: pure static text with zero motion nodes and instant visibility
+  if (isMobile) {
+    return (
+      <span
+        className={`inline-block ${className}`}
+        style={{ overflowWrap: 'break-word', wordBreak: 'normal', opacity: 1 }}
+      >
+        {text}
+      </span>
+    );
+  }
 
   const defaultFrom = {
     opacity: 0,

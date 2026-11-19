@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 export interface AnimatedContentProps {
   children: React.ReactNode;
@@ -19,7 +20,8 @@ export interface AnimatedContentProps {
 
 /**
  * React Bits - AnimatedContent
- * Provides smooth directional entrance animation when content scrolls into view or loads.
+ * Provides smooth directional entrance animation when content scrolls into view on desktop.
+ * On mobile (< 768px), immediately renders clean static children with ZERO motion overhead.
  */
 export const AnimatedContent: React.FC<AnimatedContentProps> = ({
   children,
@@ -36,8 +38,14 @@ export const AnimatedContent: React.FC<AnimatedContentProps> = ({
   rootMargin = '-50px',
   easing = [0.22, 1, 0.36, 1],
 }) => {
+  const isMobile = useIsMobile();
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, amount: threshold, margin: rootMargin as any });
+
+  // Mobile bypass: pure static element with zero motion or opacity lag
+  if (isMobile) {
+    return <div className={className}>{children}</div>;
+  }
 
   const getTransform = () => {
     const mult = reverse ? -1 : 1;

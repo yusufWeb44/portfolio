@@ -774,7 +774,8 @@ const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
         <div className="space-y-8 sm:space-y-10 relative z-10 pt-7 pb-4">
           {experiences.map((item, index) => {
             const theme = getThemeColors(item.color, index);
-            const isReached = reachedMobile.includes(index);
+            // On mobile phones: all cards and nodes are immediately reached and visible with 0 lag
+            const isReached = true || reachedMobile.includes(index);
 
             return (
               <div

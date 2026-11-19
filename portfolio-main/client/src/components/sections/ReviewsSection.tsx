@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Quote } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useIsMobile } from '../../hooks/useIsMobile';
 import { SplitText, BlurText } from '../react-bits';
 import { FadeContent as FadeIn } from '../react-bits';
 import { cn } from '../../lib/utils';
@@ -38,6 +39,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
 }) => {
   const { currentLang, currentDirection } = useLanguage();
   const isAr = currentLang === 'ar' || currentDirection === 'rtl';
+  const isMobile = useIsMobile();
 
   const defaultTitle = isAr ? 'ماذا يقول العملاء والشركاء.' : 'What Clients & Partners Say.';
   const defaultSubtitle = isAr
@@ -110,9 +112,9 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
     }
   }, [batchSize]);
 
-  // Auto-play interval timer: continuous one-directional progression according to language
+  // Auto-play interval timer: continuous progression on desktop, disabled on mobile to prevent unwanted movement
   useEffect(() => {
-    if (isPaused || batchSize === 0) return;
+    if (isMobile || isPaused || batchSize === 0) return;
 
     const interval = setInterval(() => {
       setIsTransitionEnabled(true);
@@ -120,7 +122,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
     }, 4200);
 
     return () => clearInterval(interval);
-  }, [isPaused, batchSize]);
+  }, [isMobile, isPaused, batchSize]);
 
   const handleNext = () => {
     setIsTransitionEnabled(true);

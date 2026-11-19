@@ -393,4 +393,21 @@
   .section-surface {
     contain: paint;
   }
+
+  /* ─── Mobile Performance & Zero-Jank Compositor Rule (< 768px) ─── */
+  @media (max-width: 767px) {
+    /* Prevent entrance lag or delayed opacities on mobile */
+    .fade-in,
+    .animate-in {
+      animation: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
+
+    /* Keep continuous marquee tickers silky and GPU-accelerated */
+    .animate-tech-marquee {
+      transform: translateZ(0);
+      will-change: transform;
+    }
+  }
 }

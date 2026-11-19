@@ -13,6 +13,7 @@ import {
 } from 'framer-motion';
 import api from '../../services/api';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useIsMobile } from '../../hooks/useIsMobile';
 import { SkillPill, SkillBrandIcon } from '../icons/SkillBrandIcon';
 import { SplitText, FadeContent } from '../react-bits';
 
@@ -404,6 +405,7 @@ const fadeUpVariants = {
 const SkillsSection = () => {
   const { t, currentLang } = useLanguage();
   const isAr = currentLang === 'ar';
+  const isMobile = useIsMobile();
   const [rawSkillsData, setRawSkillsData] = useState<any[]>(() => {
     try {
       const cached = localStorage.getItem('portfolio_skills');
@@ -503,9 +505,9 @@ const SkillsSection = () => {
           {/* ── Left Column (5 cols on desktop, full width on tablets & mobile) ── */}
           <motion.div
             className="xl:col-span-5 flex flex-col gap-5 sm:gap-6 xl:gap-7 max-w-3xl xl:max-w-none"
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
+            variants={isMobile ? undefined : containerVariants}
+            initial={isMobile ? false : "hidden"}
+            whileInView={isMobile ? undefined : "visible"}
             viewport={{ once: true, margin: '-100px' }}
           >
             {/* Headline */}
@@ -546,7 +548,11 @@ const SkillsSection = () => {
 
             {/* Key Metrics / Highlights */}
             {(point1Title || point2Title) && (
-              <motion.div variants={fadeUpVariants} className="space-y-3 pt-1">
+              <motion.div
+                variants={isMobile ? undefined : fadeUpVariants}
+                initial={isMobile ? false : undefined}
+                className="space-y-3 pt-1"
+              >
                 {point1Title && (
                   <div className="flex items-start gap-3">
                     <span className="mt-1.5 shrink-0 w-1.5 h-1.5 rounded-full bg-emerald-500" />

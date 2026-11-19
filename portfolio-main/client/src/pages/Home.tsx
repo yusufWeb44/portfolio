@@ -28,6 +28,7 @@ import { FAQ } from '../components/sections/FaqSection';
 import ReviewsSection, { type ReviewItem } from '../components/sections/ReviewsSection';
 import SEO from '../components/common/SEO';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 import { buttonVariants, cn } from '../components/ui/Button';
 import { SocialButton } from '../components/ui/SocialButton';
@@ -148,6 +149,7 @@ const FadeIn = ({
 
 const Home = () => {
   const { t, currentLang } = useLanguage();
+  const isMobile = useIsMobile();
   /* ─── State ──────────────────────────────────────────────────────── */
   const [settings, setSettings] = useState<Settings | null>(() => {
     try {
@@ -677,10 +679,10 @@ const Home = () => {
       >
         <div className="relative z-10 max-w-[620px] mx-auto w-full">
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={isMobile ? false : { opacity: 0, y: 16 }}
+            whileInView={isMobile ? undefined : { opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-40px' }}
-            transition={{ duration: 0.45, ease: [0.23, 1, 0.32, 1] }}
+            transition={isMobile ? { duration: 0 } : { duration: 0.45, ease: [0.23, 1, 0.32, 1] }}
           >
             <SpotlightCard
               spotlightColor="rgba(0, 0, 0, 0.02)"
