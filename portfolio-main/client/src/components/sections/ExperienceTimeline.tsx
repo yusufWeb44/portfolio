@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { SpotlightCard } from '../react-bits';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 export interface ExperienceItem {
   id: string;
@@ -499,6 +500,7 @@ const MobileTimelineCard = memo(({ item, theme, isRtl, isReached }: MobileTimeli
 MobileTimelineCard.displayName = 'MobileTimelineCard';
 
 const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
+  const isMobile = useIsMobile();
   const { currentLang, currentDirection } = useLanguage();
   const isRtl = currentDirection === 'rtl' || currentLang === 'ar';
   const containerRef = useRef<HTMLDivElement>(null);
@@ -862,6 +864,7 @@ const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
       {/* ═══════════════════════════════════════════════════════════════════
           DESKTOP VIEW (>= md): Full Centered Continuous Spine & Alternating Deck
           ═══════════════════════════════════════════════════════════════════ */}
+      {!isMobile && (
       <div className="hidden md:block relative pt-10 md:pt-12">
         {/* Top Origin Green Chevron Indicator */}
         <div className={`absolute top-0 z-30 flex items-center justify-center ${desktopSpineClass}`}>
@@ -997,6 +1000,7 @@ const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 };

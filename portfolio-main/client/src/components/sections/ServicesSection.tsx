@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/Button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SpotlightCard } from "../react-bits";
+import { useIsMobile } from "../../hooks/useIsMobile";
 
 // --- Dynamic Icon Resolver ---
 export const getServiceIcon = (title?: string): LucideIcon => {
@@ -78,8 +79,8 @@ export const ServiceCard = ({
     ? `${whatsappBaseUrl}${whatsappBaseUrl.includes('?') ? '&' : '?'}text=${inquiryMsg}`
     : `https://wa.me/?text=${inquiryMsg}`;
 
-  // Layered surface matching reviews card architecture
-  const cardBg = "bg-white/95 dark:bg-zinc-900/60 backdrop-blur-xl";
+  // High-opacity GPU-friendly surface on mobile (< 768px) to avoid heavy live backdrop-filter blur lag during vertical scroll; full backdrop-blur-xl on md+
+  const cardBg = "bg-white/98 dark:bg-zinc-900/95 md:bg-white/95 md:dark:bg-zinc-900/60 md:backdrop-blur-xl";
 
   return (
     <div className="h-full">
@@ -136,30 +137,23 @@ export const ServiceCard = ({
   );
 };
 
-// --- Scroll-Driven Mandatory Horizontal Carousel ---
-export const ServiceCarousel = ({
+// --- Desktop Scroll-Driven Sticky Horizontal Track (Only mounted when !isMobile) ---
+const DesktopServiceStickyTrack = ({
   services,
   whatsappBaseUrl,
   header,
+  isRtl,
+  currentDirection,
 }: {
   services: Service[];
   whatsappBaseUrl?: string | null;
   header?: React.ReactNode;
+  isRtl: boolean;
+  currentDirection: string;
 }) => {
-  const { currentLang, currentDirection } = useLanguage();
-  const isAr = currentLang === 'ar';
-  const isRtl = currentDirection === 'rtl' || isAr;
-
   const trackRef = React.useRef<HTMLDivElement>(null);
   const cardsContainerRef = React.useRef<HTMLDivElement>(null);
   const [maxScroll, setMaxScroll] = React.useState(0);
-
-  // Mobile Carousel State & Refs
-  const mobileScrollRef = React.useRef<HTMLDivElement>(null);
-  const [activeMobileIndex, setActiveMobileIndex] = React.useState(0);
-  const isScrollingRef = React.useRef(false);
-  const touchStartXRef = React.useRef<number | null>(null);
-  const touchMovedRef = React.useRef(false);
 
   const { scrollYProgress } = useScroll({
     target: trackRef,
@@ -190,6 +184,80 @@ export const ServiceCarousel = ({
       clearTimeout(timer);
     };
   }, [services, currentDirection]);
+
+  const x = useTransform(smoothProgress, (val) => {
+    const clamped = Math.max(0, Math.min(1, val));
+    const offset = clamped * maxScroll;
+    return isRtl ? `${offset}px` : `-${offset}px`;
+  });
+
+  // Mandatory horizontal scroll track height: ~45vh per card ensures silky, natural pacing
+  const trackHeight = services.length > 1 ? `${100 + services.length * 45}vh` : "auto";
+
+  return (
+    <div
+      ref={trackRef}
+      className="hidden xl:block relative w-full overflow-x-clip"
+      style={{ height: trackHeight }}
+    >
+      <div className="sticky top-0 h-screen w-full flex flex-col justify-between pt-[74px] md:pt-[84px] pb-6 md:pb-10 overflow-x-clip overflow-y-clip [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {/* Header slot pinned inside the sticky viewport */}
+        {header && (
+          <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 shrink-0 mb-2 sm:mb-4">
+            {header}
+          </div>
+        )}
+
+        {/* Horizontal Cards Viewport */}
+        <div className="w-full flex-1 flex items-center overflow-x-clip overflow-y-clip py-2.5 sm:py-3.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <motion.div
+            ref={cardsContainerRef}
+            style={{ x }}
+            className={cn(
+              "flex gap-4 sm:gap-6 items-stretch shrink-0 py-2",
+              "ps-4 sm:ps-6 lg:ps-8 xl:ps-[max(2rem,calc((100vw-80rem)/2+2rem))]",
+              "pe-4 sm:pe-6 lg:pe-8 xl:pe-[max(2rem,calc((100vw-80rem)/2+2rem))]"
+            )}
+          >
+            {services.map((service, index) => (
+              <div
+                key={service.id || index}
+                className="w-[310px] md:w-[330px] lg:w-[350px] shrink-0"
+              >
+                <ServiceCard
+                  service={service}
+                  whatsappBaseUrl={whatsappBaseUrl}
+                />
+              </div>
+            ))}
+          </motion.div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// --- Scroll-Driven Mandatory Horizontal Carousel ---
+export const ServiceCarousel = ({
+  services,
+  whatsappBaseUrl,
+  header,
+}: {
+  services: Service[];
+  whatsappBaseUrl?: string | null;
+  header?: React.ReactNode;
+}) => {
+  const { currentLang, currentDirection } = useLanguage();
+  const isAr = currentLang === 'ar';
+  const isRtl = currentDirection === 'rtl' || isAr;
+  const isMobile = useIsMobile();
+
+  // Mobile Carousel State & Refs
+  const mobileScrollRef = React.useRef<HTMLDivElement>(null);
+  const [activeMobileIndex, setActiveMobileIndex] = React.useState(0);
+  const isScrollingRef = React.useRef(false);
+  const touchStartXRef = React.useRef<number | null>(null);
+  const touchMovedRef = React.useRef(false);
 
   // Mobile Scroll Active Dot Detection (Smooth, frame-rate safe)
   const handleMobileScroll = () => {
@@ -269,18 +337,9 @@ export const ServiceCarousel = ({
     }
   }, [currentLang]);
 
-  const x = useTransform(smoothProgress, (val) => {
-    const clamped = Math.max(0, Math.min(1, val));
-    const offset = clamped * maxScroll;
-    return isRtl ? `${offset}px` : `-${offset}px`;
-  });
-
   if (!services || services.length === 0) {
     return null;
   }
-
-  // Mandatory horizontal scroll track height: ~45vh per card ensures silky, natural pacing
-  const trackHeight = services.length > 1 ? `${100 + services.length * 45}vh` : "auto";
 
   return (
     <>
@@ -345,46 +404,16 @@ export const ServiceCarousel = ({
         )}
       </div>
 
-      {/* ─── DESKTOP ONLY VIEW (>= xl): Cinematic Scroll-Driven Sticky Horizontal Carousel ─── */}
-      <div
-        ref={trackRef}
-        className="hidden xl:block relative w-full overflow-x-clip"
-        style={{ height: trackHeight }}
-      >
-        <div className="sticky top-0 h-screen w-full flex flex-col justify-between pt-[74px] md:pt-[84px] pb-6 md:pb-10 overflow-x-clip overflow-y-clip [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {/* Header slot pinned inside the sticky viewport */}
-          {header && (
-            <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 shrink-0 mb-2 sm:mb-4">
-              {header}
-            </div>
-          )}
-
-          {/* Horizontal Cards Viewport */}
-          <div className="w-full flex-1 flex items-center overflow-x-clip overflow-y-clip py-2.5 sm:py-3.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <motion.div
-              ref={cardsContainerRef}
-              style={{ x }}
-              className={cn(
-                "flex gap-4 sm:gap-6 items-stretch shrink-0 py-2",
-                "ps-4 sm:ps-6 lg:ps-8 xl:ps-[max(2rem,calc((100vw-80rem)/2+2rem))]",
-                "pe-4 sm:pe-6 lg:pe-8 xl:pe-[max(2rem,calc((100vw-80rem)/2+2rem))]"
-              )}
-            >
-              {services.map((service, index) => (
-                <div
-                  key={service.id || index}
-                  className="w-[310px] md:w-[330px] lg:w-[350px] shrink-0"
-                >
-                  <ServiceCard
-                    service={service}
-                    whatsappBaseUrl={whatsappBaseUrl}
-                  />
-                </div>
-              ))}
-            </motion.div>
-          </div>
-        </div>
-      </div>
+      {/* ─── DESKTOP ONLY VIEW (>= xl): Unmounted on mobile phones to save DOM & scroll listeners ─── */}
+      {!isMobile && (
+        <DesktopServiceStickyTrack
+          services={services}
+          whatsappBaseUrl={whatsappBaseUrl}
+          header={header}
+          isRtl={isRtl}
+          currentDirection={currentDirection}
+        />
+      )}
     </>
   );
 };

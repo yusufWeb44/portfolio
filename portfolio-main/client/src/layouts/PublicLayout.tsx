@@ -135,72 +135,74 @@ const PublicLayout = () => {
     };
   }, []);
 
-  // Passive RAF scroll detection & High-Precision Active Section Spy
-  useEffect(() => {
-    let ticking = false;
+  const computeActiveSectionNow = () => {
+    if (typeof window === 'undefined' || location.pathname !== '/') return;
+    const scrollY = window.scrollY;
+    if (scrollY < 100) {
+      setActiveSection((prev) => (prev !== '' ? '' : prev));
+      return;
+    }
+
+    const scrollBottom = window.innerHeight + scrollY;
+    const docHeight = document.documentElement.scrollHeight;
+    if (scrollBottom >= docHeight - 80) {
+      setActiveSection((prev) => (prev !== 'contact' ? 'contact' : prev));
+      return;
+    }
+
     const navSectionIds = ['about', 'workflow', 'projects', 'skills', 'experience', 'services', 'faq', 'reviews', 'contact'];
+    const headerThreshold = 140;
+    let matchedSection = '';
 
-    const updateSpy = () => {
-      const scrollY = window.scrollY;
-      setScrolled(scrollY > 20);
-
-      // If user is on another route or currently navigating via click, lock the active section
-      if (location.pathname !== '/' || isNavigatingRef.current) {
-        ticking = false;
-        return;
+    for (const id of navSectionIds) {
+      const el = document.getElementById(id);
+      if (!el) continue;
+      const rect = el.getBoundingClientRect();
+      if (rect.top <= headerThreshold && rect.bottom > headerThreshold) {
+        matchedSection = id;
+        break;
       }
+    }
 
-      // Hero section: top of the page
-      if (scrollY < 100) {
-        setActiveSection('');
-        ticking = false;
-        return;
-      }
-
-      // Check if user reached near the very bottom of the document -> activate Contact
-      const scrollBottom = window.innerHeight + scrollY;
-      const docHeight = document.documentElement.scrollHeight;
-      if (scrollBottom >= docHeight - 80) {
-        setActiveSection('contact');
-        ticking = false;
-        return;
-      }
-
-      // Determine active section using the reading line threshold (~140px below fixed navbar)
-      const headerThreshold = 140;
-      let matchedSection = '';
-
+    if (!matchedSection) {
+      let minDiff = Infinity;
       for (const id of navSectionIds) {
         const el = document.getElementById(id);
         if (!el) continue;
         const rect = el.getBoundingClientRect();
-        if (rect.top <= headerThreshold && rect.bottom > headerThreshold) {
-          matchedSection = id;
-          break;
-        }
-      }
-
-      // Secondary fallback: find the section closest to the top viewport edge
-      if (!matchedSection) {
-        let minDiff = Infinity;
-        for (const id of navSectionIds) {
-          const el = document.getElementById(id);
-          if (!el) continue;
-          const rect = el.getBoundingClientRect();
-          if (rect.bottom > 60 && rect.top < window.innerHeight * 0.75) {
-            const diff = Math.abs(rect.top - headerThreshold);
-            if (diff < minDiff) {
-              minDiff = diff;
-              matchedSection = id;
-            }
+        if (rect.bottom > 60 && rect.top < window.innerHeight * 0.75) {
+          const diff = Math.abs(rect.top - headerThreshold);
+          if (diff < minDiff) {
+            minDiff = diff;
+            matchedSection = id;
           }
         }
       }
+    }
 
-      if (matchedSection) {
-        setActiveSection(matchedSection);
+    if (matchedSection) {
+      setActiveSection((prev) => (prev !== matchedSection ? matchedSection : prev));
+    }
+  };
+
+  // Passive RAF scroll detection & High-Precision Active Section Spy
+  useEffect(() => {
+    let ticking = false;
+
+    const updateSpy = () => {
+      const scrollY = window.scrollY;
+      const nextScrolled = scrollY > 20;
+      setScrolled((prev) => (prev !== nextScrolled ? nextScrolled : prev));
+
+      // On screens < 1280px (mobile & tablet), the desktop navbar is hidden (hidden xl:flex).
+      // Skip per-frame getBoundingClientRect() layout reads and PublicLayout re-renders during touch scroll;
+      // activeSection is computed on-demand when opening the mobile menu drawer.
+      if (window.innerWidth < 1280 || location.pathname !== '/' || isNavigatingRef.current) {
+        ticking = false;
+        return;
       }
 
+      computeActiveSectionNow();
       ticking = false;
     };
 
@@ -669,7 +671,10 @@ const PublicLayout = () => {
 
                 <button
                   type="button"
-                  onClick={() => setMobileMenuOpen(true)}
+                  onClick={() => {
+                    computeActiveSectionNow();
+                    setMobileMenuOpen(true);
+                  }}
                   className="w-10 h-10 rounded-lg bg-white/50 hover:bg-white/80 dark:bg-white/[0.04] dark:hover:bg-white/[0.07] border border-slate-900/[0.07] dark:border-white/[0.08] dark:hover:border-white/[0.15] text-foreground dark:text-zinc-300 transition-all cursor-pointer shadow-xs active:scale-95 flex items-center justify-center shrink-0 backdrop-blur-md"
                   aria-label="Open menu"
                   aria-expanded={mobileMenuOpen}

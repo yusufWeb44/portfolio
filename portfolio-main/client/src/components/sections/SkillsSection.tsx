@@ -355,7 +355,7 @@ const InfiniteSkillsMarquee = ({ items, isAr }: { items: TechItem[]; isAr: boole
             skills={rowSkills}
             direction={config.direction}
             baseSpeed={config.baseSpeed}
-            velocityFactor={velocityFactor}
+            velocityFactor={viewportWidth < 768 ? null : velocityFactor}
             isPaused={activeHover !== null || !isInView}
             onHover={setActiveHover}
             onToggle={handleToggle}

@@ -286,6 +286,18 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
             onAnimationComplete={handleAnimationComplete}
           >
             {displayList.map((review, index) => {
+              // On mobile, skip mounting heavy inner card DOM for off-screen cloned buffers (> 2 slides away)
+              if (isMobile && Math.abs(index - currentIndex) > 2) {
+                return (
+                  <div
+                    key={`${review.id || 'rev'}-${index}`}
+                    className="px-2.5 sm:px-3 flex-shrink-0"
+                    style={{ width: `${cardWidthPercent}%` }}
+                    aria-hidden="true"
+                  />
+                );
+              }
+
               const nameText = isAr ? (review.nameAr || review.name) : review.name;
               const roleText = isAr ? (review.roleAr || review.role) : review.role;
               const reviewText = isAr ? (review.contentAr || review.content) : review.content;
@@ -313,11 +325,10 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
                   <div
                     className={cn(
                       "group relative h-full flex flex-col justify-between rounded-2xl p-6 sm:p-7 pt-12 sm:pt-14",
-                      "bg-white/95 dark:bg-zinc-900/60 backdrop-blur-xl",
+                      "bg-white/98 dark:bg-zinc-900/95 md:bg-white/95 md:dark:bg-zinc-900/60 md:backdrop-blur-xl",
                       "border border-zinc-200/90 dark:border-white/[0.08]",
                       "shadow-[0_1px_2px_rgba(0,0,0,0.03),0_8px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset,0_16px_32px_-12px_rgba(0,0,0,0.4)]",
-                      "hover:border-zinc-300 dark:hover:border-white/[0.18] transition-all duration-300",
-                      "hover:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_1px_0_0_rgba(255,255,255,0.06)_inset,0_20px_40px_-12px_rgba(0,0,0,0.5)]"
+                      "hover:border-zinc-300 dark:hover:border-white/[0.18] transition-colors duration-200"
                     )}
                   >
                     {/* Top Floating Circular Avatar (Centered with flex inset-x-0, zero transform conflicts) */}

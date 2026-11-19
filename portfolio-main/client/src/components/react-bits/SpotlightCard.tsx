@@ -1,4 +1,5 @@
 import React, { useRef, useState, useCallback } from 'react';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 export interface SpotlightCardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
@@ -38,6 +39,7 @@ export const SpotlightCard: React.FC<SpotlightCardProps> = ({
   darkSize,
   ...props
 }) => {
+  const isMobile = useIsMobile();
   const divRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [opacity, setOpacity] = useState(0);
@@ -57,6 +59,15 @@ export const SpotlightCard: React.FC<SpotlightCardProps> = ({
   const handleMouseLeave = useCallback(() => {
     setOpacity(0);
   }, []);
+
+  // Mobile bypass: zero radial-gradient overlay DOM nodes and zero mouse tracking overhead
+  if (isMobile) {
+    return (
+      <div className={`relative overflow-hidden ${className}`} {...props}>
+        {children}
+      </div>
+    );
+  }
 
   // In dark mode: ensure ZERO harsh glowing spots or sharp circular discs.
   // We use an ultra-delicate, whisper-quiet architectural platinum micro-sheen (< 0.8% peak opacity).

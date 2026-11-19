@@ -56,16 +56,32 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
   const touchStartXRef = useRef<number | null>(null);
   const touchStartYRef = useRef<number | null>(null);
 
-  // Auto-flip timer for mobile: flips to the next certificate periodically ("كل فترة يقلب على وحدة")
+  // Track visibility with IntersectionObserver so continuous loop & mobile auto-flip only run when in viewport
+  const carouselContainerRef = useRef<HTMLDivElement>(null);
+  const [isInView, setIsInView] = useState(true);
+
   useEffect(() => {
-    if (!isMobile || certificates.length <= 1 || isMobilePaused || selectedCert !== null) return;
+    if (!carouselContainerRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInView(entry.isIntersecting);
+      },
+      { rootMargin: '100px 0px' }
+    );
+    observer.observe(carouselContainerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  // Auto-flip timer for mobile: flips to the next certificate periodically ("كل فترة يقلب على وحدة") only while visible in viewport
+  useEffect(() => {
+    if (!isMobile || !isInView || certificates.length <= 1 || isMobilePaused || selectedCert !== null) return;
 
     const interval = setInterval(() => {
       setActiveMobileIndex((prev) => (prev + 1) % certificates.length);
     }, 3800);
 
     return () => clearInterval(interval);
-  }, [isMobile, certificates.length, isMobilePaused, selectedCert]);
+  }, [isMobile, isInView, certificates.length, isMobilePaused, selectedCert]);
 
   const handleMobileTouchStart = (e: React.TouchEvent) => {
     if (e.touches.length === 1) {
@@ -198,22 +214,6 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
   // totalPeriod based on exact angleStep so spacing between adjacent cards never gets compressed
   const totalPeriod = wheelItems.length * layout.angleStep;
 
-  // Track visibility with IntersectionObserver so continuous loop only runs when in viewport
-  const carouselContainerRef = useRef<HTMLDivElement>(null);
-  const [isInView, setIsInView] = useState(true);
-
-  useEffect(() => {
-    if (!carouselContainerRef.current) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsInView(entry.isIntersecting);
-      },
-      { rootMargin: '100px 0px' }
-    );
-    observer.observe(carouselContainerRef.current);
-    return () => observer.disconnect();
-  }, []);
-
   // Continuous auto-rotation loop for desktop 3D cylinder (disabled on mobile)
   useEffect(() => {
     if (isMobile || wheelItems.length === 0 || !isInView) return;
@@ -337,7 +337,7 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
   }
 
   return (
-    <div className="w-full pt-4 pb-2 relative select-none overflow-x-clip">
+    <div ref={carouselContainerRef} className="w-full pt-4 pb-2 relative select-none overflow-x-clip">
 
       {/* ── Section Header (Title & Subtitle placed at top of certificates, centered) ── */}
       <div className="relative z-20 max-w-3xl mx-auto px-4 text-center mb-4 sm:mb-8 md:mb-10 pointer-events-none">
@@ -468,9 +468,9 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
         )}
       </div>
 
-      {/* ── DESKTOP & TABLET VIEW (>= md): 3D Curved Panoramic Stage ── */}
+      {/* ── DESKTOP & TABLET VIEW (>= md): 3D Curved Panoramic Stage (unmounted on mobile phones) ── */}
+      {!isMobile && (
       <div
-        ref={carouselContainerRef}
         style={{
           height: `${layout.containerHeight}px`,
           marginTop: `-${layout.bleed}px`,
@@ -601,6 +601,7 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
           })}
         </div>
       </div>
+      )}
 
       {/* ═══════════════════════════════════════════════════════════════
           PURE LARGE CERTIFICATE VIEW (No container, no extra headers, X on top-right)

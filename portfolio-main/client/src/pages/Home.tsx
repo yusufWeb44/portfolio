@@ -729,10 +729,10 @@ const Home = () => {
               darkSize={580}
               className={cn(
                 "group relative overflow-hidden rounded-2xl sm:rounded-3xl p-6 sm:p-10",
-                "bg-white/95 dark:bg-zinc-900/60 backdrop-blur-xl",
+                "bg-white/98 dark:bg-zinc-900/95 md:bg-white/95 md:dark:bg-zinc-900/60 md:backdrop-blur-xl",
                 "border border-zinc-200/90 dark:border-white/[0.08]",
                 "shadow-[0_1px_2px_rgba(0,0,0,0.03),0_8px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset,0_16px_32px_-12px_rgba(0,0,0,0.4)]",
-                "hover:border-zinc-300 dark:hover:border-white/[0.18] transition-all duration-300"
+                "hover:border-zinc-300 dark:hover:border-white/[0.18] transition-colors duration-200"
               )}
             >
               <div className="relative z-10 flex flex-col items-center text-center">
