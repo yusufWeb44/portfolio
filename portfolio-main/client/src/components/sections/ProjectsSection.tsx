@@ -291,7 +291,7 @@ const DesktopStackedCard = ({
         className="rounded-2xl border border-slate-200/90 dark:border-white/[0.14] bg-background dark:bg-background shadow-[0_4px_20px_-2px_rgba(0,0,0,0.12),0_12px_36px_-4px_rgba(0,0,0,0.18)] dark:shadow-[0_20px_50px_-10px_rgba(0,0,0,0.9)] overflow-hidden relative w-full"
       >
         {/* Desktop 12-col split */}
-        <div className="grid grid-cols-12 gap-5 lg:gap-6 px-5 lg:px-6 pt-3 lg:pt-3.5 pb-4.5 lg:pb-6 items-stretch xl:min-h-[355px] xl:max-h-[355px] xl:h-[355px]">
+        <div className="grid grid-cols-12 gap-5 lg:gap-6 px-5 lg:px-6 pt-3 lg:pt-3.5 pb-4 lg:pb-5 items-stretch xl:min-h-[350px] xl:max-h-[350px] xl:h-[350px]">
           {/* Details Column (5 cols) */}
           <div
             className={`col-span-5 flex flex-col justify-between h-full min-h-0 ${isAr ? 'text-right' : 'text-left'
@@ -530,17 +530,17 @@ const ProjectsSection = () => {
       {/* ═══════════════════════════════════════════════════════════════════
           DESKTOP ONLY VIEW (>= xl): Full original sticky deck stacking experience
           ═══════════════════════════════════════════════════════════════════ */}
-      <div className="hidden xl:block [--cards-step:44px]">
+      <div className="hidden xl:block [--cards-step:36px]">
         {isDesktop && (
           <>
             {/* Outer Scroll Track */}
             <div ref={trackRef} className="relative w-full" style={{ height: trackHeight }}>
               {/* Sticky Container - Pinned cleanly to top:0, full-screen, 100% desktop-grade */}
-              <div className="sticky top-0 h-screen w-full flex flex-col justify-start pt-[84px] pb-6 overflow-x-clip pointer-events-none">
+              <div className="sticky top-0 h-screen w-full flex flex-col justify-start pt-[78px] pb-4 overflow-x-clip pointer-events-none">
                 {/* 1. Header */}
-                <div className="max-w-7xl mx-auto px-6 lg:px-8 pb-2.5 w-full pointer-events-auto shrink-0">
+                <div className="max-w-7xl mx-auto px-6 lg:px-8 pb-1 w-full pointer-events-auto shrink-0">
                   <div className="max-w-3xl">
-                    <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-[1.15] text-foreground mb-1">
+                    <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight text-foreground mb-0.5">
                       <SplitText text={displayTitle} delay={35} duration={0.45} />
                     </h2>
                     {displaySubtitle && (
@@ -549,14 +549,14 @@ const ProjectsSection = () => {
                         text={displaySubtitle}
                         animateBy="block"
                         delay={20}
-                        className="text-base md:text-lg text-muted-foreground leading-relaxed line-clamp-2"
+                        className="text-sm md:text-base text-muted-foreground leading-snug line-clamp-1"
                       />
                     )}
                   </div>
                 </div>
 
                 {/* 2. Cards Deck Container */}
-                <div className="relative mt-6 w-full max-w-[980px] mx-auto px-6 flex-1 flex flex-col justify-start">
+                <div className="relative mt-2 w-full max-w-[980px] mx-auto px-6 flex-1 flex flex-col justify-start">
                   {loading ? (
                     <div className="h-[320px] flex items-center justify-center px-4">
                       <div className="w-full max-w-[920px] h-[280px] rounded-xl bg-card/40 dark:bg-white/[0.02] border border-border/50 animate-pulse flex items-center justify-center">

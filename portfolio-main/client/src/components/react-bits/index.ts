@@ -16,3 +16,7 @@ export type { AnimatedContentProps } from './AnimatedContent';
 export { SpotlightCard } from './SpotlightCard';
 export type { SpotlightCardProps } from './SpotlightCard';
 
+export { HeroBackground } from './HeroBackground';
+export type { HeroBackgroundProps } from './HeroBackground';
+
+

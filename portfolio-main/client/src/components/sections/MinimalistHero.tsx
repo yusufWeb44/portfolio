@@ -5,7 +5,7 @@ import { Typewriter } from '@/components/ui/typewriter';
 import { GithubIcon, LinkedinIcon, InstagramIcon, FacebookIcon } from '../ui/BrandIcons';
 import { buttonVariants } from '../ui/Button';
 import { SocialButton } from '../ui/SocialButton';
-import { SplitText, BlurText, FadeContent } from '../react-bits';
+import { SplitText, BlurText, FadeContent, HeroBackground } from '../react-bits';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { resolveImageUrl } from '../../utils/mediaUrl';
@@ -14,26 +14,16 @@ import { resolveImageUrl } from '../../utils/mediaUrl';
 const AnimatedStatValue: React.FC<{ value: string }> = ({ value }) => {
   const isMobile = useIsMobile();
   const strVal = String(value ?? '');
-
-  if (isMobile) {
-    return <span className="tabular-nums">{strVal}</span>;
-  }
-
   const match = strVal.match(/^([^0-9]*)(\d+)(.*)$/);
-
-  if (!match) {
-    return <span>{strVal}</span>;
-  }
-
-  const prefix = match[1];
-  const targetNum = parseInt(match[2], 10);
-  const suffix = match[3];
+  const prefix = match ? match[1] : '';
+  const targetNum = match ? parseInt(match[2], 10) : 0;
+  const suffix = match ? match[3] : '';
 
   const spanRef = useRef<HTMLSpanElement>(null);
   const hasAnimated = useRef(false);
 
   useEffect(() => {
-    if (!spanRef.current || hasAnimated.current) return;
+    if (isMobile || !match || !spanRef.current || hasAnimated.current) return;
 
     const el = spanRef.current;
     const observer = new IntersectionObserver(
@@ -42,7 +32,6 @@ const AnimatedStatValue: React.FC<{ value: string }> = ({ value }) => {
           hasAnimated.current = true;
           observer.disconnect();
 
-          // Defer count-up by 200ms to allow Hero entrance paint & transitions to finish first
           let animationFrameId: number;
           const timer = setTimeout(() => {
             let startTimestamp: number | null = null;
@@ -78,7 +67,11 @@ const AnimatedStatValue: React.FC<{ value: string }> = ({ value }) => {
 
     observer.observe(el);
     return () => observer.disconnect();
-  }, [targetNum, prefix, suffix]);
+  }, [isMobile, targetNum, prefix, suffix, match]);
+
+  if (isMobile || !match) {
+    return <span className="tabular-nums">{strVal}</span>;
+  }
 
   return (
     <span ref={spanRef} className="tabular-nums">
@@ -137,6 +130,10 @@ const formatStatLabel = (label: string) => {
   return <span className="block leading-tight">{label}</span>;
 };
 
+const blobPath1 = 'M410.5,317.5Q372,385,299,419.5Q226,454,161.5,410Q97,366,66,298Q35,230,73.5,166Q112,102,181,71.5Q250,41,319,72Q388,103,418.5,176.5Q449,250,410.5,317.5Z';
+const blobPath2 = 'M395,310Q350,370,285,410Q220,450,155,410Q90,370,65,300Q40,230,75,165Q110,100,180,65Q250,30,320,65Q390,100,415,165Q440,230,395,310Z';
+const blobPath3 = 'M420,320Q380,390,300,425Q220,460,150,415Q80,370,55,295Q30,220,70,155Q110,90,185,60Q260,30,330,60Q400,90,430,160Q460,230,420,320Z';
+
 const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
   imageSrc = '/portfolio_photo.webp',
   headline,
@@ -156,15 +153,11 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
   const isMobile = useIsMobile();
   const cubicEase = [0.22, 1, 0.36, 1] as any;
 
-  const blobPath1 = 'M410.5,317.5Q372,385,299,419.5Q226,454,161.5,410Q97,366,66,298Q35,230,73.5,166Q112,102,181,71.5Q250,41,319,72Q388,103,418.5,176.5Q449,250,410.5,317.5Z';
-  const blobPath2 = 'M395,310Q350,370,285,410Q220,450,155,410Q90,370,65,300Q40,230,75,165Q110,100,180,65Q250,30,320,65Q390,100,415,165Q440,230,395,310Z';
-  const blobPath3 = 'M420,320Q380,390,300,425Q220,460,150,415Q80,370,55,295Q30,220,70,155Q110,90,185,60Q260,30,330,60Q400,90,430,160Q460,230,420,320Z';
-
   const [startMorph, setStartMorph] = useState(false);
   useEffect(() => {
     // Skip continuous SVG path string morphing on mobile touch devices to keep mobile CPU completely free
-    const isMobile = typeof window !== 'undefined' && (window.innerWidth < 1024 || window.matchMedia('(pointer: coarse)').matches);
-    if (isMobile) return;
+    const isTouch = typeof window !== 'undefined' && (window.innerWidth < 1024 || window.matchMedia('(pointer: coarse)').matches);
+    if (isTouch) return;
     const timer = setTimeout(() => setStartMorph(true), 1200);
     return () => clearTimeout(timer);
   }, []);
@@ -182,9 +175,11 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
 
   return (
     <div className="relative min-h-[100svh] md:min-h-0 xl:min-h-[calc(100vh-4rem)] flex flex-col justify-between overflow-hidden bg-transparent">
+      {/* ── Single Living Background: React Bits Ambient Backdrop (Light & Dark + Seamless Bottom Fade) ── */}
+      <HeroBackground />
 
       {/* Main Hero Content */}
-      <div className="flex-1 max-w-7xl mx-auto w-full px-5 sm:px-6 lg:px-6 pt-20 sm:pt-24 md:pt-28 xl:pt-32 pb-8 md:pb-12 xl:pb-8 flex flex-col justify-center md:justify-start xl:justify-center">
+      <div className="relative z-10 flex-1 max-w-7xl mx-auto w-full px-5 sm:px-6 lg:px-6 pt-20 sm:pt-24 md:pt-28 xl:pt-32 pb-8 md:pb-12 xl:pb-8 flex flex-col justify-center md:justify-start xl:justify-center">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-8 items-center">
 
           {/* ── Left Column (desktop & tablet): Headline, Bio, CTA, Social, Stats ── */}
@@ -261,11 +256,10 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
               {activeStats.length > 0 && (
                 <FadeContent delay={0.4} blur={false} distance={15}>
                   <div
-                    className={`grid ${
-                      activeStats.length === 3
-                        ? 'grid-cols-3 sm:grid-cols-3 lg:grid-cols-4'
-                        : 'grid-cols-2 sm:grid-cols-4'
-                    } gap-3 sm:gap-4 pt-5 sm:pt-6 border-t border-border/40 mt-5 sm:mt-6 w-full`}
+                    className={`grid ${activeStats.length === 3
+                      ? 'grid-cols-3 sm:grid-cols-3 lg:grid-cols-4'
+                      : 'grid-cols-2 sm:grid-cols-4'
+                      } gap-3 sm:gap-4 pt-5 sm:pt-6 border-t border-border/40 mt-5 sm:mt-6 w-full`}
                   >
                     {activeStats.map((stat, idx) => (
                       <div key={idx} className="flex flex-col">
@@ -315,7 +309,7 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
               </div>
             )}
 
-            {/* Blob + Profile Image */}
+            {/* Blob + Profile Image (Anchored & Stationary, zero mouse movement) */}
             <div className="relative flex justify-center items-center min-h-[350px] sm:min-h-[390px] md:min-h-[420px] lg:min-h-[460px] xl:min-h-[500px] w-full select-none pointer-events-none">
               {/* Fluid Blob Backdrop — Enlarged to match reference photo, perfectly framing profile */}
               <div className="absolute -top-6 sm:-top-8 md:-top-9 lg:-top-10 xl:-top-11 w-[320px] h-[320px] sm:w-[360px] sm:h-[360px] md:w-[390px] md:h-[390px] lg:w-[400px] lg:h-[400px] xl:w-[450px] xl:h-[450px] z-0 pointer-events-none select-none">
@@ -325,8 +319,8 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
                   transition={isMobile ? { duration: 0 } : { duration: 0.4, ease: cubicEase }}
                   className="w-full h-full relative"
                 >
-                  {/* Ambient glow behind blob without expensive filter */}
-                  <div className="absolute inset-6 rounded-full bg-emerald-500/15 dark:bg-emerald-500/25 blur-3xl -z-10 transform-gpu pointer-events-none select-none" style={{ contain: 'strict', transform: 'translateZ(0)' }} />
+                  {/* Ambient soft glow behind blob */}
+                  <div className="absolute inset-6 rounded-full bg-emerald-500/05 dark:bg-emerald-500/10 blur-2xl -z-10 transform-gpu pointer-events-none select-none" style={{ contain: 'strict', transform: 'translateZ(0)' }} />
                   <svg viewBox="0 0 500 500" className="w-full h-full transform-gpu" style={{ willChange: 'transform' }}>
                     <defs>
                       {/* Dark Mode Gradient: Cyan into Primary Theme */}
@@ -342,11 +336,11 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
                         <stop offset="100%" stopColor="#064E3B" style={{ stopColor: '#064E3B' }} />
                       </linearGradient>
                       <radialGradient id="glow-gradient-dark" cx="50%" cy="50%" r="50%">
-                        <stop offset="0%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)' }} stopOpacity="0.45" />
+                        <stop offset="0%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)' }} stopOpacity="0.12" />
                         <stop offset="100%" stopColor="#0EA5E9" stopOpacity="0" />
                       </radialGradient>
                       <radialGradient id="glow-gradient-light" cx="50%" cy="50%" r="50%">
-                        <stop offset="0%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)' }} stopOpacity="0.22" />
+                        <stop offset="0%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)' }} stopOpacity="0.08" />
                         <stop offset="100%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)' }} stopOpacity="0" />
                       </radialGradient>
                     </defs>
@@ -361,7 +355,7 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
                 </motion.div>
               </div>
 
-              {/* Profile Image — Completely fluid, continuous feather-soft eased gradient with zero visible steps or lines */}
+              {/* Profile Image — Anchored, zero mouse movement, bottom aligned with page elements */}
               <motion.div
                 initial={isMobile ? false : { opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -381,19 +375,19 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
                   height={420}
                   draggable={false}
                   style={{
-                    maskImage: 'linear-gradient(to bottom, black 0%, black 76%, rgba(0, 0, 0, 0.99) 79%, rgba(0, 0, 0, 0.96) 82%, rgba(0, 0, 0, 0.91) 85%, rgba(0, 0, 0, 0.82) 88%, rgba(0, 0, 0, 0.69) 91%, rgba(0, 0, 0, 0.52) 94%, rgba(0, 0, 0, 0.33) 96.5%, rgba(0, 0, 0, 0.15) 98.2%, rgba(0, 0, 0, 0.04) 99.2%, transparent 100%)',
-                    WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 76%, rgba(0, 0, 0, 0.99) 79%, rgba(0, 0, 0, 0.96) 82%, rgba(0, 0, 0, 0.91) 85%, rgba(0, 0, 0, 0.82) 88%, rgba(0, 0, 0, 0.69) 91%, rgba(0, 0, 0, 0.52) 94%, rgba(0, 0, 0, 0.33) 96.5%, rgba(0, 0, 0, 0.15) 98.2%, rgba(0, 0, 0, 0.04) 99.2%, transparent 100%)',
+                    maskImage: 'linear-gradient(to bottom, black 0%, black 85%, rgba(0, 0, 0, 0.95) 89%, rgba(0, 0, 0, 0.8) 93%, rgba(0, 0, 0, 0.45) 97%, transparent 100%)',
+                    WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 85%, rgba(0, 0, 0, 0.95) 89%, rgba(0, 0, 0, 0.8) 93%, rgba(0, 0, 0, 0.45) 97%, transparent 100%)',
                     userSelect: 'none',
                     WebkitUserSelect: 'none',
                     pointerEvents: 'none',
                   }}
-                  className="w-[275px] sm:w-[315px] md:w-[340px] lg:w-[370px] xl:w-[420px] h-auto object-contain scale-[1.54] sm:scale-[1.56] md:scale-[1.58] lg:scale-[1.56] xl:scale-[1.6] pointer-events-none select-none"
+                  className="w-[275px] sm:w-[315px] md:w-[340px] lg:w-[370px] xl:w-[420px] h-auto object-contain scale-[1.54] sm:scale-[1.56] md:scale-[1.58] lg:scale-[1.56] xl:scale-[1.6] translate-y-3 sm:translate-y-4 md:translate-y-5 lg:translate-y-6 xl:translate-y-7 pointer-events-none select-none"
                 />
               </motion.div>
             </div>
           </div>
 
-          {/* ── Right Column (desktop only >= xl): Specialties stacked vertically, single line with prestige dash prefix ── */}
+          {/* ── Right Column (desktop only >= xl): Specialties stacked vertically, original clean dash & hover ── */}
           {words.length > 0 && (
             <div className="hidden xl:flex order-3 xl:col-span-3 xl:justify-start rtl:xl:justify-start xl:items-center z-10 min-w-0 w-full pl-1 xl:pl-3 rtl:pl-0 rtl:pr-1 rtl:xl:pr-3">
               <motion.div
