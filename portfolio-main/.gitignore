@@ -68,3 +68,5 @@ server/scratch_test.js
 Thumbs.db
 ehthumbs.db
 desktop.ini
+
+server/prisma/portfolio_db_dump.sql
