@@ -60,6 +60,7 @@ interface Settings {
   availabilityAr?: string;
   email?: string;
   profilePhoto?: string;
+  profilePhotoHover?: string;
   typewriterWords?: string | string[];
   typewriterWordsAr?: string | string[];
   footerText?: string;
@@ -462,6 +463,11 @@ const Home = () => {
     return resolved;
   }, [settings?.profilePhoto]);
 
+  const heroHoverImageSrc = useMemo(() => {
+    const resolved = resolveImageUrl(settings?.profilePhotoHover);
+    return resolved || undefined;
+  }, [settings?.profilePhotoHover]);
+
   return (
     <div className="w-full bg-transparent">
       <SEO
@@ -480,6 +486,7 @@ const Home = () => {
           ctaText={ctaText}
           ctaHref="#projects"
           imageSrc={heroImageSrc}
+          hoverImageSrc={heroHoverImageSrc}
           githubUrl={githubUrl}
           linkedinUrl={linkedinUrl}
           instagramUrl={instagramUrl}

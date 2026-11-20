@@ -98,22 +98,6 @@ export const HeroBackground: React.FC<HeroBackgroundProps> = ({ className = '' }
       } ${className}`}
     >
       <style>{`
-        @keyframes rbAuroraDriftA {
-          0%, 100% {
-            transform: translate3d(0%, 0%, 0) scale(1);
-          }
-          50% {
-            transform: translate3d(2%, -2%, 0) scale(1.03);
-          }
-        }
-        @keyframes rbAuroraDriftB {
-          0%, 100% {
-            transform: translate3d(0%, 0%, 0) scale(1);
-          }
-          50% {
-            transform: translate3d(-2%, 2%, 0) scale(1.03);
-          }
-        }
         @keyframes rbCellPulse {
           0%, 100% {
             opacity: 0;
@@ -121,14 +105,6 @@ export const HeroBackground: React.FC<HeroBackgroundProps> = ({ className = '' }
           50% {
             opacity: 1;
           }
-        }
-        .rb-aurora-a {
-          animation: rbAuroraDriftA 22s ease-in-out infinite;
-          will-change: transform;
-        }
-        .rb-aurora-b {
-          animation: rbAuroraDriftB 26s ease-in-out infinite;
-          will-change: transform;
         }
         .rb-grid-cell {
           animation-name: rbCellPulse;
@@ -140,8 +116,6 @@ export const HeroBackground: React.FC<HeroBackgroundProps> = ({ className = '' }
           animation-play-state: paused !important;
         }
         @media (prefers-reduced-motion: reduce) {
-          .rb-aurora-a,
-          .rb-aurora-b,
           .rb-grid-cell {
             animation: none !important;
           }
@@ -153,35 +127,12 @@ export const HeroBackground: React.FC<HeroBackgroundProps> = ({ className = '' }
         className="absolute inset-0"
         style={{
           maskImage:
-            'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.3) 6%, rgba(0,0,0,0.85) 16%, rgba(0,0,0,1) 28%, rgba(0,0,0,1) 62%, rgba(0,0,0,0.7) 75%, rgba(0,0,0,0.3) 86%, transparent 100%)',
+            'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.3) 6%, rgba(0,0,0,0.85) 16%, rgba(0,0,0,1) 28%, rgba(0,0,0,1) 68%, rgba(0,0,0,0.7) 80%, rgba(0,0,0,0.3) 90%, transparent 100%)',
           WebkitMaskImage:
-            'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.3) 6%, rgba(0,0,0,0.85) 16%, rgba(0,0,0,1) 28%, rgba(0,0,0,1) 62%, rgba(0,0,0,0.7) 75%, rgba(0,0,0,0.3) 86%, transparent 100%)',
+            'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.3) 6%, rgba(0,0,0,0.85) 16%, rgba(0,0,0,1) 28%, rgba(0,0,0,1) 68%, rgba(0,0,0,0.7) 80%, rgba(0,0,0,0.3) 90%, transparent 100%)',
         }}
       >
-        {/* ── 1. Extremely Soft Ambient Atmospheric Sheen (Whisper-Quiet, Zero Harsh Glow) ── */}
-        <div
-          className={`-top-[8%] left-[5%] w-[480px] h-[380px] sm:w-[620px] sm:h-[420px] rounded-full opacity-60 dark:opacity-50 ${
-            !isMobile ? 'rb-aurora-a' : ''
-          }`}
-          style={{
-            position: 'absolute',
-            background:
-              'radial-gradient(ellipse 65% 55% at 50% 50%, rgba(16, 185, 129, 0.02) 0%, rgba(14, 165, 233, 0.012) 45%, transparent 72%)',
-          }}
-        />
-
-        <div
-          className={`top-[12%] right-[5%] w-[460px] h-[380px] sm:w-[580px] sm:h-[440px] rounded-full opacity-60 dark:opacity-50 ${
-            !isMobile ? 'rb-aurora-b' : ''
-          }`}
-          style={{
-            position: 'absolute',
-            background:
-              'radial-gradient(ellipse 65% 55% at 50% 50%, rgba(14, 165, 233, 0.016) 0%, rgba(16, 185, 129, 0.012) 45%, transparent 72%)',
-          }}
-        />
-
-        {/* ── 2. Architectural Grid + Subtle Shimmering Nodes (SVG Pattern) ── */}
+        {/* ── Architectural Snapped Grid (Snaps cleanly to layout, zero green/dark wave interference) ── */}
         <div
           className="absolute inset-0"
           style={{
@@ -246,7 +197,7 @@ export const HeroBackground: React.FC<HeroBackgroundProps> = ({ className = '' }
                       animationDelay: cell.delay,
                       animationDuration: cell.duration,
                     }}
-                    className="rb-grid-cell fill-emerald-500/[0.02] dark:fill-white/[0.018] stroke-emerald-600/[0.08] dark:stroke-white/[0.06]"
+                    className="rb-grid-cell fill-slate-900/[0.02] dark:fill-white/[0.015] stroke-slate-400/[0.06] dark:stroke-white/[0.04]"
                     strokeWidth="1"
                   />
                 ))}

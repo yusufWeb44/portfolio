@@ -11,7 +11,7 @@ export const getSettings = async (req: Request, res: Response) => {
 
 const ALLOWED_SETTINGS_KEYS = new Set([
   'name', 'nameAr', 'bio', 'bioAr', 'heroText', 'heroTextAr', 'ctaText', 'ctaTextAr',
-  'location', 'locationAr', 'availability', 'availabilityAr', 'email', 'profilePhoto',
+  'location', 'locationAr', 'availability', 'availabilityAr', 'email', 'profilePhoto', 'profilePhotoHover',
   'logoUrl',
   'typewriterWords', 'typewriterWordsAr', 'footerText', 'footerTextAr', 'whatsappNumber',
   'heroStats', 'heroStatsAr', 'primaryThemeColor', 'fontFamilyEn', 'fontUrlEn', 'fontFamilyAr', 'fontUrlAr',

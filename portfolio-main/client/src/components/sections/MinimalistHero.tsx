@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { Typewriter } from '@/components/ui/typewriter';
@@ -87,6 +87,7 @@ export interface StatItem {
 
 export interface MinimalistHeroProps {
   imageSrc?: string;
+  hoverImageSrc?: string;
   headline?: string;
   heroText?: string;
   bioText?: string;
@@ -134,8 +135,41 @@ const blobPath1 = 'M410.5,317.5Q372,385,299,419.5Q226,454,161.5,410Q97,366,66,29
 const blobPath2 = 'M395,310Q350,370,285,410Q220,450,155,410Q90,370,65,300Q40,230,75,165Q110,100,180,65Q250,30,320,65Q390,100,415,165Q440,230,395,310Z';
 const blobPath3 = 'M420,320Q380,390,300,425Q220,460,150,415Q80,370,55,295Q30,220,70,155Q110,90,185,60Q260,30,330,60Q400,90,430,160Q460,230,420,320Z';
 
+/* ─── Desktop-Only Portrait Ferrofluid / Liquid-Metal Localized Radial Reveal ─── */
+const CORE_LENS_RADIUS = 58;
+
+// 6 organic orbiting ferrofluid lobes creating living liquid-metal waves around the hovered reveal zone
+const FERRO_LOBES = [
+  { dist: 42, distAmp: 14, speed: 1.15, phase: 0.0, r: 27, rAmp: 6 },
+  { dist: 45, distAmp: 15, speed: -1.42, phase: 1.05, r: 24, rAmp: 6.5 },
+  { dist: 40, distAmp: 13, speed: 1.78, phase: 2.1, r: 22, rAmp: 5.5 },
+  { dist: 46, distAmp: 14, speed: -0.96, phase: 3.15, r: 26, rAmp: 6 },
+  { dist: 41, distAmp: 16, speed: 2.12, phase: 4.2, r: 21, rAmp: 5.5 },
+  { dist: 44, distAmp: 12, speed: -1.68, phase: 5.25, r: 23, rAmp: 5 },
+] as const;
+
+// 5 velocity-reactive trailing liquid mercury droplets
+const FERRO_TRAIL_BASE_RADII = [36, 27, 20, 13.5, 8.5] as const;
+
+// 6 delicate liquid-metal micro-beads floating around the outer ferrofluid perimeter
+const FERRO_SPARKS = [
+  { dist: 74, distAmp: 11, speed: 0.85, phase: 0.4, r: 1.9 },
+  { dist: 80, distAmp: 13, speed: -1.12, phase: 1.7, r: 1.4 },
+  { dist: 70, distAmp: 10, speed: 1.38, phase: 2.9, r: 2.1 },
+  { dist: 86, distAmp: 12, speed: -0.74, phase: 4.1, r: 1.2 },
+  { dist: 76, distAmp: 14, speed: 1.62, phase: 5.0, r: 1.7 },
+  { dist: 82, distAmp: 9, speed: -1.31, phase: 5.9, r: 1.3 },
+] as const;
+
+// Total metaball circles per SVG mask: 1 core + 6 lobes + 5 trailing droplets = 12
+const METABALL_INDICES = Array.from({ length: 1 + FERRO_LOBES.length + FERRO_TRAIL_BASE_RADII.length }, (_, i) => i);
+
+const clampNum = (val: number, min: number, max: number): number =>
+  Math.max(min, Math.min(max, val));
+
 const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
   imageSrc = '/portfolio_photo.webp',
+  hoverImageSrc,
   headline,
   heroText,
   bioText = '',
@@ -162,6 +196,394 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
     return () => clearTimeout(timer);
   }, []);
 
+  /* ─── Desktop-Only Localized Ferrofluid / Liquid-Metal Hover Reveal (Zero React re-renders per frame) ─── */
+  const resolvedPrimarySrc = resolveImageUrl(imageSrc);
+  const resolvedHoverSrc = hoverImageSrc ? resolveImageUrl(hoverImageSrc) : '';
+
+  const [isDesktopHover, setIsDesktopHover] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return (
+      window.innerWidth >= 1024 &&
+      window.matchMedia('(hover: hover) and (pointer: fine)').matches
+    );
+  });
+  const [hoverImgReady, setHoverImgReady] = useState(false);
+  const [stageSize, setStageSize] = useState<{ w: number; h: number }>({ w: 420, h: 420 });
+
+  const stageRef = useRef<HTMLDivElement>(null);
+  const primaryImgRef = useRef<HTMLImageElement>(null);
+  const svgOverlayRef = useRef<SVGSVGElement>(null);
+  const metalGradRef = useRef<SVGLinearGradientElement>(null);
+  const rimRectRef = useRef<SVGRectElement>(null);
+
+  // Direct SVG <circle> refs for all 3 synced metaball masks + orbiting metallic micro-beads
+  const hoverCirclesRef = useRef<(SVGCircleElement | null)[]>([]);
+  const primaryCirclesRef = useRef<(SVGCircleElement | null)[]>([]);
+  const rimCirclesRef = useRef<(SVGCircleElement | null)[]>([]);
+  const sparkCirclesRef = useRef<(SVGCircleElement | null)[]>([]);
+
+  const ferroRef = useRef({
+    rafId: 0,
+    lastTime: 0,
+    elapsed: 0,
+    hovered: false,
+    openness: 0,
+    openVelocity: 0,
+    cx: 210,
+    cy: 210,
+    targetCx: 210,
+    targetCy: 210,
+    speedSmooth: 0,
+    reducedMotion: false,
+    trail: FERRO_TRAIL_BASE_RADII.map(() => ({ x: 210, y: 210 })),
+  });
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mq = window.matchMedia('(hover: hover) and (pointer: fine)');
+    const check = () => setIsDesktopHover(window.innerWidth >= 1024 && mq.matches);
+    check();
+    window.addEventListener('resize', check);
+    mq.addEventListener?.('change', check);
+    return () => {
+      window.removeEventListener('resize', check);
+      mq.removeEventListener?.('change', check);
+    };
+  }, []);
+
+  // Preload secondary portrait cleanly on desktop only (0 network cost on mobile/tablet)
+  useEffect(() => {
+    setHoverImgReady(false);
+    if (!isDesktopHover || !resolvedHoverSrc) return;
+
+    let cancelled = false;
+    const preload = new Image();
+    preload.decoding = 'async';
+    preload.onload = () => {
+      if (!cancelled) setHoverImgReady(true);
+    };
+    preload.onerror = () => {
+      if (!cancelled) setHoverImgReady(false);
+    };
+    preload.src = resolvedHoverSrc;
+    if (preload.complete && preload.naturalWidth > 0) {
+      setHoverImgReady(true);
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [isDesktopHover, resolvedHoverSrc]);
+
+  // Keep SVG viewBox synced 1:1 with the primary portrait's unscaled layout dimensions
+  useEffect(() => {
+    const el = stageRef.current;
+    if (!el || !isDesktopHover) return;
+
+    const measure = () => {
+      const w = el.offsetWidth;
+      const h = el.offsetHeight;
+      if (w > 20 && h > 20) {
+        setStageSize((prev) => (prev.w === w && prev.h === h ? prev : { w, h }));
+      }
+    };
+
+    measure();
+    if (typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [isDesktopHover, resolvedPrimarySrc]);
+
+  const canRadialReveal = isDesktopHover && Boolean(resolvedHoverSrc) && hoverImgReady;
+
+  const setRestingVisuals = useCallback(() => {
+    const state = ferroRef.current;
+    if (state.rafId) {
+      cancelAnimationFrame(state.rafId);
+      state.rafId = 0;
+    }
+    state.hovered = false;
+    state.openness = 0;
+    state.openVelocity = 0;
+    state.speedSmooth = 0;
+
+    if (primaryImgRef.current) {
+      primaryImgRef.current.style.opacity = '1';
+    }
+    if (svgOverlayRef.current) {
+      svgOverlayRef.current.style.opacity = '0';
+      svgOverlayRef.current.style.visibility = 'hidden';
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!canRadialReveal) {
+      setRestingVisuals();
+    }
+    return () => {
+      const state = ferroRef.current;
+      if (state.rafId) {
+        cancelAnimationFrame(state.rafId);
+        state.rafId = 0;
+      }
+    };
+  }, [canRadialReveal, setRestingVisuals]);
+
+  const writeMetaballCircle = useCallback((idx: number, x: number, y: number, r: number) => {
+    const xStr = x.toFixed(1);
+    const yStr = y.toFixed(1);
+    const rStr = Math.max(0, r).toFixed(1);
+
+    const hEl = hoverCirclesRef.current[idx];
+    if (hEl) {
+      hEl.setAttribute('cx', xStr);
+      hEl.setAttribute('cy', yStr);
+      hEl.setAttribute('r', rStr);
+    }
+    const pEl = primaryCirclesRef.current[idx];
+    if (pEl) {
+      pEl.setAttribute('cx', xStr);
+      pEl.setAttribute('cy', yStr);
+      pEl.setAttribute('r', rStr);
+    }
+    const rEl = rimCirclesRef.current[idx];
+    if (rEl) {
+      rEl.setAttribute('cx', xStr);
+      rEl.setAttribute('cy', yStr);
+      rEl.setAttribute('r', rStr);
+    }
+  }, []);
+
+  const stepFerrofluid = useCallback(
+    (now: number) => {
+      const state = ferroRef.current;
+      const svgEl = svgOverlayRef.current;
+      const baseImg = primaryImgRef.current;
+
+      if (!svgEl || !baseImg) {
+        state.rafId = 0;
+        return;
+      }
+
+      const dt = state.lastTime ? Math.min((now - state.lastTime) / 1000, 0.05) : 0.016;
+      state.lastTime = now;
+      state.elapsed += dt;
+      const t = state.elapsed;
+
+      // C1-continuous critically-damped spring for localized lens opening / closing (never covers full portrait)
+      const targetOpen = state.hovered ? 1 : 0;
+      const omega = state.hovered ? 9.4 : 10.6;
+      const exp = Math.exp(-omega * dt);
+      const delta = state.openness - targetOpen;
+      const temp = (state.openVelocity + omega * delta) * dt;
+      state.openVelocity = (state.openVelocity - omega * temp) * exp;
+      state.openness = clampNum(targetOpen + (delta + temp) * exp, 0, 1);
+
+      // Completely collapsed back to rest -> hide SVG overlay & sleep at 0% CPU/GPU
+      if (!state.hovered && state.openness <= 0.004 && Math.abs(state.openVelocity) < 0.03) {
+        state.openness = 0;
+        state.openVelocity = 0;
+        state.speedSmooth = 0;
+        state.rafId = 0;
+        baseImg.style.opacity = '1';
+        svgEl.style.opacity = '0';
+        svgEl.style.visibility = 'hidden';
+        return;
+      }
+
+      // Activate SVG dual-masked layer synchronously on the exact same frame as hiding baseImg (zero flicker)
+      if (svgEl.style.visibility !== 'visible') {
+        svgEl.style.visibility = 'visible';
+        svgEl.style.opacity = '1';
+        baseImg.style.opacity = '0';
+      }
+
+      // Snappy liquid inertia for the main ferrofluid pool center
+      const prevCx = state.cx;
+      const prevCy = state.cy;
+      const followLerp = 1 - Math.exp(-17 * dt);
+      state.cx += (state.targetCx - state.cx) * followLerp;
+      state.cy += (state.targetCy - state.cy) * followLerp;
+
+      const instSpeed = Math.hypot(state.cx - prevCx, state.cy - prevCy) / Math.max(dt, 0.008);
+      state.speedSmooth += (Math.min(instSpeed / 520, 1) - state.speedSmooth) * (1 - Math.exp(-10 * dt));
+
+      const open = state.openness;
+      const motionScale = state.reducedMotion ? 0 : 1;
+
+      // 1. Core localized ferrofluid pool (breathes organically even when cursor is still)
+      const coreBreath = motionScale * (3.2 * Math.sin(t * 2.15) + 1.6 * Math.cos(t * 3.4));
+      const coreRadius = (CORE_LENS_RADIUS + coreBreath) * open;
+      writeMetaballCircle(0, state.cx, state.cy, coreRadius);
+
+      // 2. Orbiting ferrofluid perimeter lobes (living magnetic ripples around the hovered region)
+      for (let i = 0; i < FERRO_LOBES.length; i++) {
+        const lobe = FERRO_LOBES[i];
+        if (motionScale === 0) {
+          writeMetaballCircle(1 + i, state.cx, state.cy, 0);
+          continue;
+        }
+        const angle = t * lobe.speed + lobe.phase;
+        const radialWave =
+          lobe.dist +
+          lobe.distAmp * Math.sin(t * (1.7 + i * 0.23) + lobe.phase * 1.7) +
+          state.speedSmooth * 6;
+        const lx = state.cx + Math.cos(angle) * radialWave * open;
+        const ly = state.cy + Math.sin(angle) * radialWave * open;
+        const lr = (lobe.r + lobe.rAmp * Math.cos(t * (2.2 + i * 0.19) + lobe.phase)) * open;
+        writeMetaballCircle(1 + i, lx, ly, lr);
+      }
+
+      // 3. Velocity-trailing liquid-metal metaball droplets (stretch into mercury tail & merge smoothly on stop)
+      let leaderX = state.cx;
+      let leaderY = state.cy;
+      const trailOffset = 1 + FERRO_LOBES.length;
+
+      for (let i = 0; i < FERRO_TRAIL_BASE_RADII.length; i++) {
+        const node = state.trail[i];
+        const lagRate = Math.max(7.5, 16.5 - i * 2.1);
+        const step = 1 - Math.exp(-lagRate * dt);
+        node.x += (leaderX - node.x) * step;
+        node.y += (leaderY - node.y) * step;
+
+        const distFromLeader = Math.hypot(leaderX - node.x, leaderY - node.y);
+        // Droplets swell gracefully while streaking behind cursor, then softly melt back into core when stopped
+        const streakBoost = Math.min(distFromLeader / 26, 1);
+        const trailR =
+          motionScale *
+          FERRO_TRAIL_BASE_RADII[i] *
+          (0.42 + 0.72 * streakBoost) *
+          open;
+
+        writeMetaballCircle(trailOffset + i, node.x, node.y, trailR);
+        leaderX = node.x;
+        leaderY = node.y;
+      }
+
+      // 4. Rotating brushed liquid-metal / chrome reflection along the dynamic rim
+      if (metalGradRef.current) {
+        const gradAngle = (t * 26) % 360;
+        metalGradRef.current.setAttribute(
+          'gradientTransform',
+          `rotate(${gradAngle.toFixed(1)} ${state.cx.toFixed(1)} ${state.cy.toFixed(1)})`
+        );
+      }
+      if (rimRectRef.current) {
+        const rimAlpha = clampNum(open * 1.15, 0, 1) * (0.62 + 0.24 * state.speedSmooth);
+        rimRectRef.current.setAttribute('opacity', rimAlpha.toFixed(3));
+      }
+
+      // 5. Delicate orbiting metallic micro-beads floating around the ferrofluid boundary
+      for (let i = 0; i < FERRO_SPARKS.length; i++) {
+        const el = sparkCirclesRef.current[i];
+        if (!el) continue;
+        if (motionScale === 0 || open < 0.08) {
+          el.setAttribute('r', '0');
+          el.setAttribute('opacity', '0');
+          continue;
+        }
+        const sp = FERRO_SPARKS[i];
+        const angle = t * sp.speed + sp.phase;
+        const orbitR =
+          (sp.dist + sp.distAmp * Math.sin(t * 1.9 + sp.phase * 2.1) + state.speedSmooth * 14) *
+          open;
+        const sx = state.cx + Math.cos(angle) * orbitR;
+        const sy = state.cy + Math.sin(angle) * orbitR;
+        const pulse = 0.55 + 0.45 * Math.sin(t * 3.1 + sp.phase * 2.7);
+        const sr = sp.r * (0.75 + 0.35 * pulse) * open;
+        const sop = (0.32 + 0.55 * pulse) * open;
+
+        el.setAttribute('cx', sx.toFixed(1));
+        el.setAttribute('cy', sy.toFixed(1));
+        el.setAttribute('r', sr.toFixed(2));
+        el.setAttribute('opacity', sop.toFixed(3));
+      }
+
+      state.rafId = requestAnimationFrame(stepFerrofluid);
+    },
+    [writeMetaballCircle]
+  );
+
+  const getLocalPortraitPoint = useCallback((clientX: number, clientY: number) => {
+    const stage = stageRef.current;
+    if (!stage) return null;
+    const rect = stage.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return null;
+    const w = stage.offsetWidth || 420;
+    const h = stage.offsetHeight || 420;
+    const lx = clampNum(((clientX - rect.left) / rect.width) * w, 0, w);
+    const ly = clampNum(((clientY - rect.top) / rect.height) * h, 0, h);
+    return { lx, ly };
+  }, []);
+
+  const handlePortraitPointerEnter = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      if (!canRadialReveal || e.pointerType === 'touch') return;
+
+      const state = ferroRef.current;
+      state.reducedMotion =
+        typeof window !== 'undefined' &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      const pt = getLocalPortraitPoint(e.clientX, e.clientY);
+      if (pt) {
+        if (state.openness <= 0.05) {
+          // Snap origin & trail right under entry point so the ferrofluid pool blooms directly under the cursor
+          state.cx = pt.lx;
+          state.cy = pt.ly;
+          for (let i = 0; i < state.trail.length; i++) {
+            state.trail[i].x = pt.lx;
+            state.trail[i].y = pt.ly;
+          }
+        }
+        state.targetCx = pt.lx;
+        state.targetCy = pt.ly;
+      }
+
+      state.hovered = true;
+      if (!state.rafId) {
+        state.lastTime = 0;
+        state.rafId = requestAnimationFrame(stepFerrofluid);
+      }
+    },
+    [canRadialReveal, getLocalPortraitPoint, stepFerrofluid]
+  );
+
+  const handlePortraitPointerMove = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      if (!canRadialReveal || e.pointerType === 'touch') return;
+      const state = ferroRef.current;
+      if (!state.hovered) return;
+
+      const pt = getLocalPortraitPoint(e.clientX, e.clientY);
+      if (!pt) return;
+
+      state.targetCx = pt.lx;
+      state.targetCy = pt.ly;
+    },
+    [canRadialReveal, getLocalPortraitPoint]
+  );
+
+  const handlePortraitPointerLeave = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      if (!canRadialReveal || e.pointerType === 'touch') return;
+      const state = ferroRef.current;
+
+      const pt = getLocalPortraitPoint(e.clientX, e.clientY);
+      if (pt) {
+        state.targetCx = pt.lx;
+        state.targetCy = pt.ly;
+      }
+
+      state.hovered = false;
+      if (!state.rafId && state.openness > 0) {
+        state.lastTime = 0;
+        state.rafId = requestAnimationFrame(stepFerrofluid);
+      }
+    },
+    [canRadialReveal, getLocalPortraitPoint, stepFerrofluid]
+  );
+
   const headlineContent = headline || heroText || 'End-to-End Web Development & Software Engineering';
   const activeStats = stats || [];
   const words = typewriterWords || [];
@@ -175,6 +597,18 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
 
   return (
     <div className="relative min-h-[100svh] md:min-h-0 xl:min-h-[calc(100vh-4rem)] flex flex-col justify-between overflow-hidden bg-transparent">
+      {/* ── Dynamic Portrait Bottom Mask: Subtle, refined 4% edge roll-off in light mode (no exaggerated white fog), seamless blend in dark mode ── */}
+      <style>{`
+        .hero-portrait-stage {
+          -webkit-mask-image: linear-gradient(to bottom, black 0%, black 95.8%, rgba(0, 0, 0, 0.72) 98.2%, transparent 100%);
+          mask-image: linear-gradient(to bottom, black 0%, black 95.8%, rgba(0, 0, 0, 0.72) 98.2%, transparent 100%);
+        }
+        .dark .hero-portrait-stage {
+          -webkit-mask-image: linear-gradient(to bottom, black 0%, black 91%, rgba(0, 0, 0, 0.75) 96.5%, transparent 100%);
+          mask-image: linear-gradient(to bottom, black 0%, black 91%, rgba(0, 0, 0, 0.75) 96.5%, transparent 100%);
+        }
+      `}</style>
+
       {/* ── Single Living Background: React Bits Ambient Backdrop (Light & Dark + Seamless Bottom Fade) ── */}
       <HeroBackground />
 
@@ -312,15 +746,13 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
             {/* Blob + Profile Image (Anchored & Stationary, zero mouse movement) */}
             <div className="relative flex justify-center items-center min-h-[350px] sm:min-h-[390px] md:min-h-[420px] lg:min-h-[460px] xl:min-h-[500px] w-full select-none pointer-events-none">
               {/* Fluid Blob Backdrop — Enlarged to match reference photo, perfectly framing profile */}
-              <div className="absolute -top-6 sm:-top-8 md:-top-9 lg:-top-10 xl:-top-11 w-[320px] h-[320px] sm:w-[360px] sm:h-[360px] md:w-[390px] md:h-[390px] lg:w-[400px] lg:h-[400px] xl:w-[450px] xl:h-[450px] z-0 pointer-events-none select-none">
+              <div className="absolute -top-7 sm:-top-9 md:-top-10 lg:-top-11 xl:-top-12 w-[320px] h-[320px] sm:w-[360px] sm:h-[360px] md:w-[390px] md:h-[390px] lg:w-[400px] lg:h-[400px] xl:w-[450px] xl:h-[450px] z-0 pointer-events-none select-none">
                 <motion.div
                   initial={isMobile ? false : { scale: 0.9, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={isMobile ? { duration: 0 } : { duration: 0.4, ease: cubicEase }}
                   className="w-full h-full relative"
                 >
-                  {/* Ambient soft glow behind blob */}
-                  <div className="absolute inset-6 rounded-full bg-emerald-500/05 dark:bg-emerald-500/10 blur-2xl -z-10 transform-gpu pointer-events-none select-none" style={{ contain: 'strict', transform: 'translateZ(0)' }} />
                   <svg viewBox="0 0 500 500" className="w-full h-full transform-gpu" style={{ willChange: 'transform' }}>
                     <defs>
                       {/* Dark Mode Gradient: Cyan into Primary Theme */}
@@ -335,16 +767,7 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
                         <stop offset="60%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)' }} />
                         <stop offset="100%" stopColor="#064E3B" style={{ stopColor: '#064E3B' }} />
                       </linearGradient>
-                      <radialGradient id="glow-gradient-dark" cx="50%" cy="50%" r="50%">
-                        <stop offset="0%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)' }} stopOpacity="0.12" />
-                        <stop offset="100%" stopColor="#0EA5E9" stopOpacity="0" />
-                      </radialGradient>
-                      <radialGradient id="glow-gradient-light" cx="50%" cy="50%" r="50%">
-                        <stop offset="0%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)' }} stopOpacity="0.08" />
-                        <stop offset="100%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)' }} stopOpacity="0" />
-                      </radialGradient>
                     </defs>
-                    <circle cx="250" cy="250" r="230" className="dark:fill-[url(#glow-gradient-dark)] fill-[url(#glow-gradient-light)]" />
                     <motion.path
                       className="dark:fill-[url(#fluid-gradient-dark)] fill-[url(#fluid-gradient-light)]"
                       d={blobPath1}
@@ -363,27 +786,271 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
                 className="relative z-10 flex items-center justify-center pointer-events-none select-none transform-gpu"
                 style={{ willChange: 'opacity, transform', transform: 'translateZ(0)' }}
               >
-                <img
-                  src={resolveImageUrl(imageSrc)}
-                  alt=""
-                  aria-label="Profile photo"
-                  loading="eager"
-                  decoding="async"
-                  // @ts-ignore
-                  fetchPriority="high"
-                  width={420}
-                  height={420}
-                  draggable={false}
+                <div
+                  ref={stageRef}
                   style={{
-                    maskImage: 'linear-gradient(to bottom, black 0%, black 85%, rgba(0, 0, 0, 0.95) 89%, rgba(0, 0, 0, 0.8) 93%, rgba(0, 0, 0, 0.45) 97%, transparent 100%)',
-                    WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 85%, rgba(0, 0, 0, 0.95) 89%, rgba(0, 0, 0, 0.8) 93%, rgba(0, 0, 0, 0.45) 97%, transparent 100%)',
                     userSelect: 'none',
                     WebkitUserSelect: 'none',
                     pointerEvents: 'none',
                   }}
-                  className="w-[275px] sm:w-[315px] md:w-[340px] lg:w-[370px] xl:w-[420px] h-auto object-contain scale-[1.54] sm:scale-[1.56] md:scale-[1.58] lg:scale-[1.56] xl:scale-[1.6] translate-y-3 sm:translate-y-4 md:translate-y-5 lg:translate-y-6 xl:translate-y-7 pointer-events-none select-none"
-                />
+                  className="hero-portrait-stage relative w-[275px] sm:w-[315px] md:w-[340px] lg:w-[370px] xl:w-[420px] scale-[1.54] sm:scale-[1.56] md:scale-[1.58] lg:scale-[1.56] xl:scale-[1.6] translate-y-0 sm:translate-y-1 md:translate-y-1 lg:translate-y-2 xl:translate-y-2 pointer-events-none select-none"
+                >
+                  <img
+                    ref={primaryImgRef}
+                    src={resolvedPrimarySrc}
+                    alt=""
+                    aria-label="Profile photo"
+                    loading="eager"
+                    decoding="async"
+                    // @ts-ignore
+                    fetchPriority="high"
+                    width={420}
+                    height={420}
+                    draggable={false}
+                    onLoad={() => {
+                      const el = stageRef.current;
+                      if (el && el.offsetWidth > 20 && el.offsetHeight > 20) {
+                        setStageSize({ w: el.offsetWidth, h: el.offsetHeight });
+                      }
+                    }}
+                    style={{
+                      userSelect: 'none',
+                      WebkitUserSelect: 'none',
+                      pointerEvents: 'none',
+                    }}
+                    className="block w-full h-auto object-contain pointer-events-none select-none"
+                  />
+
+                  {/* Desktop-only Localized Ferrofluid / Liquid-Metal Dual-Portrait SVG Reveal Layer */}
+                  {canRadialReveal && (
+                    <svg
+                      ref={svgOverlayRef}
+                      viewBox={`0 0 ${stageSize.w} ${stageSize.h}`}
+                      aria-hidden="true"
+                      className="hidden lg:block absolute inset-0 w-full h-full pointer-events-none select-none overflow-visible"
+                      style={{
+                        opacity: 0,
+                        visibility: 'hidden',
+                        userSelect: 'none',
+                        WebkitUserSelect: 'none',
+                        pointerEvents: 'none',
+                      }}
+                    >
+                      <defs>
+                        {/* 1. Gooey Ferrofluid Metaball Filter (Secondary Hover Portrait Mask) */}
+                        <filter id="hero-ferro-hover-goo" x="-25%" y="-25%" width="150%" height="150%" colorInterpolationFilters="sRGB">
+                          <feGaussianBlur in="SourceGraphic" stdDeviation="9.5" result="blur" />
+                          <feColorMatrix
+                            in="blur"
+                            mode="matrix"
+                            values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -8.5"
+                            result="goo"
+                          />
+                          <feGaussianBlur in="goo" stdDeviation="1.8" />
+                        </filter>
+
+                        {/* 2. Slightly Tighter Inner Cutout Filter (Primary Portrait Mask — prevents dark seam & zero ghosting) */}
+                        <filter id="hero-ferro-primary-goo" x="-25%" y="-25%" width="150%" height="150%" colorInterpolationFilters="sRGB">
+                          <feGaussianBlur in="SourceGraphic" stdDeviation="9.5" result="blur" />
+                          <feColorMatrix
+                            in="blur"
+                            mode="matrix"
+                            values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -10.2"
+                            result="goo"
+                          />
+                          <feGaussianBlur in="goo" stdDeviation="1.4" />
+                        </filter>
+
+                        {/* 3. Liquid-Metal Contour Rim Extractor (Razor-fine chrome ring + soft specular halo) */}
+                        <filter id="hero-ferro-rim-goo" x="-25%" y="-25%" width="150%" height="150%" colorInterpolationFilters="sRGB">
+                          <feGaussianBlur in="SourceGraphic" stdDeviation="9.5" result="blur" />
+                          <feColorMatrix
+                            in="blur"
+                            mode="matrix"
+                            values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 24 -9.0"
+                            result="goo"
+                          />
+                          <feMorphology in="goo" operator="erode" radius="1.25" result="inner" />
+                          <feComposite in="goo" in2="inner" operator="out" result="ring" />
+                          <feGaussianBlur in="ring" stdDeviation="2.2" result="halo" />
+                          <feComponentTransfer in="halo" result="softHalo">
+                            <feFuncA type="linear" slope="0.42" />
+                          </feComponentTransfer>
+                          <feMerge>
+                            <feMergeNode in="softHalo" />
+                            <feMergeNode in="ring" />
+                          </feMerge>
+                        </filter>
+
+                        {/* Rotating Brushed Liquid-Chrome / Titanium-Emerald Metallic Gradient */}
+                        <linearGradient
+                          ref={metalGradRef}
+                          id="hero-liquid-metal-grad"
+                          gradientUnits="userSpaceOnUse"
+                          x1="0"
+                          y1="0"
+                          x2={stageSize.w}
+                          y2={stageSize.h}
+                        >
+                          <stop offset="0%" stopColor="#f8fafc" />
+                          <stop offset="18%" stopColor="#94a3b8" />
+                          <stop offset="35%" stopColor="#ffffff" />
+                          <stop offset="52%" stopColor="var(--theme-primary-hex, #10b981)" style={{ stopColor: 'var(--theme-primary-hex, #10b981)' }} />
+                          <stop offset="68%" stopColor="#38bdf8" />
+                          <stop offset="84%" stopColor="#64748b" />
+                          <stop offset="100%" stopColor="#f8fafc" />
+                        </linearGradient>
+
+                        {/* Mask A: Reveals Secondary Portrait ONLY inside the localized ferrofluid pool */}
+                        <mask
+                          id="hero-ferro-hover-mask"
+                          maskUnits="userSpaceOnUse"
+                          x={-stageSize.w * 0.15}
+                          y={-stageSize.h * 0.15}
+                          width={stageSize.w * 1.3}
+                          height={stageSize.h * 1.3}
+                        >
+                          <rect
+                            x={-stageSize.w * 0.15}
+                            y={-stageSize.h * 0.15}
+                            width={stageSize.w * 1.3}
+                            height={stageSize.h * 1.3}
+                            fill="#000"
+                          />
+                          <g filter="url(#hero-ferro-hover-goo)" fill="#fff">
+                            {METABALL_INDICES.map((idx) => (
+                              <circle
+                                key={`h-${idx}`}
+                                ref={(el) => { hoverCirclesRef.current[idx] = el; }}
+                                cx={stageSize.w / 2}
+                                cy={stageSize.h / 2}
+                                r={0}
+                              />
+                            ))}
+                          </g>
+                        </mask>
+
+                        {/* Mask B: Dissolves Primary Portrait cleanly inside the ferrofluid pool (zero ghosting) */}
+                        <mask
+                          id="hero-ferro-primary-mask"
+                          maskUnits="userSpaceOnUse"
+                          x={-stageSize.w * 0.15}
+                          y={-stageSize.h * 0.15}
+                          width={stageSize.w * 1.3}
+                          height={stageSize.h * 1.3}
+                        >
+                          <rect
+                            x={-stageSize.w * 0.15}
+                            y={-stageSize.h * 0.15}
+                            width={stageSize.w * 1.3}
+                            height={stageSize.h * 1.3}
+                            fill="#fff"
+                          />
+                          <g filter="url(#hero-ferro-primary-goo)" fill="#000">
+                            {METABALL_INDICES.map((idx) => (
+                              <circle
+                                key={`p-${idx}`}
+                                ref={(el) => { primaryCirclesRef.current[idx] = el; }}
+                                cx={stageSize.w / 2}
+                                cy={stageSize.h / 2}
+                                r={0}
+                              />
+                            ))}
+                          </g>
+                        </mask>
+
+                        {/* Mask C: Carves the exact animated liquid-metal perimeter contour */}
+                        <mask
+                          id="hero-ferro-rim-mask"
+                          maskUnits="userSpaceOnUse"
+                          x={-stageSize.w * 0.15}
+                          y={-stageSize.h * 0.15}
+                          width={stageSize.w * 1.3}
+                          height={stageSize.h * 1.3}
+                        >
+                          <rect
+                            x={-stageSize.w * 0.15}
+                            y={-stageSize.h * 0.15}
+                            width={stageSize.w * 1.3}
+                            height={stageSize.h * 1.3}
+                            fill="#000"
+                          />
+                          <g filter="url(#hero-ferro-rim-goo)" fill="#fff">
+                            {METABALL_INDICES.map((idx) => (
+                              <circle
+                                key={`r-${idx}`}
+                                ref={(el) => { rimCirclesRef.current[idx] = el; }}
+                                cx={stageSize.w / 2}
+                                cy={stageSize.h / 2}
+                                r={0}
+                              />
+                            ))}
+                          </g>
+                        </mask>
+                      </defs>
+
+                      {/* Layer 1: Primary Portrait (masked away inside hovered liquid pool) */}
+                      <image
+                        href={resolvedPrimarySrc}
+                        x="0"
+                        y="0"
+                        width={stageSize.w}
+                        height={stageSize.h}
+                        preserveAspectRatio="xMidYMid meet"
+                        mask="url(#hero-ferro-primary-mask)"
+                      />
+
+                      {/* Layer 2: Secondary Portrait (revealed ONLY inside hovered liquid pool) */}
+                      <image
+                        href={resolvedHoverSrc}
+                        x="0"
+                        y="0"
+                        width={stageSize.w}
+                        height={stageSize.h}
+                        preserveAspectRatio="xMidYMid meet"
+                        mask="url(#hero-ferro-hover-mask)"
+                      />
+
+                      {/* Layer 3: Gleaming Liquid-Metal Chrome Contour along the undulating ferrofluid edge */}
+                      <rect
+                        ref={rimRectRef}
+                        x={-stageSize.w * 0.15}
+                        y={-stageSize.h * 0.15}
+                        width={stageSize.w * 1.3}
+                        height={stageSize.h * 1.3}
+                        fill="url(#hero-liquid-metal-grad)"
+                        mask="url(#hero-ferro-rim-mask)"
+                        opacity="0"
+                      />
+
+                      {/* Layer 4: Orbiting Liquid-Metal Chrome Micro-Beads */}
+                      <g fill="url(#hero-liquid-metal-grad)">
+                        {FERRO_SPARKS.map((_, idx) => (
+                          <circle
+                            key={`s-${idx}`}
+                            ref={(el) => { sparkCirclesRef.current[idx] = el; }}
+                            cx={stageSize.w / 2}
+                            cy={stageSize.h / 2}
+                            r={0}
+                            opacity={0}
+                          />
+                        ))}
+                      </g>
+                    </svg>
+                  )}
+                </div>
               </motion.div>
+
+              {/* Desktop-only Interactive Hover Hit-Zone tightly fitted to the portrait silhouette */}
+              {canRadialReveal && (
+                <div
+                  aria-hidden="true"
+                  onPointerEnter={handlePortraitPointerEnter}
+                  onPointerMove={handlePortraitPointerMove}
+                  onPointerLeave={handlePortraitPointerLeave}
+                  className="hidden lg:block absolute z-20 left-1/2 top-1/2 -translate-x-1/2 -translate-y-[49%] w-[300px] xl:w-[370px] h-[420px] xl:h-[490px] rounded-[46%_46%_34%_34%] pointer-events-auto"
+                />
+              )}
             </div>
           </div>
 

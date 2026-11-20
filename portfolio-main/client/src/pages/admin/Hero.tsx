@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { 
   Save, Loader2, Check, Plus, Trash2, 
   ArrowUp, ArrowDown, Sparkles, 
-  BarChart3, RefreshCw, Eye
+  BarChart3, RefreshCw, Eye, ImagePlus
 } from 'lucide-react';
 import api from '../../services/api';
 import { Button } from '../../components/ui/Button';
@@ -31,6 +31,7 @@ interface HeroSettingsData {
   typewriterWords: string;
   typewriterWordsAr?: string;
   profilePhoto?: string;
+  profilePhotoHover?: string;
   heroStats?: string;
   heroStatsAr?: string;
 }
@@ -64,6 +65,8 @@ const AdminHero = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [uploadingHoverPhoto, setUploadingHoverPhoto] = useState(false);
+  const [removingHoverPhoto, setRemovingHoverPhoto] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   // Hero Fields
@@ -79,6 +82,7 @@ const AdminHero = () => {
     typewriterWords: '',
     typewriterWordsAr: '',
     profilePhoto: '',
+    profilePhotoHover: '',
     heroStats: '',
     heroStatsAr: '',
   });
@@ -114,6 +118,7 @@ const AdminHero = () => {
           typewriterWords: parseListToInput(data.typewriterWords),
           typewriterWordsAr: parseListToInput(data.typewriterWordsAr),
           profilePhoto: data.profilePhoto || '',
+          profilePhotoHover: data.profilePhotoHover || '',
           heroStats: data.heroStats || '',
           heroStatsAr: data.heroStatsAr || '',
         });
@@ -260,6 +265,58 @@ const AdminHero = () => {
     } finally {
       setUploadingPhoto(false);
       e.target.value = '';
+    }
+  };
+
+  const handleHoverPhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    setUploadingHoverPhoto(true);
+    try {
+      const res = await api.post('/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      const photoUrl = res.data.url;
+      setHeroData(prev => ({ ...prev, profilePhotoHover: photoUrl }));
+      await api.put('/settings', { profilePhotoHover: photoUrl });
+      try {
+        const local = JSON.parse(localStorage.getItem('portfolio_settings') || '{}');
+        local.profilePhotoHover = photoUrl;
+        localStorage.setItem('portfolio_settings', JSON.stringify(local));
+        window.dispatchEvent(new Event('portfolio_settings_updated'));
+      } catch {}
+      showToast(isAr ? 'تم تحديث صورة الهوفر بنجاح!' : 'Hover reveal photo updated successfully!');
+    } catch (error: any) {
+      console.error('Failed to upload hover image:', error);
+      const msg = error.response?.data?.message || (isAr ? 'فشل رفع صورة الهوفر' : 'Failed to upload hover image');
+      showToast(msg, 'error');
+    } finally {
+      setUploadingHoverPhoto(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleRemoveHoverPhoto = async () => {
+    setRemovingHoverPhoto(true);
+    try {
+      setHeroData(prev => ({ ...prev, profilePhotoHover: '' }));
+      await api.put('/settings', { profilePhotoHover: '' });
+      try {
+        const local = JSON.parse(localStorage.getItem('portfolio_settings') || '{}');
+        local.profilePhotoHover = '';
+        localStorage.setItem('portfolio_settings', JSON.stringify(local));
+        window.dispatchEvent(new Event('portfolio_settings_updated'));
+      } catch {}
+      showToast(isAr ? 'تم إزالة صورة الهوفر بنجاح' : 'Hover reveal photo removed');
+    } catch (error: any) {
+      console.error('Failed to remove hover image:', error);
+      showToast(isAr ? 'فشل إزالة صورة الهوفر' : 'Failed to remove hover photo', 'error');
+    } finally {
+      setRemovingHoverPhoto(false);
     }
   };
 
@@ -681,6 +738,81 @@ const AdminHero = () => {
             </label>
             <p className="text-xs text-muted-foreground">
               {isAr ? 'صيغة مربعة موصى بها (WEBP, PNG, JPG).' : 'Recommended square format (WEBP, PNG, JPG).'}
+            </p>
+          </div>
+
+          {/* Secondary Hover Reveal Photo Card (Desktop Only) */}
+          <div className="bg-card border border-border rounded-xl p-6 text-center space-y-4">
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <h2 className="text-base font-bold text-start">
+                {isAr ? 'صورة الهوفر الثانية (Radial Reveal)' : 'Hover Reveal Photo'}
+              </h2>
+              <span className="font-mono text-[10px] uppercase tracking-widest px-2 py-0.5 border border-border rounded bg-muted/50 text-muted-foreground shrink-0">
+                {isAr ? 'دسكتوب فقط' : 'Desktop Only'}
+              </span>
+            </div>
+
+            <div className="relative w-40 h-40 mx-auto rounded-full overflow-hidden border-2 border-dashed border-border/80 shadow-sm group bg-muted/40 flex items-center justify-center">
+              {heroData.profilePhotoHover ? (
+                <img
+                  src={resolveImageUrl(heroData.profilePhotoHover)}
+                  alt=""
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+              ) : (
+                <div className="flex flex-col items-center justify-center gap-1.5 text-muted-foreground px-4">
+                  <ImagePlus size={22} strokeWidth={1.5} className="opacity-70" />
+                  <span className="text-[11px] leading-tight">
+                    {isAr ? 'لم يتم رفع صورة بعد' : 'No hover photo'}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-center gap-2 flex-wrap">
+              <label className="cursor-pointer inline-block">
+                <Button variant="outline" size="sm" asChild disabled={uploadingHoverPhoto || removingHoverPhoto}>
+                  <span>
+                    {uploadingHoverPhoto ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {isAr ? 'جاري الرفع...' : 'Uploading...'}
+                      </>
+                    ) : heroData.profilePhotoHover ? (
+                      isAr ? 'تغيير صورة الهوفر' : 'Change Hover Photo'
+                    ) : (
+                      isAr ? 'رفع صورة الهوفر' : 'Upload Hover Photo'
+                    )}
+                    <input type="file" accept="image/*" className="hidden" onChange={handleHoverPhotoUpload} />
+                  </span>
+                </Button>
+              </label>
+
+              {heroData.profilePhotoHover && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRemoveHoverPhoto}
+                  disabled={uploadingHoverPhoto || removingHoverPhoto}
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/30"
+                  title={isAr ? 'حذف صورة الهوفر' : 'Remove hover photo'}
+                >
+                  {removingHoverPhoto ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : (
+                    <>
+                      <Trash2 size={14} strokeWidth={1.5} className={isAr ? 'ml-1.5' : 'mr-1.5'} />
+                      {isAr ? 'حذف' : 'Remove'}
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
+
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              {isAr
+                ? 'تظهر أجزاء هذه الصورة موضعياً عند تمرير الماوس بتأثير سائل معدني متحرك (Ferrofluid Reveal) على نسخة الدسكتوب فقط. يُفضل نفس أبعاد الصورة الأصلية بخلفية شفافة.'
+                : 'Reveals locally beneath the cursor with an animated liquid-metal ferrofluid mask (Desktop only). Same framing & transparent PNG/WEBP recommended.'}
             </p>
           </div>
 

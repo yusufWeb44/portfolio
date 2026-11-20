@@ -33,6 +33,7 @@ model PortfolioSettings {
   availabilityAr  String?
   email           String?
   profilePhoto    String?
+  profilePhotoHover String? @db.Text
   logoUrl         String?  @db.Text
   typewriterWords String?  @db.Text
   typewriterWordsAr String? @db.Text
