@@ -226,7 +226,10 @@ export const Footer: React.FC<FooterProps> = ({ settings, socialLinks = [], scro
   };
 
   return (
-    <footer className="relative mt-10 md:mt-12 border-t border-border/40 bg-background text-foreground transition-colors duration-300">
+    <footer
+      className="relative mt-10 md:mt-12 border-t border-border/40 bg-background text-foreground transform-gpu"
+      style={{ contain: 'paint layout', transform: 'translateZ(0)' }}
+    >
       {/* Subtle top ambient glow */}
       <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-emerald-500/25 to-transparent pointer-events-none" />
 

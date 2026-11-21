@@ -720,123 +720,236 @@ const Home = () => {
       ═══════════════════════════════════════════════════════════════ */}
       <section
         id="contact"
-        className="scroll-mt-24 relative overflow-hidden bg-transparent text-foreground py-12 sm:py-14 md:py-16 lg:py-20 px-4 sm:px-6 lg:px-8"
+        className="scroll-mt-24 relative overflow-hidden bg-transparent text-foreground py-12 sm:py-14 md:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 transform-gpu"
+        style={{ contain: 'paint layout', transform: 'translateZ(0)' }}
       >
         <div className="relative z-10 max-w-[620px] mx-auto w-full">
-          <motion.div
-            initial={isMobile ? false : { opacity: 0, y: 16 }}
-            whileInView={isMobile ? undefined : { opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-40px' }}
-            transition={isMobile ? { duration: 0 } : { duration: 0.45, ease: [0.23, 1, 0.32, 1] }}
-          >
-            <SpotlightCard
-              spotlightColor="rgba(0, 0, 0, 0.02)"
-              darkSpotlightColor="rgba(255, 255, 255, 0.007)"
-              size={420}
-              darkSize={580}
-              className={cn(
-                "group relative overflow-hidden rounded-2xl sm:rounded-3xl p-6 sm:p-10",
-                "bg-white/98 dark:bg-zinc-900/95 md:bg-white/95 md:dark:bg-zinc-900/60 md:backdrop-blur-xl",
-                "border border-zinc-200/90 dark:border-white/[0.08]",
-                "shadow-[0_1px_2px_rgba(0,0,0,0.03),0_8px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset,0_16px_32px_-12px_rgba(0,0,0,0.4)]",
-                "hover:border-zinc-300 dark:hover:border-white/[0.18] transition-colors duration-200"
-              )}
-            >
-              <div className="relative z-10 flex flex-col items-center text-center">
-                {/* 1. Headline */}
-                <h2 className="text-2xl sm:text-4xl md:text-[36px] font-extrabold tracking-tight leading-[1.18] text-foreground">
-                  {resolveField(
-                    'contact.headline',
-                    settings?.contactTitleAr,
-                    settings?.contactTitle,
-                    isAr ? 'لديك فكرة أو مشروع؟' : 'Have an idea?'
-                  )}
-                </h2>
-
-                {/* 2. Subtitle */}
-                <p className="mt-3.5 text-xs sm:text-sm md:text-[14.5px] text-slate-600 dark:text-zinc-300 leading-relaxed max-w-md mx-auto">
-                  {resolveField(
-                    'contact.subtitle',
-                    settings?.contactSubtitleAr,
-                    settings?.contactSubtitle,
-                    isAr
-                      ? 'سواء كنت بحاجة إلى تطبيق ويب متكامل، أو واجهة برمجية مخصصة، أو لوحة تحكم حديثة، أو تطبيق هاتف — أنا جاهز لتحويل رؤيتك إلى واقع.'
-                      : "Whether you need a full-stack application, a custom API, a modern dashboard, or a mobile app — I'm ready to bring your vision to life."
-                  )}
-                </p>
-
-                {/* 3. Action Buttons */}
-                <div className="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3 w-full sm:w-auto">
-                  <a
-                    href={
-                      settings?.whatsappNumber
-                        ? `https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, '')}`
-                        : (socialLinks.find(s => s.platform.toLowerCase() === 'whatsapp')?.url || `mailto:${email}`)
-                    }
-                    target="_blank"
-                    rel="noreferrer"
-                    className={cn(
-                      buttonVariants({ variant: 'primary', size: 'default' }),
-                      "w-full max-w-[220px] sm:max-w-none sm:w-auto shadow-sm hover:shadow-[0_8px_20px_rgba(16,185,129,0.22)]"
-                    )}
-                  >
-                    <WhatsappIcon size={16} />
-                    <span>{t('contact.chatWhatsapp', isAr ? 'تواصل عبر واتساب' : 'Chat on WhatsApp')}</span>
-                  </a>
-
-                  <a
-                    href={`mailto:${email}`}
-                    className={cn(
-                      buttonVariants({ variant: 'secondary', size: 'default' }),
-                      "w-full max-w-[220px] sm:max-w-none sm:w-auto bg-slate-50 dark:bg-white/[0.05] hover:bg-white dark:hover:bg-white/[0.09]",
-                      "border-slate-200/90 dark:border-white/15 hover:border-slate-300 dark:hover:border-white/25",
-                      "!text-foreground hover:!text-foreground dark:hover:!text-foreground",
-                      "[&_svg]:!text-foreground [&_span]:!text-foreground",
-                      "hover:shadow-xs transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]"
-                    )}
-                  >
-                    <Mail size={16} strokeWidth={1.5} className="!text-foreground" />
-                    <span className="!text-foreground">{t('contact.sendEmail', isAr ? 'إرسال بريد إلكتروني' : 'Send an Email')}</span>
-                  </a>
-                </div>
-
-                {/* 4. Location Row */}
-                {location && (
-                  <div className="mt-5 flex items-center justify-center gap-1.5 text-xs text-muted-foreground select-none font-medium">
-                    <MapPin size={13} className="text-emerald-500 shrink-0" strokeWidth={1.5} />
-                    <span>{location}</span>
-                  </div>
+          {isMobile ? (
+            <div className="w-full">
+              <SpotlightCard
+                spotlightColor="rgba(0, 0, 0, 0.02)"
+                darkSpotlightColor="rgba(255, 255, 255, 0.007)"
+                size={420}
+                darkSize={580}
+                className={cn(
+                  "group relative overflow-hidden rounded-2xl sm:rounded-3xl p-6 sm:p-10",
+                  "bg-white dark:bg-zinc-900 md:bg-white/95 md:dark:bg-zinc-900/60 md:backdrop-blur-xl",
+                  "border border-zinc-200/90 dark:border-white/[0.08]",
+                  "shadow-[0_1px_2px_rgba(0,0,0,0.03),0_8px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset,0_16px_32px_-12px_rgba(0,0,0,0.4)]",
+                  "hover:border-zinc-300 dark:hover:border-white/[0.18] transition-colors duration-200"
                 )}
+              >
+                <div className="relative z-10 flex flex-col items-center text-center">
+                  {/* 1. Headline */}
+                  <h2 className="text-2xl sm:text-4xl md:text-[36px] font-extrabold tracking-tight leading-[1.18] text-foreground">
+                    {resolveField(
+                      'contact.headline',
+                      settings?.contactTitleAr,
+                      settings?.contactTitle,
+                      isAr ? 'لديك فكرة أو مشروع؟' : 'Have an idea?'
+                    )}
+                  </h2>
 
-                {/* 5. Hairline Gradient Divider */}
-                {socialLinks.length > 0 && (
-                  <div className="w-full my-6 flex items-center justify-center" aria-hidden="true">
-                    <div className="h-px w-full max-w-[240px] bg-gradient-to-r from-transparent via-slate-200 dark:via-white/10 to-transparent" />
+                  {/* 2. Subtitle */}
+                  <p className="mt-3.5 text-xs sm:text-sm md:text-[14.5px] text-slate-600 dark:text-zinc-300 leading-relaxed max-w-md mx-auto">
+                    {resolveField(
+                      'contact.subtitle',
+                      settings?.contactSubtitleAr,
+                      settings?.contactSubtitle,
+                      isAr
+                        ? 'سواء كنت بحاجة إلى تطبيق ويب متكامل، أو واجهة برمجية مخصصة، أو لوحة تحكم حديثة، أو تطبيق هاتف — أنا جاهز لتحويل رؤيتك إلى واقع.'
+                        : "Whether you need a full-stack application, a custom API, a modern dashboard, or a mobile app — I'm ready to bring your vision to life."
+                    )}
+                  </p>
+
+                  {/* 3. Action Buttons */}
+                  <div className="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3 w-full sm:w-auto">
+                    <a
+                      href={
+                        settings?.whatsappNumber
+                          ? `https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, '')}`
+                          : (socialLinks.find(s => s.platform.toLowerCase() === 'whatsapp')?.url || `mailto:${email}`)
+                      }
+                      target="_blank"
+                      rel="noreferrer"
+                      className={cn(
+                        buttonVariants({ variant: 'primary', size: 'default' }),
+                        "w-full max-w-[220px] sm:max-w-none sm:w-auto shadow-sm hover:shadow-[0_8px_20px_rgba(16,185,129,0.22)]"
+                      )}
+                    >
+                      <WhatsappIcon size={16} />
+                      <span>{t('contact.chatWhatsapp', isAr ? 'تواصل عبر واتساب' : 'Chat on WhatsApp')}</span>
+                    </a>
+
+                    <a
+                      href={`mailto:${email}`}
+                      className={cn(
+                        buttonVariants({ variant: 'secondary', size: 'default' }),
+                        "w-full max-w-[220px] sm:max-w-none sm:w-auto bg-slate-50 dark:bg-white/[0.05] hover:bg-white dark:hover:bg-white/[0.09]",
+                        "border-slate-200/90 dark:border-white/15 hover:border-slate-300 dark:hover:border-white/25",
+                        "!text-foreground hover:!text-foreground dark:hover:!text-foreground",
+                        "[&_svg]:!text-foreground [&_span]:!text-foreground",
+                        "hover:shadow-xs transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]"
+                      )}
+                    >
+                      <Mail size={16} strokeWidth={1.5} className="!text-foreground" />
+                      <span className="!text-foreground">{t('contact.sendEmail', isAr ? 'إرسال بريد إلكتروني' : 'Send an Email')}</span>
+                    </a>
                   </div>
-                )}
 
-                {/* 6. Social Links */}
-                {socialLinks.length > 0 && (
-                  <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5">
-                    <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground select-none">
-                      {t('contact.findMe', isAr ? 'أو تابعنا على:' : 'Find me on:')}
-                    </span>
-                    <div className="flex items-center gap-2 flex-wrap justify-center">
-                      {socialLinks.map(link => (
-                        <SocialButton
-                          key={link.platform}
-                          href={link.url}
-                          label={link.platform}
-                          icon={getSocialIcon(link.platform)}
-                          size="sm"
-                        />
-                      ))}
+                  {/* 4. Location Row */}
+                  {location && (
+                    <div className="mt-5 flex items-center justify-center gap-1.5 text-xs text-muted-foreground select-none font-medium">
+                      <MapPin size={13} className="text-emerald-500 shrink-0" strokeWidth={1.5} />
+                      <span>{location}</span>
                     </div>
-                  </div>
+                  )}
+
+                  {/* 5. Hairline Gradient Divider */}
+                  {socialLinks.length > 0 && (
+                    <div className="w-full my-6 flex items-center justify-center" aria-hidden="true">
+                      <div className="h-px w-full max-w-[240px] bg-gradient-to-r from-transparent via-slate-200 dark:via-white/10 to-transparent" />
+                    </div>
+                  )}
+
+                  {/* 6. Social Links */}
+                  {socialLinks.length > 0 && (
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5">
+                      <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground select-none">
+                        {t('contact.findMe', isAr ? 'أو تابعنا على:' : 'Find me on:')}
+                      </span>
+                      <div className="flex items-center gap-2 flex-wrap justify-center">
+                        {socialLinks.map(link => (
+                          <SocialButton
+                            key={link.platform}
+                            href={link.url}
+                            label={link.platform}
+                            icon={getSocialIcon(link.platform)}
+                            size="sm"
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </SpotlightCard>
+            </div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={{ duration: 0.45, ease: [0.23, 1, 0.32, 1] }}
+            >
+              <SpotlightCard
+                spotlightColor="rgba(0, 0, 0, 0.02)"
+                darkSpotlightColor="rgba(255, 255, 255, 0.007)"
+                size={420}
+                darkSize={580}
+                className={cn(
+                  "group relative overflow-hidden rounded-2xl sm:rounded-3xl p-6 sm:p-10",
+                  "bg-white/98 dark:bg-zinc-900/95 md:bg-white/95 md:dark:bg-zinc-900/60 md:backdrop-blur-xl",
+                  "border border-zinc-200/90 dark:border-white/[0.08]",
+                  "shadow-[0_1px_2px_rgba(0,0,0,0.03),0_8px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset,0_16px_32px_-12px_rgba(0,0,0,0.4)]",
+                  "hover:border-zinc-300 dark:hover:border-white/[0.18] transition-colors duration-200"
                 )}
-              </div>
-            </SpotlightCard>
-          </motion.div>
+              >
+                <div className="relative z-10 flex flex-col items-center text-center">
+                  {/* 1. Headline */}
+                  <h2 className="text-2xl sm:text-4xl md:text-[36px] font-extrabold tracking-tight leading-[1.18] text-foreground">
+                    {resolveField(
+                      'contact.headline',
+                      settings?.contactTitleAr,
+                      settings?.contactTitle,
+                      isAr ? 'لديك فكرة أو مشروع؟' : 'Have an idea?'
+                    )}
+                  </h2>
+
+                  {/* 2. Subtitle */}
+                  <p className="mt-3.5 text-xs sm:text-sm md:text-[14.5px] text-slate-600 dark:text-zinc-300 leading-relaxed max-w-md mx-auto">
+                    {resolveField(
+                      'contact.subtitle',
+                      settings?.contactSubtitleAr,
+                      settings?.contactSubtitle,
+                      isAr
+                        ? 'سواء كنت بحاجة إلى تطبيق ويب متكامل، أو واجهة برمجية مخصصة، أو لوحة تحكم حديثة، أو تطبيق هاتف — أنا جاهز لتحويل رؤيتك إلى واقع.'
+                        : "Whether you need a full-stack application, a custom API, a modern dashboard, or a mobile app — I'm ready to bring your vision to life."
+                    )}
+                  </p>
+
+                  {/* 3. Action Buttons */}
+                  <div className="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3 w-full sm:w-auto">
+                    <a
+                      href={
+                        settings?.whatsappNumber
+                          ? `https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, '')}`
+                          : (socialLinks.find(s => s.platform.toLowerCase() === 'whatsapp')?.url || `mailto:${email}`)
+                      }
+                      target="_blank"
+                      rel="noreferrer"
+                      className={cn(
+                        buttonVariants({ variant: 'primary', size: 'default' }),
+                        "w-full max-w-[220px] sm:max-w-none sm:w-auto shadow-sm hover:shadow-[0_8px_20px_rgba(16,185,129,0.22)]"
+                      )}
+                    >
+                      <WhatsappIcon size={16} />
+                      <span>{t('contact.chatWhatsapp', isAr ? 'تواصل عبر واتساب' : 'Chat on WhatsApp')}</span>
+                    </a>
+
+                    <a
+                      href={`mailto:${email}`}
+                      className={cn(
+                        buttonVariants({ variant: 'secondary', size: 'default' }),
+                        "w-full max-w-[220px] sm:max-w-none sm:w-auto bg-slate-50 dark:bg-white/[0.05] hover:bg-white dark:hover:bg-white/[0.09]",
+                        "border-slate-200/90 dark:border-white/15 hover:border-slate-300 dark:hover:border-white/25",
+                        "!text-foreground hover:!text-foreground dark:hover:!text-foreground",
+                        "[&_svg]:!text-foreground [&_span]:!text-foreground",
+                        "hover:shadow-xs transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]"
+                      )}
+                    >
+                      <Mail size={16} strokeWidth={1.5} className="!text-foreground" />
+                      <span className="!text-foreground">{t('contact.sendEmail', isAr ? 'إرسال بريد إلكتروني' : 'Send an Email')}</span>
+                    </a>
+                  </div>
+
+                  {/* 4. Location Row */}
+                  {location && (
+                    <div className="mt-5 flex items-center justify-center gap-1.5 text-xs text-muted-foreground select-none font-medium">
+                      <MapPin size={13} className="text-emerald-500 shrink-0" strokeWidth={1.5} />
+                      <span>{location}</span>
+                    </div>
+                  )}
+
+                  {/* 5. Hairline Gradient Divider */}
+                  {socialLinks.length > 0 && (
+                    <div className="w-full my-6 flex items-center justify-center" aria-hidden="true">
+                      <div className="h-px w-full max-w-[240px] bg-gradient-to-r from-transparent via-slate-200 dark:via-white/10 to-transparent" />
+                    </div>
+                  )}
+
+                  {/* 6. Social Links */}
+                  {socialLinks.length > 0 && (
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5">
+                      <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground select-none">
+                        {t('contact.findMe', isAr ? 'أو تابعنا على:' : 'Find me on:')}
+                      </span>
+                      <div className="flex items-center gap-2 flex-wrap justify-center">
+                        {socialLinks.map(link => (
+                          <SocialButton
+                            key={link.platform}
+                            href={link.url}
+                            label={link.platform}
+                            icon={getSocialIcon(link.platform)}
+                            size="sm"
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </SpotlightCard>
+            </motion.div>
+          )}
         </div>
       </section>
 

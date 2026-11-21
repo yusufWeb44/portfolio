@@ -70,3 +70,13 @@ ehthumbs.db
 desktop.ini
 
 server/prisma/portfolio_db_dump.sql
+
+# ==========================================
+# AI Agent Skills & Local Scratch
+# ==========================================
+.claude/
+.cursor/
+.agent/
+GEMINI.md
+CLAUDE.md
+scratch/

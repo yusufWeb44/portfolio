@@ -40,25 +40,26 @@ export const SocialButton: React.FC<SocialButtonProps> = ({
       className={cn(
         // Base shape, flex layout and transition
         "group relative rounded-full flex items-center justify-center shrink-0 cursor-pointer",
-        "transition-all duration-200 ease-out select-none transform-gpu will-change-transform [backface-visibility:hidden]",
+        "transition-all duration-200 ease-out select-none",
+        "[@media(hover:hover)]:hover:-translate-y-1",
         "before:absolute before:-inset-1.5 before:rounded-full before:content-['']",
 
         // Light Mode styling: crisp white porcelain card with refined slate border & soft shadow
-        "bg-white border border-slate-200/90 text-slate-700 shadow-sm",
+        "bg-white border border-slate-200/90 text-slate-700 shadow-xs",
 
         // Dark Mode styling: deep obsidian glass card with soft translucent border
-        "dark:bg-zinc-900/90 dark:border-white/10 dark:text-zinc-200 dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)]",
-        "backdrop-blur-sm",
+        "dark:bg-zinc-900 dark:border-white/10 dark:text-zinc-200 dark:shadow-[0_2px_8px_rgba(0,0,0,0.25)]",
+        "md:backdrop-blur-sm",
 
-        // Light Mode Hover: smooth micro-lift, soft emerald tint, vivid border & diffused glow
-        "hover:-translate-y-1 hover:bg-emerald-50 hover:border-emerald-500 hover:text-emerald-600",
-        "hover:shadow-[0_8px_20px_rgba(16,185,129,0.22)]",
+        // Light Mode Hover: smooth micro-lift, soft emerald tint, vivid border & diffused glow (hover devices only)
+        "[@media(hover:hover)]:hover:bg-emerald-50 [@media(hover:hover)]:hover:border-emerald-500 [@media(hover:hover)]:hover:text-emerald-600",
+        "[@media(hover:hover)]:hover:shadow-[0_8px_20px_rgba(16,185,129,0.22)]",
 
-        // Dark Mode Hover: smooth micro-lift, subtle emerald tint & delicate glow
-        "dark:hover:bg-emerald-500/10 dark:hover:border-emerald-500/40 dark:hover:text-emerald-400",
-        "dark:hover:shadow-[0_4px_16px_rgba(16,185,129,0.12)]",
+        // Dark Mode Hover: smooth micro-lift, subtle emerald tint & delicate glow (hover devices only)
+        "[@media(hover:hover)]:dark:hover:bg-emerald-500/10 [@media(hover:hover)]:dark:hover:border-emerald-500/40 [@media(hover:hover)]:dark:hover:text-emerald-400",
+        "[@media(hover:hover)]:dark:hover:shadow-[0_4px_16px_rgba(16,185,129,0.12)]",
 
-        // Active state
+        // Active state (instant feedback on touch/click)
         "active:translate-y-0 active:scale-95",
 
         sizeClasses,

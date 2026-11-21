@@ -4,8 +4,15 @@
 
 /* CSS-driven cursor blink — avoids JS setInterval re-renders */
 @keyframes cursorBlink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
 }
 
 /* React Bits ShinyText shimmer animation */
@@ -13,6 +20,7 @@
   0% {
     background-position: 200% 0;
   }
+
   100% {
     background-position: -200% 0;
   }
@@ -20,6 +28,99 @@
 
 .animate-shiny {
   animation: shiny 5s linear infinite;
+}
+
+/* ─── Desktop Hero Kinetic Luxury Keyframes (100% GPU Composited) ─── */
+@keyframes heroOrbitCW {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes heroOrbitCCW {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+@keyframes heroBlobBreath {
+
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+
+  33% {
+    transform: scale(1.034) rotate(2.4deg);
+  }
+
+  66% {
+    transform: scale(0.988) rotate(-2deg);
+  }
+}
+
+@keyframes heroHairlineSweep {
+  0% {
+    transform: translateX(-120%);
+    opacity: 0;
+  }
+
+  8% {
+    opacity: 0.75;
+  }
+
+  34% {
+    transform: translateX(360%);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateX(360%);
+    opacity: 0;
+  }
+}
+
+.hero-orbit-cw {
+  animation: heroOrbitCW 46s linear infinite;
+  will-change: transform;
+}
+
+.hero-orbit-ccw {
+  animation: heroOrbitCCW 64s linear infinite;
+  will-change: transform;
+}
+
+.hero-blob-breath {
+  animation: heroBlobBreath 13s ease-in-out infinite;
+  will-change: transform;
+}
+
+.hero-hairline-sweep {
+  animation: heroHairlineSweep 8.5s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+  will-change: transform, opacity;
+}
+
+.hero-motion-paused,
+.hero-motion-paused * {
+  animation-play-state: paused !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .hero-orbit-cw,
+  .hero-orbit-ccw,
+  .hero-blob-breath,
+  .hero-hairline-sweep {
+    animation: none !important;
+  }
 }
 
 
@@ -275,6 +376,7 @@
   ::view-transition-group(root) {
     animation-duration: 0.35s;
   }
+
   ::view-transition-old(root),
   ::view-transition-new(root) {
     animation: none;
@@ -283,9 +385,11 @@
     will-change: clip-path;
     contain: paint;
   }
+
   ::view-transition-old(root) {
     z-index: 1;
   }
+
   ::view-transition-new(root) {
     z-index: 9999;
   }
@@ -396,6 +500,7 @@
 
   /* ─── Mobile Performance & Zero-Jank Compositor Rule (< 768px) ─── */
   @media (max-width: 767px) {
+
     /* Prevent entrance lag or delayed opacities on mobile */
     .fade-in,
     .animate-in {
@@ -408,6 +513,24 @@
     .animate-tech-marquee {
       transform: translateZ(0);
       will-change: transform;
+    }
+
+    /* Bottom Sections GPU Compositor Isolation for Silky 120 FPS Mobile Scroll */
+    #contact,
+    footer {
+      contain: paint layout;
+      transform: translateZ(0);
+      -webkit-transform: translateZ(0);
+    }
+  }
+
+  /* ─── Touch Screen Scroll Protection: Prevent hover layout/transform jitter while dragging ─── */
+  @media (hover: none) {
+    .group:hover .group-hover\:translate-x-1,
+    .group:hover .group-hover\:-translate-x-1,
+    .group:hover .group-hover\:scale-105,
+    .group:hover .group-hover\:scale-110 {
+      transform: none !important;
     }
   }
 }
