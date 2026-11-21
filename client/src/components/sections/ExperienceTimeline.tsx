@@ -340,7 +340,7 @@ const TimelineNodeCard = memo(({ item, theme, isRtl, alignToSpineEnd, isReached 
               {item.technologies.map(tech => (
                 <span
                   key={tech.name}
-                  className={`text-[10px] font-mono font-medium px-2.5 py-0.5 rounded border transition-colors duration-200 ${theme.tagBg}`}
+                  className={`text-[0.625rem] font-mono font-medium px-2.5 py-0.5 rounded border transition-colors duration-200 ${theme.tagBg}`}
                 >
                   {tech.name}
                 </span>
@@ -473,7 +473,7 @@ const MobileTimelineCard = memo(({ item, theme, isRtl, isReached }: MobileTimeli
 
           {/* Description */}
           {descriptionText && (
-            <p className="text-xs sm:text-[13.5px] text-muted-foreground/90 leading-relaxed pt-2.5 whitespace-pre-line relative z-10">
+            <p className="text-xs sm:text-[0.84375rem] text-muted-foreground/90 leading-relaxed pt-2.5 whitespace-pre-line relative z-10">
               {descriptionText}
             </p>
           )}
@@ -484,7 +484,7 @@ const MobileTimelineCard = memo(({ item, theme, isRtl, isReached }: MobileTimeli
               {item.technologies.map(tech => (
                 <span
                   key={tech.name}
-                  className={`text-[10px] font-mono font-medium px-2.5 py-0.5 rounded border transition-colors duration-200 ${theme.tagBg}`}
+                  className={`text-[0.625rem] font-mono font-medium px-2.5 py-0.5 rounded border transition-colors duration-200 ${theme.tagBg}`}
                 >
                   {tech.name}
                 </span>
@@ -819,8 +819,8 @@ const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
                   }}
                   className={`absolute top-5 -translate-y-1/2 h-[2px] pointer-events-none z-10 ${
                     isRtl
-                      ? 'right-3.5 sm:right-5 w-[24px] sm:w-[28px]'
-                      : 'left-3.5 sm:left-5 w-[24px] sm:w-[28px]'
+                      ? 'right-3.5 sm:right-5 w-[1.5rem] sm:w-[1.75rem]'
+                      : 'left-3.5 sm:left-5 w-[1.5rem] sm:w-[1.75rem]'
                   }`}
                 >
                   {/* Subtle track line */}
@@ -834,7 +834,7 @@ const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
                 </motion.div>
 
                 {/* ─── Card Column (Spanning from the circle badge onward) ─── */}
-                <div className={`w-full relative z-20 ${isRtl ? 'pr-[38px] sm:pr-[46px]' : 'pl-[38px] sm:pl-[46px]'}`}>
+                <div className={`w-full relative z-20 ${isRtl ? 'pr-[2.375rem] sm:pr-[2.875rem]' : 'pl-[2.375rem] sm:pl-[2.875rem]'}`}>
                   <MobileTimelineCard
                     item={item}
                     theme={theme}
@@ -944,8 +944,8 @@ const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
                     }}
                     className={`flex items-center absolute top-1/2 -translate-y-1/2 h-[2px] pointer-events-none z-0 ${
                       stemGoesRight
-                        ? 'left-full w-[40px] lg:w-[48px]'
-                        : 'right-full w-[40px] lg:w-[48px]'
+                        ? 'left-full w-[2.5rem] lg:w-[3rem]'
+                        : 'right-full w-[2.5rem] lg:w-[3rem]'
                     }`}
                   >
                     {/* Subtle base line */}

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import prisma from '../utils/prisma';
+import { sendSafeError, handlePrismaError } from '../utils/sanitize';
 
 export const getSeo = async (req: Request, res: Response) => {
   try {
@@ -51,7 +52,7 @@ export const getSeo = async (req: Request, res: Response) => {
 
     res.json({ success: true, data: payload });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Failed to fetch SEO settings', error });
+    sendSafeError(res, 500, 'Failed to fetch SEO settings', error);
   }
 };
 
@@ -138,7 +139,6 @@ export const updateSeo = async (req: Request, res: Response) => {
 
     res.json({ success: true, data: responseData });
   } catch (error) {
-    console.error('SEO Update Error:', error);
-    res.status(500).json({ success: false, message: 'Failed to update SEO settings', error });
+    handlePrismaError(res, error, 'Failed to update SEO settings');
   }
 };

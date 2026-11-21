@@ -219,7 +219,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
               type="button"
               onClick={isAr ? handleNext : handlePrev}
               aria-label={isAr ? "التالي" : "Previous review"}
-              className="hidden sm:flex absolute -left-2 sm:-left-5 md:-left-6 lg:-left-7 xl:-left-8 top-[calc(50%+14px)] -translate-y-1/2 z-30 w-7 h-7 rounded-full border border-zinc-200/90 dark:border-white/[0.12] bg-white/95 dark:bg-zinc-900/90 backdrop-blur-md hover:bg-white dark:hover:bg-zinc-800 text-foreground items-center justify-center transition-all duration-200 shadow-md hover:shadow-lg dark:shadow-[0_4px_20px_rgba(0,0,0,0.5)] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 cursor-pointer"
+              className="hidden sm:flex absolute -left-2 sm:-left-5 md:-left-6 lg:-left-7 xl:-left-8 top-[calc(50%+0.875rem)] -translate-y-1/2 z-30 w-7 h-7 rounded-full border border-zinc-200/90 dark:border-white/[0.12] bg-white/95 dark:bg-zinc-900/90 backdrop-blur-md hover:bg-white dark:hover:bg-zinc-800 text-foreground items-center justify-center transition-all duration-200 shadow-md hover:shadow-lg dark:shadow-[0_4px_20px_rgba(0,0,0,0.5)] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 cursor-pointer"
             >
               <ChevronLeft size={14} strokeWidth={2.2} />
             </button>
@@ -231,7 +231,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
               type="button"
               onClick={isAr ? handlePrev : handleNext}
               aria-label={isAr ? "السابق" : "Next review"}
-              className="hidden sm:flex absolute -right-2 sm:-right-5 md:-right-6 lg:-right-7 xl:-right-8 top-[calc(50%+14px)] -translate-y-1/2 z-30 w-7 h-7 rounded-full border border-zinc-200/90 dark:border-white/[0.12] bg-white/95 dark:bg-zinc-900/90 backdrop-blur-md hover:bg-white dark:hover:bg-zinc-800 text-foreground items-center justify-center transition-all duration-200 shadow-md hover:shadow-lg dark:shadow-[0_4px_20px_rgba(0,0,0,0.5)] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 cursor-pointer"
+              className="hidden sm:flex absolute -right-2 sm:-right-5 md:-right-6 lg:-right-7 xl:-right-8 top-[calc(50%+0.875rem)] -translate-y-1/2 z-30 w-7 h-7 rounded-full border border-zinc-200/90 dark:border-white/[0.12] bg-white/95 dark:bg-zinc-900/90 backdrop-blur-md hover:bg-white dark:hover:bg-zinc-800 text-foreground items-center justify-center transition-all duration-200 shadow-md hover:shadow-lg dark:shadow-[0_4px_20px_rgba(0,0,0,0.5)] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 cursor-pointer"
             >
               <ChevronRight size={14} strokeWidth={2.2} />
             </button>
@@ -333,7 +333,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
                   >
                     {/* Top Floating Circular Avatar (Centered with flex inset-x-0, zero transform conflicts) */}
                     <div className="absolute -top-10 sm:-top-11 inset-x-0 flex justify-center z-20 pointer-events-none">
-                      <div className="relative w-20 h-20 sm:w-[86px] sm:h-[86px] rounded-full p-1 bg-background shadow-md transition-transform duration-300 ease-out group-hover:scale-105">
+                      <div className="relative w-20 h-20 sm:w-[5.375rem] sm:h-[5.375rem] rounded-full p-1 bg-background shadow-md transition-transform duration-300 ease-out group-hover:scale-105">
                         {review.avatarUrl ? (
                           <img
                             src={getMediaUrl(review.avatarUrl)}
@@ -375,9 +375,9 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
                       <h3 className="text-base sm:text-lg font-bold tracking-tight text-foreground leading-snug select-text">
                         {nameText}
                       </h3>
-                      <p className="inline-flex items-center justify-center gap-1.5 text-xs sm:text-[13px] text-zinc-500 dark:text-zinc-400 mt-1 select-text">
+                      <p className="inline-flex items-center justify-center gap-1.5 text-xs sm:text-[0.8125rem] text-zinc-500 dark:text-zinc-400 mt-1 select-text">
                         <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 dark:bg-zinc-600 shrink-0 inline-block" />
-                        <span className="font-mono text-[11px] sm:text-xs tracking-wider uppercase select-text">
+                        <span className="font-mono text-[0.6875rem] sm:text-xs tracking-wider uppercase select-text">
                           {roleText}
                         </span>
                       </p>
@@ -385,14 +385,14 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
 
                     {/* Review Body Text (Clear, readable, comfortable line height, fully selectable & copyable) */}
                     <div className="mt-4 flex-1 flex items-center justify-center select-text">
-                      <p className="text-xs sm:text-[13.5px] text-slate-600 dark:text-zinc-300 leading-relaxed text-center italic line-clamp-6 select-text cursor-text">
+                      <p className="text-xs sm:text-[0.84375rem] text-slate-600 dark:text-zinc-300 leading-relaxed text-center italic line-clamp-6 select-text cursor-text">
                         "{reviewText}"
                       </p>
                     </div>
 
                     {/* Circular Social Buttons (LinkedIn & GitHub) matching Contact & Footer */}
                     {(review.linkedinUrl || review.githubUrl) && (
-                      <div className="mt-5 pt-3.5 border-t border-border/40 flex items-center justify-center gap-2.5 min-h-[46px]">
+                      <div className="mt-5 pt-3.5 border-t border-border/40 flex items-center justify-center gap-2.5 min-h-[2.875rem]">
                         {review.linkedinUrl && (
                           <SocialButton
                             href={review.linkedinUrl}

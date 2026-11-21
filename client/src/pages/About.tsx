@@ -130,7 +130,7 @@ const About = () => {
               {/* Main photo */}
               <div className="aspect-[3/4] rounded-xl overflow-hidden bg-muted border border-border relative">
                 {photo ? (
-                  <img src={photo} alt={name} className="w-full h-full object-cover" />
+                  <img src={photo} alt={name} width={450} height={600} decoding="async" className="w-full h-full object-cover" />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center bg-muted">
                     <span className="text-7xl font-bold text-muted-foreground/20 tracking-tighter">
@@ -157,7 +157,7 @@ const About = () => {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.6 + i * 0.15, duration: 0.6 }}
                   >
-                    <img src={resolveImageUrl(img)} alt="" className="w-full h-full object-cover" />
+                    <img src={resolveImageUrl(img)} alt={`${p.title} project thumbnail`} width={144} height={96} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                   </motion.div>
                 );
               })}

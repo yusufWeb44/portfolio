@@ -185,7 +185,7 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
   const isRtl = currentDirection === 'rtl' || currentLang === 'ar';
   const isMobile = useIsMobile();
   const isCompactViewport = useIsMobile(1024);
-  const cubicEase = [0.22, 1, 0.36, 1] as any;
+  const cubicEase = [0.22, 1, 0.36, 1] as const;
 
   const [startMorph, setStartMorph] = useState(false);
   useEffect(() => {
@@ -593,7 +593,11 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
     linkedinUrl && { label: 'LinkedIn', href: linkedinUrl, Icon: LinkedinIcon },
     instagramUrl && { label: 'Instagram', href: instagramUrl, Icon: InstagramIcon },
     facebookUrl && { label: 'Facebook', href: facebookUrl, Icon: FacebookIcon },
-  ].filter(Boolean) as { label: string; href: string; Icon: any }[];
+  ].filter(Boolean) as { label: string; href: string; Icon: React.ComponentType<{ size?: number; className?: string }> }[];
+
+  const portraitAlt = isRtl
+    ? 'صورة يوسف الأيوبي — مطور ويب ومهندس برمجيات'
+    : 'Yousef Ayoubi — Full-Stack Developer & Software Engineer';
 
   return (
     <div className="relative min-h-[min(100svh,1440px)] lg:min-h-0 xl:min-h-[calc(100vh-4rem)] flex flex-col justify-between overflow-hidden bg-transparent">
@@ -751,11 +755,9 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
               <div className="hero-portrait-stage-mobile relative z-10 h-full flex items-end justify-center shrink-0 pointer-events-none select-none">
                 <img
                   src={resolvedPrimarySrc}
-                  alt=""
-                  aria-label="Profile photo"
+                  alt={portraitAlt}
                   loading="eager"
                   decoding="async"
-                  // @ts-ignore
                   fetchPriority="high"
                   width={560}
                   height={420}
@@ -898,7 +900,7 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
                           <span className="text-lg sm:text-2xl font-extrabold text-foreground font-mono">
                             <AnimatedStatValue value={stat.value} />
                           </span>
-                          <span className="text-[11px] sm:text-xs text-muted-foreground uppercase tracking-wider mt-1 sm:mt-1.5 leading-snug">
+                          <span className="text-[0.6875rem] sm:text-xs text-muted-foreground uppercase tracking-wider mt-1 sm:mt-1.5 leading-snug">
                             {formatStatLabel(stat.label)}
                           </span>
                         </div>
@@ -913,9 +915,9 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
             <div className="order-1 lg:order-2 lg:col-span-5 xl:col-span-4 relative flex flex-col justify-center items-center min-w-0">
 
               {/* Blob + Profile Image (Anchored & Stationary, zero mouse movement) */}
-              <div className="relative flex justify-center items-center min-h-[350px] sm:min-h-[390px] md:min-h-[420px] lg:min-h-[460px] xl:min-h-[500px] w-full select-none pointer-events-none">
+              <div className="relative flex justify-center items-center min-h-[21.875rem] sm:min-h-[24.375rem] md:min-h-[26.25rem] lg:min-h-[28.75rem] xl:min-h-[31.25rem] w-full select-none pointer-events-none">
                 {/* Fluid Blob Backdrop — Enlarged to match reference photo, perfectly framing profile */}
-                <div className="absolute -top-7 sm:-top-9 md:-top-10 lg:-top-11 xl:-top-12 w-[320px] h-[320px] sm:w-[360px] sm:h-[360px] md:w-[390px] md:h-[390px] lg:w-[400px] lg:h-[400px] xl:w-[450px] xl:h-[450px] z-0 pointer-events-none select-none">
+                <div className="absolute -top-7 sm:-top-9 md:-top-10 lg:-top-11 xl:-top-12 w-[20rem] h-[20rem] sm:w-[22.5rem] sm:h-[22.5rem] md:w-[24.375rem] md:h-[24.375rem] lg:w-[25rem] lg:h-[25rem] xl:w-[28.125rem] xl:h-[28.125rem] z-0 pointer-events-none select-none">
                   <motion.div
                     initial={isMobile ? false : { scale: 0.9, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
@@ -962,16 +964,14 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
                       WebkitUserSelect: 'none',
                       pointerEvents: 'none',
                     }}
-                    className="hero-portrait-stage relative w-[275px] sm:w-[315px] md:w-[340px] lg:w-[370px] xl:w-[420px] scale-[1.54] sm:scale-[1.56] md:scale-[1.58] lg:scale-[1.56] xl:scale-[1.6] translate-y-0 sm:translate-y-1 md:translate-y-1 lg:translate-y-2 xl:translate-y-2 pointer-events-none select-none"
+                    className="hero-portrait-stage relative w-[17.1875rem] sm:w-[19.6875rem] md:w-[21.25rem] lg:w-[23.125rem] xl:w-[26.25rem] scale-[1.54] sm:scale-[1.56] md:scale-[1.58] lg:scale-[1.56] xl:scale-[1.6] translate-y-0 sm:translate-y-1 md:translate-y-1 lg:translate-y-2 xl:translate-y-2 pointer-events-none select-none"
                   >
                     <img
                       ref={primaryImgRef}
                       src={resolvedPrimarySrc}
-                      alt=""
-                      aria-label="Profile photo"
+                      alt={portraitAlt}
                       loading="eager"
                       decoding="async"
-                      // @ts-ignore
                       fetchPriority="high"
                       width={420}
                       height={420}
@@ -1217,7 +1217,7 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
                     onPointerEnter={handlePortraitPointerEnter}
                     onPointerMove={handlePortraitPointerMove}
                     onPointerLeave={handlePortraitPointerLeave}
-                    className="hidden lg:block absolute z-20 left-1/2 top-1/2 -translate-x-1/2 -translate-y-[49%] w-[300px] xl:w-[370px] h-[420px] xl:h-[490px] rounded-[46%_46%_34%_34%] pointer-events-auto"
+                    className="hidden lg:block absolute z-20 left-1/2 top-1/2 -translate-x-1/2 -translate-y-[49%] w-[18.75rem] xl:w-[23.125rem] h-[26.25rem] xl:h-[30.625rem] rounded-[46%_46%_34%_34%] pointer-events-auto"
                   />
                 )}
               </div>
@@ -1250,11 +1250,11 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
                         }}
                         className="flex items-center cursor-pointer py-0.5"
                       >
-                        <span className="text-foreground/90 font-extrabold text-lg lg:text-xl xl:text-2xl 2xl:text-3xl mr-2.5 rtl:mr-0 rtl:ml-2.5 shrink-0 leading-none">
+                        <span className="hero-role-dash text-foreground/90 font-extrabold text-lg lg:text-xl xl:text-2xl 2xl:text-3xl mr-2.5 rtl:mr-0 rtl:ml-2.5 shrink-0 leading-none">
                           -
                         </span>
                         <span
-                          className="whitespace-nowrap text-base sm:text-lg lg:text-[1.15rem] xl:text-[1.4rem] 2xl:text-[1.65rem] font-extrabold tracking-tight rtl:tracking-normal uppercase rtl:normal-case text-foreground/90 leading-none"
+                          className="hero-role-text whitespace-nowrap text-base sm:text-lg lg:text-[1.15rem] xl:text-[1.4rem] 2xl:text-[1.65rem] font-extrabold tracking-tight rtl:tracking-normal uppercase rtl:normal-case text-foreground/90 leading-none"
                           dir="auto"
                         >
                           {cleanRole}

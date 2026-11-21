@@ -111,11 +111,11 @@ export const TechStackMarquee: React.FC<TechStackMarqueeProps> = ({
                     onMouseLeave={() => setIsItemHovered(false)}
                     className="tech-item group/item flex items-center gap-3 sm:gap-3.5 py-2 px-3 rounded-xl cursor-pointer transition-transform duration-200 hover:scale-105"
                   >
-                    <span className="shrink-0 flex items-center justify-center transition-transform duration-200 group-hover/item:scale-110 drop-shadow-sm">
+                    <span className="shrink-0 flex items-center justify-center transition-transform duration-200 group-hover/item:scale-110 drop-shadow-sm [&>svg]:w-[1.75rem] [&>svg]:h-[1.75rem]">
                       {getTechBrandIcon(tech, 28)}
                     </span>
                     <span 
-                      className="font-sans text-base sm:text-[17px] md:text-lg font-semibold tracking-tight text-foreground dark:text-white whitespace-nowrap"
+                      className="font-sans text-base sm:text-[1.0625rem] md:text-lg font-semibold tracking-tight text-foreground dark:text-white whitespace-nowrap"
                       style={{ fontFamily: 'var(--font-family)' }}
                     >
                       {tech}

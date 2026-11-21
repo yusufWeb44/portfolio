@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type HTMLAttributes } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Plus } from 'lucide-react';
 import { cn } from '../ui/Button';
@@ -19,13 +19,12 @@ interface FAQCategories {
   [key: string]: string;
 }
 
-interface FAQProps {
+interface FAQProps extends Omit<HTMLAttributes<HTMLElement>, 'title'> {
   title?: string;
   subtitle?: string;
   categories: FAQCategories;
   faqData: FAQData;
   className?: string;
-  [key: string]: any;
 }
 
 const FAQHeader = ({ title, subtitle }: { title: string; subtitle?: string }) => {
@@ -66,6 +65,8 @@ const FAQTabs = ({
       {Object.entries(categories).map(([key, label]) => (
         <button
           key={key}
+          type="button"
+          aria-pressed={selected === key}
           onClick={() => setSelected(key)}
           className={cn(
             'relative shrink-0 overflow-hidden whitespace-nowrap rounded-xl border px-3.5 sm:px-5 py-2 sm:py-2 text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer select-none active:scale-[0.98]',
@@ -163,6 +164,8 @@ const FAQItemCard = ({ question, answer, isMobile }: FAQItem & { isMobile?: bool
       )}
     >
       <button
+        type="button"
+        aria-expanded={isOpen}
         onClick={() => setIsOpen(!isOpen)}
         className="flex w-full items-center justify-between gap-4 sm:gap-6 p-4 sm:p-5 lg:p-6 text-start cursor-pointer relative z-10"
       >
@@ -214,7 +217,7 @@ const FAQItemCard = ({ question, answer, isMobile }: FAQItem & { isMobile?: bool
           initial={false}
           animate={{
             height: isOpen ? 'auto' : '0px',
-            marginBottom: isOpen ? '20px' : '0px',
+            marginBottom: isOpen ? '1.25rem' : '0rem',
           }}
           transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
           className="overflow-hidden px-4 sm:px-5 lg:px-6 relative z-10"

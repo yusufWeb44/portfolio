@@ -15,6 +15,7 @@ import {
   TelegramIcon
 } from '../ui/BrandIcons';
 import { SocialButton } from '../ui/SocialButton';
+import type { PortfolioSettings, ServiceData, SocialLinkData } from '../../types/portfolio';
 
 interface QuickLinkItem {
   id: string;
@@ -33,7 +34,7 @@ interface FooterData {
   brandDescription?: string;
   brandDescriptionAr?: string;
   showSocialLinks?: boolean;
-  customSocialLinks?: string | any[];
+  customSocialLinks?: string | SocialLinkData[];
 
   servicesTitle?: string;
   servicesTitleAr?: string;
@@ -64,8 +65,8 @@ interface FooterData {
 }
 
 interface FooterProps {
-  settings?: any;
-  socialLinks?: { platform: string; url: string; icon?: string }[];
+  settings?: PortfolioSettings | null;
+  socialLinks?: SocialLinkData[];
   scrollToSection: (id: string) => void;
 }
 
@@ -75,7 +76,7 @@ export const Footer: React.FC<FooterProps> = ({ settings, socialLinks = [], scro
   const isRtl = currentDirection === 'rtl';
 
   const [footerConfig, setFooterConfig] = useState<FooterData | null>(null);
-  const [servicesList, setServicesList] = useState<any[]>([]);
+  const [servicesList, setServicesList] = useState<ServiceData[]>([]);
 
   // Fetch dynamic footer configuration & services
   const loadFooterData = async () => {
@@ -91,11 +92,11 @@ export const Footer: React.FC<FooterProps> = ({ settings, socialLinks = [], scro
       if (servicesRes.status === 'fulfilled' && servicesRes.value.data?.data) {
         const rawServices = servicesRes.value.data.data;
         if (Array.isArray(rawServices)) {
-          setServicesList(rawServices.filter((s: any) => s.isEnabled !== false));
+          setServicesList((rawServices as ServiceData[]).filter((s) => s.isEnabled !== false));
         }
       }
-    } catch (err) {
-      console.warn('Footer fetch notice:', err);
+    } catch {
+      // Silently preserve existing state on transient network failure
     }
   };
 
@@ -202,14 +203,14 @@ export const Footer: React.FC<FooterProps> = ({ settings, socialLinks = [], scro
   };
 
   // Compile social links list from CMS customSocialLinks
-  let socialItems: { platform: string; url: string; isEnabled?: boolean }[] = [];
+  let socialItems: SocialLinkData[] = [];
   if (footerConfig?.customSocialLinks) {
     try {
       const parsed = typeof footerConfig.customSocialLinks === 'string'
         ? JSON.parse(footerConfig.customSocialLinks)
         : footerConfig.customSocialLinks;
       if (Array.isArray(parsed)) {
-        socialItems = parsed.filter((s: any) => s.isEnabled !== false);
+        socialItems = (parsed as SocialLinkData[]).filter((s) => s.isEnabled !== false);
       }
     } catch {}
   } else if (!footerConfig && socialLinks && socialLinks.length > 0) {
@@ -241,16 +242,19 @@ export const Footer: React.FC<FooterProps> = ({ settings, socialLinks = [], scro
           <div className="col-span-2 sm:col-span-2 lg:col-span-1 space-y-3.5">
             <div className="flex items-center gap-3">
               <button
+                type="button"
                 onClick={() => scrollToSection('hero')}
                 className="flex items-center gap-2 hover:opacity-90 transition-opacity text-start cursor-pointer bg-transparent border-none p-0 group"
-                aria-label="Home"
+                aria-label={isAr ? 'العودة إلى الرئيسية' : 'Home'}
               >
                 <img
                   src={resolveImageUrl(settings?.logoUrl) || '/logo.webp'}
-                  alt={brandName}
+                  alt={brandName ? `${brandName} Logo` : 'Portfolio Logo'}
                   width={120}
                   height={69}
-                  className="h-9 sm:h-10 w-auto max-w-[120px] object-contain filter invert contrast-125 dark:filter-none select-none transition-transform duration-300 group-hover:scale-105"
+                  loading="lazy"
+                  decoding="async"
+                  className="h-9 sm:h-10 w-auto max-w-[7.5rem] object-contain filter invert contrast-125 dark:filter-none select-none transition-transform duration-300 group-hover:scale-105"
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = '/logo.webp';
                   }}
@@ -260,7 +264,7 @@ export const Footer: React.FC<FooterProps> = ({ settings, socialLinks = [], scro
                 <span className="font-bold text-sm sm:text-base tracking-tight text-foreground leading-tight">
                   {brandName}
                 </span>
-                <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">
+                <span className="text-[0.625rem] font-mono text-muted-foreground uppercase tracking-wider">
                   {brandRole}
                 </span>
               </div>
@@ -297,6 +301,7 @@ export const Footer: React.FC<FooterProps> = ({ settings, socialLinks = [], scro
                 {displayedServices.map((service, idx) => (
                   <li key={service.id || idx}>
                     <button
+                      type="button"
                       onClick={() => scrollToSection('services')}
                       className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer bg-transparent border-none p-0 text-start block leading-relaxed group"
                     >
@@ -422,16 +427,17 @@ export const Footer: React.FC<FooterProps> = ({ settings, socialLinks = [], scro
 
           <div className="flex items-center gap-6">
             {secondaryBadge && (
-              <span className="hidden sm:inline-block font-mono text-[11px] text-muted-foreground/70">
+              <span className="hidden sm:inline-block font-mono text-[0.6875rem] text-muted-foreground/70">
                 {secondaryBadge}
               </span>
             )}
 
             {showBackToTop && (
               <button
+                type="button"
                 onClick={() => scrollToSection('hero')}
                 className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer group"
-                aria-label="Back to top"
+                aria-label={isAr ? 'العودة إلى الأعلى' : 'Back to top'}
               >
                 <span>{isAr ? 'للأعلى' : 'Back to top'}</span>
                 <ArrowUp className="w-3.5 h-3.5 group-hover:-translate-y-0.5 transition-transform duration-200 text-emerald-500" />

@@ -66,7 +66,7 @@ export const loginAdmin = async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         message: 'Invalid input',
-        errors: (error as any).errors || error.issues,
+        errors: error.issues,
       });
     }
     console.error('Login error:', error);
@@ -74,7 +74,7 @@ export const loginAdmin = async (req: Request, res: Response) => {
   }
 };
 
-export const logoutAdmin = async (req: Request, res: Response) => {
+export const logoutAdmin = async (_req: Request, res: Response) => {
   const isProd = process.env.NODE_ENV === 'production';
 
   res.clearCookie('jwt', {
@@ -100,6 +100,9 @@ export const getMe = async (req: AuthRequest, res: Response) => {
 
 export const getSecurityStatus = async (req: AuthRequest, res: Response) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: 'Not authorized' });
+    }
     const admin = await prisma.adminUser.findUnique({
       where: { id: req.user.id },
       select: {
@@ -122,7 +125,7 @@ export const getSecurityStatus = async (req: AuthRequest, res: Response) => {
         updatedAt: admin.updatedAt,
       },
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Error in getSecurityStatus:', err);
     res.status(500).json({ success: false, message: 'Failed to retrieve security status' });
   }
@@ -133,6 +136,9 @@ export const getSecurityStatus = async (req: AuthRequest, res: Response) => {
  */
 export const setup2FA = async (req: AuthRequest, res: Response) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: 'Not authorized' });
+    }
     const admin = await prisma.adminUser.findUnique({
       where: { id: req.user.id },
     });
@@ -158,17 +164,20 @@ export const setup2FA = async (req: AuthRequest, res: Response) => {
       qrCode,
       otpauth: uri,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Error in setup2FA:', err);
     res.status(500).json({ success: false, message: 'Failed to initiate 2FA setup' });
   }
 };
 
 /**
- * Step 2: Confirms the 6-digit rolling code displayed in Google Authenticator and activates 2FA
+ * Step 2: Confirms the 6-digit rolling TOTP code and activates 2FA
  */
 export const enable2FA = async (req: AuthRequest, res: Response) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: 'Not authorized' });
+    }
     const { token } = z.object({ token: z.string().length(6) }).parse(req.body);
 
     const admin = await prisma.adminUser.findUnique({
@@ -195,13 +204,11 @@ export const enable2FA = async (req: AuthRequest, res: Response) => {
       data: { twoFactorEnabled: true },
     });
 
-    console.log(`🛡️ [2FA Enabled] Administrator ${admin.email} successfully activated 2FA.`);
-
     res.status(200).json({
       success: true,
       message: 'Two-factor authentication is now active! Your account is fully protected.',
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     if (err instanceof z.ZodError) {
       return res.status(400).json({ success: false, message: 'Verification code must be 6 digits' });
     }
@@ -211,10 +218,13 @@ export const enable2FA = async (req: AuthRequest, res: Response) => {
 };
 
 /**
- * Step 3: Deactivates Google Authenticator 2FA (requires current password and TOTP token)
+ * Step 3: Deactivates TOTP 2FA (requires current password and valid verification code)
  */
 export const disable2FA = async (req: AuthRequest, res: Response) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: 'Not authorized' });
+    }
     const { currentPassword, token } = z.object({
       currentPassword: z.string().min(1, 'Current password is required'),
       token: z.string().length(6, 'Verification code must be 6 digits'),
@@ -243,13 +253,11 @@ export const disable2FA = async (req: AuthRequest, res: Response) => {
       data: { twoFactorEnabled: false, twoFactorSecret: null },
     });
 
-    console.log(`⚠️ [2FA Disabled] Administrator ${admin.email} deactivated 2FA.`);
-
     res.status(200).json({
       success: true,
       message: 'Two-factor authentication has been disabled.',
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     if (err instanceof z.ZodError) {
       return res.status(400).json({ success: false, message: err.issues?.[0]?.message || 'Invalid input' });
     }
@@ -269,6 +277,9 @@ const changePasswordSchema = z.object({
 
 export const changePassword = async (req: AuthRequest, res: Response) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: 'Not authorized' });
+    }
     const { currentPassword, newPassword, totpCode } = changePasswordSchema.parse(req.body);
 
     const admin = await prisma.adminUser.findUnique({
@@ -323,14 +334,12 @@ export const changePassword = async (req: AuthRequest, res: Response) => {
     // 5. Issue fresh JWT token
     const token = generateToken(res, admin.id);
 
-    console.log(`🔒 [Security Audit] Administrator ${admin.email} successfully updated password via 2FA.`);
-
     res.status(200).json({
       success: true,
       token,
       message: 'Password successfully changed and secured!',
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     if (err instanceof z.ZodError) {
       const firstIssue = err.issues?.[0]?.message || 'Invalid input requirements';
       return res.status(400).json({ success: false, message: firstIssue });
@@ -348,6 +357,9 @@ const updateEmailSchema = z.object({
 
 export const updateAdminEmail = async (req: AuthRequest, res: Response) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: 'Not authorized' });
+    }
     const { newEmail, currentPassword, totpCode } = updateEmailSchema.parse(req.body);
 
     const admin = await prisma.adminUser.findUnique({
@@ -401,14 +413,12 @@ export const updateAdminEmail = async (req: AuthRequest, res: Response) => {
       select: { id: true, email: true, updatedAt: true, twoFactorEnabled: true }
     });
 
-    console.log(`📧 [Admin Email Updated] Email updated from ${admin.email} to ${updated.email}`);
-
     res.status(200).json({
       success: true,
       data: updated,
       message: 'Admin email updated successfully!',
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     if (err instanceof z.ZodError) {
       return res.status(400).json({ success: false, message: err.issues?.[0]?.message || 'Invalid input' });
     }

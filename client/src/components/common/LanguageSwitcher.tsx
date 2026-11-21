@@ -44,21 +44,27 @@ export const LanguageSwitcher = () => {
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="h-10 px-3 sm:px-3.5 rounded-lg flex items-center gap-1.5 sm:gap-2 bg-white/50 hover:bg-white/75 dark:bg-white/[0.04] dark:hover:bg-white/[0.07] border border-slate-900/[0.07] hover:border-slate-900/[0.14] dark:border-white/[0.08] dark:hover:border-white/[0.15] text-foreground dark:text-zinc-300 dark:hover:text-white transition-all duration-200 cursor-pointer shadow-xs backdrop-blur-md text-xs sm:text-sm font-semibold select-none group shrink-0"
-        aria-label="Select Language"
+        aria-label={currentLang === 'ar' ? `تغيير اللغة (${currentName})` : `Switch language (${currentName})`}
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
       >
-        <Globe className="w-4 h-4 text-muted-foreground group-hover:text-foreground dark:group-hover:text-zinc-200 transition-colors shrink-0" />
+        <Globe className="w-4 h-4 text-muted-foreground group-hover:text-foreground dark:group-hover:text-zinc-200 transition-colors shrink-0" aria-hidden="true" />
         <span className="hidden sm:inline font-medium text-xs sm:text-sm">
           {currentName}
         </span>
         <span className="inline sm:hidden font-mono uppercase text-xs">
           {currentLang}
         </span>
-        <ChevronDown size={14} className={`text-muted-foreground transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-3.5 h-3.5 text-muted-foreground transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
       </button>
 
       {isOpen && (
-        <div className="absolute end-0 mt-2 w-40 rounded-lg border border-slate-900/[0.08] dark:border-white/[0.14] bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl shadow-lg shadow-black/5 dark:shadow-[0_12px_36px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.10)] p-1.5 z-50 animate-in fade-in zoom-in-95 duration-150">
-          <div className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground px-2.5 py-1">
+        <div
+          role="listbox"
+          aria-label="Languages"
+          className="absolute end-0 mt-2 w-40 rounded-lg border border-slate-900/[0.08] dark:border-white/[0.14] bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl shadow-lg shadow-black/5 dark:shadow-[0_12px_36px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.10)] p-1.5 z-50 animate-in fade-in zoom-in-95 duration-150"
+        >
+          <div className="text-[0.625rem] font-mono uppercase tracking-wider text-muted-foreground px-2.5 py-1">
             Languages
           </div>
           {availableLanguages.length === 0 ? (

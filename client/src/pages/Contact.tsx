@@ -124,8 +124,9 @@ const Contact = () => {
       await api.post('/messages', sanitizedPayload);
       setSuccess(true);
       setFormData({ name: '', email: '', subject: '', content: '', hp_company: '' });
-    } catch (err: any) {
-      setError(err.response?.data?.message || t('contact.errorDefault', 'Something went wrong. Please try again.'));
+    } catch (err: unknown) {
+      const apiErr = err as { response?: { data?: { message?: string } } };
+      setError(apiErr.response?.data?.message || t('contact.errorDefault', 'Something went wrong. Please try again.'));
     } finally {
       setLoading(false);
     }
@@ -252,8 +253,9 @@ const Contact = () => {
 
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <label className="text-sm font-medium">{t('contact.nameLabel', 'Your Name')} <span className="text-destructive">*</span></label>
+                      <label htmlFor="contact-name" className="text-sm font-medium">{t('contact.nameLabel', 'Your Name')} <span className="text-destructive">*</span></label>
                       <Input
+                        id="contact-name"
                         name="name"
                         value={formData.name}
                         onChange={handleChange}
@@ -267,8 +269,9 @@ const Contact = () => {
                       )}
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-sm font-medium">{t('contact.emailLabel', 'Your Email Address')} <span className="text-destructive">*</span></label>
+                      <label htmlFor="contact-email" className="text-sm font-medium">{t('contact.emailLabel', 'Your Email Address')} <span className="text-destructive">*</span></label>
                       <Input
+                        id="contact-email"
                         name="email"
                         type="email"
                         value={formData.email}
@@ -285,8 +288,9 @@ const Contact = () => {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-sm font-medium">{t('contact.subjectLabel', 'Subject / Project Scope')} <span className="text-destructive">*</span></label>
+                    <label htmlFor="contact-subject" className="text-sm font-medium">{t('contact.subjectLabel', 'Subject / Project Scope')} <span className="text-destructive">*</span></label>
                     <Input
+                      id="contact-subject"
                       name="subject"
                       value={formData.subject}
                       onChange={handleChange}
@@ -301,8 +305,9 @@ const Contact = () => {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-sm font-medium">{t('contact.messageLabel', 'Your Message')} <span className="text-destructive">*</span></label>
+                    <label htmlFor="contact-content" className="text-sm font-medium">{t('contact.messageLabel', 'Your Message')} <span className="text-destructive">*</span></label>
                     <Textarea
+                      id="contact-content"
                       name="content"
                       value={formData.content}
                       onChange={handleChange}

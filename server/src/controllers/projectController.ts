@@ -1,6 +1,16 @@
 import { Request, Response } from 'express';
 import prisma from '../utils/prisma';
 import { z } from 'zod';
+import { sanitizeUrl, sendSafeError, handlePrismaError } from '../utils/sanitize';
+
+const reorderProjectsSchema = z.object({
+  items: z.array(
+    z.object({
+      id: z.string().min(1),
+      order: z.coerce.number().int(),
+    })
+  ),
+});
 
 const projectSchema = z.object({
   title: z.string().min(1),
@@ -78,13 +88,13 @@ export const getProjects = async (req: Request, res: Response) => {
 
 export const reorderProjects = async (req: Request, res: Response) => {
   try {
-    const { items } = req.body;
-    if (!Array.isArray(items)) {
-      return res.status(400).json({ success: false, message: 'Items array is required' });
+    const parsed = reorderProjectsSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return sendSafeError(res, 400, 'Items array is required', undefined, parsed.error.issues);
     }
 
     await prisma.$transaction(
-      items.map((item: { id: string; order: number }) =>
+      parsed.data.items.map((item) =>
         prisma.project.update({
           where: { id: item.id },
           data: { order: item.order }
@@ -102,8 +112,7 @@ export const reorderProjects = async (req: Request, res: Response) => {
 
     res.json({ success: true, data: projects, message: 'Projects reordered successfully' });
   } catch (error) {
-    console.error('Reorder error:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
+    handlePrismaError(res, error, 'Failed to reorder projects');
   }
 };
 
@@ -144,15 +153,24 @@ export const createProject = async (req: Request, res: Response) => {
       finalOrder = highest ? (highest.order + 1) : 1;
     }
 
+    const sanitizedImages = (images || [])
+      .map((img) => ({
+        url: sanitizeUrl(img.url) || '',
+        isCover: Boolean(img.isCover),
+      }))
+      .filter((img) => img.url.length > 0);
+
     const project = await prisma.project.create({
       data: {
         ...projectData,
+        liveDemo: sanitizeUrl(projectData.liveDemo) ?? null,
+        github: sanitizeUrl(projectData.github) ?? null,
         order: finalOrder,
         technologies: {
           connect: resolvedTechIds.map(id => ({ id }))
         },
         images: {
-          create: images || []
+          create: sanitizedImages
         }
       },
       include: { images: true, technologies: true }
@@ -160,10 +178,9 @@ export const createProject = async (req: Request, res: Response) => {
     res.status(201).json({ success: true, data: project });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ success: false, message: 'Invalid input', errors: (error as any).errors || error.issues });
+      return sendSafeError(res, 400, 'Invalid input', undefined, error.issues);
     }
-    console.error(error);
-    res.status(500).json({ success: false, message: 'Server error' });
+    handlePrismaError(res, error, 'Failed to create project');
   }
 };
 
@@ -175,8 +192,17 @@ export const updateProject = async (req: Request, res: Response) => {
 
     const resolvedTechIds = await resolveTechnologyIds(technologyIds, technologyNames);
 
+    const sanitizedImages = images !== undefined
+      ? images
+          .map((img) => ({
+            url: sanitizeUrl(img.url) || '',
+            isCover: Boolean(img.isCover),
+          }))
+          .filter((img) => img.url.length > 0)
+      : undefined;
+
     // Delete existing images to replace them with the new list
-    if (images !== undefined) {
+    if (sanitizedImages !== undefined) {
       await prisma.projectImage.deleteMany({ where: { projectId: id } });
     }
 
@@ -184,20 +210,22 @@ export const updateProject = async (req: Request, res: Response) => {
       where: { id },
       data: {
         ...projectData,
+        liveDemo: sanitizeUrl(projectData.liveDemo) ?? null,
+        github: sanitizeUrl(projectData.github) ?? null,
         technologies: {
           set: [], // clear existing
           connect: resolvedTechIds.map(techId => ({ id: techId }))
         },
-        ...(images !== undefined ? { images: { create: images } } : {})
+        ...(sanitizedImages !== undefined ? { images: { create: sanitizedImages } } : {})
       },
       include: { images: true, technologies: true }
     });
     res.json({ success: true, data: project });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ success: false, message: 'Invalid input', errors: (error as any).errors || error.issues });
+      return sendSafeError(res, 400, 'Invalid input', undefined, error.issues);
     }
-    res.status(500).json({ success: false, message: 'Server error' });
+    handlePrismaError(res, error, 'Failed to update project');
   }
 };
 
@@ -207,6 +235,6 @@ export const deleteProject = async (req: Request, res: Response) => {
     await prisma.project.delete({ where: { id } });
     res.json({ success: true, message: 'Project removed' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server error' });
+    handlePrismaError(res, error, 'Failed to delete project');
   }
 };

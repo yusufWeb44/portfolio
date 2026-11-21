@@ -33,101 +33,7 @@ import { useIsMobile } from '../hooks/useIsMobile';
 import { buttonVariants, cn } from '../components/ui/Button';
 import { SocialButton } from '../components/ui/SocialButton';
 import { SplitText, BlurText, FadeContent, SpotlightCard } from '../components/react-bits';
-
-/* ─── Types ──────────────────────────────────────────────────────── */
-
-interface Service {
-  id: string;
-  title: string;
-  titleAr?: string;
-  description: string;
-  descriptionAr?: string;
-  isEnabled: boolean;
-}
-
-interface Settings {
-  name?: string;
-  nameAr?: string;
-  bio?: string;
-  bioAr?: string;
-  heroText?: string;
-  heroTextAr?: string;
-  ctaText?: string;
-  ctaTextAr?: string;
-  location?: string;
-  locationAr?: string;
-  availability?: string;
-  availabilityAr?: string;
-  email?: string;
-  profilePhoto?: string;
-  profilePhotoHover?: string;
-  typewriterWords?: string | string[];
-  typewriterWordsAr?: string | string[];
-  footerText?: string;
-  footerTextAr?: string;
-  whatsappNumber?: string;
-  heroStats?: string;
-  heroStatsAr?: string;
-
-  workflowBadge?: string;
-  workflowBadgeAr?: string;
-  workflowTitle?: string;
-  workflowTitleAr?: string;
-  workflowSubtitle?: string;
-  workflowSubtitleAr?: string;
-  projectsBadge?: string;
-  projectsBadgeAr?: string;
-  projectsTitle?: string;
-  projectsTitleAr?: string;
-  projectsSubtitle?: string;
-  projectsSubtitleAr?: string;
-  skillsBadge?: string;
-  skillsBadgeAr?: string;
-  skillsTitle?: string;
-  skillsTitleAr?: string;
-  skillsDescription?: string;
-  skillsDescriptionAr?: string;
-  experienceBadge?: string;
-  experienceBadgeAr?: string;
-  experienceTitle?: string;
-  experienceTitleAr?: string;
-  experienceSubtitle?: string;
-  experienceSubtitleAr?: string;
-  certificatesTitle?: string;
-  certificatesTitleAr?: string;
-  certificatesSubtitle?: string;
-  certificatesSubtitleAr?: string;
-  servicesBadge?: string;
-  servicesBadgeAr?: string;
-  servicesTitle?: string;
-  servicesTitleAr?: string;
-  servicesSubtitle?: string;
-  servicesSubtitleAr?: string;
-  faqBadge?: string;
-  faqBadgeAr?: string;
-  faqTitle?: string;
-  faqTitleAr?: string;
-  faqSubtitle?: string;
-  faqSubtitleAr?: string;
-  reviewsBadge?: string;
-  reviewsBadgeAr?: string;
-  reviewsTitle?: string;
-  reviewsTitleAr?: string;
-  reviewsSubtitle?: string;
-  reviewsSubtitleAr?: string;
-  contactBadge?: string;
-  contactBadgeAr?: string;
-  contactTitle?: string;
-  contactTitleAr?: string;
-  contactSubtitle?: string;
-  contactSubtitleAr?: string;
-}
-
-interface SocialLinkItem {
-  id: string;
-  platform: string;
-  url: string;
-}
+import type { PortfolioSettings, ServiceData, SocialLinkData, FaqRawItem } from '../types/portfolio';
 
 const FadeIn = ({
   children,
@@ -152,7 +58,7 @@ const Home = () => {
   const { t, currentLang } = useLanguage();
   const isMobile = useIsMobile();
   /* ─── State ──────────────────────────────────────────────────────── */
-  const [settings, setSettings] = useState<Settings | null>(() => {
+  const [settings, setSettings] = useState<PortfolioSettings | null>(() => {
     try {
       const cached = localStorage.getItem('portfolio_settings');
       return cached ? JSON.parse(cached) : null;
@@ -176,7 +82,7 @@ const Home = () => {
       return [];
     }
   });
-  const [services, setServices] = useState<Service[]>(() => {
+  const [services, setServices] = useState<ServiceData[]>(() => {
     try {
       const cached = localStorage.getItem('portfolio_services');
       return cached ? JSON.parse(cached) : [];
@@ -184,7 +90,7 @@ const Home = () => {
       return [];
     }
   });
-  const [socialLinks, setSocialLinks] = useState<SocialLinkItem[]>(() => {
+  const [socialLinks, setSocialLinks] = useState<SocialLinkData[]>(() => {
     try {
       const cached = localStorage.getItem('portfolio_social_links');
       return cached ? JSON.parse(cached) : [];
@@ -192,7 +98,7 @@ const Home = () => {
       return [];
     }
   });
-  const [rawFaqs, setRawFaqs] = useState<any[]>(() => {
+  const [rawFaqs, setRawFaqs] = useState<FaqRawItem[]>(() => {
     try {
       const cached = localStorage.getItem('portfolio_faqs');
       return cached ? JSON.parse(cached) : [];
@@ -208,88 +114,89 @@ const Home = () => {
       return [];
     }
   });
+  const [isLoadingData, setIsLoadingData] = useState<boolean>(
+    () => experiences.length === 0 || services.length === 0
+  );
+  const [expLoadError, setExpLoadError] = useState(false);
+  const [servLoadError, setServLoadError] = useState(false);
 
   /* ─── Data Fetching ─────────────────────────────────────────────── */
-  useEffect(() => {
-    const fetchAll = async () => {
-      try {
-        const [settRes, expRes, certRes, servRes, socialRes, faqRes, revRes] = await Promise.allSettled([
-          api.get('/settings'),
-          api.get('/experience'),
-          api.get('/certificates'),
-          api.get('/services'),
-          api.get('/social-links'),
-          api.get('/faqs'),
-          api.get('/reviews'),
-        ]);
+  const fetchAll = async () => {
+    try {
+      setExpLoadError(false);
+      setServLoadError(false);
+      const [settRes, expRes, certRes, servRes, socialRes, faqRes, revRes] = await Promise.allSettled([
+        api.get('/settings'),
+        api.get('/experience'),
+        api.get('/certificates'),
+        api.get('/services'),
+        api.get('/social-links'),
+        api.get('/faqs'),
+        api.get('/reviews'),
+      ]);
 
-        if (settRes.status === 'fulfilled') {
-          const settData = settRes.value.data.data;
-          setSettings(settData);
-          try {
-            localStorage.setItem('portfolio_settings', JSON.stringify(settData));
-          } catch { }
+      if (settRes.status === 'fulfilled' && settRes.value.data?.data) {
+        const settData = settRes.value.data.data;
+        setSettings(settData);
+        try {
+          localStorage.setItem('portfolio_settings', JSON.stringify(settData));
+        } catch { }
+      }
+
+      // Below-the-fold data — defer with startTransition to avoid blocking paint.
+      // Preserve cached localStorage data if a request fails during Render cold start.
+      startTransition(() => {
+        if (expRes.status === 'fulfilled') {
+          const expData = expRes.value.data.data || [];
+          setExperiences(expData);
+          try { localStorage.setItem('portfolio_experiences', JSON.stringify(expData)); } catch { }
         } else {
-          setSettings(null);
+          setExpLoadError(true);
         }
 
-        // Below-the-fold data — defer with startTransition to avoid blocking paint
-        startTransition(() => {
-          if (expRes.status === 'fulfilled') {
-            const expData = expRes.value.data.data || [];
-            setExperiences(expData);
-            try { localStorage.setItem('portfolio_experiences', JSON.stringify(expData)); } catch { }
-          } else {
-            setExperiences([]);
-          }
-          if (certRes.status === 'fulfilled') {
-            const certData = certRes.value.data.data || [];
-            setCertificates(certData);
-            try { localStorage.setItem('portfolio_certificates', JSON.stringify(certData)); } catch { }
-          } else {
-            setCertificates([]);
-          }
-          if (servRes.status === 'fulfilled') {
-            const servData = (servRes.value.data.data || []).filter((s: Service) => s.isEnabled);
-            setServices(servData);
-            try { localStorage.setItem('portfolio_services', JSON.stringify(servData)); } catch { }
-          } else {
-            setServices([]);
-          }
-          if (socialRes.status === 'fulfilled') {
-            const socialData = socialRes.value.data.data || [];
-            setSocialLinks(socialData);
-            try {
-              localStorage.setItem('portfolio_social_links', JSON.stringify(socialData));
-            } catch { }
-          } else {
-            setSocialLinks([]);
-          }
-          if (faqRes.status === 'fulfilled') {
-            const fetchedFaqs = faqRes.value.data.data;
-            if (Array.isArray(fetchedFaqs) && fetchedFaqs.length > 0) {
-              const valid = fetchedFaqs.filter((f: any) => f.isEnabled !== false);
-              setRawFaqs(valid);
-              try { localStorage.setItem('portfolio_faqs', JSON.stringify(valid)); } catch { }
-            } else {
-              setRawFaqs([]);
-            }
-          } else {
-            setRawFaqs([]);
-          }
-          if (revRes.status === 'fulfilled') {
-            const revData = revRes.value.data.data || [];
-            setReviews(revData);
-            try { localStorage.setItem('portfolio_reviews', JSON.stringify(revData)); } catch { }
-          } else {
-            setReviews([]);
-          }
-        });
-      } catch (err) {
-        console.error('Failed to load portfolio data', err);
-      }
-    };
+        if (certRes.status === 'fulfilled') {
+          const certData = certRes.value.data.data || [];
+          setCertificates(certData);
+          try { localStorage.setItem('portfolio_certificates', JSON.stringify(certData)); } catch { }
+        }
 
+        if (servRes.status === 'fulfilled') {
+          const servData = (servRes.value.data.data || []).filter((s: ServiceData) => s.isEnabled);
+          setServices(servData);
+          try { localStorage.setItem('portfolio_services', JSON.stringify(servData)); } catch { }
+        } else {
+          setServLoadError(true);
+        }
+
+        if (socialRes.status === 'fulfilled') {
+          const socialData = socialRes.value.data.data || [];
+          setSocialLinks(socialData);
+          try {
+            localStorage.setItem('portfolio_social_links', JSON.stringify(socialData));
+          } catch { }
+        }
+
+        if (faqRes.status === 'fulfilled') {
+          const fetchedFaqs = faqRes.value.data.data;
+          if (Array.isArray(fetchedFaqs)) {
+            const valid = (fetchedFaqs as FaqRawItem[]).filter((f) => f.isEnabled !== false);
+            setRawFaqs(valid);
+            try { localStorage.setItem('portfolio_faqs', JSON.stringify(valid)); } catch { }
+          }
+        }
+
+        if (revRes.status === 'fulfilled') {
+          const revData = revRes.value.data.data || [];
+          setReviews(revData);
+          try { localStorage.setItem('portfolio_reviews', JSON.stringify(revData)); } catch { }
+        }
+      });
+    } finally {
+      setIsLoadingData(false);
+    }
+  };
+
+  useEffect(() => {
     fetchAll();
 
     const handleSettingsUpdated = () => {
@@ -339,7 +246,7 @@ const Home = () => {
 
     const itemsToProcess = rawFaqs || [];
 
-    itemsToProcess.forEach((item: any) => {
+    itemsToProcess.forEach((item: FaqRawItem) => {
       const catKey = item.category || 'services';
       if (!cats[catKey]) {
         cats[catKey] = isAr
@@ -554,6 +461,28 @@ const Home = () => {
           {/* Vertical Timeline with Scroll Effects */}
           {experiences.length > 0 ? (
             <ExperienceTimeline experiences={experiences} />
+          ) : isLoadingData ? (
+            <div className="space-y-4 animate-pulse" aria-busy="true">
+              {[0, 1].map((idx) => (
+                <div key={idx} className="h-36 rounded-xl bg-card/40 dark:bg-white/[0.03] border border-border/50" />
+              ))}
+            </div>
+          ) : expLoadError ? (
+            <div className="py-14 px-4 text-center border border-dashed border-border/70 rounded-xl bg-card/30 backdrop-blur-md space-y-3">
+              <p className="text-muted-foreground">
+                {isAr ? 'تعذر تحميل مسار الخبرات حالياً. قد يكون الخادم قيد التشغيل.' : 'Unable to load experience timeline right now. The server may be waking up.'}
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsLoadingData(true);
+                  fetchAll();
+                }}
+                className="px-4 py-1.5 rounded-lg text-xs font-semibold border border-border bg-card hover:bg-muted transition-colors cursor-pointer"
+              >
+                {isAr ? 'إعادة المحاولة' : 'Retry'}
+              </button>
+            </div>
           ) : (
             <div className="py-14 text-center border border-dashed border-border/70 rounded-xl bg-card/30 backdrop-blur-md">
               <p className="text-muted-foreground">{isAr ? 'يتم تحديث مسار الخبرات حالياً.' : 'Experience timeline is being updated.'}</p>
@@ -587,7 +516,29 @@ const Home = () => {
           SECTION 5: SERVICES (Scroll-Driven Mandatory Horizontal Scroll)
       ═══════════════════════════════════════════════════════════════ */}
       <section id="services" className="scroll-mt-20 relative w-full">
-        {services.length === 0 ? (
+        {services.length === 0 && isLoadingData ? (
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid grid-cols-1 md:grid-cols-3 gap-6 animate-pulse" aria-busy="true">
+            {[0, 1, 2].map((idx) => (
+              <div key={idx} className="h-[21.25rem] rounded-2xl bg-card/40 dark:bg-white/[0.03] border border-border/50" />
+            ))}
+          </div>
+        ) : services.length === 0 && servLoadError ? (
+          <div className="max-w-7xl mx-auto py-14 px-4 sm:px-6 lg:px-8 text-center border border-dashed border-border/70 rounded-xl bg-card/30 backdrop-blur-md space-y-3">
+            <p className="text-muted-foreground">
+              {isAr ? 'تعذر تحميل الخدمات حالياً. قد يكون الخادم قيد التشغيل.' : 'Unable to load services right now. The server may be waking up.'}
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setIsLoadingData(true);
+                fetchAll();
+              }}
+              className="px-4 py-1.5 rounded-lg text-xs font-semibold border border-border bg-card hover:bg-muted transition-colors cursor-pointer"
+            >
+              {isAr ? 'إعادة المحاولة' : 'Retry'}
+            </button>
+          </div>
+        ) : services.length === 0 ? (
           <div className="max-w-7xl mx-auto py-14 px-4 sm:px-6 lg:px-8 text-center border border-dashed border-border/70 rounded-xl bg-card/30 backdrop-blur-md">
             <p className="text-muted-foreground">{isAr ? 'يتم تحديث الخدمات حالياً.' : 'Services are being updated.'}</p>
           </div>
@@ -718,240 +669,142 @@ const Home = () => {
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 7: CONTACT
       ═══════════════════════════════════════════════════════════════ */}
-      <section
-        id="contact"
-        className="scroll-mt-24 relative overflow-hidden bg-transparent text-foreground py-12 sm:py-14 md:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 transform-gpu"
-        style={{ contain: 'paint layout', transform: 'translateZ(0)' }}
-      >
-        <div className="relative z-10 max-w-[620px] mx-auto w-full">
-          {isMobile ? (
-            <div className="w-full">
-              <SpotlightCard
-                spotlightColor="rgba(0, 0, 0, 0.02)"
-                darkSpotlightColor="rgba(255, 255, 255, 0.007)"
-                size={420}
-                darkSize={580}
-                className={cn(
-                  "group relative overflow-hidden rounded-2xl sm:rounded-3xl p-6 sm:p-10",
-                  "bg-white dark:bg-zinc-900 md:bg-white/95 md:dark:bg-zinc-900/60 md:backdrop-blur-xl",
-                  "border border-zinc-200/90 dark:border-white/[0.08]",
-                  "shadow-[0_1px_2px_rgba(0,0,0,0.03),0_8px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset,0_16px_32px_-12px_rgba(0,0,0,0.4)]",
-                  "hover:border-zinc-300 dark:hover:border-white/[0.18] transition-colors duration-200"
+      {(() => {
+        const contactCard = (
+          <SpotlightCard
+            spotlightColor="rgba(0, 0, 0, 0.02)"
+            darkSpotlightColor="rgba(255, 255, 255, 0.007)"
+            size={420}
+            darkSize={580}
+            className={cn(
+              "group relative overflow-hidden rounded-2xl sm:rounded-3xl p-6 sm:p-10",
+              isMobile
+                ? "bg-white dark:bg-zinc-900 md:bg-white/95 md:dark:bg-zinc-900/60 md:backdrop-blur-xl"
+                : "bg-white/98 dark:bg-zinc-900/95 md:bg-white/95 md:dark:bg-zinc-900/60 md:backdrop-blur-xl",
+              "border border-zinc-200/90 dark:border-white/[0.08]",
+              "shadow-[0_1px_2px_rgba(0,0,0,0.03),0_8px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset,0_16px_32px_-12px_rgba(0,0,0,0.4)]",
+              "hover:border-zinc-300 dark:hover:border-white/[0.18] transition-colors duration-200"
+            )}
+          >
+            <div className="relative z-10 flex flex-col items-center text-center">
+              {/* 1. Headline */}
+              <h2 className="text-2xl sm:text-4xl md:text-[2.25rem] font-extrabold tracking-tight leading-[1.18] text-foreground">
+                {resolveField(
+                  'contact.headline',
+                  settings?.contactTitleAr,
+                  settings?.contactTitle,
+                  isAr ? 'لديك فكرة أو مشروع؟' : 'Have an idea?'
                 )}
-              >
-                <div className="relative z-10 flex flex-col items-center text-center">
-                  {/* 1. Headline */}
-                  <h2 className="text-2xl sm:text-4xl md:text-[36px] font-extrabold tracking-tight leading-[1.18] text-foreground">
-                    {resolveField(
-                      'contact.headline',
-                      settings?.contactTitleAr,
-                      settings?.contactTitle,
-                      isAr ? 'لديك فكرة أو مشروع؟' : 'Have an idea?'
-                    )}
-                  </h2>
+              </h2>
 
-                  {/* 2. Subtitle */}
-                  <p className="mt-3.5 text-xs sm:text-sm md:text-[14.5px] text-slate-600 dark:text-zinc-300 leading-relaxed max-w-md mx-auto">
-                    {resolveField(
-                      'contact.subtitle',
-                      settings?.contactSubtitleAr,
-                      settings?.contactSubtitle,
-                      isAr
-                        ? 'سواء كنت بحاجة إلى تطبيق ويب متكامل، أو واجهة برمجية مخصصة، أو لوحة تحكم حديثة، أو تطبيق هاتف — أنا جاهز لتحويل رؤيتك إلى واقع.'
-                        : "Whether you need a full-stack application, a custom API, a modern dashboard, or a mobile app — I'm ready to bring your vision to life."
-                    )}
-                  </p>
+              {/* 2. Subtitle */}
+              <p className="mt-3.5 text-xs sm:text-sm md:text-[0.90625rem] text-slate-600 dark:text-zinc-300 leading-relaxed max-w-md mx-auto">
+                {resolveField(
+                  'contact.subtitle',
+                  settings?.contactSubtitleAr,
+                  settings?.contactSubtitle,
+                  isAr
+                    ? 'سواء كنت بحاجة إلى تطبيق ويب متكامل، أو واجهة برمجية مخصصة، أو لوحة تحكم حديثة، أو تطبيق هاتف — أنا جاهز لتحويل رؤيتك إلى واقع.'
+                    : "Whether you need a full-stack application, a custom API, a modern dashboard, or a mobile app — I'm ready to bring your vision to life."
+                )}
+              </p>
 
-                  {/* 3. Action Buttons */}
-                  <div className="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3 w-full sm:w-auto">
-                    <a
-                      href={
-                        settings?.whatsappNumber
-                          ? `https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, '')}`
-                          : (socialLinks.find(s => s.platform.toLowerCase() === 'whatsapp')?.url || `mailto:${email}`)
-                      }
-                      target="_blank"
-                      rel="noreferrer"
-                      className={cn(
-                        buttonVariants({ variant: 'primary', size: 'default' }),
-                        "w-full max-w-[220px] sm:max-w-none sm:w-auto shadow-sm hover:shadow-[0_8px_20px_rgba(16,185,129,0.22)]"
-                      )}
-                    >
-                      <WhatsappIcon size={16} />
-                      <span>{t('contact.chatWhatsapp', isAr ? 'تواصل عبر واتساب' : 'Chat on WhatsApp')}</span>
-                    </a>
-
-                    <a
-                      href={`mailto:${email}`}
-                      className={cn(
-                        buttonVariants({ variant: 'secondary', size: 'default' }),
-                        "w-full max-w-[220px] sm:max-w-none sm:w-auto bg-slate-50 dark:bg-white/[0.05] hover:bg-white dark:hover:bg-white/[0.09]",
-                        "border-slate-200/90 dark:border-white/15 hover:border-slate-300 dark:hover:border-white/25",
-                        "!text-foreground hover:!text-foreground dark:hover:!text-foreground",
-                        "[&_svg]:!text-foreground [&_span]:!text-foreground",
-                        "hover:shadow-xs transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]"
-                      )}
-                    >
-                      <Mail size={16} strokeWidth={1.5} className="!text-foreground" />
-                      <span className="!text-foreground">{t('contact.sendEmail', isAr ? 'إرسال بريد إلكتروني' : 'Send an Email')}</span>
-                    </a>
-                  </div>
-
-                  {/* 4. Location Row */}
-                  {location && (
-                    <div className="mt-5 flex items-center justify-center gap-1.5 text-xs text-muted-foreground select-none font-medium">
-                      <MapPin size={13} className="text-emerald-500 shrink-0" strokeWidth={1.5} />
-                      <span>{location}</span>
-                    </div>
+              {/* 3. Action Buttons */}
+              <div className="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3 w-full sm:w-auto">
+                <a
+                  href={
+                    settings?.whatsappNumber
+                      ? `https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, '')}`
+                      : (socialLinks.find(s => s.platform.toLowerCase() === 'whatsapp')?.url || `mailto:${email}`)
+                  }
+                  target="_blank"
+                  rel="noreferrer"
+                  className={cn(
+                    buttonVariants({ variant: 'primary', size: 'default' }),
+                    "w-full max-w-[13.75rem] sm:max-w-none sm:w-auto shadow-sm hover:shadow-[0_8px_20px_rgba(16,185,129,0.22)]"
                   )}
+                >
+                  <WhatsappIcon size={16} />
+                  <span>{t('contact.chatWhatsapp', isAr ? 'تواصل عبر واتساب' : 'Chat on WhatsApp')}</span>
+                </a>
 
-                  {/* 5. Hairline Gradient Divider */}
-                  {socialLinks.length > 0 && (
-                    <div className="w-full my-6 flex items-center justify-center" aria-hidden="true">
-                      <div className="h-px w-full max-w-[240px] bg-gradient-to-r from-transparent via-slate-200 dark:via-white/10 to-transparent" />
-                    </div>
+                <a
+                  href={`mailto:${email}`}
+                  className={cn(
+                    buttonVariants({ variant: 'secondary', size: 'default' }),
+                    "w-full max-w-[13.75rem] sm:max-w-none sm:w-auto bg-slate-50 dark:bg-white/[0.05] hover:bg-white dark:hover:bg-white/[0.09]",
+                    "border-slate-200/90 dark:border-white/15 hover:border-slate-300 dark:hover:border-white/25",
+                    "!text-foreground hover:!text-foreground dark:hover:!text-foreground",
+                    "[&_svg]:!text-foreground [&_span]:!text-foreground",
+                    "hover:shadow-xs transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]"
                   )}
+                >
+                  <Mail size={16} strokeWidth={1.5} className="!text-foreground" />
+                  <span className="!text-foreground">{t('contact.sendEmail', isAr ? 'إرسال بريد إلكتروني' : 'Send an Email')}</span>
+                </a>
+              </div>
 
-                  {/* 6. Social Links */}
-                  {socialLinks.length > 0 && (
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5">
-                      <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground select-none">
-                        {t('contact.findMe', isAr ? 'أو تابعنا على:' : 'Find me on:')}
-                      </span>
-                      <div className="flex items-center gap-2 flex-wrap justify-center">
-                        {socialLinks.map(link => (
-                          <SocialButton
-                            key={link.platform}
-                            href={link.url}
-                            label={link.platform}
-                            icon={getSocialIcon(link.platform)}
-                            size="sm"
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  )}
+              {/* 4. Location Row */}
+              {location && (
+                <div className="mt-5 flex items-center justify-center gap-1.5 text-xs text-muted-foreground select-none font-medium">
+                  <MapPin size={13} className="text-emerald-500 shrink-0" strokeWidth={1.5} />
+                  <span>{location}</span>
                 </div>
-              </SpotlightCard>
+              )}
+
+              {/* 5. Hairline Gradient Divider */}
+              {socialLinks.length > 0 && (
+                <div className="w-full my-6 flex items-center justify-center" aria-hidden="true">
+                  <div className="h-px w-full max-w-[15rem] bg-gradient-to-r from-transparent via-slate-200 dark:via-white/10 to-transparent" />
+                </div>
+              )}
+
+              {/* 6. Social Links */}
+              {socialLinks.length > 0 && (
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5">
+                  <span className="font-mono text-[0.6875rem] uppercase tracking-wider text-muted-foreground select-none">
+                    {t('contact.findMe', isAr ? 'أو تابعنا على:' : 'Find me on:')}
+                  </span>
+                  <div className="flex items-center gap-2 flex-wrap justify-center">
+                    {socialLinks.map(link => (
+                      <SocialButton
+                        key={link.platform}
+                        href={link.url}
+                        label={link.platform}
+                        icon={getSocialIcon(link.platform)}
+                        size="sm"
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-40px' }}
-              transition={{ duration: 0.45, ease: [0.23, 1, 0.32, 1] }}
-            >
-              <SpotlightCard
-                spotlightColor="rgba(0, 0, 0, 0.02)"
-                darkSpotlightColor="rgba(255, 255, 255, 0.007)"
-                size={420}
-                darkSize={580}
-                className={cn(
-                  "group relative overflow-hidden rounded-2xl sm:rounded-3xl p-6 sm:p-10",
-                  "bg-white/98 dark:bg-zinc-900/95 md:bg-white/95 md:dark:bg-zinc-900/60 md:backdrop-blur-xl",
-                  "border border-zinc-200/90 dark:border-white/[0.08]",
-                  "shadow-[0_1px_2px_rgba(0,0,0,0.03),0_8px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset,0_16px_32px_-12px_rgba(0,0,0,0.4)]",
-                  "hover:border-zinc-300 dark:hover:border-white/[0.18] transition-colors duration-200"
-                )}
-              >
-                <div className="relative z-10 flex flex-col items-center text-center">
-                  {/* 1. Headline */}
-                  <h2 className="text-2xl sm:text-4xl md:text-[36px] font-extrabold tracking-tight leading-[1.18] text-foreground">
-                    {resolveField(
-                      'contact.headline',
-                      settings?.contactTitleAr,
-                      settings?.contactTitle,
-                      isAr ? 'لديك فكرة أو مشروع؟' : 'Have an idea?'
-                    )}
-                  </h2>
+          </SpotlightCard>
+        );
 
-                  {/* 2. Subtitle */}
-                  <p className="mt-3.5 text-xs sm:text-sm md:text-[14.5px] text-slate-600 dark:text-zinc-300 leading-relaxed max-w-md mx-auto">
-                    {resolveField(
-                      'contact.subtitle',
-                      settings?.contactSubtitleAr,
-                      settings?.contactSubtitle,
-                      isAr
-                        ? 'سواء كنت بحاجة إلى تطبيق ويب متكامل، أو واجهة برمجية مخصصة، أو لوحة تحكم حديثة، أو تطبيق هاتف — أنا جاهز لتحويل رؤيتك إلى واقع.'
-                        : "Whether you need a full-stack application, a custom API, a modern dashboard, or a mobile app — I'm ready to bring your vision to life."
-                    )}
-                  </p>
-
-                  {/* 3. Action Buttons */}
-                  <div className="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3 w-full sm:w-auto">
-                    <a
-                      href={
-                        settings?.whatsappNumber
-                          ? `https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, '')}`
-                          : (socialLinks.find(s => s.platform.toLowerCase() === 'whatsapp')?.url || `mailto:${email}`)
-                      }
-                      target="_blank"
-                      rel="noreferrer"
-                      className={cn(
-                        buttonVariants({ variant: 'primary', size: 'default' }),
-                        "w-full max-w-[220px] sm:max-w-none sm:w-auto shadow-sm hover:shadow-[0_8px_20px_rgba(16,185,129,0.22)]"
-                      )}
-                    >
-                      <WhatsappIcon size={16} />
-                      <span>{t('contact.chatWhatsapp', isAr ? 'تواصل عبر واتساب' : 'Chat on WhatsApp')}</span>
-                    </a>
-
-                    <a
-                      href={`mailto:${email}`}
-                      className={cn(
-                        buttonVariants({ variant: 'secondary', size: 'default' }),
-                        "w-full max-w-[220px] sm:max-w-none sm:w-auto bg-slate-50 dark:bg-white/[0.05] hover:bg-white dark:hover:bg-white/[0.09]",
-                        "border-slate-200/90 dark:border-white/15 hover:border-slate-300 dark:hover:border-white/25",
-                        "!text-foreground hover:!text-foreground dark:hover:!text-foreground",
-                        "[&_svg]:!text-foreground [&_span]:!text-foreground",
-                        "hover:shadow-xs transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]"
-                      )}
-                    >
-                      <Mail size={16} strokeWidth={1.5} className="!text-foreground" />
-                      <span className="!text-foreground">{t('contact.sendEmail', isAr ? 'إرسال بريد إلكتروني' : 'Send an Email')}</span>
-                    </a>
-                  </div>
-
-                  {/* 4. Location Row */}
-                  {location && (
-                    <div className="mt-5 flex items-center justify-center gap-1.5 text-xs text-muted-foreground select-none font-medium">
-                      <MapPin size={13} className="text-emerald-500 shrink-0" strokeWidth={1.5} />
-                      <span>{location}</span>
-                    </div>
-                  )}
-
-                  {/* 5. Hairline Gradient Divider */}
-                  {socialLinks.length > 0 && (
-                    <div className="w-full my-6 flex items-center justify-center" aria-hidden="true">
-                      <div className="h-px w-full max-w-[240px] bg-gradient-to-r from-transparent via-slate-200 dark:via-white/10 to-transparent" />
-                    </div>
-                  )}
-
-                  {/* 6. Social Links */}
-                  {socialLinks.length > 0 && (
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5">
-                      <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground select-none">
-                        {t('contact.findMe', isAr ? 'أو تابعنا على:' : 'Find me on:')}
-                      </span>
-                      <div className="flex items-center gap-2 flex-wrap justify-center">
-                        {socialLinks.map(link => (
-                          <SocialButton
-                            key={link.platform}
-                            href={link.url}
-                            label={link.platform}
-                            icon={getSocialIcon(link.platform)}
-                            size="sm"
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </SpotlightCard>
-            </motion.div>
-          )}
-        </div>
-      </section>
+        return (
+          <section
+            id="contact"
+            className="scroll-mt-24 relative overflow-hidden bg-transparent text-foreground py-12 sm:py-14 md:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 transform-gpu"
+            style={{ contain: 'paint layout', transform: 'translateZ(0)' }}
+          >
+            <div className="relative z-10 max-w-[38.75rem] mx-auto w-full">
+              {isMobile ? (
+                <div className="w-full">{contactCard}</div>
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-40px' }}
+                  transition={{ duration: 0.45, ease: [0.23, 1, 0.32, 1] }}
+                >
+                  {contactCard}
+                </motion.div>
+              )}
+            </div>
+          </section>
+        );
+      })()}
 
     </div>
   );

@@ -25,6 +25,7 @@ import {
 } from '../components/icons/BrandIcons';
 import { SocialButton } from '../components/ui/SocialButton';
 import { resolveImageUrl } from '../utils/mediaUrl';
+import type { PortfolioSettings, SocialLinkData } from '../types/portfolio';
 
 const PublicLayout = () => {
   const { t, currentLang, currentDirection } = useLanguage();
@@ -56,12 +57,12 @@ const PublicLayout = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState<string>('');
-  const [socialLinks, setSocialLinks] = useState<{ platform: string; url: string }[]>([]);
-  const [footerSocials, setFooterSocials] = useState<{ platform: string; url: string; isEnabled?: boolean }[]>([]);
-  const [settings, setSettings] = useState<any>(() => {
+  const [socialLinks, setSocialLinks] = useState<SocialLinkData[]>([]);
+  const [footerSocials, setFooterSocials] = useState<SocialLinkData[]>([]);
+  const [settings, setSettings] = useState<PortfolioSettings | null>(() => {
     try {
       const cached = localStorage.getItem('portfolio_settings');
-      const parsed = cached ? JSON.parse(cached) : null;
+      const parsed: PortfolioSettings | null = cached ? JSON.parse(cached) : null;
       if (parsed?.primaryThemeColor) {
         applyThemePalette(parsed.primaryThemeColor);
       }
@@ -101,7 +102,7 @@ const PublicLayout = () => {
           ? JSON.parse(settings.customSocialLinks)
           : settings.customSocialLinks;
         if (Array.isArray(parsed) && parsed.length > 0) {
-          const enabled = parsed.filter((s: any) => s.isEnabled !== false);
+          const enabled = parsed.filter((s: SocialLinkData) => s.isEnabled !== false);
           if (enabled.length > 0) return enabled;
         }
       } catch { }
@@ -386,7 +387,7 @@ const PublicLayout = () => {
           try {
             const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
             if (Array.isArray(parsed)) {
-              const enabled = parsed.filter((s: any) => s.isEnabled !== false);
+              const enabled = parsed.filter((s: SocialLinkData) => s.isEnabled !== false);
               if (enabled.length > 0) setFooterSocials(enabled);
             }
           } catch { }
@@ -529,7 +530,7 @@ const PublicLayout = () => {
 
   return (
     <SmoothScrollProvider>
-      <div className="min-h-screen flex flex-col relative bg-background text-foreground font-sans selection:bg-foreground selection:text-background">
+      <div className="min-h-screen flex flex-col relative overflow-x-clip bg-background text-foreground font-sans selection:bg-foreground selection:text-background">
 
         {/* ── First-Time Session Splash Screen (Architecture Boot) ── */}
         <AnimatePresence>
@@ -558,10 +559,10 @@ const PublicLayout = () => {
                 className="hidden md:block dark:hidden absolute inset-0 overflow-hidden opacity-30 pointer-events-none select-none"
                 style={{ contain: 'strict', transform: 'translateZ(0)' }}
               >
-                <div className={`absolute -top-[5%] -right-[5%] w-[460px] h-[460px] rounded-full bg-gradient-to-br ${auras.orb1} blur-2xl transform-gpu`} />
-                <div className={`absolute top-[35%] -left-[10%] w-[420px] h-[420px] rounded-full bg-gradient-to-tr ${auras.orb2} blur-2xl transform-gpu`} />
-                <div className={`absolute top-[70%] -right-[5%] w-[460px] h-[460px] rounded-full bg-gradient-to-tl ${auras.orb3} blur-2xl transform-gpu`} />
-                <div className={`absolute -bottom-[5%] left-1/2 -translate-x-1/2 w-[520px] h-[300px] rounded-full ${auras.orb4} blur-2xl transform-gpu`} />
+                <div className={`absolute -top-[5%] -right-[5%] w-[28.75rem] h-[28.75rem] rounded-full bg-gradient-to-br ${auras.orb1} blur-2xl transform-gpu`} />
+                <div className={`absolute top-[35%] -left-[10%] w-[26.25rem] h-[26.25rem] rounded-full bg-gradient-to-tr ${auras.orb2} blur-2xl transform-gpu`} />
+                <div className={`absolute top-[70%] -right-[5%] w-[28.75rem] h-[28.75rem] rounded-full bg-gradient-to-tl ${auras.orb3} blur-2xl transform-gpu`} />
+                <div className={`absolute -bottom-[5%] left-1/2 -translate-x-1/2 w-[32.5rem] h-[18.75rem] rounded-full ${auras.orb4} blur-2xl transform-gpu`} />
               </div>
               {/* Mobile lightweight ambient glow — Light mode only */}
               <div
@@ -587,20 +588,22 @@ const PublicLayout = () => {
               : ""
           )}
         >
-          <div className="w-full max-w-7xl 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between min-h-[62px] sm:min-h-[66px] py-2 sm:py-2.5">
+          <div className="site-header-inner w-full max-w-7xl 2xl:max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between min-h-[3.875rem] sm:min-h-[4.125rem] py-2 sm:py-2.5">
               {/* Start: Brand Logo */}
               <button
+                type="button"
                 onClick={() => scrollToSection('hero')}
                 className="group flex items-center transition-transform duration-200 hover:opacity-90 cursor-pointer bg-transparent border-none p-0 focus:outline-none shrink-0"
-                aria-label="Home"
+                aria-label={isAr ? 'الصفحة الرئيسية' : 'Home'}
               >
                 <img
                   src={logoSrc}
-                  alt="Logo"
+                  alt={`${brandName} Logo`}
                   width={110}
                   height={63}
-                  className="h-8 sm:h-9 md:h-9.5 w-auto max-w-[95px] sm:max-w-[115px] md:max-w-[125px] object-contain filter invert contrast-125 dark:filter-none select-none shrink-0 transition-transform duration-200 group-hover:scale-105"
+                  decoding="async"
+                  className="h-8 sm:h-9 md:h-9.5 w-auto max-w-[5.9375rem] sm:max-w-[7.1875rem] md:max-w-[7.8125rem] object-contain filter invert contrast-125 dark:filter-none select-none shrink-0 transition-transform duration-200 group-hover:scale-105"
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = '/logo.webp';
                   }}
@@ -617,9 +620,10 @@ const PublicLayout = () => {
                   return (
                     <button
                       key={link.id}
+                      type="button"
                       onClick={() => scrollToSection(link.id)}
                       className={cn(
-                        "px-3 sm:px-3.5 py-1.5 text-sm sm:text-[14.5px] font-semibold transition-colors duration-200 flex items-center justify-center cursor-pointer bg-transparent border-none select-none",
+                        "px-3 sm:px-3.5 py-1.5 text-sm sm:text-[0.90625rem] font-semibold transition-colors duration-200 flex items-center justify-center cursor-pointer bg-transparent border-none select-none",
                         isActive
                           ? "text-emerald-500 dark:text-emerald-400 font-bold"
                           : "text-muted-foreground hover:text-black dark:hover:text-white"
@@ -639,12 +643,12 @@ const PublicLayout = () => {
                   onClick={toggleTheme}
                   className="p-2 sm:p-2.5 rounded-lg bg-white/50 hover:bg-white/80 dark:bg-white/[0.04] dark:hover:bg-white/[0.07] border border-slate-900/[0.07] hover:border-slate-900/[0.15] dark:border-white/[0.08] dark:hover:border-white/[0.15] text-slate-700 dark:text-zinc-300 dark:hover:text-white transition-all cursor-pointer group shadow-xs backdrop-blur-md flex items-center justify-center shrink-0"
                   title={isDark ? (isAr ? 'تفعيل الوضع الفاتح' : 'Switch to Light Mode') : (isAr ? 'تفعيل الوضع الداكن' : 'Switch to Dark Mode')}
-                  aria-label="Toggle Theme"
+                  aria-label={isDark ? (isAr ? 'تفعيل الوضع الفاتح' : 'Switch to Light Mode') : (isAr ? 'تفعيل الوضع الداكن' : 'Switch to Dark Mode')}
                 >
                   {isDark ? (
-                    <Sun className="w-4 h-4 text-zinc-700 dark:text-zinc-200 group-hover:rotate-45 transition-transform duration-300" />
+                    <Sun className="w-4 h-4 text-zinc-700 dark:text-zinc-200 group-hover:rotate-45 transition-transform duration-300" aria-hidden="true" />
                   ) : (
-                    <Moon className="w-4 h-4 text-zinc-700 dark:text-zinc-200 group-hover:-rotate-12 transition-transform duration-300" />
+                    <Moon className="w-4 h-4 text-zinc-700 dark:text-zinc-200 group-hover:-rotate-12 transition-transform duration-300" aria-hidden="true" />
                   )}
                 </button>
 
@@ -660,12 +664,12 @@ const PublicLayout = () => {
                   type="button"
                   onClick={toggleTheme}
                   className="w-10 h-10 rounded-lg bg-white/50 hover:bg-white/80 dark:bg-white/[0.04] dark:hover:bg-white/[0.07] border border-slate-900/[0.07] dark:border-white/[0.08] dark:hover:border-white/[0.15] text-foreground dark:text-zinc-300 transition-all cursor-pointer shadow-xs active:scale-95 flex items-center justify-center shrink-0 backdrop-blur-md"
-                  aria-label="Toggle Theme"
+                  aria-label={isDark ? (isAr ? 'تفعيل الوضع الفاتح' : 'Switch to Light Mode') : (isAr ? 'تفعيل الوضع الداكن' : 'Switch to Dark Mode')}
                 >
                   {isDark ? (
-                    <Sun className="w-4 h-4 text-zinc-700 dark:text-zinc-200" />
+                    <Sun className="w-4 h-4 text-zinc-700 dark:text-zinc-200" aria-hidden="true" />
                   ) : (
-                    <Moon className="w-4 h-4 text-zinc-700 dark:text-zinc-200" />
+                    <Moon className="w-4 h-4 text-zinc-700 dark:text-zinc-200" aria-hidden="true" />
                   )}
                 </button>
 
@@ -676,10 +680,10 @@ const PublicLayout = () => {
                     setMobileMenuOpen(true);
                   }}
                   className="w-10 h-10 rounded-lg bg-white/50 hover:bg-white/80 dark:bg-white/[0.04] dark:hover:bg-white/[0.07] border border-slate-900/[0.07] dark:border-white/[0.08] dark:hover:border-white/[0.15] text-foreground dark:text-zinc-300 transition-all cursor-pointer shadow-xs active:scale-95 flex items-center justify-center shrink-0 backdrop-blur-md"
-                  aria-label="Open menu"
+                  aria-label={isAr ? 'فتح القائمة' : 'Open menu'}
                   aria-expanded={mobileMenuOpen}
                 >
-                  <Menu className="w-5 h-5 text-zinc-700 dark:text-zinc-200" />
+                  <Menu className="w-5 h-5 text-zinc-700 dark:text-zinc-200" aria-hidden="true" />
                 </button>
               </div>
             </div>
@@ -708,7 +712,7 @@ const PublicLayout = () => {
                 exit={{ x: currentDirection === 'rtl' ? '100%' : '-100%' }}
                 transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                 className={cn(
-                  "fixed inset-y-0 top-0 bottom-0 z-[9999] w-[82vw] max-w-[320px] sm:max-w-[360px] h-[100dvh] bg-white dark:bg-zinc-950 text-foreground shadow-2xl flex flex-col xl:hidden",
+                  "fixed inset-y-0 top-0 bottom-0 z-[9999] w-[82vw] max-w-[20rem] sm:max-w-[22.5rem] h-[100dvh] bg-white dark:bg-zinc-950 text-foreground shadow-2xl flex flex-col xl:hidden",
                   currentDirection === 'rtl'
                     ? "right-0 border-s border-border/70 dark:border-white/10"
                     : "left-0 border-e border-border/70 dark:border-white/10"
@@ -720,6 +724,7 @@ const PublicLayout = () => {
                 {/* Drawer Header */}
                 <div className="flex items-center justify-between p-4 border-b border-border/70 dark:border-white/10 shrink-0">
                   <button
+                    type="button"
                     onClick={() => {
                       setMobileMenuOpen(false);
                       document.body.style.overflow = '';
@@ -727,13 +732,15 @@ const PublicLayout = () => {
                       scrollToSection('hero');
                     }}
                     className="flex items-center cursor-pointer bg-transparent border-none p-0 focus:outline-none"
+                    aria-label={isAr ? 'العودة إلى الرئيسية' : 'Back to Home'}
                   >
                     <img
                       src={logoSrc}
-                      alt="Logo"
+                      alt={`${brandName} Logo`}
                       width={90}
                       height={52}
-                      className="h-8 w-auto max-w-[90px] object-contain filter invert contrast-125 dark:filter-none select-none shrink-0"
+                      decoding="async"
+                      className="h-8 w-auto max-w-[5.625rem] object-contain filter invert contrast-125 dark:filter-none select-none shrink-0"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = '/logo.webp';
                       }}
@@ -744,9 +751,9 @@ const PublicLayout = () => {
                     type="button"
                     onClick={() => setMobileMenuOpen(false)}
                     className="w-9 h-9 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 border border-transparent hover:border-border text-muted-foreground hover:text-emerald-500 transition-all cursor-pointer active:scale-95 flex items-center justify-center"
-                    aria-label="Close menu"
+                    aria-label={isAr ? 'إغلاق القائمة' : 'Close menu'}
                   >
-                    <X className="w-5 h-5" />
+                    <X className="w-5 h-5" aria-hidden="true" />
                   </button>
                 </div>
 
@@ -761,6 +768,7 @@ const PublicLayout = () => {
                       return (
                         <button
                           key={item.id}
+                          type="button"
                           onClick={() => {
                             setMobileMenuOpen(false);
                             document.body.style.overflow = '';
@@ -768,7 +776,7 @@ const PublicLayout = () => {
                             scrollToSection(item.id);
                           }}
                           className={cn(
-                            "w-full flex items-center justify-between px-4 py-3.5 rounded-xl text-[15px] sm:text-base font-semibold transition-all cursor-pointer bg-transparent border-none text-start active:scale-[0.99]",
+                            "w-full flex items-center justify-between px-4 py-3.5 rounded-xl text-[0.9375rem] sm:text-base font-semibold transition-all cursor-pointer bg-transparent border-none text-start active:scale-[0.99]",
                             isActive
                               ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 dark:bg-emerald-500/20 font-bold border border-emerald-500/30 dark:shadow-[0_0_12px_rgba(16,185,129,0.15)]"
                               : "text-muted-foreground hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.06]"
@@ -797,7 +805,7 @@ const PublicLayout = () => {
 
                   {/* Social Links Section (4 icons matching footer) */}
                   <div className="pt-4 mt-2 border-t border-border/70 dark:border-white/10">
-                    <div className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground px-1 mb-2.5 font-semibold">
+                    <div className="text-[0.6875rem] font-mono uppercase tracking-wider text-muted-foreground px-1 mb-2.5 font-semibold">
                       {isAr ? 'روابط التواصل' : 'CONNECT'}
                     </div>
                     <div className="flex items-center gap-2.5 px-1 flex-wrap">
@@ -815,8 +823,8 @@ const PublicLayout = () => {
                 </div>
 
                 {/* Drawer Footer */}
-                <div className="p-3.5 border-t border-border/70 dark:border-white/10 text-center text-[11px] text-muted-foreground shrink-0">
-                  <p className="text-[10px] text-muted-foreground/75">
+                <div className="p-3.5 border-t border-border/70 dark:border-white/10 text-center text-[0.6875rem] text-muted-foreground shrink-0">
+                  <p className="text-[0.625rem] text-muted-foreground/75">
                     © {new Date().getFullYear()} {brandName}. {isAr ? 'جميع الحقوق محفوظة' : 'All rights reserved'}
                   </p>
                 </div>

@@ -2,7 +2,6 @@ import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { LazyMotion, domAnimation } from 'framer-motion';
 import PublicLayout from './layouts/PublicLayout';
-import AdminLayout from './layouts/AdminLayout';
 
 // Public Pages (Home eager for instant first paint, others lazy)
 import Home from './pages/Home';
@@ -15,7 +14,8 @@ const Services = lazy(() => import('./pages/Services'));
 const Contact = lazy(() => import('./pages/Contact'));
 const Demo = lazy(() => import('./demo'));
 
-// Admin Pages (Lazy loaded so visitors don't download admin code)
+// Admin Layout & Pages (100% lazy loaded so public visitors never download admin bundles)
+const AdminLayout = lazy(() => import('./layouts/AdminLayout'));
 const Login = lazy(() => import('./pages/admin/Login'));
 const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
 const AdminProjects = lazy(() => import('./pages/admin/Projects'));

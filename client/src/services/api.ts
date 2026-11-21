@@ -1,21 +1,51 @@
-import axios from 'axios';
+import axios, { type AxiosRequestConfig, type AxiosResponse, type AxiosError } from 'axios';
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5000/api' : '/api');
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: API_BASE_URL,
   withCredentials: true, // Important for sending HTTP-only cookies
+  timeout: 35000, // Accommodates Render free-tier cold starts gracefully
 });
 
 // In-flight GET request deduplicator (prevents multiple components firing identical requests on page load)
-const inFlightRequests = new Map<string, Promise<any>>();
+const inFlightRequests = new Map<string, Promise<AxiosResponse>>();
 const originalGet = api.get.bind(api);
 
-api.get = function (url: string, config?: any): Promise<any> {
+const isTransientColdStartError = (err: unknown): boolean => {
+  const axiosErr = err as AxiosError;
+  if (!axiosErr) return false;
+  if (axiosErr.code === 'ECONNABORTED' || axiosErr.code === 'ERR_NETWORK' || !axiosErr.response) {
+    return true;
+  }
+  const status = axiosErr.response.status;
+  return status === 502 || status === 503 || status === 504;
+};
+
+api.get = (function <T = unknown, R = AxiosResponse<T>, D = unknown>(
+  url: string,
+  config?: AxiosRequestConfig<D>
+): Promise<R> {
   const cacheKey = `${url}:${JSON.stringify(config?.params || {})}`;
-  if (inFlightRequests.has(cacheKey)) {
-    return inFlightRequests.get(cacheKey)!;
+  const existing = inFlightRequests.get(cacheKey);
+  if (existing) {
+    return existing as Promise<R>;
   }
 
-  const promise = originalGet(url, config)
+  const executeWithColdStartRetry = async (): Promise<AxiosResponse> => {
+    try {
+      return await originalGet(url, config);
+    } catch (firstErr) {
+      if (isTransientColdStartError(firstErr)) {
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        return await originalGet(url, config);
+      }
+      throw firstErr;
+    }
+  };
+
+  const promise = executeWithColdStartRetry()
     .then((res) => {
       setTimeout(() => inFlightRequests.delete(cacheKey), 1500);
       return res;
@@ -26,8 +56,8 @@ api.get = function (url: string, config?: any): Promise<any> {
     });
 
   inFlightRequests.set(cacheKey, promise);
-  return promise;
-} as any;
+  return promise as Promise<R>;
+}) as typeof api.get;
 
 // Attach Authorization Bearer token fallback if present in localStorage
 api.interceptors.request.use((config) => {

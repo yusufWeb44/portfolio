@@ -28,7 +28,7 @@ export const SocialButton: React.FC<SocialButtonProps> = ({
       ? 'w-9 h-9 [&>span>svg]:w-4 [&>span>svg]:h-4'
       : size === 'lg'
       ? 'w-11 h-11 sm:w-12 sm:h-12 [&>span>svg]:w-5 [&>span>svg]:h-5'
-      : 'w-10 h-10 sm:w-[42px] sm:h-[42px] [&>span>svg]:w-[18px] [&>span>svg]:h-[18px]';
+      : 'w-10 h-10 sm:w-[2.625rem] sm:h-[2.625rem] [&>span>svg]:w-[1.125rem] [&>span>svg]:h-[1.125rem]';
 
   return (
     <a

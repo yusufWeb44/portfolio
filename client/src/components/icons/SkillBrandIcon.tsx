@@ -50,8 +50,12 @@ export const SkillBrandIcon: React.FC<{
   size?: number;
   className?: string;
 }> = ({ name, size = 22, className = '' }) => {
+  const sizeRem = `${size / 16}rem`;
   return (
-    <div className={`shrink-0 flex items-center justify-center ${className}`}>
+    <div
+      style={{ width: sizeRem, height: sizeRem }}
+      className={`shrink-0 flex items-center justify-center [&>svg]:w-full [&>svg]:h-full ${className}`}
+    >
       {getTechBrandIcon(name, size)}
     </div>
   );

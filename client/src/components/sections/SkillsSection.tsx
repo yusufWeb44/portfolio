@@ -10,12 +10,14 @@ import {
   useMotionValue,
   useAnimationFrame,
   wrap,
+  type MotionValue,
 } from 'framer-motion';
 import api from '../../services/api';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { SkillPill, SkillBrandIcon } from '../icons/SkillBrandIcon';
 import { SplitText, FadeContent } from '../react-bits';
+import type { PortfolioSettings, SkillData } from '../../types/portfolio';
 
 /* ─── Technology Data Types ───────────────────────────────────────── */
 export interface TechItem {
@@ -118,7 +120,7 @@ const FloatingTooltip = ({ skill, isAr }: { skill: HoveredSkillData; isAr: boole
         </div>
 
         {/* Skill Description */}
-        <p className="text-[11px] text-foreground/85 leading-relaxed font-normal whitespace-normal">
+        <p className="text-[0.6875rem] text-foreground/85 leading-relaxed font-normal whitespace-normal">
           {skill.description}
         </p>
 
@@ -157,7 +159,7 @@ interface MarqueeRowProps {
   skills: TechItem[];
   direction: 1 | -1;
   baseSpeed: number;
-  velocityFactor: any;
+  velocityFactor: MotionValue<number> | null;
   isPaused: boolean;
   onHover: (data: HoveredSkillData) => void;
   onToggle: (skill: TechItem, e: React.MouseEvent) => void;
@@ -406,7 +408,7 @@ const SkillsSection = () => {
   const { t, currentLang } = useLanguage();
   const isAr = currentLang === 'ar';
   const isMobile = useIsMobile();
-  const [rawSkillsData, setRawSkillsData] = useState<any[]>(() => {
+  const [rawSkillsData, setRawSkillsData] = useState<SkillData[]>(() => {
     try {
       const cached = localStorage.getItem('portfolio_skills');
       return cached ? JSON.parse(cached) : [];
@@ -414,7 +416,7 @@ const SkillsSection = () => {
       return [];
     }
   });
-  const [settings, setSettings] = useState<any>(() => {
+  const [settings, setSettings] = useState<PortfolioSettings | null>(() => {
     try {
       const cached = localStorage.getItem('portfolio_settings');
       return cached ? JSON.parse(cached) : null;
@@ -425,28 +427,26 @@ const SkillsSection = () => {
 
   useEffect(() => {
     const fetchData = () => {
-      Promise.all([
+      Promise.allSettled([
         api.get('/skills'),
         api.get('/settings')
-      ])
-        .then(([skillsRes, settingsRes]) => {
-          if (settingsRes.data?.data) {
-            setSettings(settingsRes.data.data);
-          }
+      ]).then(([skillsRes, settingsRes]) => {
+        if (settingsRes.status === 'fulfilled' && settingsRes.value.data?.data) {
+          setSettings(settingsRes.value.data.data);
+        }
 
-          const rawSkills = skillsRes.data?.data;
+        if (skillsRes.status === 'fulfilled') {
+          const rawSkills = skillsRes.value.data?.data;
           if (Array.isArray(rawSkills) && rawSkills.length > 0) {
-            const activeSkills = rawSkills.filter((s: any) => s.isEnabled !== false);
-            activeSkills.sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
+            const activeSkills = (rawSkills as SkillData[]).filter((s) => s.isEnabled !== false);
+            activeSkills.sort((a, b) => (a.order || 0) - (b.order || 0));
             setRawSkillsData(activeSkills);
             try {
               localStorage.setItem('portfolio_skills', JSON.stringify(activeSkills));
             } catch {}
           }
-        })
-        .catch((err) => {
-          console.error('Failed to load skills from database', err);
-        });
+        }
+      });
     };
 
     fetchData();
@@ -459,9 +459,9 @@ const SkillsSection = () => {
   }, []);
 
   const skillsItems: TechItem[] = useMemo(() => {
-    const dataSource = rawSkillsData.length > 0 ? rawSkillsData : DEFAULT_SKILLS;
+    const dataSource: SkillData[] = rawSkillsData.length > 0 ? rawSkillsData : DEFAULT_SKILLS;
 
-    return dataSource.map((s: any) => {
+    return dataSource.map((s) => {
       // Keep the skill name in English as requested
       const label = s.name;
       const description = isAr 
@@ -592,7 +592,7 @@ const SkillsSection = () => {
             {skillsItems.length > 0 ? (
               <InfiniteSkillsMarquee items={skillsItems} isAr={isAr} />
             ) : (
-              <div className="h-[240px] flex items-center justify-center border border-dashed border-border/70 rounded-3xl bg-card/20 text-muted-foreground text-sm">
+              <div className="h-[15rem] flex items-center justify-center border border-dashed border-border/70 rounded-3xl bg-card/20 text-muted-foreground text-sm">
                 {isAr ? 'لا توجد مهارات معروضة حالياً.' : 'No skills available yet.'}
               </div>
             )}

@@ -4,6 +4,7 @@ import { UploadApiResponse, UploadApiErrorResponse } from 'cloudinary';
 import upload from '../middleware/uploadMiddleware';
 import { protect } from '../middleware/authMiddleware';
 import cloudinary from '../utils/cloudinary';
+import { sendSafeError } from '../utils/sanitize';
 
 const router = express.Router();
 
@@ -43,12 +44,8 @@ router.post('/', protect, upload.any(), async (req: Request, res: Response) => {
       mimetype: file.mimetype,
       public_id: result.public_id,
     });
-  } catch (error: any) {
-    console.error('Cloudinary upload error:', error);
-    return res.status(500).json({
-      success: false,
-      message: error.message || 'Image upload failed',
-    });
+  } catch (error: unknown) {
+    return sendSafeError(res, 500, 'Image upload failed', error);
   }
 });
 

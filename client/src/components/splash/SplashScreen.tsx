@@ -330,7 +330,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, isAr = f
             <div
               className="relative"
               style={{
-                width: 'min(62vw, 360px)',
+                width: 'min(62vw, 22.5rem)',
                 aspectRatio: LOGO_ASPECT,
                 transformStyle: 'preserve-3d',
               }}
@@ -395,8 +395,8 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, isAr = f
             }}
             className={
               isAr
-                ? 'mt-4 sm:mt-4.5 text-sm sm:text-[15px] font-medium tracking-normal text-zinc-200/90 text-center leading-relaxed'
-                : 'mt-4 sm:mt-4.5 font-mono text-[10.5px] sm:text-[11.5px] uppercase tracking-[0.22em] text-zinc-300 ps-[0.22em] text-center'
+                ? 'mt-4 sm:mt-4.5 text-sm sm:text-[0.9375rem] font-medium tracking-normal text-zinc-200/90 text-center leading-relaxed'
+                : 'mt-4 sm:mt-4.5 font-mono text-[0.65625rem] sm:text-[0.71875rem] uppercase tracking-[0.22em] text-zinc-300 ps-[0.22em] text-center'
             }
           >
             {roleLabel}

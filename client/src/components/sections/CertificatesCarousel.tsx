@@ -385,7 +385,7 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
                   key={`${cert.id || index}-mob`}
                   className="w-full shrink-0 px-1 py-1"
                 >
-                  <div className="w-full max-w-[94vw] sm:max-w-[480px] mx-auto">
+                  <div className="w-full max-w-[94vw] sm:max-w-[30rem] mx-auto">
                     {/* Pure Large Certificate Image (Sharp Edges, No Border Radius, Focus 100% on Certificate) */}
                     <div
                       onClick={() => setSelectedCert(cert)}
@@ -395,6 +395,8 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
                         <img
                           src={imgSrc}
                           alt={certTitle}
+                          width={560}
+                          height={396}
                           className="w-full h-full object-contain bg-zinc-950 select-none pointer-events-none"
                           loading="lazy"
                           decoding="async"
@@ -402,7 +404,7 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
                       ) : (
                         <div className="w-full h-full flex flex-col items-center justify-center p-6 bg-gradient-to-br from-zinc-900 to-zinc-950 text-white text-center">
                           <Award className="w-16 h-16 text-amber-400 mb-3" />
-                          <h4 className="font-bold text-lg">{certTitle}</h4>
+                          <h3 className="font-bold text-lg">{certTitle}</h3>
                           <span className="font-mono text-xs text-emerald-400 uppercase tracking-widest mt-1">{certIssuer}</span>
                         </div>
                       )}
@@ -422,7 +424,7 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
 
         {/* Mobile Navigation Controls: Prev/Next & Dots (Zero Numbers) */}
         {certificates.length > 1 && (
-          <div className="flex items-center justify-between max-w-[94vw] sm:max-w-[480px] mx-auto mt-4 px-2">
+          <div className="flex items-center justify-between max-w-[94vw] sm:max-w-[30rem] mx-auto mt-4 px-2">
             {/* Prev Button */}
             <button
               type="button"
@@ -440,7 +442,7 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
                   key={idx}
                   type="button"
                   onClick={() => setActiveMobileIndex(idx)}
-                  aria-label={isRtl ? 'شهادة' : 'Certificate'}
+                  aria-label={isRtl ? `شهادة ${idx + 1}` : `Certificate ${idx + 1}`}
                   className="p-1 focus:outline-none cursor-pointer"
                 >
                   <span
@@ -472,9 +474,9 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
       {!isMobile && (
       <div
         style={{
-          height: `${layout.containerHeight}px`,
-          marginTop: `-${layout.bleed}px`,
-          marginBottom: `-${layout.bleed}px`,
+          height: `${layout.containerHeight / 16}rem`,
+          marginTop: `-${layout.bleed / 16}rem`,
+          marginBottom: `-${layout.bleed / 16}rem`,
         }}
         className="hidden md:flex relative w-full overflow-visible items-center justify-center cursor-grab active:cursor-grabbing touch-pan-y"
         onPointerDown={handlePointerDown}
@@ -527,16 +529,16 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
                 style={{
                   position: 'absolute',
                   left: '50%',
-                  top: `${layout.topBaseline}px`,
-                  marginLeft: `${-layout.cardWidth / 2}px`,
-                  transform: `translate3d(${xOffset}px, 0px, 0px) perspective(${layout.perspective}px) translateZ(${zOffset}px) rotateY(${-angle}deg) scale(${scale})`,
+                  top: `${layout.topBaseline / 16}rem`,
+                  marginLeft: `${-layout.cardWidth / 32}rem`,
+                  transform: `translate3d(${xOffset / 16}rem, 0, 0) perspective(${layout.perspective / 16}rem) translateZ(${zOffset / 16}rem) rotateY(${-angle}deg) scale(${scale})`,
                   transformOrigin: 'center center',
                   backfaceVisibility: 'hidden',
                   WebkitBackfaceVisibility: 'hidden',
                   willChange: 'transform, opacity',
                   opacity,
                   zIndex,
-                  width: `${layout.cardWidth}px`,
+                  width: `${layout.cardWidth / 16}rem`,
                   transition: isDraggingRef.current ? 'none' : 'opacity 0.15s ease',
                 }}
                 className="aspect-[1.41/1] pointer-events-auto"
@@ -580,7 +582,7 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
                     <div className="w-full h-full p-6 flex flex-col justify-between bg-gradient-to-br from-slate-900 to-zinc-950 text-white">
                       <div className="flex items-center justify-between">
                         <Award className="w-8 h-8 text-amber-400" />
-                        <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-white/10 border border-white/10">
+                        <span className="text-[0.6875rem] font-mono px-2.5 py-0.5 rounded-full bg-white/10 border border-white/10">
                           {cert.issueDate || 'VERIFIED'}
                         </span>
                       </div>
@@ -588,11 +590,11 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
                         <p className="text-xs font-mono text-emerald-400 uppercase tracking-wider mb-1 font-semibold">
                           {isRtl ? (cert.issuerAr || cert.issuer) : cert.issuer}
                         </p>
-                        <h4 className="font-bold text-base sm:text-lg leading-tight line-clamp-2">
+                        <h3 className="font-bold text-base sm:text-lg leading-tight line-clamp-2">
                           {isRtl ? (cert.titleAr || cert.title) : cert.title}
-                        </h4>
+                        </h3>
                       </div>
-                      <span className="text-[11px] text-muted-foreground font-mono">{cert.credentialId || 'ID: Official'}</span>
+                      <span className="text-[0.6875rem] text-muted-foreground font-mono">{cert.credentialId || 'ID: Official'}</span>
                     </div>
                   )}
                 </div>
@@ -643,10 +645,13 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
                   <img
                     src={getMediaUrl(selectedCert.imageUrl || selectedCert.credentialUrl)}
                     alt={selectedCert.title}
+                    width={1200}
+                    height={850}
+                    decoding="async"
                     className="max-w-[94vw] max-h-[88vh] object-contain rounded-none shadow-[0_25px_80px_rgba(0,0,0,0.95)] border border-white/20"
                   />
                 ) : (
-                  <div className="w-[600px] max-w-[90vw] aspect-[1.41/1] rounded-none bg-zinc-900 border border-white/20 flex flex-col items-center justify-center p-8 text-center text-white shadow-2xl">
+                  <div className="w-[37.5rem] max-w-[90vw] aspect-[1.41/1] rounded-none bg-zinc-900 border border-white/20 flex flex-col items-center justify-center p-8 text-center text-white shadow-2xl">
                     <Award className="w-20 h-20 text-amber-400 mb-4" />
                     <h3 className="text-2xl font-bold mb-2">
                       {isRtl ? (selectedCert.titleAr || selectedCert.title) : selectedCert.title}

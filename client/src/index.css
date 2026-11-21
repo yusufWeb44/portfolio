@@ -236,6 +236,7 @@
     scrollbar-width: none;
     -ms-overflow-style: none;
     -webkit-overflow-scrolling: touch;
+    overflow-x: clip;
   }
 
   html::-webkit-scrollbar,
@@ -532,5 +533,27 @@
     .group:hover .group-hover\:scale-110 {
       transform: none !important;
     }
+  }
+}
+
+/* ─── 1:1 Proportional Root Scaling Fallback (100% at 1536px down to 70% zoom at 2194px, capped thereafter) ─── */
+@media (min-width: 1536px) {
+  html {
+    font-size: clamp(16px, 1.04167vw, 22.86px);
+  }
+}
+
+/* Prevent 2xl (1536px) breakpoint jumps when sub-1536px desktop laptops (1280/1366/1440px) zoom out */
+@media (min-width: 1536px) {
+  html.zoom-lock-sub-2xl .site-header-inner {
+    max-width: 80rem;
+  }
+
+  html.zoom-lock-sub-2xl .hero-role-dash {
+    font-size: 1.5rem;
+  }
+
+  html.zoom-lock-sub-2xl .hero-role-text {
+    font-size: 1.4rem;
   }
 }

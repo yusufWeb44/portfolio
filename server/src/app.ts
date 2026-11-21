@@ -3,8 +3,11 @@ import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import path from 'path';
-
-// We'll import routes later
+import fs from 'fs';
+import authRoutes from './routes/authRoutes';
+import projectRoutes from './routes/projectRoutes';
+import apiRoutes from './routes/apiRoutes';
+import uploadRoutes from './routes/uploadRoutes';
 
 const app = express();
 
@@ -39,12 +42,14 @@ app.use(
 
 // 2. Cross-Origin Resource Sharing (CORS) Hardening
 const allowedOrigins = [
+  'https://aubi.dev',
+  'https://www.aubi.dev',
+  'https://portfolio-portfolio-main-ruby.vercel.app',
   'http://localhost:5173',
   'http://localhost:4173',
   'http://127.0.0.1:5173',
   'http://127.0.0.1:4173',
-  'https://portfolio-portfolio-main-ruby.vercel.app',
-  process.env.CLIENT_URL?.replace(/\/$/, ''), // إزالة أي / زائدة تلقائياً
+  process.env.CLIENT_URL?.replace(/\/$/, ''),
 ].filter(Boolean) as string[];
 
 app.use(
@@ -58,7 +63,9 @@ app.use(
       if (process.env.NODE_ENV !== 'production' && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
         return callback(null, true);
       }
-      return callback(new Error('Blocked by CORS policy'));
+      const corsError = new Error('Blocked by CORS policy') as Error & { status?: number };
+      corsError.status = 403;
+      return callback(corsError);
     },
     credentials: true,
   })
@@ -68,8 +75,6 @@ app.use(
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use(cookieParser());
-
-import fs from 'fs';
 
 // Static file serving for uploads with caching and automatic WebP negotiation
 app.use('/uploads', (req, res, next) => {
@@ -90,28 +95,40 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
   immutable: true,
 }));
 
-import authRoutes from './routes/authRoutes';
-import projectRoutes from './routes/projectRoutes';
-import apiRoutes from './routes/apiRoutes';
-import uploadRoutes from './routes/uploadRoutes';
-
-// Routes will go here
+// API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api', apiRoutes);
 app.use('/api/upload', uploadRoutes);
 
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+// Lightweight Health Check for Uptime Monitoring
+app.get('/api/health', (_req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Global error handler
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error(err.stack);
-  res.status(err.status || 500).json({
+// Global error handler (never leaks stack traces or internal errors in production)
+interface AppError extends Error {
+  status?: number;
+  statusCode?: number;
+  errors?: unknown[];
+}
+
+app.use((err: AppError, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  const status = err.status || err.statusCode || 500;
+  const isProd = process.env.NODE_ENV === 'production';
+
+  console.error(`[Unhandled Error ${status}]`, isProd ? err.message : err.stack || err);
+
+  const safeMessage =
+    isProd && status >= 500
+      ? 'Internal Server Error'
+      : err.message || 'Internal Server Error';
+
+  res.status(status).json({
     success: false,
-    message: err.message || 'Internal Server Error',
-    errors: err.errors || []
+    message: safeMessage,
+    ...(Array.isArray(err.errors) && err.errors.length > 0 ? { errors: err.errors } : {}),
   });
 });
 

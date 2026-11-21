@@ -3,6 +3,7 @@ import { motion, useScroll, useSpring, useTransform, useMotionValueEvent } from 
 import api from '../../services/api';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { SplitText, BlurText } from '../react-bits';
+import type { PortfolioSettings, WorkflowStepApiData } from '../../types/portfolio';
 
 /* ═══════════════════════════════════════════════════════════════════
    Pushpin SVG — 3D pinned head with punctured paper effect
@@ -17,7 +18,7 @@ const Pushpin = ({ color, isMobile }: { color: string; isMobile?: boolean }) => 
       viewBox="0 0 38 34"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className="select-none overflow-visible"
+      className={isMobile ? "w-[1.875rem] h-[1.625rem] select-none overflow-visible" : "w-[2.375rem] h-[2.125rem] select-none overflow-visible"}
       aria-hidden="true"
     >
       <defs>
@@ -337,7 +338,7 @@ const StickyNoteCard = memo(({
                 <div
                   key={i}
                   className="absolute w-full"
-                  style={{ top: `${72 + i * 22}px`, height: '0.8px', background: '#6b7280' }}
+                  style={{ top: `${(72 + i * 22) / 16}rem`, height: '0.8px', background: '#6b7280' }}
                 />
               ))}
             </div>
@@ -379,19 +380,19 @@ const StickyNoteCard = memo(({
               <div
                 key={i}
                 className="absolute w-full"
-                style={{ top: `${(isMobile ? 54 : 72) + i * (isMobile ? 18 : 22)}px`, height: '0.8px', background: '#6b7280' }}
+                style={{ top: `${((isMobile ? 54 : 72) + i * (isMobile ? 18 : 22)) / 16}rem`, height: '0.8px', background: '#6b7280' }}
               />
             ))}
           </div>
           {/* Red margin (mirrored on right side for RTL Arabic writing) */}
           <div
             className="absolute top-0 bottom-0 pointer-events-none"
-            style={{ [isRtl ? 'right' : 'left']: isMobile ? '28px' : '36px', width: '1.2px', background: 'rgba(220,50,50,0.08)' }}
+            style={{ [isRtl ? 'right' : 'left']: isMobile ? '1.75rem' : '2.25rem', width: '1.2px', background: 'rgba(220,50,50,0.08)' }}
           />
           {/* Top adhesive */}
           <div
             className="absolute top-0 left-0 right-0 pointer-events-none"
-            style={{ height: '6px', background: `linear-gradient(180deg, ${step.paperEdge}90, transparent)` }}
+            style={{ height: '0.375rem', background: `linear-gradient(180deg, ${step.paperEdge}90, transparent)` }}
           />
 
           {/* Pushpin — tactile pinning strike on reveal */}
@@ -449,10 +450,10 @@ const StickyNoteCard = memo(({
           {/* Corner fold (mirrored to bottom-left for RTL) */}
           <div
             className={`absolute bottom-0 ${isRtl ? 'left-0' : 'right-0'} pointer-events-none overflow-hidden`}
-            style={{ width: isMobile ? 18 : 24, height: isMobile ? 18 : 24 }}
+            style={{ width: isMobile ? '1.125rem' : '1.5rem', height: isMobile ? '1.125rem' : '1.5rem' }}
           >
             <div
-              className={`absolute bottom-0 ${isRtl ? 'left-0' : 'right-0'} ${isMobile ? 'w-[25px] h-[25px]' : 'w-[34px] h-[34px]'}`}
+              className={`absolute bottom-0 ${isRtl ? 'left-0' : 'right-0'} ${isMobile ? 'w-[1.5625rem] h-[1.5625rem]' : 'w-[2.125rem] h-[2.125rem]'}`}
               style={{
                 background: isRtl
                   ? `linear-gradient(225deg, ${step.paperBg} 48%, ${step.paperEdge} 50%, rgba(0,0,0,0.06) 52%, rgba(0,0,0,0.02) 100%)`
@@ -594,8 +595,10 @@ const ConnectorSegment = memo(({
   const progress = useTransform(smoothProgress, (val) => (isActive ? val : 0));
   const clipInset = useTransform(progress, (v) => `inset(0 0 ${(1 - Math.max(0, Math.min(1, v))) * 100}% 0)`);
 
+  const svgHeightRem = isMobile ? '2.375rem' : '8.125rem';
+
   return (
-    <div ref={ref} className="w-full relative" style={{ height: svgHeight }}>
+    <div ref={ref} className="w-full relative" style={{ height: svgHeightRem }}>
       {/* Dashed line entirely revealed on scroll via GPU composited clipPath — zero layout reflow */}
       <motion.div
         className="absolute inset-0 overflow-hidden pointer-events-none"
@@ -603,7 +606,7 @@ const ConnectorSegment = memo(({
       >
         <svg
           className="w-full pointer-events-none"
-          style={{ height: svgHeight, minHeight: svgHeight }}
+          style={{ height: svgHeightRem, minHeight: svgHeightRem }}
           viewBox={`0 0 100 ${svgHeight}`}
           preserveAspectRatio="none"
           fill="none"
@@ -640,7 +643,8 @@ const HowItWorks = () => {
       return [];
     }
   });
-  const [settings, setSettings] = useState<any>(null);
+  const [settings, setSettings] = useState<PortfolioSettings | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(() => stepsData.length === 0);
   const [isMobile, setIsMobile] = useState(() =>
     typeof window !== 'undefined' ? window.innerWidth < 768 : false
   );
@@ -684,16 +688,16 @@ const HowItWorks = () => {
         if (wfRes.status === 'fulfilled') {
           const data = wfRes.value.data?.data;
           if (Array.isArray(data) && data.length > 0) {
-            const enabledSteps = data.filter((s: any) => s.isEnabled !== false);
+            const enabledSteps = data.filter((s: WorkflowStepApiData) => s.isEnabled !== false);
             if (enabledSteps.length > 0) {
-              const mapped: Step[] = enabledSteps.map((s: any, idx: number) => {
+              const mapped: Step[] = enabledSteps.map((s: WorkflowStepApiData, idx: number) => {
                 const fallbackSide: 'left' | 'right' = idx % 2 === 0 ? 'left' : 'right';
                 return {
                   num: s.num || String(idx + 1).padStart(2, '0'),
                   title: s.title,
-                  titleAr: s.titleAr,
+                  titleAr: s.titleAr ?? undefined,
                   description: s.description,
-                  descriptionAr: s.descriptionAr,
+                  descriptionAr: s.descriptionAr ?? undefined,
                   pinColor: s.pinColor || (idx % 2 === 0 ? '#E8732A' : '#3B7DD8'),
                   tilt: typeof s.tilt === 'number' ? s.tilt : (idx % 2 === 0 ? -2.5 : 2.5),
                   side: (s.side === 'left' || s.side === 'right') ? s.side : fallbackSide,
@@ -708,7 +712,7 @@ const HowItWorks = () => {
             }
           }
         }
-      });
+      }).finally(() => setIsLoading(false));
     };
 
     fetchWorkflowAndSettings();
@@ -746,14 +750,24 @@ const HowItWorks = () => {
         id="workflow"
         className="relative scroll-mt-24 py-10 sm:py-14 md:py-18 px-4 sm:px-6 lg:px-8 bg-transparent"
         aria-label="Engineering process and workflow"
-      />
+      >
+        {isLoading && (
+          <div className="max-w-5xl mx-auto space-y-6 animate-pulse" aria-busy="true">
+            <div className="h-10 w-64 mx-auto rounded-lg bg-muted/50 dark:bg-white/[0.05]" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+              <div className="h-44 rounded-xl bg-card/40 dark:bg-white/[0.03] border border-border/50" />
+              <div className="h-44 rounded-xl bg-card/40 dark:bg-white/[0.03] border border-border/50" />
+            </div>
+          </div>
+        )}
+      </section>
     );
   }
 
   return (
     <section
       id="workflow"
-      className="relative isolate scroll-mt-24 py-12 sm:py-14 md:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-transparent overflow-x-hidden overflow-y-visible"
+      className="relative isolate scroll-mt-24 py-12 sm:py-14 md:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-transparent overflow-x-clip overflow-y-visible"
       aria-label="Engineering process and workflow"
     >
       {/* ── Seamless Dot Grid Background System (Crisp & Visible on All Displays) ── */}
@@ -763,7 +777,7 @@ const HowItWorks = () => {
       >
         {/* Pure, plain Dot Grid Pattern Layer */}
         <div
-          className="absolute inset-0 [background-size:24px_24px] bg-[radial-gradient(circle_at_center,rgba(15,23,42,0.22)_1.25px,transparent_1.25px)] dark:bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.2)_1.25px,transparent_1.25px)]"
+          className="absolute inset-0 [background-size:1.5rem_1.5rem] bg-[radial-gradient(circle_at_center,rgba(15,23,42,0.22)_1.25px,transparent_1.25px)] dark:bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.2)_1.25px,transparent_1.25px)]"
         />
         {/* Universal smooth top & bottom blend into page background */}
         <div className="absolute top-0 inset-x-0 h-20 sm:h-28 md:h-36 bg-gradient-to-b from-background to-transparent pointer-events-none" />
@@ -816,7 +830,7 @@ const HowItWorks = () => {
             <div key={step.num + i} className="mb-5 sm:mb-6 md:mb-0 last:mb-0">
               {/* Card row: centered column on mobile with clean simple gap, alternating zig-zag on desktop */}
               <div className={`flex justify-center ${step.side === 'right' ? 'md:justify-end' : 'md:justify-start'}`}>
-                <div className="w-[82%] max-w-[285px] sm:max-w-[320px] md:w-full md:max-w-[390px] lg:max-w-[420px]">
+                <div className="w-[82%] max-w-[17.8125rem] sm:max-w-[20rem] md:w-full md:max-w-[24.375rem] lg:max-w-[26.25rem]">
                   <StickyNoteCard
                     step={step}
                     isMobile={isMobile}

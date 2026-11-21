@@ -5,7 +5,11 @@ import { LanguageProvider } from './contexts/LanguageContext'
 import './index.css'
 import App from './App.tsx'
 import { applyCustomFonts } from './utils/fontLoader'
+import { initViewportZoomLock } from './utils/viewportZoomLock'
 import { ErrorBoundary } from './components/common/ErrorBoundary'
+
+// Lock 1:1 desktop zoom scaling synchronously before first paint (zero layout shift)
+initViewportZoomLock();
 
 // Synchronously apply custom fonts from cache before initial paint
 try {

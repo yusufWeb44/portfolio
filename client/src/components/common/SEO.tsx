@@ -48,15 +48,15 @@ export const SEO: React.FC<SeoProps> = ({
         if (res.data.success && res.data.data) {
           setSeo(res.data.data);
         }
-      } catch (err) {
-        console.warn('Could not load SEO settings', err);
+      } catch {
+        // Fallback silently to default metadata on transient network failure
       }
     };
     fetchSeo();
   }, []);
 
   // Parse page overrides if available
-  let pageOverrideData: Record<string, any> = {};
+  let pageOverrideData: Record<string, string | undefined> = {};
   if (seo?.pageOverrides && pageKey) {
     try {
       const allOverrides = typeof seo.pageOverrides === 'string' ? JSON.parse(seo.pageOverrides) : seo.pageOverrides;
@@ -68,16 +68,16 @@ export const SEO: React.FC<SeoProps> = ({
     }
   }
 
-  const finalTitle = title || pageOverrideData.title || seo?.metaTitle || 'Yusuf Ayoubi | Software Developer & Engineer';
+  const finalTitle = title || pageOverrideData.title || seo?.metaTitle || 'Yousef Ayoubi | Computer Engineer & Full-Stack Developer';
   const finalDescription = description || pageOverrideData.description || seo?.metaDescription || 'Building scalable web applications, custom CRM systems, and high-performance APIs.';
   const finalKeywords = keywords || pageOverrideData.keywords || seo?.keywords || 'Software Engineer, Full-Stack Developer, React, Next.js, Node.js';
-  const finalAuthor = seo?.author || 'Yusuf Ayoubi';
+  const finalAuthor = seo?.author || 'Yousef Ayoubi';
   const finalOgTitle = seo?.ogTitle || finalTitle;
   const finalOgDescription = seo?.ogDescription || finalDescription;
-  const finalOgImage = resolveImageUrl(image || seo?.ogImage || '/portfolio_photo.png');
-  const finalCanonical = canonical || seo?.canonicalUrl || 'https://yusufayoubi.com';
+  const finalOgImage = resolveImageUrl(image || seo?.ogImage || '/og-image.jpg');
+  const finalCanonical = canonical || seo?.canonicalUrl || 'https://aubi.dev/';
   const finalRobots = seo?.robots || 'index, follow';
-  const finalTwitterHandle = seo?.twitterHandle || '@yusuf';
+  const finalTwitterHandle = seo?.twitterHandle || '';
   const finalTwitterCard = seo?.twitterCardType || 'summary_large_image';
 
   return (

@@ -8,6 +8,7 @@ import { getMediaUrl } from '../../utils/mediaUrl';
 import { buttonVariants, cn } from '../ui/Button';
 import { SplitText, BlurText, SpotlightCard } from '../react-bits';
 import { useIsMobile } from '../../hooks/useIsMobile';
+import type { PortfolioSettings } from '../../types/portfolio';
 
 /* ─── Data Interfaces ─────────────────────────────────────────────── */
 interface ProjectImage {
@@ -62,6 +63,7 @@ const ProjectMediaVisual = ({
           height={450}
           className="w-full h-full object-cover select-none transition-transform duration-700 group-hover:scale-105"
           loading="lazy"
+          decoding="async"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60" />
       </div>
@@ -284,14 +286,14 @@ const DesktopStackedCard = ({
         size={420}
         darkSize={580}
         style={{
-          maxWidth: `calc(980px - ${diff * 20}px)`,
-          width: `calc(100% - ${diff * 10}px)`,
+          maxWidth: `calc(61.25rem - ${diff * 1.25}rem)`,
+          width: `calc(100% - ${diff * 0.625}rem)`,
           transformOrigin: 'top center',
         }}
         className="rounded-2xl border border-slate-200/90 dark:border-white/[0.14] bg-background dark:bg-background shadow-[0_4px_20px_-2px_rgba(0,0,0,0.12),0_12px_36px_-4px_rgba(0,0,0,0.18)] dark:shadow-[0_20px_50px_-10px_rgba(0,0,0,0.9)] overflow-hidden relative w-full"
       >
         {/* Desktop 12-col split */}
-        <div className="grid grid-cols-12 gap-5 lg:gap-6 px-5 lg:px-6 pt-3 lg:pt-3.5 pb-4 lg:pb-5 items-stretch xl:min-h-[350px] xl:max-h-[350px] xl:h-[350px]">
+        <div className="grid grid-cols-12 gap-5 lg:gap-6 px-5 lg:px-6 pt-3 lg:pt-3.5 pb-4 lg:pb-5 items-stretch xl:min-h-[21.875rem] xl:max-h-[21.875rem] xl:h-[21.875rem]">
           {/* Details Column (5 cols) */}
           <div
             className={`col-span-5 flex flex-col justify-between h-full min-h-0 ${isAr ? 'text-right' : 'text-left'
@@ -303,7 +305,7 @@ const DesktopStackedCard = ({
                   {formattedNumber}
                 </span>
                 {(project.year || displayCategory) && (
-                  <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-muted-foreground/80 dark:text-zinc-400 inline-flex items-center gap-1.5 truncate">
+                  <span className="text-[0.6875rem] font-mono font-bold uppercase tracking-wider text-muted-foreground/80 dark:text-zinc-400 inline-flex items-center gap-1.5 truncate">
                     {displayCategory && <span className="truncate">{displayCategory}</span>}
                     {displayCategory && project.year && <span className="text-muted-foreground/50">•</span>}
                     {project.year && <span dir="ltr">{project.year}</span>}
@@ -315,16 +317,16 @@ const DesktopStackedCard = ({
                 {displayTitle}
               </h3>
 
-              <p className="text-[13px] lg:text-[13.5px] text-muted-foreground dark:text-zinc-300 leading-relaxed line-clamp-4 lg:line-clamp-6 mb-2.5 w-full">
+              <p className="text-[0.8125rem] lg:text-[0.84375rem] text-muted-foreground dark:text-zinc-300 leading-relaxed line-clamp-4 lg:line-clamp-6 mb-2.5 w-full">
                 {displayDescription}
               </p>
 
               {project.technologies && project.technologies.length > 0 && (
-                <div className="flex flex-wrap items-center gap-1.5 mb-2.5 max-h-[26px] overflow-hidden justify-start">
+                <div className="flex flex-wrap items-center gap-1.5 mb-2.5 max-h-[1.625rem] overflow-hidden justify-start">
                   {project.technologies.slice(0, 5).map((tech, tIdx) => (
                     <span
                       key={tech.id || tech.name || tIdx}
-                      className="inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] font-mono font-medium border border-border/70 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-foreground dark:text-zinc-300 whitespace-nowrap"
+                      className="inline-flex items-center px-2 py-0.5 rounded-full text-[0.65625rem] font-mono font-medium border border-border/70 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] text-foreground dark:text-zinc-300 whitespace-nowrap"
                     >
                       {tech.name}
                     </span>
@@ -338,7 +340,7 @@ const DesktopStackedCard = ({
                 to={`/projects#${project.slug}`}
                 className={cn(
                   buttonVariants({ variant: 'primary', size: 'default' }),
-                  "font-bold text-[13px] tracking-wide shadow-sm hover:shadow-[0_8px_20px_rgba(16,185,129,0.22)] dark:hover:shadow-[0_6px_16px_rgba(16,185,129,0.14)]"
+                  "font-bold text-[0.8125rem] tracking-wide shadow-sm hover:shadow-[0_8px_20px_rgba(16,185,129,0.22)] dark:hover:shadow-[0_6px_16px_rgba(16,185,129,0.14)]"
                 )}
               >
                 <span>{isAr ? 'عرض دراسة الحالة' : 'VIEW CASE STUDY'}</span>
@@ -376,8 +378,9 @@ const ProjectsSection = () => {
       return [];
     }
   });
-  const [settings, setSettings] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [settings, setSettings] = useState<PortfolioSettings | null>(null);
+  const [loading, setLoading] = useState<boolean>(() => projects.length === 0);
+  const [fetchError, setFetchError] = useState(false);
 
   const trackRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
@@ -385,23 +388,26 @@ const ProjectsSection = () => {
     offset: ['start start', 'end end'],
   });
 
+  const fetchSettingsAndProjects = () => {
+    setFetchError(false);
+    api.get('/settings').then((res) => setSettings(res.data?.data)).catch(() => { });
+    api
+      .get('/projects?public=true')
+      .then((res) => {
+        const data = res.data.data || [];
+        setProjects(data);
+        try {
+          localStorage.setItem('portfolio_projects', JSON.stringify(data));
+        } catch { }
+      })
+      .catch(() => {
+        setFetchError(true);
+      })
+      .finally(() => setLoading(false));
+  };
+
   // Load Settings & Projects directly from Backend API (Dashboard Driven)
   useEffect(() => {
-    const fetchSettingsAndProjects = () => {
-      api.get('/settings').then((res) => setSettings(res.data?.data)).catch(() => { });
-      api
-        .get('/projects?public=true')
-        .then((res) => {
-          const data = res.data.data || [];
-          setProjects(data);
-          try {
-            localStorage.setItem('portfolio_projects', JSON.stringify(data));
-          } catch { }
-        })
-        .catch(() => { })
-        .finally(() => setLoading(false));
-    };
-
     fetchSettingsAndProjects();
 
     const handleUpdate = () => fetchSettingsAndProjects();
@@ -415,7 +421,7 @@ const ProjectsSection = () => {
 
   // Assemble projects for the stacked deck: ONLY projects explicitly starred as featured appear on the homepage
   const deckProjects: Project[] = useMemo(() => {
-    return projects.filter((p: any) => Boolean(p.isFeatured));
+    return projects.filter((p) => Boolean(p.isFeatured));
   }, [projects]);
 
   const resolveField = (key: string, arVal?: string, enVal?: string, fallback?: string) => {
@@ -484,9 +490,25 @@ const ProjectsSection = () => {
         </div>
 
         {/* Cards Vertical List: Rendered naturally one below the other */}
-        {loading ? (
-          <div className="h-[280px] md:h-[360px] rounded-2xl md:rounded-3xl bg-card/40 dark:bg-white/[0.02] border border-border/50 animate-pulse flex items-center justify-center">
+        {loading && numCards === 0 ? (
+          <div className="h-[17.5rem] md:h-[22.5rem] rounded-2xl md:rounded-3xl bg-card/40 dark:bg-white/[0.02] border border-border/50 animate-pulse flex items-center justify-center">
             <Sparkles className="w-8 h-8 text-emerald-500 animate-spin" />
+          </div>
+        ) : numCards === 0 && fetchError ? (
+          <div className="py-12 md:py-16 px-4 text-center border border-dashed border-border/70 rounded-2xl bg-card/30 space-y-3">
+            <p className="text-muted-foreground text-sm md:text-base">
+              {isAr ? 'تعذر تحميل المشاريع حالياً. قد يكون الخادم قيد الاستيقاظ.' : 'Unable to load projects right now. The server may be waking up.'}
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setLoading(true);
+                fetchSettingsAndProjects();
+              }}
+              className="px-4 py-1.5 rounded-lg text-xs font-semibold border border-border bg-card hover:bg-muted transition-colors cursor-pointer"
+            >
+              {isAr ? 'إعادة المحاولة' : 'Retry'}
+            </button>
           </div>
         ) : numCards === 0 ? (
           <div className="py-12 md:py-16 px-4 text-center border border-dashed border-border/70 rounded-2xl bg-card/30">
@@ -530,13 +552,13 @@ const ProjectsSection = () => {
       {/* ═══════════════════════════════════════════════════════════════════
           DESKTOP ONLY VIEW (>= xl): Full original sticky deck stacking experience
           ═══════════════════════════════════════════════════════════════════ */}
-      <div className="hidden xl:block [--cards-step:36px]">
+      <div className="hidden xl:block [--cards-step:2.25rem]">
         {isDesktop && (
           <>
             {/* Outer Scroll Track */}
             <div ref={trackRef} className="relative w-full" style={{ height: trackHeight }}>
               {/* Sticky Container - Pinned cleanly to top:0, full-screen, 100% desktop-grade */}
-              <div className="sticky top-0 h-screen w-full flex flex-col justify-start pt-[78px] pb-4 overflow-x-clip pointer-events-none">
+              <div className="sticky top-0 h-screen w-full flex flex-col justify-start pt-[4.875rem] pb-4 overflow-x-clip pointer-events-none">
                 {/* 1. Header */}
                 <div className="max-w-7xl mx-auto px-6 lg:px-8 pb-1 w-full pointer-events-auto shrink-0">
                   <div className="max-w-3xl">
@@ -556,12 +578,28 @@ const ProjectsSection = () => {
                 </div>
 
                 {/* 2. Cards Deck Container */}
-                <div className="relative mt-2 w-full max-w-[980px] mx-auto px-6 flex-1 flex flex-col justify-start">
-                  {loading ? (
-                    <div className="h-[320px] flex items-center justify-center px-4">
-                      <div className="w-full max-w-[920px] h-[280px] rounded-xl bg-card/40 dark:bg-white/[0.02] border border-border/50 animate-pulse flex items-center justify-center">
+                <div className="relative mt-2 w-full max-w-[61.25rem] mx-auto px-6 flex-1 flex flex-col justify-start">
+                  {loading && numCards === 0 ? (
+                    <div className="h-[20rem] flex items-center justify-center px-4">
+                      <div className="w-full max-w-[57.5rem] h-[17.5rem] rounded-xl bg-card/40 dark:bg-white/[0.02] border border-border/50 animate-pulse flex items-center justify-center">
                         <Sparkles className="w-8 h-8 text-emerald-500 animate-spin" />
                       </div>
+                    </div>
+                  ) : numCards === 0 && fetchError ? (
+                    <div className="max-w-4xl mx-auto my-8 py-16 px-4 text-center border border-dashed border-border/70 rounded-xl bg-card/30 backdrop-blur-md pointer-events-auto space-y-3">
+                      <p className="text-muted-foreground text-base">
+                        {isAr ? 'تعذر تحميل المشاريع حالياً. قد يكون الخادم قيد الاستيقاظ.' : 'Unable to load projects right now. The server may be waking up.'}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setLoading(true);
+                          fetchSettingsAndProjects();
+                        }}
+                        className="px-4 py-1.5 rounded-lg text-xs font-semibold border border-border bg-card hover:bg-muted transition-colors cursor-pointer"
+                      >
+                        {isAr ? 'إعادة المحاولة' : 'Retry'}
+                      </button>
                     </div>
                   ) : numCards === 0 ? (
                     <div className="max-w-4xl mx-auto my-8 py-16 px-4 text-center border border-dashed border-border/70 rounded-xl bg-card/30 backdrop-blur-md pointer-events-auto">

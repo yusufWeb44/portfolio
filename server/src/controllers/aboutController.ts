@@ -1,8 +1,19 @@
 import { Request, Response } from 'express';
+import { Prisma } from '@prisma/client';
 import prisma from '../utils/prisma';
 import { syncAboutToTranslation } from '../utils/translationSync';
+import { sendSafeError, handlePrismaError } from '../utils/sanitize';
 
-export const getAbout = async (req: Request, res: Response) => {
+const ALLOWED_ABOUT_KEYS = new Set([
+  'badge', 'badgeAr',
+  'headline', 'headlineAr',
+  'bioParagraph1', 'bioParagraph1Ar',
+  'bioParagraph2', 'bioParagraph2Ar',
+  'coreStack', 'coreStackAr',
+  'bentoCards', 'bentoCardsAr',
+]);
+
+export const getAbout = async (_req: Request, res: Response) => {
   try {
     let about = await prisma.aboutSettings.findUnique({ where: { id: 'singleton' } });
     if (!about) {
@@ -24,16 +35,33 @@ export const getAbout = async (req: Request, res: Response) => {
     }
     res.json({ success: true, data: about });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Failed to fetch about settings', error });
+    sendSafeError(res, 500, 'Failed to fetch about settings', error);
   }
 };
 
 export const updateAbout = async (req: Request, res: Response) => {
   try {
-    const data = { ...req.body };
-    // If arrays are passed, stringify them for storage
-    if (typeof data.coreStack === 'object') data.coreStack = JSON.stringify(data.coreStack);
-    if (typeof data.coreStackAr === 'object') data.coreStackAr = JSON.stringify(data.coreStackAr);
+    if (!req.body || typeof req.body !== 'object' || Array.isArray(req.body)) {
+      return sendSafeError(res, 400, 'Invalid about settings payload');
+    }
+
+    const data: Record<string, string | null> = {};
+    for (const key of Object.keys(req.body)) {
+      if (!ALLOWED_ABOUT_KEYS.has(key)) continue;
+      const val = req.body[key];
+      if (key === 'coreStack' || key === 'coreStackAr' || key === 'bentoCards' || key === 'bentoCardsAr') {
+        data[key] =
+          typeof val === 'object' && val !== null
+            ? JSON.stringify(val)
+            : val === null
+              ? null
+              : String(val);
+      } else if (typeof val === 'string') {
+        data[key] = val.replace(/<\s*\/?\s*script[^>]*>/gi, '').replace(/javascript:/gi, '');
+      } else if (val === null) {
+        data[key] = null;
+      }
+    }
 
     // Ensure coreStack and coreStackAr are always kept in sync
     if (data.coreStack && (!data.coreStackAr || data.coreStackAr === 'null')) {
@@ -42,19 +70,16 @@ export const updateAbout = async (req: Request, res: Response) => {
       data.coreStack = data.coreStackAr;
     }
 
-    if (typeof data.bentoCards === 'object') data.bentoCards = JSON.stringify(data.bentoCards);
-    if (typeof data.bentoCardsAr === 'object') data.bentoCardsAr = JSON.stringify(data.bentoCardsAr);
-
     const about = await prisma.aboutSettings.upsert({
       where: { id: 'singleton' },
-      update: data,
-      create: { id: 'singleton', ...data }
+      update: data as Prisma.AboutSettingsUpdateInput,
+      create: { id: 'singleton', ...(data as Prisma.AboutSettingsCreateInput) }
     });
     // Synchronize matching fields to Translation table
     await syncAboutToTranslation(data);
 
     res.json({ success: true, data: about });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Failed to update about settings', error });
+    handlePrismaError(res, error, 'Failed to update about settings');
   }
 };

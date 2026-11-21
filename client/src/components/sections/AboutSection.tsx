@@ -6,6 +6,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import TechStackMarquee, { DEFAULT_CORE_STACK } from '../ui/TechStackMarquee';
 import { SplitText, FadeContent, SpotlightCard } from '../react-bits';
+import type { AboutSettingsData, BentoCardItem } from '../../types/portfolio';
 
 /* ─── Animation Variants ─────────────────────────────────────────── */
 const containerVariants = {
@@ -57,7 +58,7 @@ const AboutSection = () => {
   const isAr = currentLang === 'ar';
   const isMobile = useIsMobile();
 
-  const [aboutData, setAboutData] = useState<any>(() => {
+  const [aboutData, setAboutData] = useState<AboutSettingsData | null>(() => {
     try {
       const cached = localStorage.getItem('portfolio_about');
       return cached ? JSON.parse(cached) : null;
@@ -65,21 +66,27 @@ const AboutSection = () => {
       return null;
     }
   });
+  const [isLoading, setIsLoading] = useState<boolean>(() => !aboutData);
+  const [hasError, setHasError] = useState(false);
+
+  const fetchAbout = async () => {
+    try {
+      setHasError(false);
+      const res = await api.get('/about');
+      if (res.data?.success && res.data?.data) {
+        setAboutData(res.data.data);
+        try {
+          localStorage.setItem('portfolio_about', JSON.stringify(res.data.data));
+        } catch {}
+      }
+    } catch {
+      setHasError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchAbout = async () => {
-      try {
-        const res = await api.get('/about');
-        if (res.data?.success && res.data?.data) {
-          setAboutData(res.data.data);
-          try {
-            localStorage.setItem('portfolio_about', JSON.stringify(res.data.data));
-          } catch {}
-        }
-      } catch (err) {
-        console.warn('Could not load about data', err);
-      }
-    };
     fetchAbout();
 
     const handleUpdate = () => fetchAbout();
@@ -111,7 +118,7 @@ const AboutSection = () => {
     return [];
   })();
 
-  const displayCards: any[] = (() => {
+  const displayCards: BentoCardItem[] = (() => {
     const raw = isAr && aboutData?.bentoCardsAr ? aboutData.bentoCardsAr : aboutData?.bentoCards;
     if (!raw) return [];
     if (Array.isArray(raw)) return raw;
@@ -135,7 +142,7 @@ const AboutSection = () => {
 
           {/* ── Title & Bio Column: Full-width on mobile/tablets, 5 cols on desktop ── */}
           <motion.div
-            className={`flex flex-col gap-5 sm:gap-6 xl:gap-7 xl:pt-[54px] ${displayCards.length > 0 ? 'xl:col-span-5' : 'xl:col-span-8'}`}
+            className={`flex flex-col gap-5 sm:gap-6 xl:gap-7 xl:pt-[3.375rem] ${displayCards.length > 0 || isLoading ? 'xl:col-span-5' : 'xl:col-span-8'}`}
             variants={isMobile ? undefined : containerVariants}
             initial={isMobile ? false : "hidden"}
             whileInView={isMobile ? undefined : "visible"}
@@ -169,6 +176,29 @@ const AboutSection = () => {
                     </p>
                   )}
                 </>
+              ) : isLoading ? (
+                <div className="space-y-3 animate-pulse" aria-busy="true" aria-label={isAr ? 'جاري التحميل' : 'Loading about section'}>
+                  <div className="h-4 bg-muted/60 dark:bg-white/[0.06] rounded w-full" />
+                  <div className="h-4 bg-muted/60 dark:bg-white/[0.06] rounded w-11/12" />
+                  <div className="h-4 bg-muted/60 dark:bg-white/[0.06] rounded w-4/5" />
+                  <div className="h-4 bg-muted/60 dark:bg-white/[0.06] rounded w-5/6 mt-4" />
+                </div>
+              ) : hasError ? (
+                <div className="flex flex-col items-start gap-3">
+                  <p className="text-base text-muted-foreground leading-relaxed">
+                    {isAr ? 'تعذر تحميل النبذة التعريفية حالياً. قد يكون الخادم قيد التشغيل.' : 'Unable to load bio right now. The server may be waking up.'}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsLoading(true);
+                      fetchAbout();
+                    }}
+                    className="px-4 py-1.5 rounded-lg text-xs font-semibold border border-border bg-card hover:bg-muted transition-colors cursor-pointer"
+                  >
+                    {isAr ? 'إعادة المحاولة' : 'Retry'}
+                  </button>
+                </div>
               ) : (
                 <p className="text-base text-muted-foreground leading-relaxed">
                   {isAr ? 'يتم تحديث معلومات النبذة التعريفية حالياً.' : 'About content is being updated.'}
@@ -178,9 +208,18 @@ const AboutSection = () => {
           </motion.div>
 
           {/* ── Bento Cards Column: Full-width on mobile/tablets, 7 cols on desktop (xl) ── */}
-          {displayCards.length > 0 && (
+          {displayCards.length === 0 && isLoading ? (
+            <div className="xl:col-span-7 xl:pt-[3.375rem] grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5 lg:gap-6 animate-pulse" aria-hidden="true">
+              {[0, 1, 2].map((idx) => (
+                <div
+                  key={idx}
+                  className={`rounded-xl sm:rounded-2xl p-6 h-40 bg-card/40 dark:bg-white/[0.03] border border-border/50 ${idx === 2 ? 'sm:col-span-2' : ''}`}
+                />
+              ))}
+            </div>
+          ) : displayCards.length > 0 && (
             <motion.div
-              className="xl:col-span-7 xl:pt-[54px]"
+              className="xl:col-span-7 xl:pt-[3.375rem]"
               variants={isMobile ? undefined : containerVariants}
               initial={isMobile ? false : "hidden"}
               whileInView={isMobile ? undefined : "visible"}

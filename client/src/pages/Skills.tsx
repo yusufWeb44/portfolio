@@ -29,13 +29,21 @@ const Skills = () => {
   const isAr = currentLang === 'ar';
   const [skills, setSkills] = useState<Skill[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
-  useEffect(() => {
+  const loadSkills = () => {
+    setLoading(true);
+    setFetchError(false);
     api.get('/skills').then(res => {
-      setSkills(res.data.data.filter((s: Skill) => s.isEnabled));
-      setLoading(false);
-    }).catch(() => setLoading(false));
+      setSkills((res.data.data || []).filter((s: Skill) => s.isEnabled));
+    }).catch(() => {
+      setFetchError(true);
+    }).finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadSkills();
   }, []);
 
   const grouped = skills.reduce((acc, skill) => {
@@ -111,9 +119,22 @@ const Skills = () => {
         <div className="max-w-7xl mx-auto">
           {loading ? (
             <div className="flex flex-wrap gap-3 animate-pulse">
-              {Array.from({ length: 20 }).map((_, i) => (
-                <div key={i} className="h-10 bg-muted rounded-full" style={{ width: `${80 + Math.random() * 60}px` }} />
+              {[6, 7.5, 5.5, 8.2, 6.5, 9, 7, 5.8, 8.5, 6.2, 7.8, 6.8].map((w, i) => (
+                <div key={i} className="h-10 bg-muted rounded-full" style={{ width: `${w}rem` }} />
               ))}
+            </div>
+          ) : skills.length === 0 && fetchError ? (
+            <div className="py-16 px-4 text-center border border-dashed border-border/70 rounded-2xl bg-card/30 space-y-3">
+              <p className="text-muted-foreground">
+                {isAr ? 'تعذر تحميل المهارات حالياً. قد يكون الخادم قيد الاستيقاظ.' : 'Unable to load skills right now. The server may be waking up.'}
+              </p>
+              <button
+                type="button"
+                onClick={loadSkills}
+                className="px-4 py-1.5 rounded-lg text-xs font-semibold border border-border bg-card hover:bg-muted transition-colors cursor-pointer"
+              >
+                {isAr ? 'إعادة المحاولة' : 'Retry'}
+              </button>
             </div>
           ) : skills.length === 0 ? (
             <p className="text-muted-foreground py-12">No skills published yet.</p>

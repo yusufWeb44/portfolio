@@ -20,9 +20,12 @@ const Services = () => {
   const isAr = currentLang === 'ar';
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
   const [socialWhatsApp, setSocialWhatsApp] = useState<string | null>(null);
 
-  useEffect(() => {
+  const loadServices = () => {
+    setLoading(true);
+    setFetchError(false);
     Promise.allSettled([
       api.get('/services'),
       api.get('/social-links'),
@@ -30,14 +33,19 @@ const Services = () => {
       if (servRes.status === 'fulfilled') {
         const enabled = (servRes.value.data.data || []).filter((s: Service) => s.isEnabled);
         setServices(enabled);
+      } else {
+        setFetchError(true);
       }
       if (socRes.status === 'fulfilled') {
         const links: { platform: string; url: string }[] = socRes.value.data.data || [];
         const wa = links.find(l => l.platform.toLowerCase() === 'whatsapp');
         if (wa) setSocialWhatsApp(wa.url);
       }
-      setLoading(false);
-    }).catch(() => setLoading(false));
+    }).finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadServices();
   }, []);
 
   return (
@@ -76,8 +84,21 @@ const Services = () => {
           {loading ? (
             <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-6 animate-pulse">
               {[1, 2, 3].map(i => (
-                <div key={i} className="h-[400px] bg-muted/40 rounded-xl border border-border/50" />
+                <div key={i} className="h-[25rem] bg-muted/40 rounded-xl border border-border/50" />
               ))}
+            </div>
+          ) : services.length === 0 && fetchError ? (
+            <div className="max-w-7xl mx-auto px-6 py-16 text-center border border-dashed border-border/70 rounded-xl bg-card/30 space-y-3">
+              <p className="text-muted-foreground">
+                {isAr ? 'تعذر تحميل الخدمات حالياً. قد يكون الخادم قيد الاستيقاظ.' : 'Unable to load services right now. The server may be waking up.'}
+              </p>
+              <button
+                type="button"
+                onClick={loadServices}
+                className="px-4 py-1.5 rounded-lg text-xs font-semibold border border-border bg-card hover:bg-muted transition-colors cursor-pointer"
+              >
+                {isAr ? 'إعادة المحاولة' : 'Retry'}
+              </button>
             </div>
           ) : services.length === 0 ? (
             <div className="max-w-7xl mx-auto px-6 py-16 text-center border border-dashed border-border/70 rounded-xl bg-card/30">

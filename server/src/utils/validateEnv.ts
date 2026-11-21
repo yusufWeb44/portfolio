@@ -13,7 +13,7 @@ export const validateEnv = (): void => {
 
   if (!result.success) {
     console.error('❌ CRITICAL ENVIRONMENT CONFIGURATION ERROR:');
-    (result.error.issues || []).forEach((err: any) => {
+    (result.error.issues || []).forEach((err) => {
       console.error(`   - [${err.path.join('.')}]: ${err.message}`);
     });
 

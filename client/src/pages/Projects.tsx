@@ -16,6 +16,7 @@ import api from '../services/api';
 import { useLanguage } from '../contexts/LanguageContext';
 import { getMediaUrl } from '../utils/mediaUrl';
 import { buttonVariants, cn } from '../components/ui/Button';
+import type { PortfolioSettings } from '../types/portfolio';
 
 /* ─── Interfaces ─────────────────────────────────────────────────── */
 interface ProjectImage {
@@ -132,7 +133,7 @@ const ProjectShowcaseItem = ({
                 {formattedNumber}
               </span>
               {(displayCategory || project.year) && (
-                <span className="text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-wider text-muted-foreground/80 dark:text-zinc-400">
+                <span className="text-[0.625rem] sm:text-[0.6875rem] font-mono font-bold uppercase tracking-wider text-muted-foreground/80 dark:text-zinc-400">
                   {displayCategory ? displayCategory : ''}
                   {project.year ? ` • ${project.year}` : ''}
                 </span>
@@ -146,10 +147,10 @@ const ProjectShowcaseItem = ({
 
             {/* 3. Project Overview / Details */}
             <div className="space-y-1.5 mb-4">
-              <h3 className="text-[11px] sm:text-xs font-mono font-bold uppercase tracking-widest text-foreground dark:text-zinc-100">
+              <h3 className="text-[0.6875rem] sm:text-xs font-mono font-bold uppercase tracking-widest text-foreground dark:text-zinc-100">
                 {t('projects.projectDetails', isAr ? 'نظرة عامة على المشروع' : 'Project Overview')}
               </h3>
-              <p className="text-xs sm:text-[13.5px] lg:text-sm text-muted-foreground dark:text-zinc-300 leading-relaxed whitespace-pre-wrap">
+              <p className="text-xs sm:text-[0.84375rem] lg:text-sm text-muted-foreground dark:text-zinc-300 leading-relaxed whitespace-pre-wrap">
                 {displayDescription}
               </p>
             </div>
@@ -157,14 +158,14 @@ const ProjectShowcaseItem = ({
             {/* 4. Technologies Used */}
             {project.technologies && project.technologies.length > 0 && (
               <div className="space-y-2 mb-4 pt-3 border-t border-border/50 dark:border-white/[0.06]">
-                <h3 className="text-[11px] sm:text-xs font-mono font-bold uppercase tracking-widest text-foreground dark:text-zinc-100">
+                <h3 className="text-[0.6875rem] sm:text-xs font-mono font-bold uppercase tracking-widest text-foreground dark:text-zinc-100">
                   {t('projects.technologies', isAr ? 'التقنيات المستخدمة' : 'Technologies Used')}
                 </h3>
                 <div className="flex flex-wrap gap-1.5 sm:gap-2">
                   {project.technologies.map((tech) => (
                     <span
                       key={tech.id || tech.name}
-                      className="px-2.5 py-1 rounded-md text-[11px] sm:text-xs font-mono font-medium border border-border/80 bg-card/60 dark:bg-white/[0.04] text-foreground/90 hover:border-zinc-300 dark:hover:border-white/[0.18] hover:text-foreground dark:hover:text-white transition-colors"
+                      className="px-2.5 py-1 rounded-md text-[0.6875rem] sm:text-xs font-mono font-medium border border-border/80 bg-card/60 dark:bg-white/[0.04] text-foreground/90 hover:border-zinc-300 dark:hover:border-white/[0.18] hover:text-foreground dark:hover:text-white transition-colors"
                     >
                       {tech.name}
                     </span>
@@ -176,10 +177,10 @@ const ProjectShowcaseItem = ({
             {/* 5. Role in Project (Only at the bottom) */}
             {displayRole && (
               <div className="space-y-1.5 pt-3 border-t border-border/50 dark:border-white/[0.06]">
-                <h3 className="text-[11px] sm:text-xs font-mono font-bold uppercase tracking-widest text-foreground dark:text-zinc-100">
+                <h3 className="text-[0.6875rem] sm:text-xs font-mono font-bold uppercase tracking-widest text-foreground dark:text-zinc-100">
                   <span>{isAr ? 'الدور والمسؤوليات' : t('projects.role', 'Role & Responsibilities')}</span>
                 </h3>
-                <p className="text-xs sm:text-[13.5px] font-medium text-foreground dark:text-zinc-200 leading-relaxed">
+                <p className="text-xs sm:text-[0.84375rem] font-medium text-foreground dark:text-zinc-200 leading-relaxed">
                   {displayRole}
                 </p>
               </div>
@@ -197,7 +198,7 @@ const ProjectShowcaseItem = ({
                     rel="noreferrer"
                     className={cn(
                       buttonVariants({ variant: 'primary', size: 'default' }),
-                      "flex-1 sm:flex-initial h-11 sm:h-10 px-4 sm:px-5 rounded-xl text-xs sm:text-[13px] tracking-wide"
+                      "flex-1 sm:flex-initial h-11 sm:h-10 px-4 sm:px-5 rounded-xl text-xs sm:text-[0.8125rem] tracking-wide"
                     )}
                   >
                     <span>{isAr ? 'معاينة حية' : t('projects.liveDemo', 'Live Demo')}</span>
@@ -212,7 +213,7 @@ const ProjectShowcaseItem = ({
                     rel="noreferrer"
                     className={cn(
                       buttonVariants({ variant: 'secondary', size: 'default' }),
-                      "flex-1 sm:flex-initial h-11 sm:h-10 px-4 sm:px-5 rounded-xl text-xs sm:text-[13px] tracking-wide"
+                      "flex-1 sm:flex-initial h-11 sm:h-10 px-4 sm:px-5 rounded-xl text-xs sm:text-[0.8125rem] tracking-wide"
                     )}
                   >
                     <Code2 size={15} strokeWidth={1.75} className="transition-transform duration-200 group-hover:scale-110" />
@@ -261,12 +262,15 @@ const ProjectShowcaseItem = ({
                 key={currentImage}
                 src={currentImage}
                 alt={`${project.title} preview ${activeImageIndex + 1}`}
+                width={960}
+                height={600}
                 initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.98 }}
                 transition={{ duration: 0.25, ease: 'easeInOut' }}
                 className="w-full h-full object-contain select-none relative z-10 rounded-lg drop-shadow-sm"
                 loading="lazy"
+                decoding="async"
               />
             </AnimatePresence>
 
@@ -285,7 +289,7 @@ const ProjectShowcaseItem = ({
 
             {/* Image Counter Badge (Only if multiple images) */}
             {displayImages.length > 1 && (
-              <div className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 z-20 px-2.5 py-1 rounded-lg bg-black/70 backdrop-blur-md border border-white/15 text-white font-mono text-[10px] sm:text-[10.5px] font-bold tracking-widest select-none pointer-events-none">
+              <div className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 z-20 px-2.5 py-1 rounded-lg bg-black/70 backdrop-blur-md border border-white/15 text-white font-mono text-[0.625rem] sm:text-[0.65625rem] font-bold tracking-widest select-none pointer-events-none">
                 {String(activeImageIndex + 1).padStart(2, '0')} / {String(displayImages.length).padStart(2, '0')}
               </div>
             )}
@@ -326,7 +330,7 @@ const ProjectShowcaseItem = ({
                     key={`${imgUrl}-${idx}`}
                     onClick={() => setActiveImageIndex(idx)}
                     aria-label={`View image ${idx + 1}`}
-                    className={`relative flex-1 min-w-[55px] max-w-[120px] aspect-[16/10] rounded-lg overflow-hidden border transition-all duration-200 cursor-pointer bg-slate-900/[0.04] dark:bg-black/50 p-0.5 ${
+                    className={`relative flex-1 min-w-[3.4375rem] max-w-[7.5rem] aspect-[16/10] rounded-lg overflow-hidden border transition-all duration-200 cursor-pointer bg-slate-900/[0.04] dark:bg-black/50 p-0.5 ${
                       isActive
                         ? 'border-emerald-500 ring-2 ring-emerald-500/40 scale-[1.02] shadow-sm'
                         : 'border-border/60 hover:border-foreground/40 opacity-70 hover:opacity-100'
@@ -334,9 +338,12 @@ const ProjectShowcaseItem = ({
                   >
                     <img
                       src={imgUrl}
-                      alt={`Thumbnail ${idx + 1}`}
+                      alt={`${project.title} thumbnail ${idx + 1}`}
+                      width={120}
+                      height={75}
                       className="w-full h-full object-contain"
                       loading="lazy"
+                      decoding="async"
                     />
                     {isActive && (
                       <div className="absolute inset-0 bg-emerald-500/10 pointer-events-none" />
@@ -409,7 +416,10 @@ const ProjectShowcaseItem = ({
             >
               <img
                 src={currentImage}
-                alt={`${project.title} preview`}
+                alt={`${project.title} fullscreen preview`}
+                width={1440}
+                height={900}
+                decoding="async"
                 className="max-w-[95vw] max-h-[86vh] object-contain rounded-lg shadow-[0_25px_80px_rgba(0,0,0,0.9)] border border-white/15"
               />
               {displayImages.length > 1 && (
@@ -432,7 +442,7 @@ const SkeletonProjects = () => (
     {[1, 2].map((i) => (
       <div
         key={i}
-        className="h-[440px] rounded-2xl sm:rounded-3xl bg-card/40 dark:bg-white/[0.02] border border-border/50"
+        className="h-[27.5rem] rounded-2xl sm:rounded-3xl bg-card/40 dark:bg-white/[0.02] border border-border/50"
       />
     ))}
   </div>
@@ -445,7 +455,7 @@ const Projects = () => {
   const { t, currentLang } = useLanguage();
   const isAr = currentLang === 'ar';
   const [projects, setProjects] = useState<Project[]>([]);
-  const [settings, setSettings] = useState<any>(() => {
+  const [settings, setSettings] = useState<PortfolioSettings | null>(() => {
     try {
       const cached = localStorage.getItem('portfolio_settings');
       return cached ? JSON.parse(cached) : null;
@@ -454,16 +464,25 @@ const Projects = () => {
     }
   });
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
   const location = useLocation();
 
-  useEffect(() => {
+  const loadProjects = () => {
+    setLoading(true);
+    setFetchError(false);
     api
       .get('/projects?public=true')
       .then((res) => {
         setProjects(res.data.data || []);
-        setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(() => {
+        setFetchError(true);
+      })
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadProjects();
 
     api
       .get('/settings')
@@ -520,7 +539,7 @@ const Projects = () => {
                 to="/"
                 className={cn(
                   buttonVariants({ variant: 'secondary', size: 'sm' }),
-                  "font-mono uppercase tracking-wider gap-2 px-3.5 py-2 text-xs sm:text-[13px] rounded-xl"
+                  "font-mono uppercase tracking-wider gap-2 px-3.5 py-2 text-xs sm:text-[0.8125rem] rounded-xl"
                 )}
               >
                 <ArrowLeft size={14} strokeWidth={1.5} className="transition-transform duration-200 group-hover:-translate-x-0.5 rtl:group-hover:translate-x-0.5 rtl:rotate-180 text-muted-foreground group-hover:text-foreground" />
@@ -547,6 +566,19 @@ const Projects = () => {
         <div className="max-w-7xl mx-auto">
           {loading ? (
             <SkeletonProjects />
+          ) : projects.length === 0 && fetchError ? (
+            <div className="py-20 px-4 text-center border border-dashed border-border/70 rounded-2xl sm:rounded-3xl bg-card/30 backdrop-blur-md space-y-4">
+              <p className="text-lg font-bold tracking-tight">
+                {isAr ? 'تعذر تحميل المشاريع حالياً. قد يكون الخادم قيد الاستيقاظ.' : 'Unable to load projects right now. The server may be waking up.'}
+              </p>
+              <button
+                type="button"
+                onClick={loadProjects}
+                className={buttonVariants({ variant: 'secondary', size: 'sm' })}
+              >
+                {isAr ? 'إعادة المحاولة' : 'Retry'}
+              </button>
+            </div>
           ) : projects.length === 0 ? (
             <div className="py-20 text-center border border-dashed border-border/70 rounded-2xl sm:rounded-3xl bg-card/30 backdrop-blur-md">
               <p className="text-xl font-bold tracking-tight mb-2">{t('projects.noProjects', 'No projects published yet.')}</p>

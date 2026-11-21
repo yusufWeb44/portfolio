@@ -90,7 +90,7 @@ export const ServiceCard = ({
         size={360}
         darkSize={560}
         className={cn(
-          "group relative flex h-[315px] sm:h-[340px] md:h-[355px] lg:h-[370px] w-full flex-col justify-between overflow-hidden rounded-xl sm:rounded-2xl p-5 sm:p-6 md:p-7 border border-zinc-200/90 dark:border-white/[0.08] shadow-[0_1px_2px_rgba(0,0,0,0.03),0_8px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset,0_16px_32px_-12px_rgba(0,0,0,0.4)] hover:border-zinc-300 dark:hover:border-white/[0.18] transition-all duration-300 select-none",
+          "group relative flex h-[19.6875rem] sm:h-[21.25rem] md:h-[22.1875rem] lg:h-[23.125rem] w-full flex-col justify-between overflow-hidden rounded-xl sm:rounded-2xl p-5 sm:p-6 md:p-7 border border-zinc-200/90 dark:border-white/[0.08] shadow-[0_1px_2px_rgba(0,0,0,0.03),0_8px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset,0_16px_32px_-12px_rgba(0,0,0,0.4)] hover:border-zinc-300 dark:hover:border-white/[0.18] transition-all duration-300 select-none",
           cardBg
         )}
       >
@@ -106,7 +106,7 @@ export const ServiceCard = ({
             <h3 className="mb-2 text-base sm:text-lg md:text-xl font-bold tracking-tight text-foreground leading-snug line-clamp-2">
               {title}
             </h3>
-            <p className="text-xs sm:text-[13.5px] md:text-sm text-slate-600 dark:text-zinc-300 leading-relaxed line-clamp-4">
+            <p className="text-xs sm:text-[0.84375rem] md:text-sm text-slate-600 dark:text-zinc-300 leading-relaxed line-clamp-4">
               {description}
             </p>
           </div>
@@ -125,7 +125,7 @@ export const ServiceCard = ({
           >
             <span className="flex items-center gap-2">
               <WhatsappIcon size={16} className="text-emerald-500 shrink-0" />
-              <span className="text-foreground transition-colors group-hover/btn:text-foreground text-xs sm:text-[13px] md:text-sm">
+              <span className="text-foreground transition-colors group-hover/btn:text-foreground text-xs sm:text-[0.8125rem] md:text-sm">
                 {isAr ? 'استفسار واتساب' : 'WhatsApp Inquiry'}
               </span>
             </span>
@@ -200,7 +200,7 @@ const DesktopServiceStickyTrack = ({
       className="hidden xl:block relative w-full overflow-x-clip"
       style={{ height: trackHeight }}
     >
-      <div className="sticky top-0 h-screen w-full flex flex-col justify-between pt-[74px] md:pt-[84px] pb-6 md:pb-10 overflow-x-clip overflow-y-clip [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="sticky top-0 h-screen w-full flex flex-col justify-between pt-[4.625rem] md:pt-[5.25rem] pb-6 md:pb-10 overflow-x-clip overflow-y-clip [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {/* Header slot pinned inside the sticky viewport */}
         {header && (
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 shrink-0 mb-2 sm:mb-4">
@@ -222,7 +222,7 @@ const DesktopServiceStickyTrack = ({
             {services.map((service, index) => (
               <div
                 key={service.id || index}
-                className="w-[310px] md:w-[330px] lg:w-[350px] shrink-0"
+                className="w-[19.375rem] md:w-[20.625rem] lg:w-[21.875rem] shrink-0"
               >
                 <ServiceCard
                   service={service}
@@ -366,7 +366,7 @@ export const ServiceCarousel = ({
                 key={service.id || index}
                 data-service-card
                 onClick={(e) => handleCardClick(index, e)}
-                className="w-[82vw] max-w-[295px] sm:w-[330px] sm:max-w-none md:w-[360px] lg:w-[390px] shrink-0 cursor-pointer active:scale-[0.985] transition-transform duration-200"
+                className="w-[82vw] max-w-[18.4375rem] sm:w-[20.625rem] sm:max-w-none md:w-[22.5rem] lg:w-[24.375rem] shrink-0 cursor-pointer active:scale-[0.985] transition-transform duration-200"
               >
                 <ServiceCard
                   service={service}

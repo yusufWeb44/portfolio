@@ -8,26 +8,31 @@ import { Loader2 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const Experience = () => {
-  const { t } = useLanguage();
+  const { t, currentLang } = useLanguage();
+  const isAr = currentLang === 'ar';
   const [experiences, setExperiences] = useState<ExperienceItem[]>([]);
   const [certificates, setCertificates] = useState<CertificateItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
+
+  const fetchData = async () => {
+    setLoading(true);
+    setFetchError(false);
+    try {
+      const [expRes, certRes] = await Promise.all([
+        api.get('/experience'),
+        api.get('/certificates')
+      ]);
+      setExperiences(expRes.data.data || []);
+      setCertificates(certRes.data.data || []);
+    } catch {
+      setFetchError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [expRes, certRes] = await Promise.all([
-          api.get('/experience'),
-          api.get('/certificates')
-        ]);
-        setExperiences(expRes.data.data || []);
-        setCertificates(certRes.data.data || []);
-      } catch (error) {
-        console.error('Failed to load experience and certificate data', error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchData();
   }, []);
 
@@ -70,6 +75,19 @@ const Experience = () => {
             <div className="flex flex-col items-center justify-center py-28 gap-4">
               <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
               <p className="text-xs font-mono text-muted-foreground">{t('experience.loading', 'Loading career timeline...')}</p>
+            </div>
+          ) : fetchError && experiences.length === 0 ? (
+            <div className="py-20 px-4 text-center border border-dashed border-border/70 rounded-xl bg-card/30 space-y-3">
+              <p className="text-muted-foreground text-sm">
+                {isAr ? 'تعذر تحميل مسار الخبرات حالياً. قد يكون الخادم قيد الاستيقاظ.' : 'Unable to load career timeline right now. The server may be waking up.'}
+              </p>
+              <button
+                type="button"
+                onClick={fetchData}
+                className="px-4 py-1.5 rounded-lg text-xs font-semibold border border-border bg-card hover:bg-muted transition-colors cursor-pointer"
+              >
+                {isAr ? 'إعادة المحاولة' : 'Retry'}
+              </button>
             </div>
           ) : (
             <div className="space-y-16">

@@ -33,7 +33,9 @@ export const resolveImageUrl = (url?: string | null): string => {
 
   // Local backend uploads (e.g. /uploads/image-123.png)
   if (clean.startsWith('/uploads/') || clean.startsWith('uploads/')) {
-    const base = (import.meta.env.VITE_UPLOADS_URL || 'http://localhost:5000').replace(/\/$/, '');
+    const rawBase =
+      import.meta.env.VITE_UPLOADS_URL || (import.meta.env.DEV ? 'http://localhost:5000' : '');
+    const base = rawBase.replace(/\/$/, '');
     const cleanPath = clean.startsWith('/') ? clean : `/${clean}`;
     return `${base}${cleanPath}`;
   }
