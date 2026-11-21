@@ -58,22 +58,25 @@ const AdminSeo = () => {
   const fetchSeo = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/seo');
+      const res = await api.get('/seo', {
+        headers: { 'Cache-Control': 'no-cache, no-store' },
+        params: { _t: Date.now() },
+      });
       if (res.data?.data) {
         const fetched = res.data.data;
         setData({
-          siteName: fetched.siteName || defaultSeo.siteName,
-          defaultTitle: fetched.defaultTitle || defaultSeo.defaultTitle,
-          titleTemplate: fetched.titleTemplate || defaultSeo.titleTemplate,
-          defaultDescription: fetched.defaultDescription || defaultSeo.defaultDescription,
-          canonicalUrl: fetched.canonicalUrl || defaultSeo.canonicalUrl,
-          ogImage: fetched.ogImage || defaultSeo.ogImage,
-          twitterHandle: fetched.twitterHandle || defaultSeo.twitterHandle,
-          twitterCardType: fetched.twitterCardType || defaultSeo.twitterCardType,
-          keywords: fetched.keywords || defaultSeo.keywords,
-          robots: fetched.robots || defaultSeo.robots,
-          schemaType: fetched.schemaType || defaultSeo.schemaType,
-          jsonLdCustom: fetched.jsonLdCustom || defaultSeo.jsonLdCustom,
+          siteName: fetched.siteName ?? fetched.author ?? defaultSeo.siteName,
+          defaultTitle: fetched.defaultTitle ?? fetched.metaTitle ?? defaultSeo.defaultTitle,
+          titleTemplate: fetched.titleTemplate ?? defaultSeo.titleTemplate,
+          defaultDescription: fetched.defaultDescription ?? fetched.metaDescription ?? defaultSeo.defaultDescription,
+          canonicalUrl: fetched.canonicalUrl ?? defaultSeo.canonicalUrl,
+          ogImage: fetched.ogImage ?? defaultSeo.ogImage,
+          twitterHandle: fetched.twitterHandle ?? defaultSeo.twitterHandle,
+          twitterCardType: fetched.twitterCardType ?? defaultSeo.twitterCardType,
+          keywords: fetched.keywords ?? defaultSeo.keywords,
+          robots: fetched.robots ?? defaultSeo.robots,
+          schemaType: fetched.schemaType ?? defaultSeo.schemaType,
+          jsonLdCustom: fetched.jsonLdCustom ?? fetched.structuredData ?? defaultSeo.jsonLdCustom,
         });
       }
     } catch {
@@ -111,8 +114,57 @@ const AdminSeo = () => {
 
     try {
       setSaving(true);
-      await api.put('/seo', data);
-      showToast('SEO settings saved successfully!');
+      const payload = {
+        // Frontend keys
+        siteName: data.siteName,
+        defaultTitle: data.defaultTitle,
+        titleTemplate: data.titleTemplate,
+        defaultDescription: data.defaultDescription,
+        canonicalUrl: data.canonicalUrl,
+        ogImage: data.ogImage,
+        twitterHandle: data.twitterHandle,
+        twitterCardType: data.twitterCardType,
+        keywords: data.keywords,
+        robots: data.robots,
+        schemaType: data.schemaType,
+        jsonLdCustom: data.jsonLdCustom,
+
+        // Database schema keys
+        metaTitle: data.defaultTitle,
+        metaDescription: data.defaultDescription,
+        author: data.siteName,
+        ogTitle: data.defaultTitle,
+        ogDescription: data.defaultDescription,
+        ogType: 'website',
+        structuredData: data.jsonLdCustom || null,
+        pageOverrides: JSON.stringify({
+          titleTemplate: data.titleTemplate,
+          schemaType: data.schemaType,
+        }),
+      };
+
+      const res = await api.put('/seo', payload);
+
+      // Update frontend state directly from verified server response
+      if (res.data?.success && res.data?.data) {
+        const saved = res.data.data;
+        setData({
+          siteName: saved.siteName ?? saved.author ?? data.siteName,
+          defaultTitle: saved.defaultTitle ?? saved.metaTitle ?? data.defaultTitle,
+          titleTemplate: saved.titleTemplate ?? data.titleTemplate,
+          defaultDescription: saved.defaultDescription ?? saved.metaDescription ?? data.defaultDescription,
+          canonicalUrl: saved.canonicalUrl ?? data.canonicalUrl,
+          ogImage: saved.ogImage ?? data.ogImage,
+          twitterHandle: saved.twitterHandle ?? data.twitterHandle,
+          twitterCardType: saved.twitterCardType ?? data.twitterCardType,
+          keywords: saved.keywords ?? data.keywords,
+          robots: saved.robots ?? data.robots,
+          schemaType: saved.schemaType ?? data.schemaType,
+          jsonLdCustom: saved.jsonLdCustom ?? saved.structuredData ?? data.jsonLdCustom,
+        });
+      }
+
+      showToast(isAr ? 'تم حفظ إعدادات وتحديثات SEO بنجاح!' : 'SEO settings saved successfully!');
     } catch {
       showToast('Failed to save SEO settings', 'error');
     } finally {
