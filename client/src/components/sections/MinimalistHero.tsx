@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
-import { Typewriter } from '@/components/ui/typewriter';
 import { GithubIcon, LinkedinIcon, InstagramIcon, FacebookIcon } from '../ui/BrandIcons';
 import { buttonVariants } from '../ui/Button';
 import { SocialButton } from '../ui/SocialButton';
@@ -185,6 +184,7 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
   const { currentLang, currentDirection } = useLanguage();
   const isRtl = currentDirection === 'rtl' || currentLang === 'ar';
   const isMobile = useIsMobile();
+  const isCompactViewport = useIsMobile(1024);
   const cubicEase = [0.22, 1, 0.36, 1] as any;
 
   const [startMorph, setStartMorph] = useState(false);
@@ -292,7 +292,7 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
     const ro = new ResizeObserver(measure);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [isDesktopHover, resolvedPrimarySrc]);
+  }, [isDesktopHover, isCompactViewport, resolvedPrimarySrc]);
 
   const canRadialReveal = isDesktopHover && Boolean(resolvedHoverSrc) && hoverImgReady;
 
@@ -596,8 +596,8 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
   ].filter(Boolean) as { label: string; href: string; Icon: any }[];
 
   return (
-    <div className="relative min-h-[100svh] md:min-h-0 xl:min-h-[calc(100vh-4rem)] flex flex-col justify-between overflow-hidden bg-transparent">
-      {/* ── Dynamic Portrait Bottom Mask: Subtle, refined 4% edge roll-off in light mode (no exaggerated white fog), seamless blend in dark mode ── */}
+    <div className="relative min-h-[min(100svh,1440px)] lg:min-h-0 xl:min-h-[calc(100vh-4rem)] flex flex-col justify-between overflow-hidden bg-transparent">
+      {/* ── Dynamic Portrait Bottom Mask: Crisp grounded edge in light mode, eased multi-stop studio fade in dark mode ── */}
       <style>{`
         .hero-portrait-stage {
           -webkit-mask-image: linear-gradient(to bottom, black 0%, black 95.8%, rgba(0, 0, 0, 0.72) 98.2%, transparent 100%);
@@ -607,498 +607,668 @@ const MinimalistHeroComponent: React.FC<MinimalistHeroProps> = ({
           -webkit-mask-image: linear-gradient(to bottom, black 0%, black 91%, rgba(0, 0, 0, 0.75) 96.5%, transparent 100%);
           mask-image: linear-gradient(to bottom, black 0%, black 91%, rgba(0, 0, 0, 0.75) 96.5%, transparent 100%);
         }
+        .hero-portrait-stage-mobile {
+          -webkit-mask-image: linear-gradient(to bottom, black 0%, black 96.5%, rgba(0, 0, 0, 0.78) 98.8%, transparent 100%);
+          mask-image: linear-gradient(to bottom, black 0%, black 96.5%, rgba(0, 0, 0, 0.78) 98.8%, transparent 100%);
+        }
+        .dark .hero-portrait-stage-mobile {
+          -webkit-mask-image: linear-gradient(
+            to bottom,
+            black 0%,
+            black 78%,
+            rgba(0, 0, 0, 0.88) 85%,
+            rgba(0, 0, 0, 0.56) 91.5%,
+            rgba(0, 0, 0, 0.2) 96.5%,
+            transparent 100%
+          );
+          mask-image: linear-gradient(
+            to bottom,
+            black 0%,
+            black 78%,
+            rgba(0, 0, 0, 0.88) 85%,
+            rgba(0, 0, 0, 0.56) 91.5%,
+            rgba(0, 0, 0, 0.2) 96.5%,
+            transparent 100%
+          );
+        }
+        .hero-compact-layout {
+          --hero-stage-h: clamp(295px, min(48svh, 96vw), 460px);
+        }
+        @media (min-width: 768px) {
+          .hero-compact-layout {
+            --hero-stage-h: clamp(340px, min(52svh, 78vw), 740px);
+          }
+        }
       `}</style>
 
       {/* ── Single Living Background: React Bits Ambient Backdrop (Light & Dark + Seamless Bottom Fade) ── */}
       <HeroBackground />
 
       {/* Main Hero Content */}
-      <div className="relative z-10 flex-1 max-w-7xl mx-auto w-full px-5 sm:px-6 lg:px-6 pt-20 sm:pt-24 md:pt-28 xl:pt-32 pb-8 md:pb-12 xl:pb-8 flex flex-col justify-center md:justify-start xl:justify-center">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-8 items-center">
+      {isCompactViewport ? (
+        /* ═══════════════════════════════════════════════════════════════════════════
+           MOBILE & SMALL/TALL TABLETS (< 1024px) — EDITORIAL STUDIO FLOW (NO SPECIALTIES/TYPEWRITER)
+           Fluid viewport-proportional scaling from iPhone SE & 16 Pro Max to iPad Mini/Air & Surface Pro 10
+        ═══════════════════════════════════════════════════════════════════════════ */
+        <div className="hero-compact-layout relative z-10 flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 pt-[80px] min-[420px]:pt-[90px] sm:pt-[96px] md:pt-[104px] min-[880px]:pt-[124px] pb-5 min-[420px]:pb-6 md:pb-8 min-[880px]:pb-10 flex flex-col justify-between">
 
-          {/* ── Left Column (desktop & tablet): Headline, Bio, CTA, Social, Stats ── */}
-          <div className="order-2 lg:order-1 lg:col-span-7 xl:col-span-5 flex flex-col items-start z-10 min-w-0">
-            <motion.div
-              initial={isMobile ? false : { opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={isMobile ? { duration: 0 } : { duration: 0.3 }}
-              className="space-y-5 sm:space-y-6 w-full"
-            >
-              {/* Headline + Bio */}
-              <div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-foreground tracking-tight leading-tight mb-3">
-                  {isMobile ? (
-                    headlineContent
-                  ) : (
-                    <SplitText
-                      text={headlineContent}
-                      delay={30}
-                      duration={0.45}
-                    />
-                  )}
-                </h1>
-                {bioText ? (
-                  isMobile ? (
-                    <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-xl">
-                      {bioText}
-                    </p>
-                  ) : (
-                    <BlurText
-                      text={bioText}
-                      animateBy="block"
-                      delay={20}
-                      className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-xl"
-                    />
-                  )
-                ) : null}
-              </div>
+          {/* ── 1. Top Editorial Opening Statement (Immediate Value Proposition Above the Fold) ── */}
+          <div className="w-full max-w-2xl min-[880px]:max-w-3xl flex flex-col items-start text-start space-y-3 min-[420px]:space-y-3.5 md:space-y-4 min-[880px]:space-y-5">
+            {/* Commanding Display Headline */}
+            <h1 className="text-[1.8rem] min-[390px]:text-[2rem] min-[420px]:text-[2.15rem] sm:text-[2.45rem] md:text-[2.85rem] min-[880px]:text-[3.35rem] font-extrabold text-foreground tracking-[-0.025em] rtl:tracking-normal leading-[1.11] rtl:leading-[1.24] text-balance">
+              {isMobile ? (
+                headlineContent
+              ) : (
+                <SplitText
+                  text={headlineContent}
+                  delay={30}
+                  duration={0.45}
+                />
+              )}
+            </h1>
 
-              {/* CTA Button */}
-              <FadeContent delay={0.2} blur={false} distance={15}>
-                <a
-                  href={ctaHref}
-                  className={buttonVariants({ variant: 'primary', size: 'default' })}
-                >
-                  <span>{ctaText}</span>
-                  <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-200 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 rtl:rotate-180" />
-                </a>
-              </FadeContent>
+            {/* Crisp Editorial Bio */}
+            {bioText ? (
+              <p className="text-[14.5px] min-[420px]:text-[15.5px] sm:text-[16px] md:text-[17px] min-[880px]:text-[19px] text-muted-foreground leading-[1.6] max-w-[56ch]">
+                {bioText}
+              </p>
+            ) : null}
 
-              {/* Social Icons — Balanced White / Obsidian glass with luminous emerald hover */}
+            {/* Unified Action Row: Primary CTA + Social Links on one balanced baseline */}
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-1.5 md:pt-2 min-[880px]:pt-2.5">
+              <a
+                href={ctaHref}
+                className={`${buttonVariants({ variant: 'primary', size: 'default' })} min-[880px]:h-12 min-[880px]:px-7 min-[880px]:text-[15px]`}
+              >
+                <span>{ctaText}</span>
+                <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-200 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 rtl:rotate-180" />
+              </a>
+
               {resolvedLinks.length > 0 && (
-                <FadeContent delay={0.3} blur={false} distance={12}>
-                  <div className="flex items-center gap-2.5 sm:gap-3 pt-1">
-                    {resolvedLinks.map((s, i) => (
-                      <motion.div
-                        key={s.label}
-                        initial={isMobile ? false : { opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={isMobile ? { duration: 0 } : { delay: 0.08 + i * 0.03, duration: 0.2 }}
-                      >
-                        <SocialButton
-                          href={s.href}
-                          label={s.label}
-                          icon={<s.Icon size={18} />}
-                        />
-                      </motion.div>
-                    ))}
-                  </div>
-                </FadeContent>
+                <div className="flex items-center gap-2 sm:gap-2.5 min-[880px]:gap-3">
+                  {resolvedLinks.map((s) => (
+                    <SocialButton
+                      key={s.label}
+                      href={s.href}
+                      label={s.label}
+                      icon={<s.Icon size={isMobile ? 17 : 19} />}
+                      size={isMobile ? 'sm' : 'md'}
+                    />
+                  ))}
+                </div>
               )}
-
-              {/* Stats Bar */}
-              {activeStats.length > 0 && (
-                <FadeContent delay={0.4} blur={false} distance={15}>
-                  <div
-                    className={`grid ${activeStats.length === 3
-                      ? 'grid-cols-3 sm:grid-cols-3 lg:grid-cols-4'
-                      : 'grid-cols-2 sm:grid-cols-4'
-                      } gap-3 sm:gap-4 pt-5 sm:pt-6 border-t border-border/40 mt-5 sm:mt-6 w-full`}
-                  >
-                    {activeStats.map((stat, idx) => (
-                      <div key={idx} className="flex flex-col">
-                        <span className="text-lg sm:text-2xl font-extrabold text-foreground font-mono">
-                          <AnimatedStatValue value={stat.value} />
-                        </span>
-                        <span className="text-[11px] sm:text-xs text-muted-foreground uppercase tracking-wider mt-1 sm:mt-1.5 leading-snug">
-                          {formatStatLabel(stat.label)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </FadeContent>
-              )}
-            </motion.div>
+            </div>
           </div>
 
-          {/* ── Center/Right Column: Blob + Image (5 cols on large tablet/iPad, 4 cols on desktop) ── */}
-          <div className="order-1 lg:order-2 lg:col-span-5 xl:col-span-4 relative flex flex-col justify-center items-center min-w-0">
+          {/* ── 2. Monumental Grounded Portrait Stage + Architectural Bottom Metrics Floor ── */}
+          <div className="relative w-full mt-6 min-[420px]:mt-7 md:mt-8 flex flex-col">
 
-            {/* ── Mobile-only: typewriter above image ── */}
-            {words.length > 0 && (
-              <div className="lg:hidden w-full flex flex-col mb-1 sm:mb-2.5 px-1">
-                <motion.div
-                  initial={isMobile ? false : { opacity: 0, y: -8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={isMobile ? { duration: 0 } : { duration: 0.3, delay: 0.05 }}
-                  className="flex justify-center items-center min-h-[2.4rem] sm:min-h-[3rem]"
-                >
-                  <h2
-                    className="text-lg sm:text-2xl font-extrabold tracking-tight rtl:tracking-normal uppercase rtl:normal-case text-foreground text-center leading-[1.35] rtl:leading-[1.45]"
-                    dir="auto"
-                    style={{
-                      overflowWrap: 'break-word',
-                      wordBreak: 'normal',
-                    }}
-                  >
-                    <Typewriter
-                      words={words}
-                      speed={65}
-                      delayBetweenWords={2200}
-                      cursor={true}
-                      className="text-foreground inline-block"
-                    />
-                  </h2>
-                </motion.div>
-              </div>
-            )}
+            {/* Full-Width Centered Portrait Stage — Fluidly scales to viewport height & width */}
+            <div
+              className="relative flex items-end justify-center w-full overflow-visible select-none pointer-events-none"
+              style={{ height: 'var(--hero-stage-h)' }}
+            >
+              {/* Quiet Studio Backlight Depth (separates silhouette from obsidian grid without neon bloom) */}
+              <div
+                aria-hidden="true"
+                className="absolute inset-x-0 bottom-0 h-[94%] opacity-50 dark:opacity-100 pointer-events-none"
+                style={{
+                  background:
+                    'radial-gradient(ellipse 68% 60% at 50% 56%, rgba(16, 185, 129, 0.10) 0%, rgba(14, 165, 233, 0.04) 44%, transparent 70%)',
+                }}
+              />
 
-            {/* Blob + Profile Image (Anchored & Stationary, zero mouse movement) */}
-            <div className="relative flex justify-center items-center min-h-[350px] sm:min-h-[390px] md:min-h-[420px] lg:min-h-[460px] xl:min-h-[500px] w-full select-none pointer-events-none">
-              {/* Fluid Blob Backdrop — Enlarged to match reference photo, perfectly framing profile */}
-              <div className="absolute -top-7 sm:-top-9 md:-top-10 lg:-top-11 xl:-top-12 w-[320px] h-[320px] sm:w-[360px] sm:h-[360px] md:w-[390px] md:h-[390px] lg:w-[400px] lg:h-[400px] xl:w-[450px] xl:h-[450px] z-0 pointer-events-none select-none">
-                <motion.div
-                  initial={isMobile ? false : { scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={isMobile ? { duration: 0 } : { duration: 0.4, ease: cubicEase }}
-                  className="w-full h-full relative"
-                >
-                  <svg viewBox="0 0 500 500" className="w-full h-full transform-gpu" style={{ willChange: 'transform' }}>
-                    <defs>
-                      {/* Dark Mode Gradient: Cyan into Primary Theme */}
-                      <linearGradient id="fluid-gradient-dark" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#0EA5E9" />
-                        <stop offset="50%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)' }} />
-                        <stop offset="100%" stopColor="#064E3B" style={{ stopColor: '#064E3B' }} />
-                      </linearGradient>
-                      {/* Light Mode Gradient: Luminous, eye-friendly theme gradient */}
-                      <linearGradient id="fluid-gradient-light" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)' }} />
-                        <stop offset="60%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)' }} />
-                        <stop offset="100%" stopColor="#064E3B" style={{ stopColor: '#064E3B' }} />
-                      </linearGradient>
-                    </defs>
-                    <motion.path
-                      className="dark:fill-[url(#fluid-gradient-dark)] fill-[url(#fluid-gradient-light)]"
-                      d={blobPath1}
-                      animate={startMorph ? { d: [blobPath1, blobPath2, blobPath3, blobPath1] } : undefined}
-                      transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
-                    />
-                  </svg>
-                </motion.div>
-              </div>
-
-              {/* Profile Image — Anchored, zero mouse movement, bottom aligned with page elements */}
-              <motion.div
-                initial={isMobile ? false : { opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={isMobile ? { duration: 0 } : { duration: 0.35, ease: cubicEase }}
-                className="relative z-10 flex items-center justify-center pointer-events-none select-none transform-gpu"
-                style={{ willChange: 'opacity, transform', transform: 'translateZ(0)' }}
+              {/* Sculptural Cyan-to-Emerald Studio Backdrop (proportionally locked 1:1 with portrait height across all viewports) */}
+              <div
+                className="absolute left-1/2 -translate-x-1/2 z-0 pointer-events-none select-none"
+                style={{
+                  width: 'calc(var(--hero-stage-h) * 1.036)',
+                  height: 'calc(var(--hero-stage-h) * 1.036)',
+                  top: 'calc(var(--hero-stage-h) * -0.097)',
+                }}
               >
-                <div
-                  ref={stageRef}
+                <svg viewBox="0 0 500 500" className="w-full h-full">
+                  <defs>
+                    <linearGradient id="fluid-gradient-dark-compact" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#0EA5E9" />
+                      <stop offset="50%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)' }} />
+                      <stop offset="100%" stopColor="#064E3B" style={{ stopColor: '#064E3B' }} />
+                    </linearGradient>
+                    <linearGradient id="fluid-gradient-light-compact" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)' }} />
+                      <stop offset="60%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)' }} />
+                      <stop offset="100%" stopColor="#064E3B" style={{ stopColor: '#064E3B' }} />
+                    </linearGradient>
+                  </defs>
+                  <path
+                    className="dark:fill-[url(#fluid-gradient-dark-compact)] fill-[url(#fluid-gradient-light-compact)]"
+                    d={blobPath1}
+                  />
+                </svg>
+              </div>
+
+              {/* Monumental Portrait Silhouette — Exact stage height, grounded FLUSH to bottom floor (zero mid-air float) */}
+              <div className="hero-portrait-stage-mobile relative z-10 h-full flex items-end justify-center shrink-0 pointer-events-none select-none">
+                <img
+                  src={resolvedPrimarySrc}
+                  alt=""
+                  aria-label="Profile photo"
+                  loading="eager"
+                  decoding="async"
+                  // @ts-ignore
+                  fetchPriority="high"
+                  width={560}
+                  height={420}
+                  draggable={false}
                   style={{
                     userSelect: 'none',
                     WebkitUserSelect: 'none',
                     pointerEvents: 'none',
                   }}
-                  className="hero-portrait-stage relative w-[275px] sm:w-[315px] md:w-[340px] lg:w-[370px] xl:w-[420px] scale-[1.54] sm:scale-[1.56] md:scale-[1.58] lg:scale-[1.56] xl:scale-[1.6] translate-y-0 sm:translate-y-1 md:translate-y-1 lg:translate-y-2 xl:translate-y-2 pointer-events-none select-none"
+                  className="block h-full w-auto max-w-none object-contain object-bottom pointer-events-none select-none"
+                />
+              </div>
+            </div>
+
+            {/* ── 3. Architectural Metrics Floor (Physically grounds the portrait silhouette) ── */}
+            {activeStats.length > 0 && (
+              <div className="relative z-20 w-full border-t border-slate-900/[0.09] dark:border-white/[0.09] pt-4 min-[420px]:pt-5 md:pt-6 min-[880px]:pt-7">
+                {/* Whisper-quiet hairline horizon sheen */}
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -top-px inset-x-0 h-px bg-gradient-to-r from-transparent via-emerald-500/35 to-transparent"
+                />
+                <div
+                  className={`grid ${
+                    activeStats.length === 3
+                      ? 'grid-cols-3'
+                      : 'grid-cols-2 min-[380px]:grid-cols-4'
+                  } gap-y-4 gap-x-2.5 sm:gap-6 w-full`}
                 >
-                  <img
-                    ref={primaryImgRef}
-                    src={resolvedPrimarySrc}
-                    alt=""
-                    aria-label="Profile photo"
-                    loading="eager"
-                    decoding="async"
-                    // @ts-ignore
-                    fetchPriority="high"
-                    width={420}
-                    height={420}
-                    draggable={false}
-                    onLoad={() => {
-                      const el = stageRef.current;
-                      if (el && el.offsetWidth > 20 && el.offsetHeight > 20) {
-                        setStageSize({ w: el.offsetWidth, h: el.offsetHeight });
-                      }
-                    }}
+                  {activeStats.map((stat, idx) => (
+                    <div
+                      key={idx}
+                      className={`flex flex-col ${
+                        idx > 0
+                          ? 'min-[380px]:border-s min-[380px]:border-slate-900/[0.07] min-[380px]:dark:border-white/[0.07] min-[380px]:ps-2.5 sm:ps-5 min-[880px]:ps-7'
+                          : ''
+                      }`}
+                    >
+                      <span className="text-[1.25rem] min-[420px]:text-[1.35rem] sm:text-[1.5rem] md:text-[1.75rem] min-[880px]:text-[2.1rem] font-extrabold text-foreground font-mono tracking-tight tabular-nums leading-none">
+                        <AnimatedStatValue value={stat.value} />
+                      </span>
+                      <span className="text-[10px] min-[420px]:text-[10.5px] sm:text-[11.5px] md:text-xs min-[880px]:text-[13px] font-medium text-muted-foreground uppercase rtl:normal-case tracking-[0.04em] sm:tracking-[0.06em] rtl:tracking-normal mt-1.5 min-[880px]:mt-2 leading-snug">
+                        {formatStatLabel(stat.label)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      ) : (
+        /* ═══════════════════════════════════════════════════════════════════════════
+           LARGE IPADS & DESKTOP (>= 1024px) — UNTOUCHED SIGNATURE 3-COLUMN HERO
+        ═══════════════════════════════════════════════════════════════════════════ */
+        <div className="relative z-10 flex-1 max-w-7xl mx-auto w-full px-5 sm:px-6 lg:px-6 pt-20 sm:pt-24 md:pt-28 xl:pt-32 pb-8 md:pb-12 xl:pb-8 flex flex-col justify-center md:justify-start xl:justify-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-8 items-center">
+
+            {/* ── Left Column (desktop & tablet): Headline, Bio, CTA, Social, Stats ── */}
+            <div className="order-2 lg:order-1 lg:col-span-7 xl:col-span-5 flex flex-col items-start z-10 min-w-0">
+              <motion.div
+                initial={isMobile ? false : { opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={isMobile ? { duration: 0 } : { duration: 0.3 }}
+                className="space-y-5 sm:space-y-6 w-full"
+              >
+                {/* Headline + Bio */}
+                <div>
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-foreground tracking-tight leading-tight mb-3">
+                    {isMobile ? (
+                      headlineContent
+                    ) : (
+                      <SplitText
+                        text={headlineContent}
+                        delay={30}
+                        duration={0.45}
+                      />
+                    )}
+                  </h1>
+                  {bioText ? (
+                    isMobile ? (
+                      <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-xl">
+                        {bioText}
+                      </p>
+                    ) : (
+                      <BlurText
+                        text={bioText}
+                        animateBy="block"
+                        delay={20}
+                        className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-xl"
+                      />
+                    )
+                  ) : null}
+                </div>
+
+                {/* CTA Button */}
+                <FadeContent delay={0.2} blur={false} distance={15}>
+                  <a
+                    href={ctaHref}
+                    className={buttonVariants({ variant: 'primary', size: 'default' })}
+                  >
+                    <span>{ctaText}</span>
+                    <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-200 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 rtl:rotate-180" />
+                  </a>
+                </FadeContent>
+
+                {/* Social Icons — Balanced White / Obsidian glass with luminous emerald hover */}
+                {resolvedLinks.length > 0 && (
+                  <FadeContent delay={0.3} blur={false} distance={12}>
+                    <div className="flex items-center gap-2.5 sm:gap-3 pt-1">
+                      {resolvedLinks.map((s, i) => (
+                        <motion.div
+                          key={s.label}
+                          initial={isMobile ? false : { opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={isMobile ? { duration: 0 } : { delay: 0.08 + i * 0.03, duration: 0.2 }}
+                        >
+                          <SocialButton
+                            href={s.href}
+                            label={s.label}
+                            icon={<s.Icon size={18} />}
+                          />
+                        </motion.div>
+                      ))}
+                    </div>
+                  </FadeContent>
+                )}
+
+                {/* Stats Bar */}
+                {activeStats.length > 0 && (
+                  <FadeContent delay={0.4} blur={false} distance={15}>
+                    <div
+                      className={`grid ${activeStats.length === 3
+                        ? 'grid-cols-3 sm:grid-cols-3 lg:grid-cols-4'
+                        : 'grid-cols-2 sm:grid-cols-4'
+                        } gap-3 sm:gap-4 pt-5 sm:pt-6 border-t border-border/40 mt-5 sm:mt-6 w-full`}
+                    >
+                      {activeStats.map((stat, idx) => (
+                        <div key={idx} className="flex flex-col">
+                          <span className="text-lg sm:text-2xl font-extrabold text-foreground font-mono">
+                            <AnimatedStatValue value={stat.value} />
+                          </span>
+                          <span className="text-[11px] sm:text-xs text-muted-foreground uppercase tracking-wider mt-1 sm:mt-1.5 leading-snug">
+                            {formatStatLabel(stat.label)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </FadeContent>
+                )}
+              </motion.div>
+            </div>
+
+            {/* ── Center/Right Column: Blob + Image (5 cols on large tablet/iPad, 4 cols on desktop) ── */}
+            <div className="order-1 lg:order-2 lg:col-span-5 xl:col-span-4 relative flex flex-col justify-center items-center min-w-0">
+
+              {/* Blob + Profile Image (Anchored & Stationary, zero mouse movement) */}
+              <div className="relative flex justify-center items-center min-h-[350px] sm:min-h-[390px] md:min-h-[420px] lg:min-h-[460px] xl:min-h-[500px] w-full select-none pointer-events-none">
+                {/* Fluid Blob Backdrop — Enlarged to match reference photo, perfectly framing profile */}
+                <div className="absolute -top-7 sm:-top-9 md:-top-10 lg:-top-11 xl:-top-12 w-[320px] h-[320px] sm:w-[360px] sm:h-[360px] md:w-[390px] md:h-[390px] lg:w-[400px] lg:h-[400px] xl:w-[450px] xl:h-[450px] z-0 pointer-events-none select-none">
+                  <motion.div
+                    initial={isMobile ? false : { scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={isMobile ? { duration: 0 } : { duration: 0.4, ease: cubicEase }}
+                    className="w-full h-full relative"
+                  >
+                    <svg viewBox="0 0 500 500" className="w-full h-full transform-gpu" style={{ willChange: 'transform' }}>
+                      <defs>
+                        {/* Dark Mode Gradient: Cyan into Primary Theme */}
+                        <linearGradient id="fluid-gradient-dark" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#0EA5E9" />
+                          <stop offset="50%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)' }} />
+                          <stop offset="100%" stopColor="#064E3B" style={{ stopColor: '#064E3B' }} />
+                        </linearGradient>
+                        {/* Light Mode Gradient: Luminous, eye-friendly theme gradient */}
+                        <linearGradient id="fluid-gradient-light" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)' }} />
+                          <stop offset="60%" stopColor="var(--theme-primary-hex, #10B981)" style={{ stopColor: 'var(--theme-primary-hex, #10B981)' }} />
+                          <stop offset="100%" stopColor="#064E3B" style={{ stopColor: '#064E3B' }} />
+                        </linearGradient>
+                      </defs>
+                      <motion.path
+                        className="dark:fill-[url(#fluid-gradient-dark)] fill-[url(#fluid-gradient-light)]"
+                        d={blobPath1}
+                        animate={startMorph ? { d: [blobPath1, blobPath2, blobPath3, blobPath1] } : undefined}
+                        transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
+                      />
+                    </svg>
+                  </motion.div>
+                </div>
+
+                {/* Profile Image — Anchored, zero mouse movement, bottom aligned with page elements */}
+                <motion.div
+                  initial={isMobile ? false : { opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={isMobile ? { duration: 0 } : { duration: 0.35, ease: cubicEase }}
+                  className="relative z-10 flex items-center justify-center pointer-events-none select-none transform-gpu"
+                  style={{ willChange: 'opacity, transform', transform: 'translateZ(0)' }}
+                >
+                  <div
+                    ref={stageRef}
                     style={{
                       userSelect: 'none',
                       WebkitUserSelect: 'none',
                       pointerEvents: 'none',
                     }}
-                    className="block w-full h-auto object-contain pointer-events-none select-none"
-                  />
-
-                  {/* Desktop-only Localized Ferrofluid / Liquid-Metal Dual-Portrait SVG Reveal Layer */}
-                  {canRadialReveal && (
-                    <svg
-                      ref={svgOverlayRef}
-                      viewBox={`0 0 ${stageSize.w} ${stageSize.h}`}
-                      aria-hidden="true"
-                      className="hidden lg:block absolute inset-0 w-full h-full pointer-events-none select-none overflow-visible"
+                    className="hero-portrait-stage relative w-[275px] sm:w-[315px] md:w-[340px] lg:w-[370px] xl:w-[420px] scale-[1.54] sm:scale-[1.56] md:scale-[1.58] lg:scale-[1.56] xl:scale-[1.6] translate-y-0 sm:translate-y-1 md:translate-y-1 lg:translate-y-2 xl:translate-y-2 pointer-events-none select-none"
+                  >
+                    <img
+                      ref={primaryImgRef}
+                      src={resolvedPrimarySrc}
+                      alt=""
+                      aria-label="Profile photo"
+                      loading="eager"
+                      decoding="async"
+                      // @ts-ignore
+                      fetchPriority="high"
+                      width={420}
+                      height={420}
+                      draggable={false}
+                      onLoad={() => {
+                        const el = stageRef.current;
+                        if (el && el.offsetWidth > 20 && el.offsetHeight > 20) {
+                          setStageSize({ w: el.offsetWidth, h: el.offsetHeight });
+                        }
+                      }}
                       style={{
-                        opacity: 0,
-                        visibility: 'hidden',
                         userSelect: 'none',
                         WebkitUserSelect: 'none',
                         pointerEvents: 'none',
                       }}
-                    >
-                      <defs>
-                        {/* 1. Gooey Ferrofluid Metaball Filter (Secondary Hover Portrait Mask) */}
-                        <filter id="hero-ferro-hover-goo" x="-25%" y="-25%" width="150%" height="150%" colorInterpolationFilters="sRGB">
-                          <feGaussianBlur in="SourceGraphic" stdDeviation="9.5" result="blur" />
-                          <feColorMatrix
-                            in="blur"
-                            mode="matrix"
-                            values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -8.5"
-                            result="goo"
-                          />
-                          <feGaussianBlur in="goo" stdDeviation="1.8" />
-                        </filter>
+                      className="block w-full h-auto object-contain pointer-events-none select-none"
+                    />
 
-                        {/* 2. Slightly Tighter Inner Cutout Filter (Primary Portrait Mask — prevents dark seam & zero ghosting) */}
-                        <filter id="hero-ferro-primary-goo" x="-25%" y="-25%" width="150%" height="150%" colorInterpolationFilters="sRGB">
-                          <feGaussianBlur in="SourceGraphic" stdDeviation="9.5" result="blur" />
-                          <feColorMatrix
-                            in="blur"
-                            mode="matrix"
-                            values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -10.2"
-                            result="goo"
-                          />
-                          <feGaussianBlur in="goo" stdDeviation="1.4" />
-                        </filter>
-
-                        {/* 3. Liquid-Metal Contour Rim Extractor (Razor-fine chrome ring + soft specular halo) */}
-                        <filter id="hero-ferro-rim-goo" x="-25%" y="-25%" width="150%" height="150%" colorInterpolationFilters="sRGB">
-                          <feGaussianBlur in="SourceGraphic" stdDeviation="9.5" result="blur" />
-                          <feColorMatrix
-                            in="blur"
-                            mode="matrix"
-                            values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 24 -9.0"
-                            result="goo"
-                          />
-                          <feMorphology in="goo" operator="erode" radius="1.25" result="inner" />
-                          <feComposite in="goo" in2="inner" operator="out" result="ring" />
-                          <feGaussianBlur in="ring" stdDeviation="2.2" result="halo" />
-                          <feComponentTransfer in="halo" result="softHalo">
-                            <feFuncA type="linear" slope="0.42" />
-                          </feComponentTransfer>
-                          <feMerge>
-                            <feMergeNode in="softHalo" />
-                            <feMergeNode in="ring" />
-                          </feMerge>
-                        </filter>
-
-                        {/* Rotating Brushed Liquid-Chrome / Titanium-Emerald Metallic Gradient */}
-                        <linearGradient
-                          ref={metalGradRef}
-                          id="hero-liquid-metal-grad"
-                          gradientUnits="userSpaceOnUse"
-                          x1="0"
-                          y1="0"
-                          x2={stageSize.w}
-                          y2={stageSize.h}
-                        >
-                          <stop offset="0%" stopColor="#f8fafc" />
-                          <stop offset="18%" stopColor="#94a3b8" />
-                          <stop offset="35%" stopColor="#ffffff" />
-                          <stop offset="52%" stopColor="var(--theme-primary-hex, #10b981)" style={{ stopColor: 'var(--theme-primary-hex, #10b981)' }} />
-                          <stop offset="68%" stopColor="#38bdf8" />
-                          <stop offset="84%" stopColor="#64748b" />
-                          <stop offset="100%" stopColor="#f8fafc" />
-                        </linearGradient>
-
-                        {/* Mask A: Reveals Secondary Portrait ONLY inside the localized ferrofluid pool */}
-                        <mask
-                          id="hero-ferro-hover-mask"
-                          maskUnits="userSpaceOnUse"
-                          x={-stageSize.w * 0.15}
-                          y={-stageSize.h * 0.15}
-                          width={stageSize.w * 1.3}
-                          height={stageSize.h * 1.3}
-                        >
-                          <rect
-                            x={-stageSize.w * 0.15}
-                            y={-stageSize.h * 0.15}
-                            width={stageSize.w * 1.3}
-                            height={stageSize.h * 1.3}
-                            fill="#000"
-                          />
-                          <g filter="url(#hero-ferro-hover-goo)" fill="#fff">
-                            {METABALL_INDICES.map((idx) => (
-                              <circle
-                                key={`h-${idx}`}
-                                ref={(el) => { hoverCirclesRef.current[idx] = el; }}
-                                cx={stageSize.w / 2}
-                                cy={stageSize.h / 2}
-                                r={0}
-                              />
-                            ))}
-                          </g>
-                        </mask>
-
-                        {/* Mask B: Dissolves Primary Portrait cleanly inside the ferrofluid pool (zero ghosting) */}
-                        <mask
-                          id="hero-ferro-primary-mask"
-                          maskUnits="userSpaceOnUse"
-                          x={-stageSize.w * 0.15}
-                          y={-stageSize.h * 0.15}
-                          width={stageSize.w * 1.3}
-                          height={stageSize.h * 1.3}
-                        >
-                          <rect
-                            x={-stageSize.w * 0.15}
-                            y={-stageSize.h * 0.15}
-                            width={stageSize.w * 1.3}
-                            height={stageSize.h * 1.3}
-                            fill="#fff"
-                          />
-                          <g filter="url(#hero-ferro-primary-goo)" fill="#000">
-                            {METABALL_INDICES.map((idx) => (
-                              <circle
-                                key={`p-${idx}`}
-                                ref={(el) => { primaryCirclesRef.current[idx] = el; }}
-                                cx={stageSize.w / 2}
-                                cy={stageSize.h / 2}
-                                r={0}
-                              />
-                            ))}
-                          </g>
-                        </mask>
-
-                        {/* Mask C: Carves the exact animated liquid-metal perimeter contour */}
-                        <mask
-                          id="hero-ferro-rim-mask"
-                          maskUnits="userSpaceOnUse"
-                          x={-stageSize.w * 0.15}
-                          y={-stageSize.h * 0.15}
-                          width={stageSize.w * 1.3}
-                          height={stageSize.h * 1.3}
-                        >
-                          <rect
-                            x={-stageSize.w * 0.15}
-                            y={-stageSize.h * 0.15}
-                            width={stageSize.w * 1.3}
-                            height={stageSize.h * 1.3}
-                            fill="#000"
-                          />
-                          <g filter="url(#hero-ferro-rim-goo)" fill="#fff">
-                            {METABALL_INDICES.map((idx) => (
-                              <circle
-                                key={`r-${idx}`}
-                                ref={(el) => { rimCirclesRef.current[idx] = el; }}
-                                cx={stageSize.w / 2}
-                                cy={stageSize.h / 2}
-                                r={0}
-                              />
-                            ))}
-                          </g>
-                        </mask>
-                      </defs>
-
-                      {/* Layer 1: Primary Portrait (masked away inside hovered liquid pool) */}
-                      <image
-                        href={resolvedPrimarySrc}
-                        x="0"
-                        y="0"
-                        width={stageSize.w}
-                        height={stageSize.h}
-                        preserveAspectRatio="xMidYMid meet"
-                        mask="url(#hero-ferro-primary-mask)"
-                      />
-
-                      {/* Layer 2: Secondary Portrait (revealed ONLY inside hovered liquid pool) */}
-                      <image
-                        href={resolvedHoverSrc}
-                        x="0"
-                        y="0"
-                        width={stageSize.w}
-                        height={stageSize.h}
-                        preserveAspectRatio="xMidYMid meet"
-                        mask="url(#hero-ferro-hover-mask)"
-                      />
-
-                      {/* Layer 3: Gleaming Liquid-Metal Chrome Contour along the undulating ferrofluid edge */}
-                      <rect
-                        ref={rimRectRef}
-                        x={-stageSize.w * 0.15}
-                        y={-stageSize.h * 0.15}
-                        width={stageSize.w * 1.3}
-                        height={stageSize.h * 1.3}
-                        fill="url(#hero-liquid-metal-grad)"
-                        mask="url(#hero-ferro-rim-mask)"
-                        opacity="0"
-                      />
-
-                      {/* Layer 4: Orbiting Liquid-Metal Chrome Micro-Beads */}
-                      <g fill="url(#hero-liquid-metal-grad)">
-                        {FERRO_SPARKS.map((_, idx) => (
-                          <circle
-                            key={`s-${idx}`}
-                            ref={(el) => { sparkCirclesRef.current[idx] = el; }}
-                            cx={stageSize.w / 2}
-                            cy={stageSize.h / 2}
-                            r={0}
-                            opacity={0}
-                          />
-                        ))}
-                      </g>
-                    </svg>
-                  )}
-                </div>
-              </motion.div>
-
-              {/* Desktop-only Interactive Hover Hit-Zone tightly fitted to the portrait silhouette */}
-              {canRadialReveal && (
-                <div
-                  aria-hidden="true"
-                  onPointerEnter={handlePortraitPointerEnter}
-                  onPointerMove={handlePortraitPointerMove}
-                  onPointerLeave={handlePortraitPointerLeave}
-                  className="hidden lg:block absolute z-20 left-1/2 top-1/2 -translate-x-1/2 -translate-y-[49%] w-[300px] xl:w-[370px] h-[420px] xl:h-[490px] rounded-[46%_46%_34%_34%] pointer-events-auto"
-                />
-              )}
-            </div>
-          </div>
-
-          {/* ── Right Column (desktop only >= xl): Specialties stacked vertically, original clean dash & hover ── */}
-          {words.length > 0 && (
-            <div className="hidden xl:flex order-3 xl:col-span-3 xl:justify-start rtl:xl:justify-start xl:items-center z-10 min-w-0 w-full pl-1 xl:pl-3 rtl:pl-0 rtl:pr-1 rtl:xl:pr-3">
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.35, delay: 0.08 }}
-                className="w-auto min-w-max flex flex-col items-start rtl:items-start text-start rtl:text-start space-y-3.5 lg:space-y-4 xl:space-y-5"
-              >
-                {words.map((role, idx) => {
-                  const cleanRole = typeof role === 'string'
-                    ? (role.trim().startsWith('-') || role.trim().startsWith('—') ? role.trim().substring(1).trim() : role.trim())
-                    : role;
-
-                  return (
-                    <motion.div
-                      key={idx}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      whileHover={{ x: isRtl ? -12 : 12 }}
-                      transition={{
-                        duration: 0.28,
-                        ease: cubicEase,
-                        delay: 0.05 + idx * 0.03,
-                      }}
-                      className="flex items-center cursor-pointer py-0.5"
-                    >
-                      <span className="text-foreground/90 font-extrabold text-lg lg:text-xl xl:text-2xl 2xl:text-3xl mr-2.5 rtl:mr-0 rtl:ml-2.5 shrink-0 leading-none">
-                        -
-                      </span>
-                      <span
-                        className="whitespace-nowrap text-base sm:text-lg lg:text-[1.15rem] xl:text-[1.4rem] 2xl:text-[1.65rem] font-extrabold tracking-tight rtl:tracking-normal uppercase rtl:normal-case text-foreground/90 leading-none"
-                        dir="auto"
+                    {/* Desktop-only Localized Ferrofluid / Liquid-Metal Dual-Portrait SVG Reveal Layer */}
+                    {canRadialReveal && (
+                      <svg
+                        ref={svgOverlayRef}
+                        viewBox={`0 0 ${stageSize.w} ${stageSize.h}`}
+                        aria-hidden="true"
+                        className="hidden lg:block absolute inset-0 w-full h-full pointer-events-none select-none overflow-visible"
+                        style={{
+                          opacity: 0,
+                          visibility: 'hidden',
+                          userSelect: 'none',
+                          WebkitUserSelect: 'none',
+                          pointerEvents: 'none',
+                        }}
                       >
-                        {cleanRole}
-                      </span>
-                    </motion.div>
-                  );
-                })}
-              </motion.div>
-            </div>
-          )}
+                        <defs>
+                          {/* 1. Gooey Ferrofluid Metaball Filter (Secondary Hover Portrait Mask) */}
+                          <filter id="hero-ferro-hover-goo" x="-25%" y="-25%" width="150%" height="150%" colorInterpolationFilters="sRGB">
+                            <feGaussianBlur in="SourceGraphic" stdDeviation="9.5" result="blur" />
+                            <feColorMatrix
+                              in="blur"
+                              mode="matrix"
+                              values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -8.5"
+                              result="goo"
+                            />
+                            <feGaussianBlur in="goo" stdDeviation="1.8" />
+                          </filter>
 
+                          {/* 2. Slightly Tighter Inner Cutout Filter (Primary Portrait Mask — prevents dark seam & zero ghosting) */}
+                          <filter id="hero-ferro-primary-goo" x="-25%" y="-25%" width="150%" height="150%" colorInterpolationFilters="sRGB">
+                            <feGaussianBlur in="SourceGraphic" stdDeviation="9.5" result="blur" />
+                            <feColorMatrix
+                              in="blur"
+                              mode="matrix"
+                              values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -10.2"
+                              result="goo"
+                            />
+                            <feGaussianBlur in="goo" stdDeviation="1.4" />
+                          </filter>
+
+                          {/* 3. Liquid-Metal Contour Rim Extractor (Razor-fine chrome ring + soft specular halo) */}
+                          <filter id="hero-ferro-rim-goo" x="-25%" y="-25%" width="150%" height="150%" colorInterpolationFilters="sRGB">
+                            <feGaussianBlur in="SourceGraphic" stdDeviation="9.5" result="blur" />
+                            <feColorMatrix
+                              in="blur"
+                              mode="matrix"
+                              values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 24 -9.0"
+                              result="goo"
+                            />
+                            <feMorphology in="goo" operator="erode" radius="1.25" result="inner" />
+                            <feComposite in="goo" in2="inner" operator="out" result="ring" />
+                            <feGaussianBlur in="ring" stdDeviation="2.2" result="halo" />
+                            <feComponentTransfer in="halo" result="softHalo">
+                              <feFuncA type="linear" slope="0.42" />
+                            </feComponentTransfer>
+                            <feMerge>
+                              <feMergeNode in="softHalo" />
+                              <feMergeNode in="ring" />
+                            </feMerge>
+                          </filter>
+
+                          {/* Rotating Brushed Liquid-Chrome / Titanium-Emerald Metallic Gradient */}
+                          <linearGradient
+                            ref={metalGradRef}
+                            id="hero-liquid-metal-grad"
+                            gradientUnits="userSpaceOnUse"
+                            x1="0"
+                            y1="0"
+                            x2={stageSize.w}
+                            y2={stageSize.h}
+                          >
+                            <stop offset="0%" stopColor="#f8fafc" />
+                            <stop offset="18%" stopColor="#94a3b8" />
+                            <stop offset="35%" stopColor="#ffffff" />
+                            <stop offset="52%" stopColor="var(--theme-primary-hex, #10b981)" style={{ stopColor: 'var(--theme-primary-hex, #10b981)' }} />
+                            <stop offset="68%" stopColor="#38bdf8" />
+                            <stop offset="84%" stopColor="#64748b" />
+                            <stop offset="100%" stopColor="#f8fafc" />
+                          </linearGradient>
+
+                          {/* Mask A: Reveals Secondary Portrait ONLY inside the localized ferrofluid pool */}
+                          <mask
+                            id="hero-ferro-hover-mask"
+                            maskUnits="userSpaceOnUse"
+                            x={-stageSize.w * 0.15}
+                            y={-stageSize.h * 0.15}
+                            width={stageSize.w * 1.3}
+                            height={stageSize.h * 1.3}
+                          >
+                            <rect
+                              x={-stageSize.w * 0.15}
+                              y={-stageSize.h * 0.15}
+                              width={stageSize.w * 1.3}
+                              height={stageSize.h * 1.3}
+                              fill="#000"
+                            />
+                            <g filter="url(#hero-ferro-hover-goo)" fill="#fff">
+                              {METABALL_INDICES.map((idx) => (
+                                <circle
+                                  key={`h-${idx}`}
+                                  ref={(el) => { hoverCirclesRef.current[idx] = el; }}
+                                  cx={stageSize.w / 2}
+                                  cy={stageSize.h / 2}
+                                  r={0}
+                                />
+                              ))}
+                            </g>
+                          </mask>
+
+                          {/* Mask B: Dissolves Primary Portrait cleanly inside the ferrofluid pool (zero ghosting) */}
+                          <mask
+                            id="hero-ferro-primary-mask"
+                            maskUnits="userSpaceOnUse"
+                            x={-stageSize.w * 0.15}
+                            y={-stageSize.h * 0.15}
+                            width={stageSize.w * 1.3}
+                            height={stageSize.h * 1.3}
+                          >
+                            <rect
+                              x={-stageSize.w * 0.15}
+                              y={-stageSize.h * 0.15}
+                              width={stageSize.w * 1.3}
+                              height={stageSize.h * 1.3}
+                              fill="#fff"
+                            />
+                            <g filter="url(#hero-ferro-primary-goo)" fill="#000">
+                              {METABALL_INDICES.map((idx) => (
+                                <circle
+                                  key={`p-${idx}`}
+                                  ref={(el) => { primaryCirclesRef.current[idx] = el; }}
+                                  cx={stageSize.w / 2}
+                                  cy={stageSize.h / 2}
+                                  r={0}
+                                />
+                              ))}
+                            </g>
+                          </mask>
+
+                          {/* Mask C: Carves the exact animated liquid-metal perimeter contour */}
+                          <mask
+                            id="hero-ferro-rim-mask"
+                            maskUnits="userSpaceOnUse"
+                            x={-stageSize.w * 0.15}
+                            y={-stageSize.h * 0.15}
+                            width={stageSize.w * 1.3}
+                            height={stageSize.h * 1.3}
+                          >
+                            <rect
+                              x={-stageSize.w * 0.15}
+                              y={-stageSize.h * 0.15}
+                              width={stageSize.w * 1.3}
+                              height={stageSize.h * 1.3}
+                              fill="#000"
+                            />
+                            <g filter="url(#hero-ferro-rim-goo)" fill="#fff">
+                              {METABALL_INDICES.map((idx) => (
+                                <circle
+                                  key={`r-${idx}`}
+                                  ref={(el) => { rimCirclesRef.current[idx] = el; }}
+                                  cx={stageSize.w / 2}
+                                  cy={stageSize.h / 2}
+                                  r={0}
+                                />
+                              ))}
+                            </g>
+                          </mask>
+                        </defs>
+
+                        {/* Layer 1: Primary Portrait (masked away inside hovered liquid pool) */}
+                        <image
+                          href={resolvedPrimarySrc}
+                          x="0"
+                          y="0"
+                          width={stageSize.w}
+                          height={stageSize.h}
+                          preserveAspectRatio="xMidYMid meet"
+                          mask="url(#hero-ferro-primary-mask)"
+                        />
+
+                        {/* Layer 2: Secondary Portrait (revealed ONLY inside hovered liquid pool) */}
+                        <image
+                          href={resolvedHoverSrc}
+                          x="0"
+                          y="0"
+                          width={stageSize.w}
+                          height={stageSize.h}
+                          preserveAspectRatio="xMidYMid meet"
+                          mask="url(#hero-ferro-hover-mask)"
+                        />
+
+                        {/* Layer 3: Gleaming Liquid-Metal Chrome Contour along the undulating ferrofluid edge */}
+                        <rect
+                          ref={rimRectRef}
+                          x={-stageSize.w * 0.15}
+                          y={-stageSize.h * 0.15}
+                          width={stageSize.w * 1.3}
+                          height={stageSize.h * 1.3}
+                          fill="url(#hero-liquid-metal-grad)"
+                          mask="url(#hero-ferro-rim-mask)"
+                          opacity="0"
+                        />
+
+                        {/* Layer 4: Orbiting Liquid-Metal Chrome Micro-Beads */}
+                        <g fill="url(#hero-liquid-metal-grad)">
+                          {FERRO_SPARKS.map((_, idx) => (
+                            <circle
+                              key={`s-${idx}`}
+                              ref={(el) => { sparkCirclesRef.current[idx] = el; }}
+                              cx={stageSize.w / 2}
+                              cy={stageSize.h / 2}
+                              r={0}
+                              opacity={0}
+                            />
+                          ))}
+                        </g>
+                      </svg>
+                    )}
+                  </div>
+                </motion.div>
+
+                {/* Desktop-only Interactive Hover Hit-Zone tightly fitted to the portrait silhouette */}
+                {canRadialReveal && (
+                  <div
+                    aria-hidden="true"
+                    onPointerEnter={handlePortraitPointerEnter}
+                    onPointerMove={handlePortraitPointerMove}
+                    onPointerLeave={handlePortraitPointerLeave}
+                    className="hidden lg:block absolute z-20 left-1/2 top-1/2 -translate-x-1/2 -translate-y-[49%] w-[300px] xl:w-[370px] h-[420px] xl:h-[490px] rounded-[46%_46%_34%_34%] pointer-events-auto"
+                  />
+                )}
+              </div>
+            </div>
+
+            {/* ── Right Column (desktop only >= xl): Specialties stacked vertically, original clean dash & hover ── */}
+            {words.length > 0 && (
+              <div className="hidden xl:flex order-3 xl:col-span-3 xl:justify-start rtl:xl:justify-start xl:items-center z-10 min-w-0 w-full pl-1 xl:pl-3 rtl:pl-0 rtl:pr-1 rtl:xl:pr-3">
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.35, delay: 0.08 }}
+                  className="w-auto min-w-max flex flex-col items-start rtl:items-start text-start rtl:text-start space-y-3.5 lg:space-y-4 xl:space-y-5"
+                >
+                  {words.map((role, idx) => {
+                    const cleanRole = typeof role === 'string'
+                      ? (role.trim().startsWith('-') || role.trim().startsWith('—') ? role.trim().substring(1).trim() : role.trim())
+                      : role;
+
+                    return (
+                      <motion.div
+                        key={idx}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        whileHover={{ x: isRtl ? -12 : 12 }}
+                        transition={{
+                          duration: 0.28,
+                          ease: cubicEase,
+                          delay: 0.05 + idx * 0.03,
+                        }}
+                        className="flex items-center cursor-pointer py-0.5"
+                      >
+                        <span className="text-foreground/90 font-extrabold text-lg lg:text-xl xl:text-2xl 2xl:text-3xl mr-2.5 rtl:mr-0 rtl:ml-2.5 shrink-0 leading-none">
+                          -
+                        </span>
+                        <span
+                          className="whitespace-nowrap text-base sm:text-lg lg:text-[1.15rem] xl:text-[1.4rem] 2xl:text-[1.65rem] font-extrabold tracking-tight rtl:tracking-normal uppercase rtl:normal-case text-foreground/90 leading-none"
+                          dir="auto"
+                        >
+                          {cleanRole}
+                        </span>
+                      </motion.div>
+                    );
+                  })}
+                </motion.div>
+              </div>
+            )}
+
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

@@ -28,6 +28,37 @@ const CROSSHAIR_NODES = [
   { col: 28, row: 4 },
 ] as const;
 
+/* Calibrated static architectural grid cells & crosshairs for phones & tall tablets (< 1024px, 0% animation CPU cost) */
+const COMPACT_CELLS = [
+  { col: 1, row: 2 },
+  { col: 6, row: 3 },
+  { col: 2, row: 8 },
+  { col: 7, row: 10 },
+  { col: 4, row: 13 },
+  { col: 11, row: 4 },
+  { col: 15, row: 8 },
+  { col: 13, row: 13 },
+  { col: 18, row: 5 },
+  { col: 3, row: 19 },
+  { col: 17, row: 18 },
+  { col: 19, row: 24 },
+] as const;
+
+const COMPACT_CROSSHAIRS = [
+  { col: 2, row: 2 },
+  { col: 7, row: 4 },
+  { col: 1, row: 9 },
+  { col: 6, row: 11 },
+  { col: 4, row: 14 },
+  { col: 10, row: 3 },
+  { col: 15, row: 7 },
+  { col: 12, row: 12 },
+  { col: 19, row: 4 },
+  { col: 4, row: 20 },
+  { col: 17, row: 19 },
+  { col: 18, row: 25 },
+] as const;
+
 /**
  * React Bits — HeroBackground (Calm Ambient Architectural Grid)
  * - Ultra-subtle, quiet luxury atmosphere with ZERO flying meteors or harsh beams.
@@ -36,7 +67,7 @@ const CROSSHAIR_NODES = [
  * - Pauses automatically when scrolled out of view for 0% offscreen CPU/GPU cost.
  */
 export const HeroBackground: React.FC<HeroBackgroundProps> = ({ className = '' }) => {
-  const isMobile = useIsMobile();
+  const isCompact = useIsMobile(1024);
   const containerRef = useRef<HTMLDivElement>(null);
   const spotlightRef = useRef<HTMLDivElement>(null);
   const [isInView, setIsInView] = useState(true);
@@ -56,7 +87,7 @@ export const HeroBackground: React.FC<HeroBackgroundProps> = ({ className = '' }
 
   // Desktop subtle cursor tracking on window (zero React re-renders)
   useEffect(() => {
-    if (isMobile || !isInView || typeof window === 'undefined') return;
+    if (isCompact || !isInView || typeof window === 'undefined') return;
     if (window.matchMedia('(hover: none), (prefers-reduced-motion: reduce)').matches) return;
 
     let rafId = 0;
@@ -87,7 +118,7 @@ export const HeroBackground: React.FC<HeroBackgroundProps> = ({ className = '' }
       if (rafId) cancelAnimationFrame(rafId);
       window.removeEventListener('pointermove', handlePointerMove);
     };
-  }, [isMobile, isInView]);
+  }, [isCompact, isInView]);
 
   return (
     <div
@@ -136,10 +167,12 @@ export const HeroBackground: React.FC<HeroBackgroundProps> = ({ className = '' }
         <div
           className="absolute inset-0"
           style={{
-            maskImage:
-              'radial-gradient(ellipse 85% 75% at 50% 46%, rgba(0,0,0,1) 20%, rgba(0,0,0,0.55) 60%, transparent 92%)',
-            WebkitMaskImage:
-              'radial-gradient(ellipse 85% 75% at 50% 46%, rgba(0,0,0,1) 20%, rgba(0,0,0,0.55) 60%, transparent 92%)',
+            maskImage: isCompact
+              ? 'radial-gradient(ellipse 96% 88% at 50% 48%, rgba(0,0,0,1) 30%, rgba(0,0,0,0.68) 68%, transparent 98%)'
+              : 'radial-gradient(ellipse 85% 75% at 50% 46%, rgba(0,0,0,1) 20%, rgba(0,0,0,0.55) 60%, transparent 92%)',
+            WebkitMaskImage: isCompact
+              ? 'radial-gradient(ellipse 96% 88% at 50% 48%, rgba(0,0,0,1) 30%, rgba(0,0,0,0.68) 68%, transparent 98%)'
+              : 'radial-gradient(ellipse 85% 75% at 50% 46%, rgba(0,0,0,1) 20%, rgba(0,0,0,0.55) 60%, transparent 92%)',
           }}
         >
           <svg
@@ -157,7 +190,7 @@ export const HeroBackground: React.FC<HeroBackgroundProps> = ({ className = '' }
                 <path
                   d={`M ${GRID_SIZE} 0 L 0 0 0 ${GRID_SIZE}`}
                   fill="none"
-                  className="stroke-slate-900/[0.04] dark:stroke-white/[0.035]"
+                  className="stroke-slate-900/[0.055] lg:stroke-slate-900/[0.04] dark:stroke-white/[0.05] lg:dark:stroke-white/[0.035]"
                   strokeWidth="1"
                 />
               </pattern>
@@ -172,7 +205,7 @@ export const HeroBackground: React.FC<HeroBackgroundProps> = ({ className = '' }
                 <path
                   d={`M ${GRID_SIZE * 4} 0 L 0 0 0 ${GRID_SIZE * 4}`}
                   fill="none"
-                  className="stroke-slate-900/[0.06] dark:stroke-white/[0.05]"
+                  className="stroke-slate-900/[0.085] lg:stroke-slate-900/[0.06] dark:stroke-white/[0.08] lg:dark:stroke-white/[0.05]"
                   strokeWidth="1"
                 />
               </pattern>
@@ -182,8 +215,54 @@ export const HeroBackground: React.FC<HeroBackgroundProps> = ({ className = '' }
             <rect width="100%" height="100%" fill="url(#rb-hero-grid-pattern)" />
             <rect width="100%" height="100%" fill="url(#rb-hero-subgrid-pattern)" />
 
-            {/* Subtle, Calm Breathing Grid Squares (Ultra-Restrained & Quiet) */}
-            {!isMobile && (
+            {/* Compact Viewports (< 1024px): Crisp static architectural grid tiles & crosshairs (0% animation CPU cost) */}
+            {isCompact ? (
+              <g>
+                {COMPACT_CELLS.map((cell, idx) => (
+                  <rect
+                    key={`mcell_${idx}`}
+                    x={cell.col * GRID_SIZE + 0.5}
+                    y={cell.row * GRID_SIZE + 0.5}
+                    width={GRID_SIZE - 1}
+                    height={GRID_SIZE - 1}
+                    rx={2}
+                    className="fill-slate-900/[0.025] dark:fill-white/[0.024] stroke-slate-900/[0.06] dark:stroke-white/[0.055]"
+                    strokeWidth="1"
+                  />
+                ))}
+
+                {COMPACT_CROSSHAIRS.map((node, idx) => {
+                  const cx = node.col * GRID_SIZE;
+                  const cy = node.row * GRID_SIZE;
+                  return (
+                    <g
+                      key={`mnode_${idx}`}
+                      className="text-slate-500/35 dark:text-zinc-400/25"
+                    >
+                      <line
+                        x1={cx - 3}
+                        y1={cy}
+                        x2={cx + 3}
+                        y2={cy}
+                        stroke="currentColor"
+                        strokeWidth="1"
+                        strokeLinecap="round"
+                      />
+                      <line
+                        x1={cx}
+                        y1={cy - 3}
+                        x2={cx}
+                        y2={cy + 3}
+                        stroke="currentColor"
+                        strokeWidth="1"
+                        strokeLinecap="round"
+                      />
+                    </g>
+                  );
+                })}
+              </g>
+            ) : (
+              /* Desktop & Large iPads (>= 1024px): Subtle, Calm Breathing Grid Squares + Crosshairs */
               <g>
                 {ANIMATED_CELLS.map((cell, idx) => (
                   <rect
@@ -238,7 +317,7 @@ export const HeroBackground: React.FC<HeroBackgroundProps> = ({ className = '' }
         </div>
 
         {/* ── 3. Desktop Interactive Cursor Subtle Sheen (Quiet, Neutral, Zero Neon Glow) ── */}
-        {!isMobile && (
+        {!isCompact && (
           <div
             ref={spotlightRef}
             className="hidden lg:block absolute inset-0 opacity-0 transition-opacity duration-700 ease-out"
