@@ -27,20 +27,42 @@ export const getSeo = async (req: Request, res: Response) => {
 
 export const updateSeo = async (req: Request, res: Response) => {
   try {
-    const { id, createdAt, updatedAt, ...data } = req.body;
+    const body = req.body || {};
 
-    if (data.structuredData && typeof data.structuredData === 'object') {
-      data.structuredData = JSON.stringify(data.structuredData);
-    }
-    if (data.pageOverrides && typeof data.pageOverrides === 'object') {
-      data.pageOverrides = JSON.stringify(data.pageOverrides);
-    }
+    const allowedData: Record<string, any> = {
+      metaTitle: body.metaTitle,
+      metaDescription: body.metaDescription ?? '',
+      keywords: body.keywords ?? null,
+      author: body.author ?? null,
+      ogTitle: body.ogTitle ?? null,
+      ogDescription: body.ogDescription ?? null,
+      ogImage: body.ogImage ?? null,
+      ogType: body.ogType ?? null,
+      twitterHandle: body.twitterHandle ?? null,
+      twitterCardType: body.twitterCardType ?? null,
+      canonicalUrl: body.canonicalUrl ?? null,
+      robots: body.robots ?? null,
+      structuredData:
+        body.structuredData && typeof body.structuredData === 'object'
+          ? JSON.stringify(body.structuredData)
+          : body.structuredData ?? null,
+      pageOverrides:
+        body.pageOverrides && typeof body.pageOverrides === 'object'
+          ? JSON.stringify(body.pageOverrides)
+          : body.pageOverrides ?? null,
+    };
 
     const seo = await prisma.seoSettings.upsert({
       where: { id: 'singleton' },
-      update: data,
-      create: { id: 'singleton', ...data }
+      update: allowedData,
+      create: {
+        id: 'singleton',
+        metaTitle: allowedData.metaTitle || 'Yusuf Ayoubi | Software Developer & Engineer',
+        metaDescription: allowedData.metaDescription || '',
+        ...allowedData,
+      },
     });
+
     res.json({ success: true, data: seo });
   } catch (error) {
     console.error('SEO Update Error:', error);
