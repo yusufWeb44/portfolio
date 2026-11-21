@@ -102,13 +102,6 @@ export const SEO: React.FC<SeoProps> = ({
       <meta name="twitter:title" content={finalOgTitle} />
       <meta name="twitter:description" content={finalOgDescription} />
       {finalOgImage && <meta name="twitter:image" content={finalOgImage} />}
-
-      {/* JSON-LD Structured Data */}
-      {seo?.structuredData && (
-        <script type="application/ld+json">
-          {typeof seo.structuredData === 'string' ? seo.structuredData : JSON.stringify(seo.structuredData)}
-        </script>
-      )}
     </Helmet>
   );
 };
