@@ -93,9 +93,8 @@ export const HeroBackground: React.FC<HeroBackgroundProps> = ({ className = '' }
     <div
       ref={containerRef}
       aria-hidden="true"
-      className={`pointer-events-none absolute inset-0 z-0 overflow-hidden select-none ${
-        !isInView ? 'rb-hero-bg-paused' : ''
-      } ${className}`}
+      className={`pointer-events-none absolute inset-0 z-0 overflow-hidden select-none ${!isInView ? 'rb-hero-bg-paused' : ''
+        } ${className}`}
     >
       <style>{`
         @keyframes rbCellPulse {

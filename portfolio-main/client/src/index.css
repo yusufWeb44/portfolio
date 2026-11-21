@@ -526,6 +526,7 @@
 
   /* ─── Touch Screen Scroll Protection: Prevent hover layout/transform jitter while dragging ─── */
   @media (hover: none) {
+
     .group:hover .group-hover\:translate-x-1,
     .group:hover .group-hover\:-translate-x-1,
     .group:hover .group-hover\:scale-105,
