@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import { useAuthStore } from '../../store/authStore';
-import { Lock, Mail, Smartphone, ArrowLeft, Loader2 } from 'lucide-react';
+import { Lock, Mail, ShieldCheck, ArrowLeft, Loader2 } from 'lucide-react';
 import { resolveImageUrl } from '../../utils/mediaUrl';
 
 const Login = () => {
@@ -82,7 +82,7 @@ const Login = () => {
           </h1>
           <p className="text-muted-foreground text-xs sm:text-sm">
             {require2FA 
-              ? 'Enter the 6-digit code from Google Authenticator' 
+              ? 'Enter your 6-digit verification code' 
               : 'Enter your credentials to access the dashboard'}
           </p>
         </div>
@@ -129,13 +129,13 @@ const Login = () => {
           ) : (
             <div className="space-y-3 animate-in fade-in duration-200">
               <div className="flex items-center justify-center p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 gap-2 text-xs font-medium">
-                <Smartphone size={16} />
-                <span>Google Authenticator Active</span>
+                <ShieldCheck size={16} />
+                <span>Two-Factor Authentication</span>
               </div>
 
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-foreground text-center block">
-                  6-Digit Rolling Code
+                  6-Digit Verification Code
                 </label>
                 <input
                   type="text"

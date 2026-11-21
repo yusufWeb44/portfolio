@@ -136,7 +136,7 @@ const Security = () => {
       if (res.data?.success) {
         setFeedback({
           type: 'success',
-          text: isAr ? 'تم تفعيل Google Authenticator بنجاح! حسابك محمي بالكامل.' : 'Google Authenticator 2FA activated successfully!',
+          text: isAr ? 'تم تفعيل المصادقة الثنائية بنجاح! حسابك محمي بالكامل.' : 'Two-factor authentication (2FA) activated successfully!',
         });
         setShowSetupModal(false);
         setSetupData(null);
@@ -168,7 +168,7 @@ const Security = () => {
       if (res.data?.success) {
         setFeedback({
           type: 'success',
-          text: isAr ? 'تم إلغاء تفعيل المصادقة الثنائية.' : 'Google Authenticator 2FA has been disabled.',
+          text: isAr ? 'تم إلغاء تفعيل المصادقة الثنائية.' : 'Two-factor authentication has been disabled.',
         });
         setShowDisableModal(false);
         setDisablePassword('');
@@ -209,7 +209,7 @@ const Security = () => {
     if (status?.isTwoFactorEnabled && passwordTotpCode.trim().length !== 6) {
       setFeedback({
         type: 'error',
-        text: isAr ? 'يرجى إدخال رمز Google Authenticator المكون من 6 أرقام من هاتفك' : 'Please enter the 6-digit code from Google Authenticator',
+        text: isAr ? 'يرجى إدخال رمز التحقق المكون من 6 أرقام من تطبيق المصادقة' : 'Please enter the 6-digit verification code from your authenticator app',
       });
       return;
     }
@@ -279,7 +279,7 @@ const Security = () => {
     if (status?.isTwoFactorEnabled && emailTotpCode.trim().length !== 6) {
       setFeedback({
         type: 'error',
-        text: isAr ? 'يرجى إدخال رمز Google Authenticator المكون من 6 أرقام' : 'Please enter the 6-digit Google Authenticator code',
+        text: isAr ? 'يرجى إدخال رمز التحقق المكون من 6 أرقام من تطبيق المصادقة' : 'Please enter the 6-digit verification code from your authenticator app',
       });
       return;
     }
@@ -388,7 +388,7 @@ const Security = () => {
 
       {/* Top Grid: 2FA Status Card + Credentials Meta */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Google Authenticator Card */}
+        {/* Two-Factor Authentication Card */}
         <div className="md:col-span-2 bg-card border border-border/80 rounded-2xl p-6 shadow-sm relative overflow-hidden">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
             <div className="flex items-center gap-3">
@@ -396,7 +396,7 @@ const Security = () => {
                 <Smartphone size={24} />
               </div>
               <div>
-                <h2 className="text-base font-bold">Google Authenticator (2FA)</h2>
+                <h2 className="text-base font-bold">{isAr ? 'المصادقة الثنائية (2FA / TOTP)' : 'Two-Factor Authentication (2FA)'}</h2>
                 <p className="text-xs text-muted-foreground">
                   {isAr ? 'رمز يتجدد كل 30 ثانية على هاتفك بدون إنترنت ومجاني 100% للأبد' : 'Time-based rolling 6-digit codes. 100% free, offline, zero carrier dependencies'}
                 </p>
@@ -427,7 +427,7 @@ const Security = () => {
                 ) : (
                   <>
                     <QrCode size={14} className={isAr ? 'ml-1.5' : 'mr-1.5'} />
-                    {isAr ? 'تفعيل Google Authenticator الآن' : 'Enable Google 2FA Now'}
+                    {isAr ? 'تفعيل المصادقة الثنائية الآن' : 'Enable 2FA Now'}
                   </>
                 )}
               </Button>
@@ -741,7 +741,7 @@ const Security = () => {
             <div className="border-b border-border pb-4">
               <h3 className="text-lg font-bold flex items-center gap-2">
                 <QrCode size={20} className="text-emerald-500" />
-                {isAr ? 'إعداد Google Authenticator بخطوتين' : 'Set Up Google Authenticator'}
+                {isAr ? 'إعداد المصادقة الثنائية (TOTP) بخطوتين' : 'Set Up Two-Factor Authentication'}
               </h3>
               <p className="text-xs text-muted-foreground mt-1">
                 {isAr 
@@ -755,7 +755,7 @@ const Security = () => {
               <div className="p-3 bg-white rounded-2xl border-2 border-border shadow-md">
                 <img 
                   src={setupData.qrCode} 
-                  alt="Google Authenticator QR Code" 
+                  alt="2FA QR Code" 
                   className="w-48 h-48 sm:w-56 sm:h-56 object-contain"
                 />
               </div>
@@ -834,7 +834,7 @@ const Security = () => {
             <div className="flex items-center gap-2 text-destructive border-b border-border pb-3">
               <ShieldAlert size={22} />
               <h3 className="text-base font-bold">
-                {isAr ? 'إلغاء تفعيل Google Authenticator' : 'Disable Google Authenticator'}
+                {isAr ? 'إلغاء تفعيل المصادقة الثنائية' : 'Disable Two-Factor Authentication'}
               </h3>
             </div>
             <p className="text-xs text-muted-foreground">

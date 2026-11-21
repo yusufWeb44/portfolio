@@ -30,13 +30,13 @@ export const loginAdmin = async (req: Request, res: Response) => {
       return res.status(401).json({ success: false, message: 'Invalid email or password' });
     }
 
-    // If 2FA is active, verify Google Authenticator TOTP token
+    // If 2FA is active, verify TOTP token
     if (admin.twoFactorEnabled) {
       if (!totpCode || totpCode.trim().length !== 6) {
         return res.status(200).json({
           success: true,
           require2FA: true,
-          message: 'Google Authenticator 2FA verification required',
+          message: 'Two-factor authentication required',
         });
       }
 
@@ -45,7 +45,7 @@ export const loginAdmin = async (req: Request, res: Response) => {
         return res.status(401).json({
           success: false,
           require2FA: true,
-          message: 'Invalid 6-digit Google Authenticator code',
+          message: 'Invalid 6-digit security code',
         });
       }
     }
@@ -186,7 +186,7 @@ export const enable2FA = async (req: AuthRequest, res: Response) => {
     if (!isValid) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid 6-digit code. Please verify the code displayed in Google Authenticator and try again.',
+        message: 'Invalid 6-digit verification code. Please check your authenticator app and try again.',
       });
     }
 
@@ -195,11 +195,11 @@ export const enable2FA = async (req: AuthRequest, res: Response) => {
       data: { twoFactorEnabled: true },
     });
 
-    console.log(`🛡️ [2FA Enabled] Administrator ${admin.email} successfully activated Google Authenticator 2FA.`);
+    console.log(`🛡️ [2FA Enabled] Administrator ${admin.email} successfully activated 2FA.`);
 
     res.status(200).json({
       success: true,
-      message: 'Google Authenticator 2FA is now active! Your account is fully protected.',
+      message: 'Two-factor authentication is now active! Your account is fully protected.',
     });
   } catch (err: any) {
     if (err instanceof z.ZodError) {
@@ -235,7 +235,7 @@ export const disable2FA = async (req: AuthRequest, res: Response) => {
 
     const isValid = verifyTotp(token, admin.twoFactorSecret || '');
     if (!isValid) {
-      return res.status(400).json({ success: false, message: 'Invalid 6-digit Authenticator code' });
+      return res.status(400).json({ success: false, message: 'Invalid 6-digit verification code' });
     }
 
     await prisma.adminUser.update({
@@ -243,11 +243,11 @@ export const disable2FA = async (req: AuthRequest, res: Response) => {
       data: { twoFactorEnabled: false, twoFactorSecret: null },
     });
 
-    console.log(`⚠️ [2FA Disabled] Administrator ${admin.email} deactivated Google Authenticator.`);
+    console.log(`⚠️ [2FA Disabled] Administrator ${admin.email} deactivated 2FA.`);
 
     res.status(200).json({
       success: true,
-      message: 'Google Authenticator 2FA has been disabled.',
+      message: 'Two-factor authentication has been disabled.',
     });
   } catch (err: any) {
     if (err instanceof z.ZodError) {
@@ -298,7 +298,7 @@ export const changePassword = async (req: AuthRequest, res: Response) => {
       if (!isValid) {
         return res.status(400).json({
           success: false,
-          message: 'Invalid 6-digit Google Authenticator code. Check your phone app.',
+          message: 'Invalid 6-digit security code. Check your authenticator app.',
         });
       }
     } else if (secret) {
@@ -323,7 +323,7 @@ export const changePassword = async (req: AuthRequest, res: Response) => {
     // 5. Issue fresh JWT token
     const token = generateToken(res, admin.id);
 
-    console.log(`🔒 [Security Audit] Administrator ${admin.email} successfully updated password via Google Authenticator 2FA.`);
+    console.log(`🔒 [Security Audit] Administrator ${admin.email} successfully updated password via 2FA.`);
 
     res.status(200).json({
       success: true,
@@ -382,14 +382,14 @@ export const updateAdminEmail = async (req: AuthRequest, res: Response) => {
       if (!totpCode || totpCode.trim().length !== 6) {
         return res.status(400).json({
           success: false,
-          message: 'Google Authenticator 6-digit code is required to change email',
+          message: '6-digit verification code is required to change email',
         });
       }
       const isValid = verifyTotp(totpCode, admin.twoFactorSecret || '');
       if (!isValid) {
         return res.status(400).json({
           success: false,
-          message: 'Invalid 6-digit Google Authenticator code',
+          message: 'Invalid 6-digit verification code',
         });
       }
     }

@@ -27,9 +27,14 @@ export const getSeo = async (req: Request, res: Response) => {
 
 export const updateSeo = async (req: Request, res: Response) => {
   try {
-    const data = { ...req.body };
-    if (typeof data.structuredData === 'object') data.structuredData = JSON.stringify(data.structuredData);
-    if (typeof data.pageOverrides === 'object') data.pageOverrides = JSON.stringify(data.pageOverrides);
+    const { id, createdAt, updatedAt, ...data } = req.body;
+
+    if (data.structuredData && typeof data.structuredData === 'object') {
+      data.structuredData = JSON.stringify(data.structuredData);
+    }
+    if (data.pageOverrides && typeof data.pageOverrides === 'object') {
+      data.pageOverrides = JSON.stringify(data.pageOverrides);
+    }
 
     const seo = await prisma.seoSettings.upsert({
       where: { id: 'singleton' },
@@ -38,6 +43,7 @@ export const updateSeo = async (req: Request, res: Response) => {
     });
     res.json({ success: true, data: seo });
   } catch (error) {
+    console.error('SEO Update Error:', error);
     res.status(500).json({ success: false, message: 'Failed to update SEO settings', error });
   }
 };

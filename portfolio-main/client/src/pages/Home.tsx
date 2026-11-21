@@ -781,7 +781,7 @@ const Home = () => {
                     )}
                   >
                     <WhatsappIcon size={16} />
-                    <span>{isAr ? t('contact.chatWhatsapp', 'تواصل عبر واتساب') : 'Chat on WhatsApp'}</span>
+                    <span>{t('contact.chatWhatsapp', isAr ? 'تواصل عبر واتساب' : 'Chat on WhatsApp')}</span>
                   </a>
 
                   <a
@@ -796,7 +796,7 @@ const Home = () => {
                     )}
                   >
                     <Mail size={16} strokeWidth={1.5} className="!text-foreground" />
-                    <span className="!text-foreground">{isAr ? t('contact.sendEmail', 'إرسال بريد إلكتروني') : 'Send an Email'}</span>
+                    <span className="!text-foreground">{t('contact.sendEmail', isAr ? 'إرسال بريد إلكتروني' : 'Send an Email')}</span>
                   </a>
                 </div>
 
@@ -819,7 +819,7 @@ const Home = () => {
                 {socialLinks.length > 0 && (
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5">
                     <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground select-none">
-                      {isAr ? t('contact.findMe', 'أو تابعنا على:') : t('contact.findMe', 'Find me on:')}
+                      {t('contact.findMe', isAr ? 'أو تابعنا على:' : 'Find me on:')}
                     </span>
                     <div className="flex items-center gap-2 flex-wrap justify-center">
                       {socialLinks.map(link => (

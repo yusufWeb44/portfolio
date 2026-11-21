@@ -6,7 +6,7 @@ import {
   LogOut, LayoutDashboard, FolderKanban, Briefcase, Wrench, 
   MessageSquare, Settings, Menu, X, ArrowLeft, Terminal,
   Layers, Pin, Award, HelpCircle, Globe, Languages, PanelBottom, Sparkles, MessageSquareQuote,
-  ShieldCheck, Sun, Moon, User, ChevronUp
+  ShieldCheck, Sun, Moon, User, ChevronUp, Mail
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { Helmet } from 'react-helmet-async';
@@ -110,6 +110,7 @@ const AdminLayout = () => {
     { key: 'admin.services', fallback: 'Services', path: '/admin/services', icon: <Wrench size={17} /> },
     { key: 'admin.faqs', fallback: 'FAQs', path: '/admin/faqs', icon: <HelpCircle size={17} /> },
     { key: 'admin.reviews', fallback: 'Reviews & Feedback', path: '/admin/reviews', icon: <MessageSquareQuote size={17} /> },
+    { key: 'admin.contactSection', fallback: 'Contact Section', path: '/admin/contact', icon: <Mail size={17} /> },
     { key: 'admin.footer', fallback: 'Footer Section', path: '/admin/footer', icon: <PanelBottom size={17} /> },
   ];
 

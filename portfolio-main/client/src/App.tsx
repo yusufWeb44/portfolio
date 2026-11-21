@@ -30,6 +30,7 @@ const AdminWorkflow = lazy(() => import('./pages/admin/Workflow'));
 const AdminCertificates = lazy(() => import('./pages/admin/Certificates'));
 const AdminFaqs = lazy(() => import('./pages/admin/Faqs'));
 const AdminReviews = lazy(() => import('./pages/admin/Reviews'));
+const AdminContact = lazy(() => import('./pages/admin/Contact'));
 const AdminFooter = lazy(() => import('./pages/admin/Footer'));
 const AdminSeo = lazy(() => import('./pages/admin/Seo'));
 const AdminTranslations = lazy(() => import('./pages/admin/Translations'));
@@ -78,6 +79,7 @@ function App() {
               <Route path="services" element={<AdminServices />} />
               <Route path="faqs" element={<AdminFaqs />} />
               <Route path="reviews" element={<AdminReviews />} />
+              <Route path="contact" element={<AdminContact />} />
               <Route path="footer" element={<AdminFooter />} />
               <Route path="messages" element={<AdminMessages />} />
               <Route path="seo" element={<AdminSeo />} />
