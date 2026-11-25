@@ -14,51 +14,67 @@ const AnimatedStatValue: React.FC<{ value: string }> = ({ value }) => {
   const isMobile = useIsMobile();
   const strVal = String(value ?? '');
   const match = strVal.match(/^([^0-9]*)(\d+)(.*)$/);
+  const hasNumericMatch = Boolean(match);
   const prefix = match ? match[1] : '';
   const targetNum = match ? parseInt(match[2], 10) : 0;
   const suffix = match ? match[3] : '';
 
   const spanRef = useRef<HTMLSpanElement>(null);
-  const hasAnimated = useRef(false);
-  const [displayNum, setDisplayNum] = useState<number>(() => (isMobile || !match ? targetNum : 0));
+  const completedTargetRef = useRef<number | null>(null);
+  const [displayNum, setDisplayNum] = useState<number>(() => (isMobile || !hasNumericMatch ? targetNum : 0));
 
   useEffect(() => {
-    if (isMobile || !match || !spanRef.current || hasAnimated.current) return;
+    if (isMobile || !hasNumericMatch || !spanRef.current) {
+      setDisplayNum(targetNum);
+      return;
+    }
+
+    if (completedTargetRef.current === targetNum) {
+      setDisplayNum(targetNum);
+      return;
+    }
 
     const el = spanRef.current;
     let timerId = 0;
     let animationFrameId = 0;
+    let started = false;
     let lastVal = -1;
+
+    const startAnimation = () => {
+      if (started) return;
+      started = true;
+      timerId = window.setTimeout(() => {
+        let startTimestamp: number | null = null;
+        const duration = 1300;
+
+        const step = (timestamp: number) => {
+          if (!startTimestamp) startTimestamp = timestamp;
+          const elapsed = timestamp - startTimestamp;
+          const progress = Math.min(elapsed / duration, 1);
+          const easeOut = 1 - Math.pow(1 - progress, 3);
+          const val = Math.round(easeOut * targetNum);
+
+          if (val !== lastVal) {
+            lastVal = val;
+            setDisplayNum(val);
+          }
+
+          if (progress < 1) {
+            animationFrameId = requestAnimationFrame(step);
+          } else {
+            completedTargetRef.current = targetNum;
+          }
+        };
+
+        animationFrameId = requestAnimationFrame(step);
+      }, 200);
+    };
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && !hasAnimated.current) {
-          hasAnimated.current = true;
+        if (entry.isIntersecting) {
           observer.disconnect();
-
-          timerId = window.setTimeout(() => {
-            let startTimestamp: number | null = null;
-            const duration = 1300;
-
-            const step = (timestamp: number) => {
-              if (!startTimestamp) startTimestamp = timestamp;
-              const elapsed = timestamp - startTimestamp;
-              const progress = Math.min(elapsed / duration, 1);
-              const easeOut = 1 - Math.pow(1 - progress, 3);
-              const val = Math.round(easeOut * targetNum);
-
-              if (val !== lastVal) {
-                lastVal = val;
-                setDisplayNum(val);
-              }
-
-              if (progress < 1) {
-                animationFrameId = requestAnimationFrame(step);
-              }
-            };
-
-            animationFrameId = requestAnimationFrame(step);
-          }, 200);
+          startAnimation();
         }
       },
       { threshold: 0.1 }
@@ -70,11 +86,11 @@ const AnimatedStatValue: React.FC<{ value: string }> = ({ value }) => {
       if (timerId) window.clearTimeout(timerId);
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
     };
-  }, [isMobile, targetNum, match]);
+  }, [isMobile, targetNum, hasNumericMatch]);
 
   return (
     <span ref={spanRef} className="tabular-nums">
-      {isMobile || !match ? strVal : `${prefix}${displayNum}${suffix}`}
+      {isMobile || !hasNumericMatch ? strVal : `${prefix}${displayNum}${suffix}`}
     </span>
   );
 };
