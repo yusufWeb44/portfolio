@@ -616,10 +616,10 @@ const PublicLayout = () => {
                 className="hidden md:block dark:hidden absolute inset-0 overflow-hidden opacity-30 pointer-events-none select-none"
                 style={{ contain: 'strict', transform: 'translateZ(0)' }}
               >
-                <div className={`absolute -top-[5%] -right-[5%] w-[28.75rem] h-[28.75rem] rounded-full bg-gradient-to-br ${auras.orb1} blur-2xl transform-gpu`} />
-                <div className={`absolute top-[35%] -left-[10%] w-[26.25rem] h-[26.25rem] rounded-full bg-gradient-to-tr ${auras.orb2} blur-2xl transform-gpu`} />
-                <div className={`absolute top-[70%] -right-[5%] w-[28.75rem] h-[28.75rem] rounded-full bg-gradient-to-tl ${auras.orb3} blur-2xl transform-gpu`} />
-                <div className={`absolute -bottom-[5%] left-1/2 -translate-x-1/2 w-[32.5rem] h-[18.75rem] rounded-full ${auras.orb4} blur-2xl transform-gpu`} />
+                <div className={`absolute -top-[5%] -right-[5%] w-[28.75rem] h-[28.75rem] rounded-full bg-gradient-to-br ${auras.orb1} blur-xl transform-gpu`} />
+                <div className={`absolute top-[35%] -left-[10%] w-[26.25rem] h-[26.25rem] rounded-full bg-gradient-to-tr ${auras.orb2} blur-xl transform-gpu`} />
+                <div className={`absolute top-[70%] -right-[5%] w-[28.75rem] h-[28.75rem] rounded-full bg-gradient-to-tl ${auras.orb3} blur-xl transform-gpu`} />
+                <div className={`absolute -bottom-[5%] left-1/2 -translate-x-1/2 w-[32.5rem] h-[18.75rem] rounded-full ${auras.orb4} blur-xl transform-gpu`} />
               </div>
               {/* Mobile lightweight ambient glow — Light mode only */}
               <div

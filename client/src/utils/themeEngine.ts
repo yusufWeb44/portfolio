@@ -471,11 +471,12 @@ export function applyThemePalette(themeId?: string | null, isDark?: boolean) {
     varsToCache[`--emerald-${shade}`] = hslValue;
   });
 
-  // Apply all properties in one batch
-  requestAnimationFrame(() => {
-    Object.entries(varsToCache).forEach(([key, value]) => {
+  // Apply all CSS variables synchronously in one pass (only mutating changed values)
+  // so View Transitions captures 100% of the updated palette before animating, with zero mid-frame recalc.
+  Object.entries(varsToCache).forEach(([key, value]) => {
+    if (root.style.getPropertyValue(key) !== value) {
       root.style.setProperty(key, value);
-    });
+    }
   });
 
   try {
