@@ -1,5 +1,6 @@
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useRef, useMemo } from 'react';
+import { flushSync } from 'react-dom';
 import {
   Menu, X, Mail, Sun, Moon, ExternalLink,
   ChevronRight, User, FolderKanban, Terminal, Briefcase, Wrench, HelpCircle, Layers, MessageSquareQuote
@@ -56,6 +57,7 @@ const PublicLayout = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState<string>('');
+  const manualThemeToggleRef = useRef(false);
   const [socialLinks, setSocialLinks] = useState<SocialLinkData[]>([]);
   const [footerSocials, setFooterSocials] = useState<SocialLinkData[]>([]);
   const [settings, setSettings] = useState<PortfolioSettings | null>(() => {
@@ -355,6 +357,16 @@ const PublicLayout = () => {
     if (mobileMenuOpen) {
       document.body.style.overflow = 'hidden';
       window.__lenis?.stop();
+      if (location.pathname === '/') {
+        const rafId = window.requestAnimationFrame(() => {
+          computeActiveSectionNow();
+        });
+        return () => {
+          window.cancelAnimationFrame(rafId);
+          document.body.style.overflow = '';
+          window.__lenis?.start();
+        };
+      }
     } else {
       document.body.style.overflow = '';
       window.__lenis?.start();
@@ -363,7 +375,7 @@ const PublicLayout = () => {
       document.body.style.overflow = '';
       window.__lenis?.start();
     };
-  }, [mobileMenuOpen]);
+  }, [mobileMenuOpen, location.pathname]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -435,6 +447,10 @@ const PublicLayout = () => {
   }, []);
 
   useEffect(() => {
+    if (manualThemeToggleRef.current) {
+      manualThemeToggleRef.current = false;
+      return;
+    }
     if (isDark) {
       document.documentElement.classList.add('dark');
       localStorage.setItem('theme', 'dark');
@@ -461,10 +477,11 @@ const PublicLayout = () => {
     return () => window.removeEventListener('replay_splash_screen', handleReplay);
   }, []);
 
-  const toggleTheme = (e?: React.MouseEvent) => {
+  const toggleTheme = (e?: React.MouseEvent<HTMLButtonElement>) => {
     const nextIsDark = !isDark;
 
     const performThemeSwitch = () => {
+      manualThemeToggleRef.current = true;
       if (nextIsDark) {
         document.documentElement.classList.add('dark');
         localStorage.setItem('theme', 'dark');
@@ -481,36 +498,71 @@ const PublicLayout = () => {
       'startViewTransition' in document &&
       !window.matchMedia('(prefers-reduced-motion: reduce)').matches
     ) {
-      const x = e?.clientX ?? window.innerWidth / 2;
-      const y = e?.clientY ?? 0;
+      const rect = e?.currentTarget?.getBoundingClientRect();
+      const x = rect ? rect.left + rect.width / 2 : (e?.clientX ?? window.innerWidth / 2);
+      const y = rect ? rect.top + rect.height / 2 : (e?.clientY ?? 24);
       const endRadius = Math.hypot(
         Math.max(x, window.innerWidth - x),
         Math.max(y, window.innerHeight - y)
       );
+      const isMobileViewport = window.innerWidth < 768;
 
-      const transition = (document as any).startViewTransition(() => {
-        performThemeSwitch();
-      });
+      // Temporarily pause per-element CSS transitions so all sections update in a single pass with 0 drops
+      document.documentElement.classList.add('theme-switching');
 
-      transition.ready.then(() => {
-        document.documentElement.animate(
-          {
-            clipPath: [
-              `circle(0px at ${x}px ${y}px)`,
-              `circle(${endRadius}px at ${x}px ${y}px)`,
-            ],
-          },
-          {
-            duration: 320,
-            easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
-            pseudoElement: '::view-transition-new(root)',
-          }
-        );
-      });
-      return;
+      const safetyTimer = window.setTimeout(() => {
+        document.documentElement.classList.remove('theme-switching');
+      }, 750);
+
+      try {
+        const transition = (document as unknown as {
+          startViewTransition: (cb: () => void) => {
+            ready: Promise<void>;
+            finished: Promise<void>;
+          };
+        }).startViewTransition(() => {
+          flushSync(() => {
+            performThemeSwitch();
+          });
+        });
+
+        transition.ready
+          .then(() => {
+            document.documentElement.animate(
+              {
+                clipPath: [
+                  `circle(0px at ${x}px ${y}px)`,
+                  `circle(${endRadius}px at ${x}px ${y}px)`,
+                ],
+              },
+              {
+                duration: isMobileViewport ? 360 : 480,
+                easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+                fill: 'forwards',
+                pseudoElement: '::view-transition-new(root)',
+              }
+            );
+          })
+          .catch(() => {});
+
+        transition.finished
+          .finally(() => {
+            window.clearTimeout(safetyTimer);
+            document.documentElement.classList.remove('theme-switching');
+          })
+          .catch(() => {});
+        return;
+      } catch {
+        window.clearTimeout(safetyTimer);
+        document.documentElement.classList.remove('theme-switching');
+      }
     }
 
+    document.documentElement.classList.add('theme-switching');
     performThemeSwitch();
+    window.requestAnimationFrame(() => {
+      document.documentElement.classList.remove('theme-switching');
+    });
   };
 
   const auras = getThemeAuras(settings?.primaryThemeColor);
@@ -574,16 +626,16 @@ const PublicLayout = () => {
           )}
         </div>
 
-        {/* ── Full-Width Glassmorphic Header (Attached to Top) ── */}
+        {/* ── Full-Width Header (Solid/High-Opacity on Mobile for 120fps, Glassmorphic on md+) ── */}
         <header
           className={cn(
-            "fixed top-0 inset-x-0 z-50 w-full transition-all duration-300 border-b",
+            "fixed top-0 inset-x-0 z-50 w-full transition-colors duration-200 border-b",
             "border-slate-900/[0.07] dark:border-white/[0.09]",
-            "bg-white/70 dark:bg-zinc-950/65",
-            "backdrop-blur-xl backdrop-saturate-150",
+            "bg-white/95 dark:bg-zinc-950/95 md:bg-white/70 md:dark:bg-zinc-950/65",
+            "md:backdrop-blur-xl md:backdrop-saturate-150",
             "shadow-[0_1px_12px_rgba(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.35)]",
             scrolled
-              ? "bg-white/85 dark:bg-zinc-950/85 border-slate-900/[0.10] dark:border-white/[0.12] shadow-sm dark:shadow-[0_8px_30px_rgba(0,0,0,0.5)]"
+              ? "bg-white/98 dark:bg-zinc-950/98 md:bg-white/85 md:dark:bg-zinc-950/85 border-slate-900/[0.10] dark:border-white/[0.12] shadow-sm dark:shadow-[0_8px_30px_rgba(0,0,0,0.5)]"
               : ""
           )}
         >
@@ -662,7 +714,7 @@ const PublicLayout = () => {
                 <button
                   type="button"
                   onClick={toggleTheme}
-                  className="w-10 h-10 rounded-lg bg-white/50 hover:bg-white/80 dark:bg-white/[0.04] dark:hover:bg-white/[0.07] border border-slate-900/[0.07] dark:border-white/[0.08] dark:hover:border-white/[0.15] text-foreground dark:text-zinc-300 transition-all cursor-pointer shadow-xs active:scale-95 flex items-center justify-center shrink-0 backdrop-blur-md"
+                  className="w-10 h-10 rounded-lg bg-slate-100/80 hover:bg-slate-200/80 md:bg-white/50 md:hover:bg-white/80 dark:bg-white/[0.06] dark:hover:bg-white/[0.09] border border-slate-900/[0.07] dark:border-white/[0.08] dark:hover:border-white/[0.15] text-foreground dark:text-zinc-300 transition-colors duration-150 cursor-pointer shadow-xs active:scale-95 flex items-center justify-center shrink-0"
                   aria-label={isDark ? (isAr ? 'تفعيل الوضع الفاتح' : 'Switch to Light Mode') : (isAr ? 'تفعيل الوضع الداكن' : 'Switch to Dark Mode')}
                 >
                   {isDark ? (
@@ -674,11 +726,8 @@ const PublicLayout = () => {
 
                 <button
                   type="button"
-                  onClick={() => {
-                    computeActiveSectionNow();
-                    setMobileMenuOpen(true);
-                  }}
-                  className="w-10 h-10 rounded-lg bg-white/50 hover:bg-white/80 dark:bg-white/[0.04] dark:hover:bg-white/[0.07] border border-slate-900/[0.07] dark:border-white/[0.08] dark:hover:border-white/[0.15] text-foreground dark:text-zinc-300 transition-all cursor-pointer shadow-xs active:scale-95 flex items-center justify-center shrink-0 backdrop-blur-md"
+                  onClick={() => setMobileMenuOpen(true)}
+                  className="w-10 h-10 rounded-lg bg-slate-100/80 hover:bg-slate-200/80 md:bg-white/50 md:hover:bg-white/80 dark:bg-white/[0.06] dark:hover:bg-white/[0.09] border border-slate-900/[0.07] dark:border-white/[0.08] dark:hover:border-white/[0.15] text-foreground dark:text-zinc-300 transition-colors duration-150 cursor-pointer shadow-xs active:scale-95 flex items-center justify-center shrink-0"
                   aria-label={isAr ? 'فتح القائمة' : 'Open menu'}
                   aria-expanded={mobileMenuOpen}
                 >
@@ -689,27 +738,34 @@ const PublicLayout = () => {
           </div>
         </header>
 
-        {/* ── Mobile & Tablet Sidebar Drawer (Backdrop + Sliding Panel) ── */}
+        {/* ── Mobile & Tablet Sidebar Drawer (GPU-Isolated Backdrop + Sliding Panel) ── */}
         <AnimatePresence>
           {mobileMenuOpen && (
             <>
-              {/* Backdrop */}
+              {/* Backdrop (Pure opacity fade, zero full-screen backdrop-blur lag) */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.25 }}
-                className="fixed inset-0 z-[9998] bg-black/70 backdrop-blur-sm xl:hidden"
+                transition={{ duration: 0.2 }}
+                style={{ willChange: 'opacity' }}
+                className="fixed inset-0 z-[9998] bg-black/70 xl:hidden"
                 onClick={() => setMobileMenuOpen(false)}
                 aria-hidden="true"
               />
 
-              {/* Sliding Panel */}
+              {/* Sliding Panel (100% GPU composited transform layer) */}
               <motion.aside
                 initial={{ x: currentDirection === 'rtl' ? '100%' : '-100%' }}
                 animate={{ x: 0 }}
                 exit={{ x: currentDirection === 'rtl' ? '100%' : '-100%' }}
-                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+                style={{
+                  willChange: 'transform',
+                  backfaceVisibility: 'hidden',
+                  transform: 'translateZ(0)',
+                  contain: 'layout style paint',
+                }}
                 className={cn(
                   "fixed inset-y-0 top-0 bottom-0 z-[9999] w-[82vw] max-w-[20rem] sm:max-w-[22.5rem] h-[100dvh] bg-white dark:bg-zinc-950 text-foreground shadow-2xl flex flex-col xl:hidden",
                   currentDirection === 'rtl'
@@ -749,7 +805,7 @@ const PublicLayout = () => {
                   <button
                     type="button"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="w-9 h-9 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 border border-transparent hover:border-border text-muted-foreground hover:text-emerald-500 transition-all cursor-pointer active:scale-95 flex items-center justify-center"
+                    className="w-9 h-9 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 border border-transparent hover:border-border text-muted-foreground hover:text-emerald-500 transition-colors duration-150 cursor-pointer active:scale-95 flex items-center justify-center"
                     aria-label={isAr ? 'إغلاق القائمة' : 'Close menu'}
                   >
                     <X className="w-5 h-5" aria-hidden="true" />
@@ -775,9 +831,9 @@ const PublicLayout = () => {
                             scrollToSection(item.id);
                           }}
                           className={cn(
-                            "w-full flex items-center justify-between px-4 py-3.5 rounded-xl text-[0.9375rem] sm:text-base font-semibold transition-all cursor-pointer bg-transparent border-none text-start active:scale-[0.99]",
+                            "w-full flex items-center justify-between px-4 py-3.5 rounded-xl text-[0.9375rem] sm:text-base font-semibold transition-colors duration-150 cursor-pointer bg-transparent border-none text-start",
                             isActive
-                              ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 dark:bg-emerald-500/20 font-bold border border-emerald-500/30 dark:shadow-[0_0_12px_rgba(16,185,129,0.15)]"
+                              ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 dark:bg-emerald-500/20 font-bold border border-emerald-500/30"
                               : "text-muted-foreground hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.06]"
                           )}
                         >

@@ -83,14 +83,14 @@ export const ServiceCard = ({
   const cardBg = "bg-white/98 dark:bg-zinc-900/95 md:bg-white/95 md:dark:bg-zinc-900/60 md:backdrop-blur-xl";
 
   return (
-    <div className="h-full">
+    <div className="h-full" style={{ contain: 'layout style' }}>
       <SpotlightCard
         spotlightColor="rgba(0, 0, 0, 0.02)"
         darkSpotlightColor="rgba(255, 255, 255, 0.007)"
         size={360}
         darkSize={560}
         className={cn(
-          "group relative flex h-[19.6875rem] sm:h-[21.25rem] md:h-[22.1875rem] lg:h-[23.125rem] w-full flex-col justify-between overflow-hidden rounded-xl sm:rounded-2xl p-5 sm:p-6 md:p-7 border border-zinc-200/90 dark:border-white/[0.08] shadow-[0_1px_2px_rgba(0,0,0,0.03),0_8px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset,0_16px_32px_-12px_rgba(0,0,0,0.4)] hover:border-zinc-300 dark:hover:border-white/[0.18] transition-all duration-300 select-none",
+          "group relative flex h-[19.6875rem] sm:h-[21.25rem] md:h-[22.1875rem] lg:h-[23.125rem] w-full flex-col justify-between overflow-hidden rounded-xl sm:rounded-2xl p-5 sm:p-6 md:p-7 border border-zinc-200/90 dark:border-white/[0.08] shadow-sm md:shadow-[0_1px_2px_rgba(0,0,0,0.03),0_8px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-lg md:dark:shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset,0_16px_32px_-12px_rgba(0,0,0,0.4)] hover:border-zinc-300 dark:hover:border-white/[0.18] transition-colors duration-200 select-none",
           cardBg
         )}
       >
@@ -255,41 +255,35 @@ export const ServiceCarousel = ({
   // Mobile Carousel State & Refs
   const mobileScrollRef = React.useRef<HTMLDivElement>(null);
   const [activeMobileIndex, setActiveMobileIndex] = React.useState(0);
-  const isScrollingRef = React.useRef(false);
-  const touchStartXRef = React.useRef<number | null>(null);
-  const touchMovedRef = React.useRef(false);
 
-  // Mobile Scroll Active Dot Detection (Smooth, frame-rate safe)
-  const handleMobileScroll = () => {
-    if (isScrollingRef.current) return;
-    isScrollingRef.current = true;
-    requestAnimationFrame(() => {
-      isScrollingRef.current = false;
-      const container = mobileScrollRef.current;
-      if (!container) return;
+  // Zero-layout-thrashing active card detection via IntersectionObserver (offloads scroll geometry off main JS thread)
+  React.useEffect(() => {
+    const container = mobileScrollRef.current;
+    if (!container) return;
 
-      const cardElements = container.querySelectorAll<HTMLElement>('[data-service-card]');
-      if (cardElements.length === 0) return;
+    const cards = container.querySelectorAll<HTMLElement>('[data-service-card]');
+    if (cards.length === 0) return;
 
-      const containerRect = container.getBoundingClientRect();
-      const containerCenter = containerRect.left + containerRect.width / 2;
-
-      let closestIndex = 0;
-      let minDistance = Infinity;
-
-      cardElements.forEach((el, index) => {
-        const rect = el.getBoundingClientRect();
-        const cardCenter = rect.left + rect.width / 2;
-        const distance = Math.abs(cardCenter - containerCenter);
-        if (distance < minDistance) {
-          minDistance = distance;
-          closestIndex = index;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            const idxAttr = entry.target.getAttribute('data-card-index');
+            if (idxAttr !== null) {
+              const idx = parseInt(idxAttr, 10);
+              if (!isNaN(idx)) {
+                setActiveMobileIndex((prev) => (prev !== idx ? idx : prev));
+              }
+            }
+          }
         }
-      });
+      },
+      { root: container, threshold: 0.6 }
+    );
 
-      setActiveMobileIndex((prev) => (prev !== closestIndex ? closestIndex : prev));
-    });
-  };
+    cards.forEach((card) => observer.observe(card));
+    return () => observer.disconnect();
+  }, [services, currentLang]);
 
   const scrollToIndex = (index: number) => {
     const container = mobileScrollRef.current;
@@ -308,24 +302,7 @@ export const ServiceCarousel = ({
     setActiveMobileIndex(index);
   };
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (e.touches.length === 1) {
-      touchStartXRef.current = e.touches[0].clientX;
-      touchMovedRef.current = false;
-    }
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (touchStartXRef.current !== null && e.touches.length === 1) {
-      const deltaX = Math.abs(e.touches[0].clientX - touchStartXRef.current);
-      if (deltaX > 8) {
-        touchMovedRef.current = true;
-      }
-    }
-  };
-
   const handleCardClick = (index: number, e: React.MouseEvent) => {
-    if (touchMovedRef.current) return;
     if ((e.target as HTMLElement).closest('a, button')) return;
     scrollToIndex(index);
   };
@@ -343,7 +320,7 @@ export const ServiceCarousel = ({
 
   return (
     <>
-      {/* ─── MOBILE & TABLET VIEW (< xl): Tight header spacing + Smooth horizontal touch carousel + Interactive dots + Natural in-flow height ─── */}
+      {/* ─── MOBILE & TABLET VIEW (< xl): Tight header spacing + Smooth GPU-composited horizontal snap carousel ─── */}
       <div className="block xl:hidden w-full py-12 sm:py-14 md:py-16 lg:py-20 overflow-x-clip">
         {/* Header slot directly above cards with compact spacing */}
         {header && (
@@ -352,21 +329,20 @@ export const ServiceCarousel = ({
           </div>
         )}
 
-        {/* Horizontal Cards Row: Peeking cards with smooth horizontal scroll and snap support */}
+        {/* Horizontal Cards Row: Native GPU scroll-snap with zero JS scroll listeners */}
         <div 
           ref={mobileScrollRef}
-          onScroll={handleMobileScroll}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          className="w-full overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden touch-pan-x py-1.5 md:py-2.5"
+          className="w-full overflow-x-auto overflow-y-hidden snap-x snap-mandatory scroll-px-4 sm:scroll-px-6 overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden touch-pan-x py-1.5 md:py-2.5"
+          style={{ WebkitOverflowScrolling: 'touch' }}
         >
           <div className="flex gap-3.5 sm:gap-4 md:gap-5 lg:gap-6 items-stretch px-4 sm:px-6 md:px-8">
             {services.map((service, index) => (
               <div
                 key={service.id || index}
                 data-service-card
+                data-card-index={index}
                 onClick={(e) => handleCardClick(index, e)}
-                className="w-[82vw] max-w-[18.4375rem] sm:w-[20.625rem] sm:max-w-none md:w-[22.5rem] lg:w-[24.375rem] shrink-0 cursor-pointer active:scale-[0.985] transition-transform duration-200"
+                className="w-[82vw] max-w-[18.4375rem] sm:w-[20.625rem] sm:max-w-none md:w-[22.5rem] lg:w-[24.375rem] shrink-0 snap-center sm:snap-start cursor-pointer"
               >
                 <ServiceCard
                   service={service}

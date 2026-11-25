@@ -14,9 +14,17 @@ export interface SplashScreenProps {
 }
 
 /* ─── Timeline (ms, measured from the moment letter assets are ready) ─── */
-const isMobileClient = typeof window !== 'undefined' && (window.innerWidth < 768 || window.matchMedia('(max-width: 767px)').matches);
-const HOLD_MS = isMobileClient ? 1350 : 2200; // Snappy and responsive on mobile, calm architectural reveal on desktop
-const EXIT_MS = isMobileClient ? 680 : 960; // choreographed full-viewport upward curtain reveal
+const getIsMobileViewport = () =>
+  typeof window !== 'undefined' &&
+  (window.innerWidth < 768 || window.matchMedia('(max-width: 767px)').matches);
+
+const isMobileClient = getIsMobileViewport();
+const HOLD_MS = isMobileClient ? 1550 : 2200; // Calm architectural reveal on both mobile and desktop
+const CURTAIN_DURATION = isMobileClient ? 0.58 : 0.76;
+const CURTAIN_STAGGER = isMobileClient ? 0.04 : 0.055;
+const CURTAIN_BASE_DELAY = isMobileClient ? 0.05 : 0.08;
+// Ensure EXIT_MS strictly exceeds (CURTAIN_BASE_DELAY + 4 * CURTAIN_STAGGER + CURTAIN_DURATION) so curtain never cuts off mid-exit
+const EXIT_MS = isMobileClient ? 810 : 980;
 
 const EASE_OUT_EXPO = [0.16, 1, 0.3, 1] as const;
 const EASE_CURTAIN = [0.76, 0, 0.24, 1] as const;
@@ -53,8 +61,8 @@ const LetterMark: React.FC<LetterMarkProps> = ({
   reduced,
   isMobile,
 }) => {
-  const enterDelay = isMobile ? 0.04 + index * 0.06 : 0.06 + index * 0.095;
-  const exitDelay = index * 0.055;
+  const enterDelay = isMobile ? 0.04 + index * 0.065 : 0.06 + index * 0.095;
+  const exitDelay = isMobile ? index * 0.04 : index * 0.055;
   const offsetFromCenter = index - (LOGO_LETTERS.length - 1) / 2; // -1.5, -0.5, 0.5, 1.5
   const mask = maskOf(src);
 
@@ -71,7 +79,11 @@ const LetterMark: React.FC<LetterMarkProps> = ({
         reduced
           ? { opacity: 0 }
           : isMobile
-            ? { y: 22, opacity: 0 }
+            ? {
+                y: 44,
+                scale: 0.9,
+                opacity: 0,
+              }
             : {
                 y: 72,
                 z: -110,
@@ -84,17 +96,23 @@ const LetterMark: React.FC<LetterMarkProps> = ({
       }
       animate={
         isExiting
-          ? reduced || isMobile
+          ? reduced
             ? { opacity: 0, y: -24 }
-            : {
-                y: '-65vh',
-                z: 0,
-                rotateX: 0,
-                rotateY: 0,
-                rotateZ: 0,
-                scale: 0.96,
-                opacity: 1,
-              }
+            : isMobile
+              ? {
+                  y: '-58vh',
+                  scale: 0.96,
+                  opacity: 0,
+                }
+              : {
+                  y: '-65vh',
+                  z: 0,
+                  rotateX: 0,
+                  rotateY: 0,
+                  rotateZ: 0,
+                  scale: 0.96,
+                  opacity: 1,
+                }
           : play
             ? {
                 y: 0,
@@ -110,15 +128,15 @@ const LetterMark: React.FC<LetterMarkProps> = ({
       transition={
         isExiting
           ? {
-              duration: isMobile ? 0.42 : reduced ? 0.35 : 0.74,
+              duration: isMobile ? 0.56 : reduced ? 0.35 : 0.74,
               delay: reduced ? 0 : exitDelay,
               ease: EASE_CURTAIN,
             }
           : {
-              duration: isMobile ? 0.55 : reduced ? 0.45 : 0.95,
+              duration: isMobile ? 0.72 : reduced ? 0.45 : 0.95,
               delay: enterDelay,
               ease: EASE_OUT_EXPO,
-              opacity: { duration: 0.5, delay: enterDelay, ease: 'easeOut' },
+              opacity: { duration: isMobile ? 0.42 : 0.5, delay: enterDelay, ease: 'easeOut' },
             }
       }
     >
@@ -175,7 +193,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, isAr = f
     } catch {
       // Ignore in restricted environments
     }
-    window.setTimeout(onComplete, isMobileClient ? 500 : reduced ? 450 : EXIT_MS);
+    window.setTimeout(onComplete, reduced ? 450 : EXIT_MS);
   }, [onComplete, reduced]);
 
   // Preload AND pre-decode letter masks onto GPU before frame 1 so animation starts at locked 120fps
@@ -272,6 +290,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, isAr = f
       className={`fixed inset-0 z-[9999] select-none overflow-hidden touch-none overscroll-contain text-zinc-100 ${
         isExiting ? 'pointer-events-none bg-transparent' : 'pointer-events-auto bg-[#09090b]'
       }`}
+      style={{ contain: 'layout style paint' }}
       role="dialog"
       aria-label="Welcome Intro"
       aria-modal="true"
@@ -285,10 +304,8 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, isAr = f
         {Array.from({ length: CURTAIN_COLS }).map((_, i) => (
           <motion.div
             key={i}
-            className={`relative h-full w-[calc(100%+2px)] -ml-[1px] bg-[#09090b] ${
-              isExiting ? 'border-b border-white/[0.07]' : ''
-            }`}
-            style={{ willChange: 'transform' }}
+            className="relative h-full w-[calc(100%+2px)] -ml-[1px] bg-[#09090b] border-b border-white/[0.05]"
+            style={{ willChange: 'transform', backfaceVisibility: 'hidden', transform: 'translateZ(0)' }}
             initial={{ y: '0%' }}
             animate={
               isExiting && !reduced
@@ -296,20 +313,20 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, isAr = f
                 : { y: '0%' }
             }
             transition={{
-              duration: 0.76,
-              delay: isExiting ? 0.08 + i * 0.055 : 0,
+              duration: CURTAIN_DURATION,
+              delay: isExiting ? CURTAIN_BASE_DELAY + i * CURTAIN_STAGGER : 0,
               ease: EASE_CURTAIN,
             }}
           />
         ))}
       </div>
 
-      {/* ═══ Subtle Ambient Radial Glow & Architectural Grid (Fades as curtain lifts) ═══ */}
+      {/* ═══ Subtle Ambient Radial Glow & Architectural Grid (Zero maskImage compositing on mobile) ═══ */}
       <motion.div
         aria-hidden="true"
         className="absolute inset-0 pointer-events-none"
         animate={{ opacity: isExiting ? 0 : 1 }}
-        transition={{ duration: 0.4, ease: EASE_OUT_EXPO }}
+        transition={{ duration: isMobileClient ? 0.35 : 0.4, ease: EASE_OUT_EXPO }}
       >
         <div
           className="absolute inset-0"
@@ -318,14 +335,19 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, isAr = f
               'radial-gradient(circle at 50% 44%, rgba(255, 255, 255, 0.038) 0%, rgba(161, 161, 170, 0.015) 36%, transparent 70%)',
           }}
         />
+        {/* Clean grid + radial vignette overlay (avoids expensive software CSS mask-image compositing) */}
         <div
-          className="absolute inset-0 opacity-40"
+          className="absolute inset-0 opacity-35"
           style={{
             backgroundImage:
               'linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px)',
             backgroundSize: '72px 72px',
-            WebkitMaskImage: 'radial-gradient(ellipse 60% 55% at 50% 46%, #000 20%, transparent 80%)',
-            maskImage: 'radial-gradient(ellipse 60% 55% at 50% 46%, #000 20%, transparent 80%)',
+          }}
+        />
+        <div
+          className="absolute inset-0"
+          style={{
+            background: 'radial-gradient(ellipse 65% 60% at 50% 46%, transparent 20%, #09090b 82%)',
           }}
         />
       </motion.div>
@@ -374,8 +396,8 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, isAr = f
                   : undefined
             }
             transition={{
-              duration: isExiting ? 0.72 : 0.75,
-              delay: isExiting ? 0.07 : 0,
+              duration: isExiting ? (isMobileClient ? 0.54 : 0.72) : (isMobileClient ? 0.62 : 0.75),
+              delay: isExiting ? (isMobileClient ? 0.04 : 0.07) : 0,
               ease: isExiting ? EASE_CURTAIN : EASE_OUT_EXPO,
             }}
           >
@@ -398,8 +420,8 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, isAr = f
             }
             style={{ willChange: 'transform, opacity' }}
             transition={{
-              duration: isExiting ? 0.72 : 0.7,
-              delay: isExiting ? 0.11 : 0.08,
+              duration: isExiting ? (isMobileClient ? 0.54 : 0.72) : (isMobileClient ? 0.6 : 0.7),
+              delay: isExiting ? (isMobileClient ? 0.07 : 0.11) : 0.08,
               ease: isExiting ? EASE_CURTAIN : EASE_OUT_EXPO,
             }}
             className={

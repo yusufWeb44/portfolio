@@ -16,6 +16,7 @@ import api from '../services/api';
 import { useLanguage } from '../contexts/LanguageContext';
 import { getMediaUrl } from '../utils/mediaUrl';
 import { buttonVariants, cn } from '../components/ui/Button';
+import { useIsMobile } from '../hooks/useIsMobile';
 import type { PortfolioSettings } from '../types/portfolio';
 
 /* ─── Interfaces ─────────────────────────────────────────────────── */
@@ -119,7 +120,8 @@ const ProjectShowcaseItem = ({
   return (
     <article
       id={project.slug}
-      className="scroll-mt-28 relative rounded-2xl sm:rounded-3xl border border-zinc-200/90 dark:border-white/[0.08] bg-white/95 dark:bg-zinc-900/60 backdrop-blur-xl p-5 sm:p-7 md:p-8 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_8px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset,0_16px_32px_-12px_rgba(0,0,0,0.4)] transition-all duration-300 hover:border-zinc-300 dark:hover:border-white/[0.18]"
+      style={{ contain: 'layout style' }}
+      className="scroll-mt-28 relative rounded-2xl sm:rounded-3xl border border-zinc-200/90 dark:border-white/[0.08] bg-white/98 dark:bg-zinc-900/95 md:bg-white/95 md:dark:bg-zinc-900/60 md:backdrop-blur-xl p-5 sm:p-7 md:p-8 shadow-md md:shadow-[0_1px_2px_rgba(0,0,0,0.03),0_8px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-lg md:dark:shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset,0_16px_32px_-12px_rgba(0,0,0,0.4)] transition-colors duration-200 hover:border-zinc-300 dark:hover:border-white/[0.18]"
     >
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
         
@@ -248,31 +250,26 @@ const ProjectShowcaseItem = ({
                 }
               }
             }}
-            className="relative w-full aspect-[16/10] rounded-xl sm:rounded-2xl overflow-hidden border border-border/70 bg-slate-900/[0.03] dark:bg-black/60 backdrop-blur-xl shadow-md group flex items-center justify-center p-1.5 sm:p-2.5 cursor-zoom-in touch-pan-y"
+            className="relative w-full aspect-[16/10] rounded-xl sm:rounded-2xl overflow-hidden border border-border/70 bg-slate-100/90 dark:bg-zinc-950/90 md:bg-slate-900/[0.03] md:dark:bg-black/60 md:backdrop-blur-xl shadow-sm md:shadow-md group flex items-center justify-center p-1.5 sm:p-2.5 cursor-zoom-in touch-pan-y"
           >
-            {/* Ambient Blurred Backdrop using the image itself for premium edge-to-edge aesthetic */}
+            {/* Ambient Blurred Backdrop (Desktop only: omitted on mobile to preserve 60fps scroll GPU budget) */}
             <div
-              className="absolute inset-0 bg-center bg-cover blur-2xl opacity-15 dark:opacity-25 pointer-events-none scale-110"
+              className="hidden md:block absolute inset-0 bg-center bg-cover blur-2xl opacity-15 dark:opacity-25 pointer-events-none scale-110"
               style={{ backgroundImage: `url(${currentImage})` }}
             />
 
-            {/* Active Image (uncropped, complete uploaded layout) */}
-            <AnimatePresence mode="wait">
-              <motion.img
-                key={currentImage}
-                src={currentImage}
-                alt={`${project.title} preview ${activeImageIndex + 1}`}
-                width={960}
-                height={600}
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.98 }}
-                transition={{ duration: 0.25, ease: 'easeInOut' }}
-                className="w-full h-full object-contain select-none relative z-10 rounded-lg drop-shadow-sm"
-                loading="lazy"
-                decoding="async"
-              />
-            </AnimatePresence>
+            {/* Active Image (uncropped, complete uploaded layout, zero Framer Motion overhead) */}
+            <img
+              key={currentImage}
+              src={currentImage}
+              alt={`${project.title} preview ${activeImageIndex + 1}`}
+              width={960}
+              height={600}
+              className="w-full h-full object-contain select-none relative z-10 rounded-lg"
+              loading={index === 0 && activeImageIndex === 0 ? "eager" : "lazy"}
+              fetchPriority={index === 0 && activeImageIndex === 0 ? "high" : "auto"}
+              decoding="async"
+            />
 
             {/* Fullscreen Expand Button on Hover (and visible on touch devices) */}
             <button
@@ -282,14 +279,14 @@ const ProjectShowcaseItem = ({
                 setIsLightboxOpen(true);
               }}
               aria-label="View Fullscreen"
-              className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-20 w-8 h-8 rounded-lg bg-black/60 hover:bg-black/85 backdrop-blur-md border border-white/15 text-white/90 hover:text-white flex items-center justify-center transition-all duration-200 active:scale-95 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 cursor-pointer shadow-md"
+              className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-20 w-8 h-8 rounded-lg bg-black/75 hover:bg-black/90 md:bg-black/60 md:hover:bg-black/85 md:backdrop-blur-md border border-white/15 text-white/90 hover:text-white flex items-center justify-center transition-colors duration-200 active:scale-95 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 cursor-pointer shadow-md"
             >
               <Maximize2 size={14} strokeWidth={1.5} />
             </button>
 
             {/* Image Counter Badge (Only if multiple images) */}
             {displayImages.length > 1 && (
-              <div className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 z-20 px-2.5 py-1 rounded-lg bg-black/70 backdrop-blur-md border border-white/15 text-white font-mono text-[0.625rem] sm:text-[0.65625rem] font-bold tracking-widest select-none pointer-events-none">
+              <div className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 z-20 px-2.5 py-1 rounded-lg bg-black/80 md:bg-black/70 md:backdrop-blur-md border border-white/15 text-white font-mono text-[0.625rem] sm:text-[0.65625rem] font-bold tracking-widest select-none pointer-events-none">
                 {String(activeImageIndex + 1).padStart(2, '0')} / {String(displayImages.length).padStart(2, '0')}
               </div>
             )}
@@ -300,7 +297,7 @@ const ProjectShowcaseItem = ({
                 type="button"
                 onClick={handlePrevImage}
                 aria-label="Previous Image"
-                className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/70 hover:bg-black/90 backdrop-blur-md border border-white/20 text-white hover:text-emerald-400 hover:border-emerald-500/50 flex items-center justify-center transition-all duration-200 active:scale-90 cursor-pointer shadow-md"
+                className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/80 hover:bg-black/95 md:bg-black/70 md:hover:bg-black/90 md:backdrop-blur-md border border-white/20 text-white hover:text-emerald-400 hover:border-emerald-500/50 flex items-center justify-center transition-colors duration-200 active:scale-90 cursor-pointer shadow-md"
               >
                 <ChevronLeft size={16} strokeWidth={1.5} className="rtl:rotate-180" />
               </button>
@@ -312,7 +309,7 @@ const ProjectShowcaseItem = ({
                 type="button"
                 onClick={handleNextImage}
                 aria-label="Next Image"
-                className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/70 hover:bg-black/90 backdrop-blur-md border border-white/20 text-white hover:text-emerald-400 hover:border-emerald-500/50 flex items-center justify-center transition-all duration-200 active:scale-90 cursor-pointer shadow-md"
+                className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/80 hover:bg-black/95 md:bg-black/70 md:hover:bg-black/90 md:backdrop-blur-md border border-white/20 text-white hover:text-emerald-400 hover:border-emerald-500/50 flex items-center justify-center transition-colors duration-200 active:scale-90 cursor-pointer shadow-md"
               >
                 <ChevronRight size={16} strokeWidth={1.5} className="rtl:rotate-180" />
               </button>
@@ -330,9 +327,9 @@ const ProjectShowcaseItem = ({
                     key={`${imgUrl}-${idx}`}
                     onClick={() => setActiveImageIndex(idx)}
                     aria-label={`View image ${idx + 1}`}
-                    className={`relative flex-1 min-w-[3.4375rem] max-w-[7.5rem] aspect-[16/10] rounded-lg overflow-hidden border transition-all duration-200 cursor-pointer bg-slate-900/[0.04] dark:bg-black/50 p-0.5 ${
+                    className={`relative flex-1 min-w-[3.4375rem] max-w-[7.5rem] aspect-[16/10] rounded-lg overflow-hidden border transition-colors duration-150 cursor-pointer bg-slate-900/[0.04] dark:bg-black/50 p-0.5 ${
                       isActive
-                        ? 'border-emerald-500 ring-2 ring-emerald-500/40 scale-[1.02] shadow-sm'
+                        ? 'border-emerald-500 ring-2 ring-emerald-500/40 shadow-sm'
                         : 'border-border/60 hover:border-foreground/40 opacity-70 hover:opacity-100'
                     }`}
                   >
@@ -454,6 +451,7 @@ const SkeletonProjects = () => (
 const Projects = () => {
   const { t, currentLang } = useLanguage();
   const isAr = currentLang === 'ar';
+  const isMobile = useIsMobile();
   const [projects, setProjects] = useState<Project[]>([]);
   const [settings, setSettings] = useState<PortfolioSettings | null>(() => {
     try {
@@ -528,36 +526,64 @@ const Projects = () => {
       {/* Hero Header */}
       <section className="pt-24 sm:pt-28 md:pt-32 pb-8 sm:pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          >
-            {/* Back to Portfolio Button */}
-            <div className="mb-5 sm:mb-6">
-              <Link
-                to="/"
-                className={cn(
-                  buttonVariants({ variant: 'secondary', size: 'sm' }),
-                  "font-mono uppercase tracking-wider gap-2 px-3.5 py-2 text-xs sm:text-[0.8125rem] rounded-xl"
-                )}
-              >
-                <ArrowLeft size={14} strokeWidth={1.5} className="transition-transform duration-200 group-hover:-translate-x-0.5 rtl:group-hover:translate-x-0.5 rtl:rotate-180 text-muted-foreground group-hover:text-foreground" />
-                <span>{isAr ? 'العودة للرئيسية' : 'Back to Portfolio'}</span>
-              </Link>
-            </div>
+          {isMobile ? (
+            <div>
+              <div className="mb-5 sm:mb-6">
+                <Link
+                  to="/"
+                  className={cn(
+                    buttonVariants({ variant: 'secondary', size: 'sm' }),
+                    "font-mono uppercase tracking-wider gap-2 px-3.5 py-2 text-xs sm:text-[0.8125rem] rounded-xl"
+                  )}
+                >
+                  <ArrowLeft size={14} strokeWidth={1.5} className="transition-transform duration-200 group-hover:-translate-x-0.5 rtl:group-hover:translate-x-0.5 rtl:rotate-180 text-muted-foreground group-hover:text-foreground" />
+                  <span>{isAr ? 'العودة للرئيسية' : 'Back to Portfolio'}</span>
+                </Link>
+              </div>
 
-            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 sm:gap-6 border-b border-border/40 pb-6 sm:pb-8">
-              <div>
-                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight leading-[1.15] text-foreground mb-2">
-                  {pageTitle}
-                </h1>
-                <p className="text-base md:text-lg text-muted-foreground max-w-2xl leading-relaxed">
-                  {pageSubtitle}
-                </p>
+              <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 sm:gap-6 border-b border-border/40 pb-6 sm:pb-8">
+                <div>
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight leading-[1.15] text-foreground mb-2">
+                    {pageTitle}
+                  </h1>
+                  <p className="text-base md:text-lg text-muted-foreground max-w-2xl leading-relaxed">
+                    {pageSubtitle}
+                  </p>
+                </div>
               </div>
             </div>
-          </motion.div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            >
+              {/* Back to Portfolio Button */}
+              <div className="mb-5 sm:mb-6">
+                <Link
+                  to="/"
+                  className={cn(
+                    buttonVariants({ variant: 'secondary', size: 'sm' }),
+                    "font-mono uppercase tracking-wider gap-2 px-3.5 py-2 text-xs sm:text-[0.8125rem] rounded-xl"
+                  )}
+                >
+                  <ArrowLeft size={14} strokeWidth={1.5} className="transition-transform duration-200 group-hover:-translate-x-0.5 rtl:group-hover:translate-x-0.5 rtl:rotate-180 text-muted-foreground group-hover:text-foreground" />
+                  <span>{isAr ? 'العودة للرئيسية' : 'Back to Portfolio'}</span>
+                </Link>
+              </div>
+
+              <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 sm:gap-6 border-b border-border/40 pb-6 sm:pb-8">
+                <div>
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight leading-[1.15] text-foreground mb-2">
+                    {pageTitle}
+                  </h1>
+                  <p className="text-base md:text-lg text-muted-foreground max-w-2xl leading-relaxed">
+                    {pageSubtitle}
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          )}
         </div>
       </section>
 
@@ -567,7 +593,7 @@ const Projects = () => {
           {loading ? (
             <SkeletonProjects />
           ) : projects.length === 0 && fetchError ? (
-            <div className="py-20 px-4 text-center border border-dashed border-border/70 rounded-2xl sm:rounded-3xl bg-card/30 backdrop-blur-md space-y-4">
+            <div className="py-20 px-4 text-center border border-dashed border-border/70 rounded-2xl sm:rounded-3xl bg-card/60 md:bg-card/30 md:backdrop-blur-md space-y-4">
               <p className="text-lg font-bold tracking-tight">
                 {isAr ? 'تعذر تحميل المشاريع حالياً. قد يكون الخادم قيد الاستيقاظ.' : 'Unable to load projects right now. The server may be waking up.'}
               </p>
@@ -580,7 +606,7 @@ const Projects = () => {
               </button>
             </div>
           ) : projects.length === 0 ? (
-            <div className="py-20 text-center border border-dashed border-border/70 rounded-2xl sm:rounded-3xl bg-card/30 backdrop-blur-md">
+            <div className="py-20 text-center border border-dashed border-border/70 rounded-2xl sm:rounded-3xl bg-card/60 md:bg-card/30 md:backdrop-blur-md">
               <p className="text-xl font-bold tracking-tight mb-2">{t('projects.noProjects', 'No projects published yet.')}</p>
             </div>
           ) : (
