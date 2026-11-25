@@ -20,19 +20,23 @@ const AnimatedStatValue: React.FC<{ value: string }> = ({ value }) => {
 
   const spanRef = useRef<HTMLSpanElement>(null);
   const hasAnimated = useRef(false);
+  const [displayNum, setDisplayNum] = useState<number>(() => (isMobile || !match ? targetNum : 0));
 
   useEffect(() => {
     if (isMobile || !match || !spanRef.current || hasAnimated.current) return;
 
     const el = spanRef.current;
+    let timerId = 0;
+    let animationFrameId = 0;
+    let lastVal = -1;
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting && !hasAnimated.current) {
           hasAnimated.current = true;
           observer.disconnect();
 
-          let animationFrameId: number;
-          const timer = setTimeout(() => {
+          timerId = window.setTimeout(() => {
             let startTimestamp: number | null = null;
             const duration = 1300;
 
@@ -43,8 +47,9 @@ const AnimatedStatValue: React.FC<{ value: string }> = ({ value }) => {
               const easeOut = 1 - Math.pow(1 - progress, 3);
               const val = Math.round(easeOut * targetNum);
 
-              if (spanRef.current) {
-                spanRef.current.textContent = `${prefix}${val}${suffix}`;
+              if (val !== lastVal) {
+                lastVal = val;
+                setDisplayNum(val);
               }
 
               if (progress < 1) {
@@ -54,27 +59,22 @@ const AnimatedStatValue: React.FC<{ value: string }> = ({ value }) => {
 
             animationFrameId = requestAnimationFrame(step);
           }, 200);
-
-          return () => {
-            clearTimeout(timer);
-            cancelAnimationFrame(animationFrameId);
-          };
         }
       },
       { threshold: 0.1 }
     );
 
     observer.observe(el);
-    return () => observer.disconnect();
-  }, [isMobile, targetNum, prefix, suffix, match]);
-
-  if (isMobile || !match) {
-    return <span className="tabular-nums">{strVal}</span>;
-  }
+    return () => {
+      observer.disconnect();
+      if (timerId) window.clearTimeout(timerId);
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    };
+  }, [isMobile, targetNum, match]);
 
   return (
     <span ref={spanRef} className="tabular-nums">
-      {prefix}0{suffix}
+      {isMobile || !match ? strVal : `${prefix}${displayNum}${suffix}`}
     </span>
   );
 };

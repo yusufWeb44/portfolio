@@ -332,7 +332,7 @@ export const ServiceCarousel = ({
         {/* Horizontal Cards Row: Native GPU scroll-snap with zero JS scroll listeners */}
         <div 
           ref={mobileScrollRef}
-          className="w-full overflow-x-auto overflow-y-hidden snap-x snap-mandatory scroll-px-4 sm:scroll-px-6 overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden touch-pan-x py-1.5 md:py-2.5"
+          className="w-full overflow-x-auto overflow-y-hidden snap-x snap-mandatory scroll-px-4 sm:scroll-px-6 overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [touch-action:pan-x_pan-y] py-1.5 md:py-2.5"
           style={{ WebkitOverflowScrolling: 'touch' }}
         >
           <div className="flex gap-3.5 sm:gap-4 md:gap-5 lg:gap-6 items-stretch px-4 sm:px-6 md:px-8">

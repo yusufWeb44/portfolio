@@ -43,7 +43,7 @@ export const LanguageSwitcher = () => {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="h-10 px-3 sm:px-3.5 rounded-lg flex items-center gap-1.5 sm:gap-2 bg-white/85 hover:bg-white dark:bg-white/[0.06] dark:hover:bg-white/[0.09] md:bg-white/50 md:hover:bg-white/75 md:dark:bg-white/[0.04] md:dark:hover:bg-white/[0.07] border border-slate-900/[0.07] hover:border-slate-900/[0.14] dark:border-white/[0.08] dark:hover:border-white/[0.15] text-foreground dark:text-zinc-300 dark:hover:text-white transition-colors duration-200 cursor-pointer shadow-xs md:backdrop-blur-md text-xs sm:text-sm font-semibold select-none group shrink-0"
+        className="h-10 px-3 sm:px-3.5 rounded-lg flex items-center gap-1.5 sm:gap-2 bg-white/50 hover:bg-white/75 dark:bg-white/[0.04] dark:hover:bg-white/[0.07] border border-slate-900/[0.07] hover:border-slate-900/[0.14] dark:border-white/[0.08] dark:hover:border-white/[0.15] text-foreground dark:text-zinc-300 dark:hover:text-white transition-colors duration-200 cursor-pointer shadow-xs backdrop-blur-md text-xs sm:text-sm font-semibold select-none group shrink-0"
         aria-label={currentLang === 'ar' ? `تغيير اللغة (${currentName})` : `Switch language (${currentName})`}
         aria-expanded={isOpen}
         aria-haspopup="listbox"

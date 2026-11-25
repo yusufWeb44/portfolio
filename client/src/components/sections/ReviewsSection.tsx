@@ -355,7 +355,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
           <div className="relative w-full -mx-4 px-0">
             <div
               ref={mobileScrollRef}
-              className="w-full overflow-x-auto overflow-y-hidden snap-x snap-mandatory scroll-px-4 overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden touch-pan-x pt-12 pb-4"
+              className="w-full overflow-x-auto overflow-y-hidden snap-x snap-mandatory scroll-px-4 overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [touch-action:pan-x_pan-y] pt-12 pb-4"
               style={{ WebkitOverflowScrolling: 'touch' }}
             >
               <div className="flex gap-4 items-stretch px-4">

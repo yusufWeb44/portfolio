@@ -507,11 +507,10 @@ const PublicLayout = () => {
       );
       const isMobileViewport = window.innerWidth < 768;
 
-      // Temporarily pause per-element CSS transitions so all sections update in a single pass with 0 drops
-      document.documentElement.classList.add('theme-switching');
-
       const safetyTimer = window.setTimeout(() => {
-        document.documentElement.classList.remove('theme-switching');
+        if (document.documentElement.classList.contains('theme-switching')) {
+          document.documentElement.classList.remove('theme-switching');
+        }
       }, 750);
 
       try {
@@ -521,9 +520,13 @@ const PublicLayout = () => {
             finished: Promise<void>;
           };
         }).startViewTransition(() => {
+          document.documentElement.classList.add('theme-switching');
           flushSync(() => {
             performThemeSwitch();
           });
+          // Commit final computed styles while transitions are paused, then clear class BEFORE snapshot/animation so ZERO style recalc hits at transition end
+          void document.documentElement.offsetHeight;
+          document.documentElement.classList.remove('theme-switching');
         });
 
         transition.ready
@@ -536,9 +539,8 @@ const PublicLayout = () => {
                 ],
               },
               {
-                duration: isMobileViewport ? 360 : 480,
-                easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
-                fill: 'forwards',
+                duration: isMobileViewport ? 380 : 460,
+                easing: 'cubic-bezier(0.33, 1, 0.68, 1)',
                 pseudoElement: '::view-transition-new(root)',
               }
             );
@@ -548,13 +550,17 @@ const PublicLayout = () => {
         transition.finished
           .finally(() => {
             window.clearTimeout(safetyTimer);
-            document.documentElement.classList.remove('theme-switching');
+            if (document.documentElement.classList.contains('theme-switching')) {
+              document.documentElement.classList.remove('theme-switching');
+            }
           })
           .catch(() => {});
         return;
       } catch {
         window.clearTimeout(safetyTimer);
-        document.documentElement.classList.remove('theme-switching');
+        if (document.documentElement.classList.contains('theme-switching')) {
+          document.documentElement.classList.remove('theme-switching');
+        }
       }
     }
 
@@ -626,16 +632,16 @@ const PublicLayout = () => {
           )}
         </div>
 
-        {/* ── Full-Width Header (Solid/High-Opacity on Mobile for 120fps, Glassmorphic on md+) ── */}
+        {/* ── Full-Width Glassmorphic Header (Attached to Top) ── */}
         <header
           className={cn(
             "fixed top-0 inset-x-0 z-50 w-full transition-colors duration-200 border-b",
             "border-slate-900/[0.07] dark:border-white/[0.09]",
-            "bg-white/95 dark:bg-zinc-950/95 md:bg-white/70 md:dark:bg-zinc-950/65",
-            "md:backdrop-blur-xl md:backdrop-saturate-150",
+            "bg-white/70 dark:bg-zinc-950/65",
+            "backdrop-blur-xl backdrop-saturate-150",
             "shadow-[0_1px_12px_rgba(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.35)]",
             scrolled
-              ? "bg-white/98 dark:bg-zinc-950/98 md:bg-white/85 md:dark:bg-zinc-950/85 border-slate-900/[0.10] dark:border-white/[0.12] shadow-sm dark:shadow-[0_8px_30px_rgba(0,0,0,0.5)]"
+              ? "bg-white/85 dark:bg-zinc-950/85 border-slate-900/[0.10] dark:border-white/[0.12] shadow-sm dark:shadow-[0_8px_30px_rgba(0,0,0,0.5)]"
               : ""
           )}
         >
@@ -714,7 +720,7 @@ const PublicLayout = () => {
                 <button
                   type="button"
                   onClick={toggleTheme}
-                  className="w-10 h-10 rounded-lg bg-slate-100/80 hover:bg-slate-200/80 md:bg-white/50 md:hover:bg-white/80 dark:bg-white/[0.06] dark:hover:bg-white/[0.09] border border-slate-900/[0.07] dark:border-white/[0.08] dark:hover:border-white/[0.15] text-foreground dark:text-zinc-300 transition-colors duration-150 cursor-pointer shadow-xs active:scale-95 flex items-center justify-center shrink-0"
+                  className="w-10 h-10 rounded-lg bg-white/50 hover:bg-white/80 dark:bg-white/[0.04] dark:hover:bg-white/[0.07] border border-slate-900/[0.07] dark:border-white/[0.08] dark:hover:border-white/[0.15] text-foreground dark:text-zinc-300 transition-colors duration-150 cursor-pointer shadow-xs active:scale-95 flex items-center justify-center shrink-0 backdrop-blur-md"
                   aria-label={isDark ? (isAr ? 'تفعيل الوضع الفاتح' : 'Switch to Light Mode') : (isAr ? 'تفعيل الوضع الداكن' : 'Switch to Dark Mode')}
                 >
                   {isDark ? (
@@ -727,7 +733,7 @@ const PublicLayout = () => {
                 <button
                   type="button"
                   onClick={() => setMobileMenuOpen(true)}
-                  className="w-10 h-10 rounded-lg bg-slate-100/80 hover:bg-slate-200/80 md:bg-white/50 md:hover:bg-white/80 dark:bg-white/[0.06] dark:hover:bg-white/[0.09] border border-slate-900/[0.07] dark:border-white/[0.08] dark:hover:border-white/[0.15] text-foreground dark:text-zinc-300 transition-colors duration-150 cursor-pointer shadow-xs active:scale-95 flex items-center justify-center shrink-0"
+                  className="w-10 h-10 rounded-lg bg-white/50 hover:bg-white/80 dark:bg-white/[0.04] dark:hover:bg-white/[0.07] border border-slate-900/[0.07] dark:border-white/[0.08] dark:hover:border-white/[0.15] text-foreground dark:text-zinc-300 transition-colors duration-150 cursor-pointer shadow-xs active:scale-95 flex items-center justify-center shrink-0 backdrop-blur-md"
                   aria-label={isAr ? 'فتح القائمة' : 'Open menu'}
                   aria-expanded={mobileMenuOpen}
                 >
