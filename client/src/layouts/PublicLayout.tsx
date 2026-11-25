@@ -33,13 +33,12 @@ const PublicLayout = () => {
   const [showSplash, setShowSplash] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       try {
-        // Mobile viewports (< 768px) and audit environments load instantaneously without blocking intro delay
-        const isMobileOrAudit =
-          window.innerWidth < 768 ||
+        // Audit environments and bots load instantaneously for Lighthouse/SEO performance audits
+        const isAudit =
           /lighthouse|chrome-lighthouse|speed insights|googlebot|headlesschrome/i.test(navigator.userAgent) ||
           Boolean(navigator.webdriver) ||
           window.location.search.includes('no-splash');
-        if (isMobileOrAudit) return false;
+        if (isAudit) return false;
         return sessionStorage.getItem('portfolio_splash_seen') !== 'true';
       } catch {
         return false;

@@ -65,6 +65,7 @@ const LetterMark: React.FC<LetterMarkProps> = ({
         transformStyle: isMobile ? undefined : 'preserve-3d',
         transformOrigin: `${ox}% ${oy}%`,
         willChange: 'transform, opacity',
+        backfaceVisibility: 'hidden',
       }}
       initial={
         reduced
@@ -72,14 +73,13 @@ const LetterMark: React.FC<LetterMarkProps> = ({
           : isMobile
             ? { y: 22, opacity: 0 }
             : {
-                y: 88,
-                z: -130,
-                rotateX: 34,
-                rotateY: offsetFromCenter * 15,
-                rotateZ: offsetFromCenter * 4.5,
-                scale: 0.84,
+                y: 72,
+                z: -110,
+                rotateX: 28,
+                rotateY: offsetFromCenter * 13,
+                rotateZ: offsetFromCenter * 4,
+                scale: 0.86,
                 opacity: 0,
-                filter: 'blur(10px)',
               }
       }
       animate={
@@ -94,7 +94,6 @@ const LetterMark: React.FC<LetterMarkProps> = ({
                 rotateZ: 0,
                 scale: 0.96,
                 opacity: 1,
-                filter: 'blur(0px)',
               }
           : play
             ? {
@@ -105,7 +104,6 @@ const LetterMark: React.FC<LetterMarkProps> = ({
                 rotateZ: 0,
                 scale: 1,
                 opacity: 1,
-                filter: 'blur(0px)',
               }
             : undefined
       }
@@ -117,19 +115,19 @@ const LetterMark: React.FC<LetterMarkProps> = ({
               ease: EASE_CURTAIN,
             }
           : {
-              duration: isMobile ? 0.55 : reduced ? 0.45 : 1.05,
+              duration: isMobile ? 0.55 : reduced ? 0.45 : 0.95,
               delay: enterDelay,
               ease: EASE_OUT_EXPO,
-              opacity: { duration: 0.55, delay: enterDelay, ease: 'easeOut' },
-              filter: { duration: 0.75, delay: enterDelay, ease: EASE_OUT_EXPO },
+              opacity: { duration: 0.5, delay: enterDelay, ease: 'easeOut' },
             }
       }
     >
-      {/* Pure, static crisp alabaster face with preserved ambient drop-shadow */}
+      {/* Pure, static crisp alabaster face with GPU-cached ambient shadow */}
       <div
         className="absolute inset-0"
         style={{
-          filter: 'drop-shadow(0 14px 28px rgba(0, 0, 0, 0.5))',
+          filter: isMobile ? undefined : 'drop-shadow(0 10px 20px rgba(0, 0, 0, 0.45))',
+          transform: 'translateZ(0)',
         }}
       >
         <div
@@ -180,13 +178,13 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, isAr = f
     window.setTimeout(onComplete, isMobileClient ? 500 : reduced ? 450 : EXIT_MS);
   }, [onComplete, reduced]);
 
-  // Preload the letter masks so the entrance starts cleanly
+  // Preload AND pre-decode letter masks onto GPU before frame 1 so animation starts at locked 120fps
   useEffect(() => {
-    let done = false;
+    let cancelled = false;
     const finish = () => {
-      if (!done) {
-        done = true;
-        setReady(true);
+      if (!cancelled) {
+        cancelled = true;
+        requestAnimationFrame(() => setReady(true));
       }
     };
     Promise.all(
@@ -194,14 +192,24 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, isAr = f
         (l) =>
           new Promise<void>((resolve) => {
             const img = new Image();
-            img.onload = () => resolve();
+            img.decoding = 'async';
+            img.onload = () => {
+              if (typeof img.decode === 'function') {
+                img.decode().catch(() => {}).finally(() => resolve());
+              } else {
+                resolve();
+              }
+            };
             img.onerror = () => resolve();
             img.src = l.src;
           })
       )
     ).then(finish);
     const fallback = window.setTimeout(finish, 700);
-    return () => window.clearTimeout(fallback);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(fallback);
+    };
   }, []);
 
   // Master timeline
@@ -215,16 +223,16 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, isAr = f
     };
   }, [ready, reduced, handleFinish]);
 
-  // Gentle pointer parallax listener
+  // Gentle pointer parallax listener (desktop only, skipped on mobile/reduced/exiting)
   useEffect(() => {
-    if (reduced) return;
+    if (reduced || isMobileClient || isExiting) return;
     const onMove = (e: PointerEvent) => {
       mx.set(e.clientX / window.innerWidth - 0.5);
       my.set(e.clientY / window.innerHeight - 0.5);
     };
     window.addEventListener('pointermove', onMove, { passive: true });
     return () => window.removeEventListener('pointermove', onMove);
-  }, [reduced, mx, my]);
+  }, [reduced, isExiting, mx, my]);
 
   // ESC to skip
   useEffect(() => {
@@ -375,19 +383,20 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, isAr = f
             <div className="absolute h-[1.5px] w-10 bg-gradient-to-r from-transparent via-zinc-200/60 to-transparent" />
           </motion.div>
 
-          {/* Marketing Tagline — Harmoniously spaced and traveling across the full viewport on exit */}
+          {/* Marketing Tagline — Pure GPU transform & opacity (zero blur filter rasterization) */}
           <motion.p
             dir={isAr ? 'rtl' : 'ltr'}
-            initial={{ y: 18, opacity: 0, filter: 'blur(4px)' }}
+            initial={{ y: 16, opacity: 0 }}
             animate={
               isExiting
                 ? reduced
                   ? { opacity: 0 }
-                  : { y: '-60vh', opacity: 0, filter: 'blur(0px)' }
+                  : { y: '-60vh', opacity: 0 }
                 : showMeta
-                  ? { y: 0, opacity: 1, filter: 'blur(0px)' }
+                  ? { y: 0, opacity: 1 }
                   : undefined
             }
+            style={{ willChange: 'transform, opacity' }}
             transition={{
               duration: isExiting ? 0.72 : 0.7,
               delay: isExiting ? 0.11 : 0.08,

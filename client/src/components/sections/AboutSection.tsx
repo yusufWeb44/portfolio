@@ -19,20 +19,19 @@ const containerVariants = {
 };
 
 const fadeUpVariants = {
-  hidden: { opacity: 0, y: 30 },
+  hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    y: 0,
-    transition: { duration: 0.6, ease: 'easeOut' as const },
+    transition: { duration: 0.45, ease: 'easeOut' as const },
   },
 };
 
 const cardVariants = {
-  hidden: { opacity: 0, y: 30 },
+  hidden: { opacity: 0, y: 18 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.6, ease: 'easeOut' as const },
+    transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] as const },
   },
 };
 
@@ -133,6 +132,7 @@ const AboutSection = () => {
     <section
       id="about"
       className="scroll-mt-24 py-12 sm:py-14 md:py-16 lg:py-20 bg-transparent overflow-hidden"
+      style={{ contain: 'layout style' }}
       aria-label="About me"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -231,6 +231,7 @@ const AboutSection = () => {
                   key={card.id || i}
                   variants={isMobile ? undefined : cardVariants}
                   initial={isMobile ? false : undefined}
+                  style={{ willChange: 'transform, opacity', backfaceVisibility: 'hidden' }}
                   className={card.colSpan || (i === 2 && displayCards.length === 3 ? 'sm:col-span-2' : '')}
                 >
                   <SpotlightCard
@@ -240,11 +241,11 @@ const AboutSection = () => {
                     darkSize={580}
                     className={[
                       'group relative flex flex-col gap-3.5 sm:gap-5 rounded-xl sm:rounded-2xl p-5 sm:p-6 md:p-7 lg:p-8 h-full',
-                      'bg-white/98 dark:bg-zinc-900/95 md:bg-white/95 md:dark:bg-zinc-900/60 md:backdrop-blur-xl',
+                      'bg-white/98 dark:bg-zinc-900/95 md:bg-white/95 md:dark:bg-zinc-900/60',
                       'border border-zinc-200/90 dark:border-white/[0.08]',
                       'shadow-[0_1px_2px_rgba(0,0,0,0.03),0_8px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset,0_16px_32px_-12px_rgba(0,0,0,0.4)]',
                       'hover:border-zinc-300 dark:hover:border-white/[0.18] hover:-translate-y-1',
-                      'transition-all duration-300 ease-out cursor-default',
+                      'transition-[transform,border-color,box-shadow] duration-300 ease-out cursor-default',
                     ].join(' ')}
                   >
                     {/* Subtle background tint on hover */}

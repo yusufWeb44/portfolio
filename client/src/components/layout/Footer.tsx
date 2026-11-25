@@ -374,7 +374,21 @@ export const Footer: React.FC<FooterProps> = ({ settings, socialLinks = [], scro
                 {/* 1. Email Item: First */}
                 {contactEmail && (
                   <a
-                    href={`mailto:${contactEmail}`}
+                    href={
+                      (() => {
+                        const subject = encodeURIComponent(
+                          isAr
+                            ? 'استفسار واستشارة برمجية'
+                            : 'Software Engineering Inquiry & Consultation'
+                        );
+                        const body = encodeURIComponent(
+                          isAr
+                            ? 'السلام عليكم ورحمة الله وبركاته،\n\nأود التواصل معك لبحث فرص التعاون ومناقشة المشاريع البرمجية المتاحة.\n\nمع فائق التقدير والاحترام،'
+                            : 'Hello Yousef,\n\nI would like to reach out regarding potential software engineering collaboration and consulting opportunities.\n\nBest regards,'
+                        );
+                        return `mailto:${contactEmail}?subject=${subject}&body=${body}`;
+                      })()
+                    }
                     className="flex items-center gap-2.5 hover:text-foreground transition-colors group py-0.5"
                   >
                     <Mail className="w-4 h-4 text-emerald-500 shrink-0 group-hover:scale-110 transition-transform" />
@@ -385,7 +399,16 @@ export const Footer: React.FC<FooterProps> = ({ settings, socialLinks = [], scro
                 {/* 2. Phone Item: Second */}
                 {contactPhone && (
                   <a
-                    href={`https://wa.me/${contactPhone.replace(/[^0-9]/g, '')}`}
+                    href={
+                      (() => {
+                        const msg = encodeURIComponent(
+                          isAr
+                            ? 'السلام عليكم ورحمة الله وبركاته، أود التواصل معك لبحث فرص التعاون ومناقشة المشاريع البرمجية والاستشارية المتاحة.'
+                            : 'Hello Yousef, I would like to reach out to discuss potential software engineering collaboration and consulting opportunities.'
+                        );
+                        return `https://wa.me/${contactPhone.replace(/[^0-9]/g, '')}?text=${msg}`;
+                      })()
+                    }
                     target="_blank"
                     rel="noreferrer"
                     className="flex items-center gap-2.5 hover:text-foreground transition-colors group py-0.5"

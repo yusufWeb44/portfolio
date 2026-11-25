@@ -254,22 +254,16 @@ const TimelineNodeCard = memo(({ item, theme, isRtl, alignToSpineEnd, isReached 
 
   return (
     <div className={`w-full text-start flex flex-col ${alignToSpineEnd ? 'items-end' : 'items-start'}`}>
-      {/* Top Row: Circular Icon Badge & Year (Animated on checkpoint reached) */}
-      <motion.div
-        initial={false}
-        animate={{
-          opacity: isReached ? 1 : 0,
-          y: isReached ? 0 : 8,
-          scale: isReached ? 1 : 0.94,
-        }}
-        transition={{
-          duration: 0.42,
-          delay: 0.08,
-          ease: [0.22, 1, 0.36, 1],
-        }}
-        className={`flex items-center gap-3.5 mb-3 transform-gpu ${
+      {/* Top Row: Circular Icon Badge & Year (Pure GPU CSS transition on checkpoint reached) */}
+      <div
+        className={`flex items-center gap-3.5 mb-3 transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
           alignToSpineEnd ? 'justify-end' : 'justify-start'
         }`}
+        style={{
+          opacity: isReached ? 1 : 0,
+          transform: isReached ? 'translate3d(0, 0, 0) scale(1)' : 'translate3d(0, 8px, 0) scale(0.94)',
+          willChange: isReached ? 'auto' : 'transform, opacity',
+        }}
       >
         {alignToSpineEnd ? (
           <>
@@ -282,29 +276,25 @@ const TimelineNodeCard = memo(({ item, theme, isRtl, alignToSpineEnd, isReached 
             {yearElement}
           </>
         )}
-      </motion.div>
+      </div>
 
-      {/* Experience Content Card (Silky glide entrance) */}
-      <motion.div
-        initial={false}
-        animate={{
+      {/* Experience Content Card (GPU glide entrance without heavy backdrop-blur readback) */}
+      <div
+        className="w-full transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] delay-75"
+        style={{
           opacity: isReached ? 1 : 0,
-          y: isReached ? 0 : 18,
-          x: isReached ? 0 : (alignToSpineEnd ? -14 : 14),
+          transform: isReached
+            ? 'translate3d(0, 0, 0)'
+            : `translate3d(${alignToSpineEnd ? '-14px' : '14px'}, 16px, 0)`,
+          willChange: isReached ? 'auto' : 'transform, opacity',
         }}
-        transition={{
-          duration: 0.52,
-          delay: 0.14,
-          ease: [0.22, 1, 0.36, 1],
-        }}
-        className="w-full transform-gpu"
       >
         <SpotlightCard
           spotlightColor={`rgba(${theme.accentRgb}, 0.08)`}
           darkSpotlightColor={`rgba(${theme.accentRgb}, 0.12)`}
           size={340}
           darkSize={450}
-          className={`relative w-full p-5 sm:p-6 rounded-xl bg-white/95 dark:bg-zinc-900/80 backdrop-blur-xl border border-zinc-200/90 dark:border-white/[0.08] ${theme.cardBorder} hover:border-zinc-300 dark:hover:border-white/[0.22] hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_1px_0_0_rgba(255,255,255,0.08)_inset,0_20px_40px_-12px_rgba(0,0,0,0.6)] transition-all duration-300 ease-out group-hover/item:-translate-y-1 text-start transform-gpu cursor-pointer`}
+          className={`relative w-full p-5 sm:p-6 rounded-xl bg-white/98 dark:bg-zinc-900/95 md:bg-white/95 md:dark:bg-zinc-900/60 border border-zinc-200/90 dark:border-white/[0.08] shadow-[0_1px_2px_rgba(0,0,0,0.03),0_8px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset,0_16px_32px_-12px_rgba(0,0,0,0.4)] ${theme.cardBorder} hover:border-zinc-300 dark:hover:border-white/[0.22] hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_1px_0_0_rgba(255,255,255,0.08)_inset,0_20px_40px_-12px_rgba(0,0,0,0.6)] transition-[transform,border-color,box-shadow] duration-300 ease-out group-hover/item:-translate-y-1 text-start cursor-pointer`}
         >
           {/* Role / Position Title */}
           <h3 className="text-lg md:text-xl font-bold tracking-tight text-foreground relative z-10">
@@ -348,7 +338,7 @@ const TimelineNodeCard = memo(({ item, theme, isRtl, alignToSpineEnd, isReached 
             </div>
           )}
         </SpotlightCard>
-      </motion.div>
+      </div>
     </div>
   );
 });
@@ -378,18 +368,12 @@ const MobileTimelineCard = memo(({ item, theme, isRtl, isReached }: MobileTimeli
       {/* ─── Top Branch Header: Circular Badge (outside card) + Year ─── */}
       <div className="flex items-center gap-3.5 mb-3 justify-start">
         {/* Outer Circular Icon Badge */}
-        <motion.div
-          initial={false}
-          animate={{
+        <div
+          style={{
             opacity: isReached ? 1 : 0,
-            scale: isReached ? 1 : 0.8,
+            transform: isReached ? 'scale(1)' : 'scale(0.8)',
           }}
-          transition={{
-            duration: 0.38,
-            delay: 0.08,
-            ease: [0.22, 1, 0.36, 1],
-          }}
-          className={`relative z-30 flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-full border-2 ${theme.badgeBorder} bg-white dark:bg-zinc-950 flex items-center justify-center transition-transform duration-300 group-hover/item:scale-105 shadow-sm overflow-hidden transform-gpu`}
+          className={`relative z-30 flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-full border-2 ${theme.badgeBorder} bg-white dark:bg-zinc-950 flex items-center justify-center transition-[transform,opacity] duration-300 group-hover/item:scale-105 shadow-sm overflow-hidden`}
         >
           {/* Theme tinted translucent fill over solid base */}
           <div className={`absolute inset-0 ${theme.badgeBg}`} />
@@ -401,22 +385,16 @@ const MobileTimelineCard = memo(({ item, theme, isRtl, isReached }: MobileTimeli
           <span className={`relative z-10 ${theme.text} transition-transform duration-300 group-hover/item:scale-105`}>
             {getTimelineIcon(item.icon, item.type, 19)}
           </span>
-        </motion.div>
+        </div>
 
         {/* Year / Period */}
-        <motion.div
-          initial={false}
-          animate={{
+        <div
+          className="text-lg sm:text-xl font-extrabold tracking-tight font-mono leading-none flex items-center gap-1.5 transition-[transform,opacity] duration-400 ease-[cubic-bezier(0.22,1,0.36,1)]"
+          style={{
+            color: theme.accent,
             opacity: isReached ? 1 : 0,
-            x: isReached ? 0 : (isRtl ? -10 : 10),
+            transform: isReached ? 'translate3d(0, 0, 0)' : `translate3d(${isRtl ? '-10px' : '10px'}, 0, 0)`,
           }}
-          transition={{
-            duration: 0.42,
-            delay: 0.12,
-            ease: [0.22, 1, 0.36, 1],
-          }}
-          className="text-lg sm:text-xl font-extrabold tracking-tight font-mono leading-none flex items-center gap-1.5 transform-gpu"
-          style={{ color: theme.accent }}
         >
           <span dir="ltr">{displayStart}</span>
           {displayEnd && displayEnd !== displayStart ? (
@@ -427,29 +405,23 @@ const MobileTimelineCard = memo(({ item, theme, isRtl, isReached }: MobileTimeli
               </span>
             </>
           ) : null}
-        </motion.div>
+        </div>
       </div>
 
-      {/* ─── Content Card (GPU-optimized crisp surface for mobile) ─── */}
-      <motion.div
-        initial={false}
-        animate={{
+      {/* ─── Content Card (GPU-optimized crisp surface for mobile — zero backdrop blur) ─── */}
+      <div
+        className="w-full transition-[transform,opacity] duration-400 ease-[cubic-bezier(0.22,1,0.36,1)]"
+        style={{
           opacity: isReached ? 1 : 0,
-          y: isReached ? 0 : 16,
+          transform: isReached ? 'translate3d(0, 0, 0)' : 'translate3d(0, 16px, 0)',
         }}
-        transition={{
-          duration: 0.48,
-          delay: 0.15,
-          ease: [0.22, 1, 0.36, 1],
-        }}
-        className="w-full transform-gpu"
       >
         <SpotlightCard
           spotlightColor="rgba(0, 0, 0, 0.02)"
           darkSpotlightColor="rgba(255, 255, 255, 0.007)"
           size={300}
           darkSize={450}
-          className="relative w-full p-5 sm:p-6 rounded-xl bg-white/98 dark:bg-zinc-900/95 sm:backdrop-blur-xl border border-zinc-200/90 dark:border-white/[0.08] shadow-[0_1px_2px_rgba(0,0,0,0.03),0_8px_16px_-4px_rgba(0,0,0,0.05)] dark:shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset,0_12px_24px_-8px_rgba(0,0,0,0.35)] text-start hover:border-zinc-300 dark:hover:border-white/[0.18] transition-colors duration-200 transform-gpu"
+          className="relative w-full p-5 sm:p-6 rounded-xl bg-white/98 dark:bg-zinc-900/95 md:bg-white/95 md:dark:bg-zinc-900/60 border border-zinc-200/90 dark:border-white/[0.08] shadow-[0_1px_2px_rgba(0,0,0,0.03),0_8px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset,0_16px_32px_-12px_rgba(0,0,0,0.4)] text-start hover:border-zinc-300 dark:hover:border-white/[0.18] transition-colors duration-200"
         >
           {/* Role / Position Title */}
           <h3 className="text-base sm:text-lg font-bold tracking-tight text-foreground leading-snug relative z-10">
@@ -492,7 +464,7 @@ const MobileTimelineCard = memo(({ item, theme, isRtl, isReached }: MobileTimeli
             </div>
           )}
         </SpotlightCard>
-      </motion.div>
+      </div>
     </div>
   );
 });
@@ -504,6 +476,12 @@ const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
   const { currentLang, currentDirection } = useLanguage();
   const isRtl = currentDirection === 'rtl' || currentLang === 'ar';
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Stable memoized theme objects so React.memo prevents re-rendering cards on each node activation
+  const itemThemes = useMemo(
+    () => experiences.map((item, i) => getThemeColors(item.color, i)),
+    [experiences]
+  );
   
   const mobileTrackRef = useRef<HTMLDivElement>(null);
   const desktopTrackRef = useRef<HTMLDivElement>(null);
@@ -590,7 +568,11 @@ const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
             const ratio = (nodeCenter - trackTop) / trackHeight;
             return Math.max(0.02, Math.min(0.98, ratio));
           });
-          setMobileThresholds(thresholds);
+          setMobileThresholds((prev) =>
+            prev.length === thresholds.length && prev.every((v, idx) => Math.abs(v - thresholds[idx]) < 0.004)
+              ? prev
+              : thresholds
+          );
         }
       }
 
@@ -608,7 +590,11 @@ const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
             const ratio = (nodeCenter - trackTop) / trackHeight;
             return Math.max(0.02, Math.min(0.98, ratio));
           });
-          setDesktopThresholds(thresholds);
+          setDesktopThresholds((prev) =>
+            prev.length === thresholds.length && prev.every((v, idx) => Math.abs(v - thresholds[idx]) < 0.004)
+              ? prev
+              : thresholds
+          );
         }
       }
     });
@@ -775,7 +761,7 @@ const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
         {/* Mobile Items Stack */}
         <div className="space-y-8 sm:space-y-10 relative z-10 pt-7 pb-4">
           {experiences.map((item, index) => {
-            const theme = getThemeColors(item.color, index);
+            const theme = itemThemes[index];
             // On mobile phones: all cards and nodes are immediately reached and visible with 0 lag
             const isReached = true || reachedMobile.includes(index);
 
@@ -901,7 +887,7 @@ const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
         {/* Timeline Items List */}
         <div className="space-y-12 md:space-y-16 relative z-10 pb-12">
           {experiences.map((item, index) => {
-            const theme = getThemeColors(item.color, index);
+            const theme = itemThemes[index];
             const isRightSide = index % 2 === 0;
             const stemGoesRight = isRtl ? !isRightSide : isRightSide;
             const isReached = reachedDesktop.includes(index);
@@ -931,18 +917,13 @@ const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
                     />
                   </div>
 
-                  {/* ── Horizontal Branching Connector Line (Desktop) ── */}
-                  <motion.div
-                    initial={false}
-                    animate={{ scaleX: isReached ? 1 : 0 }}
-                    transition={{
-                      duration: 0.45,
-                      ease: [0.22, 1, 0.36, 1],
-                    }}
+                  {/* ── Horizontal Branching Connector Line (Desktop GPU transition) ── */}
+                  <div
                     style={{
                       transformOrigin: stemGoesRight ? 'left center' : 'right center',
+                      transform: `translateY(-50%) scaleX(${isReached ? 1 : 0})`,
                     }}
-                    className={`flex items-center absolute top-1/2 -translate-y-1/2 h-[2px] pointer-events-none z-0 ${
+                    className={`flex items-center absolute top-1/2 h-[2px] pointer-events-none z-0 transition-transform duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] ${
                       stemGoesRight
                         ? 'left-full w-[2.5rem] lg:w-[3rem]'
                         : 'right-full w-[2.5rem] lg:w-[3rem]'
@@ -956,7 +937,7 @@ const ExperienceTimelineInner = ({ experiences }: ExperienceTimelineProps) => {
                       style={{ backgroundColor: theme.accent }}
                       className="relative w-full h-[1.5px] opacity-75 group-hover/item:opacity-100 transition-opacity duration-300"
                     />
-                  </motion.div>
+                  </div>
                 </div>
 
                 {/* ─── Desktop First Column (Inline-Start of Spine) ── */}

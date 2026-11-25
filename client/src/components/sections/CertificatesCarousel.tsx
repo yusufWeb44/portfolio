@@ -58,7 +58,7 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
 
   // Track visibility with IntersectionObserver so continuous loop & mobile auto-flip only run when in viewport
   const carouselContainerRef = useRef<HTMLDivElement>(null);
-  const [isInView, setIsInView] = useState(true);
+  const [isInView, setIsInView] = useState(false);
 
   useEffect(() => {
     if (!carouselContainerRef.current) return;
@@ -606,7 +606,7 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
       )}
 
       {/* ═══════════════════════════════════════════════════════════════
-          PURE LARGE CERTIFICATE VIEW (No container, no extra headers, X on top-right)
+          PURE LARGE CERTIFICATE VIEW (Zero glass container, pure image display, prominent close button)
       ═══════════════════════════════════════════════════════════════ */}
       {typeof document !== 'undefined' && createPortal(
         <AnimatePresence>
@@ -616,7 +616,7 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-[999999] bg-black/92 backdrop-blur-md flex items-center justify-center p-4 sm:p-8 cursor-zoom-out"
+              className="fixed inset-0 z-[999999] bg-black/92 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 cursor-zoom-out"
               onClick={() => setSelectedCert(null)}
             >
               {/* Prominent Close Button at top-right */}
@@ -626,20 +626,20 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
                   e.stopPropagation();
                   setSelectedCert(null);
                 }}
-                className="fixed top-5 right-5 sm:top-8 sm:right-8 z-50 w-12 h-12 rounded-full bg-white/10 hover:bg-white/25 border border-white/20 text-white flex items-center justify-center transition-all cursor-pointer hover:scale-110 active:scale-95 shadow-2xl backdrop-blur-xl"
+                className="fixed top-4 right-4 sm:top-6 sm:right-6 z-50 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white flex items-center justify-center transition-all cursor-pointer hover:scale-105 active:scale-95 shadow-2xl backdrop-blur-md"
                 aria-label="Close certificate preview"
               >
-                <X size={26} />
+                <X size={24} />
               </button>
 
-              {/* Pure Large Certificate Image (No modal box/container) */}
+              {/* Pure Large Certificate Image (Zero container, zero glass borders, 100% focus on pure image) */}
               <motion.div
-                initial={{ scale: 0.92, opacity: 0 }}
+                initial={{ scale: 0.94, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.92, opacity: 0 }}
-                transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                exit={{ scale: 0.94, opacity: 0 }}
+                transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
                 onClick={(e) => e.stopPropagation()}
-                className="relative max-w-[94vw] max-h-[90vh] flex items-center justify-center cursor-default select-none"
+                className="relative max-w-[95vw] max-h-[92vh] flex items-center justify-center cursor-default select-none"
               >
                 {selectedCert.imageUrl || selectedCert.credentialUrl ? (
                   <img
@@ -648,10 +648,10 @@ export const CertificatesCarousel: React.FC<CertificatesCarouselProps> = ({
                     width={1200}
                     height={850}
                     decoding="async"
-                    className="max-w-[94vw] max-h-[88vh] object-contain rounded-none shadow-[0_25px_80px_rgba(0,0,0,0.95)] border border-white/20"
+                    className="max-w-[95vw] max-h-[92vh] w-auto h-auto object-contain rounded-none shadow-[0_25px_80px_rgba(0,0,0,0.9)] border-0"
                   />
                 ) : (
-                  <div className="w-[37.5rem] max-w-[90vw] aspect-[1.41/1] rounded-none bg-zinc-900 border border-white/20 flex flex-col items-center justify-center p-8 text-center text-white shadow-2xl">
+                  <div className="w-[37.5rem] max-w-[90vw] aspect-[1.41/1] rounded-none bg-zinc-900 border border-white/10 flex flex-col items-center justify-center p-8 text-center text-white shadow-2xl">
                     <Award className="w-20 h-20 text-amber-400 mb-4" />
                     <h3 className="text-2xl font-bold mb-2">
                       {isRtl ? (selectedCert.titleAr || selectedCert.title) : selectedCert.title}

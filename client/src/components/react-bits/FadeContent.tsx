@@ -91,6 +91,7 @@ export const FadeContent: React.FC<FadeContentProps> = ({
         delay,
         ease: easing as any,
       }}
+      style={{ willChange: 'transform, opacity', backfaceVisibility: 'hidden' }}
       className={className}
     >
       {children}

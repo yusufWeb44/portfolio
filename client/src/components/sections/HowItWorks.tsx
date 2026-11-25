@@ -22,12 +22,12 @@ const Pushpin = ({ color, isMobile }: { color: string; isMobile?: boolean }) => 
       aria-hidden="true"
     >
       <defs>
-        {/* Soft shadow filter for realistic depth (desktop only to preserve high mobile scroll FPS) */}
-        {!isMobile && (
-          <filter id={`shadow_${safeId}`} x="-40%" y="-40%" width="180%" height="180%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="1.5" />
-          </filter>
-        )}
+        {/* Lightweight radial gradient shadow (0 SVG Gaussian blur filter cost during animation) */}
+        <radialGradient id={`shadow_${safeId}`} cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="rgba(0,0,0,0.34)" />
+          <stop offset="65%" stopColor="rgba(0,0,0,0.14)" />
+          <stop offset="100%" stopColor="rgba(0,0,0,0)" />
+        </radialGradient>
 
         {/* 3D Sphere Radial Gradient */}
         <radialGradient
@@ -79,10 +79,9 @@ const Pushpin = ({ color, isMobile }: { color: string; isMobile?: boolean }) => 
       <ellipse
         cx="19"
         cy="23"
-        rx="9.5"
-        ry="4"
-        fill="rgba(0,0,0,0.35)"
-        filter={isMobile ? undefined : `url(#shadow_${safeId})`}
+        rx="10.5"
+        ry="4.5"
+        fill={`url(#shadow_${safeId})`}
       />
 
       {/* ── 4. 3D Pin Head (فقط رأس الدبوس ثلاثي الأبعاد) ── */}
@@ -247,103 +246,55 @@ const StickyNoteCard = memo(({
             ? { duration: 0 }
             : isRevealed
             ? {
-                opacity: { duration: 0.28, ease: [0.16, 1, 0.3, 1] },
-                y: { type: 'spring', stiffness: 190, damping: 20, mass: 0.75 },
-                scale: { type: 'spring', stiffness: 180, damping: 20, mass: 0.8 },
-                rotateX: { type: 'spring', stiffness: 170, damping: 17, mass: 0.8 },
-                rotateY: { type: 'spring', stiffness: 170, damping: 18, mass: 0.8 },
-                rotate: { type: 'spring', stiffness: 145, damping: 13, mass: 0.8 },
+                type: 'spring',
+                stiffness: 185,
+                damping: 20,
+                mass: 0.75,
+                opacity: { duration: 0.26, ease: [0.16, 1, 0.3, 1] },
               }
             : {
-                opacity: { duration: 0.2, ease: 'easeIn' },
-                y: { duration: 0.24, ease: 'easeIn' },
-                scale: { duration: 0.24, ease: 'easeIn' },
-                rotate: { duration: 0.24, ease: 'easeIn' },
+                duration: 0.22,
+                ease: 'easeIn',
               }
         }
         style={{
           transformOrigin: '50% 22px',
         }}
       >
-        {/* ── Paper Stack Behind: 100% Opaque Physical Sheets ── */}
+        {/* ── Paper Stack Behind: 100% Opaque Physical Sheets (Pure GPU CSS transitions) ── */}
         {/* Deepest backing sheet (Sheet 3) */}
-        <motion.div
-          className="absolute inset-0 rounded-[1px] pointer-events-none overflow-hidden"
-          initial={{ rotate: 0, x: 0, y: 0 }}
-          animate={
-            isRevealed
-              ? { rotate: stackBottomRotate, x: isRtl ? -3 : 3, y: isMobile ? 3.5 : 5 }
-              : { rotate: 0, x: 0, y: 0 }
-          }
-          transition={
-            isRevealed
-              ? isMobile
-                ? { duration: 0.28, ease: [0.22, 1, 0.36, 1], delay: 0.04 }
-                : { type: 'spring', stiffness: 155, damping: 16, delay: 0.1 }
-              : { duration: 0.2, ease: 'easeIn' }
-          }
+        <div
+          className="absolute inset-0 rounded-[1px] pointer-events-none overflow-hidden transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] delay-75"
           style={{
             backgroundColor: step.paperEdge,
-            backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.03) 100%)`,
+            backgroundImage: 'linear-gradient(180deg, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.03) 100%)',
             border: '1px solid rgba(0,0,0,0.10)',
             boxShadow: isMobile
               ? '0 3px 8px rgba(0,0,0,0.12)'
-              : `
-                0 6px 16px rgba(0,0,0,0.18),
-                0 2px 5px rgba(0,0,0,0.12),
-                inset 0 1px 0 rgba(255,255,255,0.45)
-              `,
+              : '0 6px 16px rgba(0,0,0,0.16), 0 2px 5px rgba(0,0,0,0.10)',
             transformOrigin: '50% 22px',
+            transform: isRevealed
+              ? `translate3d(${isRtl ? -3 : 3}px, ${isMobile ? 3.5 : 5}px, 0) rotate(${stackBottomRotate}deg)`
+              : 'translate3d(0, 0, 0) rotate(0deg)',
           }}
         />
 
         {/* Middle backing sheet (Sheet 2) */}
-        <motion.div
-          className="absolute inset-0 rounded-[1px] pointer-events-none overflow-hidden"
-          initial={{ rotate: 0, x: 0, y: 0 }}
-          animate={
-            isRevealed
-              ? {
-                rotate: stackMiddleRotate,
-                x: isRtl ? (isMobile ? 1.5 : 2) : (isMobile ? -1.5 : -2),
-                y: isMobile ? 2 : 2.5,
-              }
-              : { rotate: 0, x: 0, y: 0 }
-          }
-          transition={
-            isRevealed
-              ? isMobile
-                ? { duration: 0.28, ease: [0.22, 1, 0.36, 1], delay: 0.02 }
-                : { type: 'spring', stiffness: 170, damping: 18, delay: 0.05 }
-              : { duration: 0.22, ease: 'easeIn' }
-          }
+        <div
+          className="absolute inset-0 rounded-[1px] pointer-events-none overflow-hidden transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] delay-50"
           style={{
             backgroundColor: step.paperBg,
             backgroundImage: `linear-gradient(180deg, ${step.paperEdge}88 0%, rgba(0,0,0,0.03) 100%)`,
             border: '1px solid rgba(0,0,0,0.08)',
             boxShadow: isMobile
               ? '0 2px 6px rgba(0,0,0,0.10)'
-              : `
-                0 3px 8px rgba(0,0,0,0.13),
-                0 1px 3px rgba(0,0,0,0.09),
-                inset 0 1px 0 rgba(255,255,255,0.65)
-              `,
+              : '0 3px 8px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.08)',
             transformOrigin: '50% 22px',
+            transform: isRevealed
+              ? `translate3d(${isRtl ? (isMobile ? 1.5 : 2) : (isMobile ? -1.5 : -2)}px, ${isMobile ? 2 : 2.5}px, 0) rotate(${stackMiddleRotate}deg)`
+              : 'translate3d(0, 0, 0) rotate(0deg)',
           }}
-        >
-          {/* Subtle ruled lines on middle sheet (desktop only) */}
-          {!isMobile && (
-            <div className="absolute inset-0 pointer-events-none" style={{ opacity: 0.035 }}>
-              {Array.from({ length: 14 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="absolute w-full"
-                  style={{ top: `${(72 + i * 22) / 16}rem`, height: '0.8px', background: '#6b7280' }}
-                />
-              ))}
-            </div>
-          )}
-        </motion.div>
+        />
 
         {/* Main paper (Top Sheet) */}
         <div
@@ -353,37 +304,29 @@ const StickyNoteCard = memo(({
             border: '1px solid rgba(0,0,0,0.06)',
             boxShadow: isMobile
               ? '0 4px 14px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.08)'
-              : `
-                0 1px 2px rgba(0,0,0,0.07),
-                0 3px 6px rgba(0,0,0,0.08),
-                0 6px 12px rgba(0,0,0,0.08),
-                0 12px 24px rgba(0,0,0,0.06),
-                inset 0 1px 0 rgba(255,255,255,0.85),
-                inset 0 -1px 0 rgba(0,0,0,0.04)
-              `,
+              : '0 12px 24px -4px rgba(0,0,0,0.14), 0 3px 8px rgba(0,0,0,0.09), inset 0 1px 0 rgba(255,255,255,0.85)',
           }}
         >
-          {/* Paper texture — desktop only */}
+          {/* Paper texture — desktop only (no mix-blend-multiply barrier inside 3D layer) */}
           {!isMobile && (
             <div
-              className="absolute inset-0 pointer-events-none mix-blend-multiply"
+              className="absolute inset-0 pointer-events-none"
               style={{
-                opacity: 0.04,
-                backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px)',
+                opacity: 0.035,
+                backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 4px)',
                 backgroundSize: '8px 8px',
               }}
             />
           )}
-          {/* Ruled lines */}
-          <div className="absolute inset-0 pointer-events-none" style={{ opacity: 0.04 }}>
-            {Array.from({ length: isMobile ? 9 : 14 }).map((_, i) => (
-              <div
-                key={i}
-                className="absolute w-full"
-                style={{ top: `${((isMobile ? 54 : 72) + i * (isMobile ? 18 : 22)) / 16}rem`, height: '0.8px', background: '#6b7280' }}
-              />
-            ))}
-          </div>
+          {/* Ruled lines — single GPU gradient background (zero extra DOM nodes) */}
+          <div
+            className="absolute inset-x-0 bottom-0 pointer-events-none"
+            style={{
+              top: isMobile ? '3.375rem' : '4.5rem',
+              opacity: 0.045,
+              backgroundImage: `repeating-linear-gradient(to bottom, #6b7280 0, #6b7280 0.8px, transparent 0.8px, transparent ${isMobile ? '1.125rem' : '1.375rem'})`,
+            }}
+          />
           {/* Red margin (mirrored on right side for RTL Arabic writing) */}
           <div
             className="absolute top-0 bottom-0 pointer-events-none"
@@ -395,33 +338,16 @@ const StickyNoteCard = memo(({
             style={{ height: '0.375rem', background: `linear-gradient(180deg, ${step.paperEdge}90, transparent)` }}
           />
 
-          {/* Pushpin — tactile pinning strike on reveal */}
-          <motion.div
-            className="flex justify-center pt-1.5 sm:pt-2 relative z-10"
-            initial={{ opacity: 0, y: -20, scale: 1.32 }}
-            animate={
-              isRevealed
-                ? { opacity: 1, y: 0, scale: 1 }
-                : { opacity: 0, y: -16, scale: 1.2 }
-            }
-            transition={
-              isRevealed
-                ? {
-                  type: 'spring',
-                  stiffness: 360,
-                  damping: 20,
-                  mass: 0.55,
-                  delay: 0.08,
-                  opacity: { duration: 0.16, delay: 0.06 },
-                }
-                : {
-                  duration: 0.18,
-                  ease: [0.4, 0, 1, 1],
-                }
-            }
+          {/* Pushpin — crisp GPU CSS strike transition on reveal */}
+          <div
+            className="flex justify-center pt-1.5 sm:pt-2 relative z-10 transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] delay-75"
+            style={{
+              opacity: isRevealed ? 1 : 0,
+              transform: isRevealed ? 'translate3d(0, 0, 0) scale(1)' : 'translate3d(0, -14px, 0) scale(1.22)',
+            }}
           >
             <Pushpin color={step.pinColor} isMobile={isMobile} />
-          </motion.div>
+          </div>
 
           {/* Content — compact, proportional mobile sizing */}
           <div className={`px-4 sm:px-7 pb-4 sm:pb-7 pt-0.5 sm:pt-2 relative z-10 ${isRtl ? 'text-right' : 'text-left'}`}>
@@ -768,6 +694,7 @@ const HowItWorks = () => {
     <section
       id="workflow"
       className="relative isolate scroll-mt-24 py-12 sm:py-14 md:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-transparent overflow-x-clip overflow-y-visible"
+      style={{ contain: 'layout style' }}
       aria-label="Engineering process and workflow"
     >
       {/* ── Seamless Dot Grid Background System (Crisp & Visible on All Displays) ── */}

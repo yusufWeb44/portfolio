@@ -89,7 +89,7 @@ export const BlurText: React.FC<BlurTextProps> = ({
         }}
         onAnimationComplete={onAnimationComplete}
         className={`inline-block ${className}`}
-        style={{ overflowWrap: 'break-word', wordBreak: 'normal' }}
+        style={{ overflowWrap: 'break-word', wordBreak: 'normal', willChange: 'transform, opacity', backfaceVisibility: 'hidden' }}
       >
         {text}
       </motion.span>

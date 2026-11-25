@@ -70,11 +70,11 @@ export const ServiceCard = ({
 
   const inquiryMsg = encodeURIComponent(
     isAr 
-      ? `مرحباً يوسف، أود الاستفسار بخصوص خدمة: "${title}".`
-      : `Hello Yousef, I'd like to inquire about: "${title}".`
+      ? `السلام عليكم ورحمة الله وبركاته، أود الاستفسار عن نطاق العمل الهندسي وخيارات التنفيذ لخدمة: "${title}". هل بالإمكان تزويدي بتفاصيل إضافية حول المنهجية المتبعة والجدول الزمني المقترح لتنفيذ المشروع؟`
+      : `Hello Yousef, I would like to inquire about the engineering scope and implementation methodology for the "${title}" service. Could you please provide further details regarding the development process and estimated timeline?`
   );
   const waLink = service.whatsappUrl
-    ? service.whatsappUrl
+    ? (service.whatsappUrl.includes('text=') ? service.whatsappUrl : `${service.whatsappUrl}${service.whatsappUrl.includes('?') ? '&' : '?'}text=${inquiryMsg}`)
     : whatsappBaseUrl
     ? `${whatsappBaseUrl}${whatsappBaseUrl.includes('?') ? '&' : '?'}text=${inquiryMsg}`
     : `https://wa.me/?text=${inquiryMsg}`;

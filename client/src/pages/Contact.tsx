@@ -167,7 +167,21 @@ const Contact = () => {
           {/* Contact info */}
           <div className="space-y-6 mt-12">
             <a
-              href={`mailto:${email}`}
+              href={
+                (() => {
+                  const subject = encodeURIComponent(
+                    isAr
+                      ? 'استفسار بخصوص مشروع برمجي جديد'
+                      : 'Inquiry Regarding New Software Engineering Project'
+                  );
+                  const body = encodeURIComponent(
+                    isAr
+                      ? 'السلام عليكم ورحمة الله وبركاته،\n\nأود التواصل معك لمناقشة متطلبات مشروع برمجي جديد وبحث إمكانية التعاون الفني والجدول الزمني المقترح لتنفيذه.\n\nمع فائق التقدير والاحترام،'
+                      : 'Hello Yousef,\n\nI would like to get in touch to discuss the technical requirements, architecture, and timeline for an upcoming software project.\n\nBest regards,'
+                  );
+                  return `mailto:${email}?subject=${subject}&body=${body}`;
+                })()
+              }
               className="group flex items-center gap-4 hover:text-background/70 transition-colors"
             >
               <div className="w-10 h-10 rounded-full border border-background/20 flex items-center justify-center group-hover:border-background/40 transition-colors">

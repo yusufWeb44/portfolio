@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { useIsMobile } from '../../hooks/useIsMobile';
 
@@ -20,9 +20,7 @@ export interface SplitTextProps {
 /**
  * React Bits - SplitText
  * Clean, modern masked typographic text entrance.
- * Smoothly lifts words from baseline with crisp opacity on desktop.
- * On mobile (< 768px), immediately renders clean static text with ZERO motion DOM overhead,
- * zero delays, and zero initial hidden states for peak 120fps compositor scrolling.
+ * GPU-composited without post-animation React state commits.
  */
 export const SplitText: React.FC<SplitTextProps> = ({
   text,
@@ -41,7 +39,6 @@ export const SplitText: React.FC<SplitTextProps> = ({
   const isMobile = useIsMobile();
   const ref = useRef<HTMLSpanElement>(null);
   const isInView = useInView(ref, { once: true, amount: threshold, margin: rootMargin as any });
-  const [isCompleted, setIsCompleted] = useState(false);
 
   useEffect(() => {
     if (isMobile) {
@@ -49,7 +46,6 @@ export const SplitText: React.FC<SplitTextProps> = ({
     }
   }, [isMobile, onAnimationComplete]);
 
-  // Mobile bypass: pure static text with zero motion nodes and instant full visibility
   if (isMobile) {
     return (
       <span
@@ -62,10 +58,8 @@ export const SplitText: React.FC<SplitTextProps> = ({
     );
   }
 
-  // Detect Arabic characters to prevent breaking Arabic cursive letters
   const hasArabic = /[\u0600-\u06FF]/.test(text);
   const effectiveSplitBy = hasArabic ? 'words' : splitBy;
-
   const elements = effectiveSplitBy === 'words' ? text.split(/\s+/) : text.split('');
 
   return (
@@ -78,10 +72,11 @@ export const SplitText: React.FC<SplitTextProps> = ({
       {elements.map((segment, index) => (
         <span
           key={index}
-          className={`inline-block ${isCompleted ? 'overflow-visible' : 'overflow-hidden'} pb-[0.35em] -mb-[0.35em] whitespace-nowrap align-top`}
+          className="inline-block overflow-x-visible overflow-y-clip pb-[0.35em] -mb-[0.35em] whitespace-nowrap align-top"
         >
           <motion.span
             className="inline-block"
+            style={{ willChange: 'transform, opacity', backfaceVisibility: 'hidden' }}
             initial={animationFrom}
             animate={isInView ? animationTo : animationFrom}
             transition={{
@@ -90,12 +85,7 @@ export const SplitText: React.FC<SplitTextProps> = ({
               ease: easing as any,
             }}
             onAnimationComplete={
-              index === elements.length - 1
-                ? () => {
-                    setIsCompleted(true);
-                    onAnimationComplete?.();
-                  }
-                : undefined
+              index === elements.length - 1 ? onAnimationComplete : undefined
             }
           >
             {segment}

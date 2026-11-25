@@ -426,7 +426,7 @@ const Home = () => {
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 4: EXPERIENCE (Vertical Animated Timeline & Certificates)
       ═══════════════════════════════════════════════════════════════ */}
-      <section id="experience" className="scroll-mt-24 py-12 sm:py-14 md:py-16 lg:py-20 relative z-10 overflow-x-clip">
+      <section id="experience" className="scroll-mt-24 py-12 sm:py-14 md:py-16 lg:py-20 relative z-10 overflow-x-clip" style={{ contain: 'layout style' }}>
         <div className="max-w-7xl mx-auto space-y-8 sm:space-y-10 px-4 sm:px-6 lg:px-8 mb-6 sm:mb-8">
           {isMobile ? (
             <div>
@@ -713,9 +713,17 @@ const Home = () => {
               <div className="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3 w-full sm:w-auto">
                 <a
                   href={
-                    settings?.whatsappNumber
-                      ? `https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, '')}`
-                      : (socialLinks.find(s => s.platform.toLowerCase() === 'whatsapp')?.url || `mailto:${email}`)
+                    (() => {
+                      const msg = encodeURIComponent(
+                        isAr
+                          ? 'السلام عليكم ورحمة الله وبركاته، أود التواصل معك لمناقشة متطلبات مشروع برمجي جديد وبحث إمكانية التعاون الفني والمهني.'
+                          : 'Hello Yousef, I would like to get in touch to discuss the technical requirements and architecture for an upcoming software project and explore collaboration opportunities.'
+                      );
+                      const baseWa = settings?.whatsappNumber
+                        ? `https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, '')}`
+                        : (socialLinks.find(s => s.platform.toLowerCase() === 'whatsapp')?.url || '');
+                      return baseWa ? `${baseWa}${baseWa.includes('?') ? '&' : '?'}text=${msg}` : `mailto:${email}`;
+                    })()
                   }
                   target="_blank"
                   rel="noreferrer"
@@ -729,7 +737,21 @@ const Home = () => {
                 </a>
 
                 <a
-                  href={`mailto:${email}`}
+                  href={
+                    (() => {
+                      const subject = encodeURIComponent(
+                        isAr
+                          ? 'استفسار بخصوص مشروع برمجي جديد'
+                          : 'Inquiry Regarding New Software Engineering Project'
+                      );
+                      const body = encodeURIComponent(
+                        isAr
+                          ? 'السلام عليكم ورحمة الله وبركاته،\n\nأود التواصل معك لمناقشة متطلبات مشروع برمجي جديد وبحث إمكانية التعاون الفني والجدول الزمني لتنفيذه.\n\nمع فائق التقدير والاحترام،'
+                          : 'Hello Yousef,\n\nI would like to get in touch to discuss the technical requirements, architecture, and timeline for an upcoming software project.\n\nBest regards,'
+                      );
+                      return `mailto:${email}?subject=${subject}&body=${body}`;
+                    })()
+                  }
                   className={cn(
                     buttonVariants({ variant: 'secondary', size: 'default' }),
                     "w-full max-w-[13.75rem] sm:max-w-none sm:w-auto bg-slate-50 dark:bg-white/[0.05] hover:bg-white dark:hover:bg-white/[0.09]",

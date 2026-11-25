@@ -35,7 +35,8 @@ const FadeIn = ({ children, delay = 0, className = '' }: { children: React.React
 );
 
 const About = () => {
-  const { t } = useLanguage();
+  const { t, currentLang } = useLanguage();
+  const isAr = currentLang === 'ar';
   const [settings, setSettings] = useState<Settings | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
 
@@ -102,7 +103,21 @@ const About = () => {
 
               <div className="flex gap-4">
                 <a
-                  href={`mailto:${email}`}
+                  href={
+                    (() => {
+                      const subject = encodeURIComponent(
+                        isAr
+                          ? 'استفسار واستشارة برمجية'
+                          : 'Software Engineering Inquiry & Consultation'
+                      );
+                      const body = encodeURIComponent(
+                        isAr
+                          ? 'السلام عليكم ورحمة الله وبركاته،\n\nأود التواصل معك لبحث فرص التعاون ومناقشة المشاريع البرمجية والاستشارية المتاحة.\n\nمع فائق التقدير والاحترام،'
+                          : 'Hello Yousef,\n\nI would like to get in touch to discuss potential software engineering collaboration and consulting opportunities.\n\nBest regards,'
+                      );
+                      return `mailto:${email}?subject=${subject}&body=${body}`;
+                    })()
+                  }
                   className={buttonVariants({ variant: 'primary', size: 'default' })}
                 >
                   <span>{t('about.sayHello', 'Say hello')}</span>
